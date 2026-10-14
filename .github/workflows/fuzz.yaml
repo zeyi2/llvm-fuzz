@@ -17,6 +17,10 @@ on:
       label:
         description: Group name on the results index
         default: main
+      explore:
+        description: Also run the rotating-seed "explore" pass
+        type: boolean
+        default: true
 
 permissions: {}
 
@@ -27,9 +31,9 @@ concurrency:
 env:
   # GitHub-hosted jobs are killed at 6h; stay well below that.
   JOB_MINUTES: 330
-  # Reserved after the campaign for fuzz_site.py (snippets, llvm-reduce,
-  # Compiler Explorer) and publishing.
-  SITE_MINUTES: 70
+  # Reserved per pass for fuzz_site.py (snippets, llvm-reduce, Compiler
+  # Explorer); also the timeout of each "Build site" step.
+  SITE_MINUTES: 45
 
 jobs:
   fuzz:
@@ -46,6 +50,8 @@ jobs:
       MUTATE: ${{ inputs.mutate || '5' }}
       MUTATE_SEED: ${{ inputs.mutate_seed || '1' }}
       LABEL: ${{ inputs.label || 'main' }}
+      # Scheduled runs have no inputs: explore defaults to on.
+      EXPLORE: ${{ inputs.explore == false && 'false' || 'true' }}
     steps:
       - name: Record start time
         run: echo "JOB_START=$(date +%s)" >> "$GITHUB_ENV"
@@ -69,11 +75,17 @@ jobs:
       - name: sccache stats
         run: sccache --show-stats || true
 
-      - name: Campaign
+      # Fixed seeds: the same mutants every day, so changes between runs
+      # come from LLVM, not from the mutator.
+      - name: Campaign (main, fixed seeds)
         run: |
           set -euo pipefail
           elapsed=$(( ($(date +%s) - JOB_START) / 60 ))
-          budget=$(( JOB_MINUTES - SITE_MINUTES - elapsed ))
+          if [ "$EXPLORE" = true ]; then
+            budget=$(( (JOB_MINUTES - 2 * SITE_MINUTES - elapsed) / 2 ))
+          else
+            budget=$(( JOB_MINUTES - SITE_MINUTES - elapsed ))
+          fi
           if [ "$budget" -lt 10 ]; then budget=10; fi
           echo "elapsed ${elapsed} min, mutation time budget ${budget} min"
           timeout $(( (budget + 15) * 60 )) \
@@ -87,9 +99,31 @@ jobs:
           fi
           ls site site/data || true
 
-      - name: Build site
-        timeout-minutes: 60
+      - name: Build site (main)
+        timeout-minutes: 45
         run: python3 fuzz_site.py --reduce --label "$LABEL" --site site
+
+      # New seeds every day (1000 + 5 per day since the epoch), disjoint from
+      # main's. Reruns on the same day reuse the same seeds.
+      - name: Campaign (explore, rotating seeds)
+        id: explore
+        if: env.EXPLORE == 'true'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          seed=$(( 1000 + $(date -u +%s) / 86400 * MUTATE ))
+          elapsed=$(( ($(date +%s) - JOB_START) / 60 ))
+          budget=$(( JOB_MINUTES - SITE_MINUTES - elapsed ))
+          if [ "$budget" -lt 5 ]; then echo "no time left"; exit 1; fi
+          echo "seeds from ${seed}, elapsed ${elapsed} min, mutation time budget ${budget} min"
+          timeout $(( (budget + 10) * 60 )) \
+            python3 isel_diff.py --mutate "$MUTATE" --mutate-seed "$seed" --time-budget "$budget" --out out-explore
+
+      - name: Build site (explore)
+        if: env.EXPLORE == 'true' && steps.explore.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 45
+        run: python3 fuzz_site.py --reduce --label explore --results out-explore --site site
 
       - name: Publish to gh-pages
         env:
@@ -111,7 +145,12 @@ jobs:
       - name: Job summary
         if: always()
         run: |
-          [ -f out/summary.md ] && head -n 80 out/summary.md >> "$GITHUB_STEP_SUMMARY"
+          for d in out out-explore; do
+            if [ -f "$d/summary.md" ]; then
+              echo "## $d" >> "$GITHUB_STEP_SUMMARY"
+              head -n 60 "$d/summary.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
           echo "Total job time: $(( ($(date +%s) - JOB_START) / 60 )) min" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload reproducers
@@ -120,8 +159,8 @@ jobs:
         with:
           name: isel-diff-out
           path: |
-            out/summary.md
-            out/meta.json
-            out/mutants/
+            out*/summary.md
+            out*/meta.json
+            out*/mutants/
           retention-days: 14
           if-no-files-found: ignore

@@ -636,6 +636,9 @@ def render_index(runs, site):
             "SelectionDAG and GlobalISel. Counts are functions; \"crash\" counts configurations.\n"
             "Click \"C\" to compare a run with the previous run of the same label, \"B\" to compare with the\n"
             "latest main run. \"Godbolt\" counts findings that reproduce on Compiler Explorer trunk.\n"
+            "<p><b>main</b> uses the same mutation seeds every day, so its deltas come from LLVM changes.\n"
+            "<b>explore</b> uses new seeds every day to find new problems; its \"B\" link lists what it\n"
+            "found beyond main, and its own deltas are partly chance.</p>\n"
             f"<div class=\"wide\">\n<table>\n{''.join(rows)}\n</table>\n</div>\n"
             "<p id=\"nomatch\" class=\"dim\" hidden>No runs match the filter.</p>\n"
             "<script src=\"filter.js\"></script>")
