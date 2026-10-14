@@ -1,0 +1,127 @@
+name: Fuzz
+
+on:
+  # Daily, right after the llvm-project bump. workflow_run checks out the
+  # latest default-branch commit, so the new submodule pin is picked up.
+  workflow_run:
+    workflows: [Update LLVM]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      mutate:
+        description: Mutants per test configuration
+        default: '5'
+      mutate_seed:
+        description: First mutation seed
+        default: '1'
+      label:
+        description: Group name on the results index
+        default: main
+
+permissions: {}
+
+concurrency:
+  group: fuzz
+  cancel-in-progress: false
+
+env:
+  # GitHub-hosted jobs are killed at 6h; stay well below that.
+  JOB_MINUTES: 330
+  # Reserved after the campaign for fuzz_site.py (snippets, llvm-reduce,
+  # Compiler Explorer) and publishing.
+  SITE_MINUTES: 70
+
+jobs:
+  fuzz:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    permissions:
+      contents: write
+    env:
+      SCCACHE_GHA_ENABLED: "true"
+      CC: clang
+      CXX: clang++
+      LLVM_USE_LINKER: lld
+      MUTATE: ${{ inputs.mutate || '5' }}
+      MUTATE_SEED: ${{ inputs.mutate_seed || '1' }}
+      LABEL: ${{ inputs.label || 'main' }}
+    steps:
+      - name: Record start time
+        run: echo "JOB_START=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install build tools
+        run: sudo apt-get update -q && sudo apt-get install -y -q ninja-build lld
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+
+      - name: Build llc, llvm-extract, llvm-reduce, ir-mutate
+        timeout-minutes: 240
+        run: ./build.sh
+
+      - name: sccache stats
+        run: sccache --show-stats || true
+
+      - name: Campaign
+        run: |
+          set -euo pipefail
+          elapsed=$(( ($(date +%s) - JOB_START) / 60 ))
+          budget=$(( JOB_MINUTES - SITE_MINUTES - elapsed ))
+          if [ "$budget" -lt 10 ]; then budget=10; fi
+          echo "elapsed ${elapsed} min, mutation time budget ${budget} min"
+          timeout $(( (budget + 15) * 60 )) \
+            python3 isel_diff.py --mutate "$MUTATE" --mutate-seed "$MUTATE_SEED" --time-budget "$budget"
+
+      - name: Restore previous results
+        run: |
+          mkdir -p site
+          if git fetch --depth 1 origin gh-pages; then
+            git archive FETCH_HEAD data godbolt-cache.json | tar -x -C site || true
+          fi
+          ls site site/data || true
+
+      - name: Build site
+        timeout-minutes: 60
+        run: python3 fuzz_site.py --reduce --label "$LABEL" --site site
+
+      - name: Publish to gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          cd site
+          touch .nojekyll
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Results for llvm-project $(git -C .. rev-parse --short=12 HEAD:llvm-project)"
+          # One commit only: history lives in data/*.json, not in git.
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" gh-pages
+          du -sh .
+
+      - name: Job summary
+        if: always()
+        run: |
+          [ -f out/summary.md ] && head -n 80 out/summary.md >> "$GITHUB_STEP_SUMMARY"
+          echo "Total job time: $(( ($(date +%s) - JOB_START) / 60 )) min" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload reproducers
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: isel-diff-out
+          path: |
+            out/summary.md
+            out/meta.json
+            out/mutants/
+          retention-days: 14
+          if-no-files-found: ignore

@@ -1,0 +1,45 @@
+name: Update LLVM
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: update-llvm
+  cancel-in-progress: false
+
+jobs:
+  update-submodule:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Only the gitlink changes, so the submodule never has to be cloned here.
+      - name: Update llvm-project submodule
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          old=$(git rev-parse HEAD:llvm-project)
+          new=$(git ls-remote https://github.com/llvm/llvm-project.git refs/heads/main | cut -f1)
+          echo "old: $old"
+          echo "new: $new"
+          if [ "$old" = "$new" ]; then
+            echo "No changes."
+            exit 0
+          fi
+          git update-index --cacheinfo "160000,$new,llvm-project"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update llvm-project submodule to ${new:0:12}"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" HEAD:main
