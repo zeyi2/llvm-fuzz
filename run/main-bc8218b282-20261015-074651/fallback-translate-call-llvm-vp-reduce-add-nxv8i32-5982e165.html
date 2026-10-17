@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.reduce.add.nxv8i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.reduce.add.nxv8i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-bc8218b282-20261015-074651.html">main-bc8218b282-20261015-074651</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.reduce.add.nxv8i32</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/redundant-copy-from-tail-duplicate.ll">redundant-copy-from-tail-duplicate.ll</a> @sum via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define signext i32 @sum(ptr %a, i32 signext %n, i1 %prof.min.iters.check, &lt;vscale x 8 x i1&gt; %0, &lt;vscale x 8 x i1&gt; %1) {
+entry:
+  br i1 %prof.min.iters.check, label %for.body, label %vector.ph
+
+vector.ph:                                        ; preds = %entry
+  %2 = tail call i32 @llvm.vp.reduce.add.nxv8i32(i32 0, &lt;vscale x 8 x i32&gt; zeroinitializer, &lt;vscale x 8 x i1&gt; %0, i32 1)
+  br label %for.end
+
+for.body:                                         ; preds = %for.body, %entry
+  %indvars.iv = phi i64 [ %indvars.iv.next, %for.body ], [ 0, %entry ]
+  %red.05 = phi i32 [ %3, %for.body ], [ 0, %entry ]
+  %arrayidx = getelementptr i32, ptr %a, i64 %indvars.iv
+  %3 = load i32, ptr %arrayidx, align 4
+  %indvars.iv.next = add i64 %indvars.iv, 1
+  %exitcond.not = icmp eq i32 %n, 0
+  br i1 %exitcond.not, label %for.end, label %for.body
+
+for.end:                                          ; preds = %for.body, %vector.ph
+  %red.0.lcssa = phi i32 [ %2, %vector.ph ], [ %red.05, %for.body ]
+  ret i32 %red.0.lcssa
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.vp.reduce.add.nxv8i32(i32, &lt;vscale x 8 x i32&gt;, &lt;vscale x 8 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.reduce.add.nxv8i32: &#x27;  %2 = tail call i32 @llvm.vp.reduce.add.nxv8i32(i32 0, &lt;vscale x 8 x i32&gt; zeroinitializer, &lt;vscale x 8 x i1&gt; %0, i32 1)&#x27; (in function: sum)
+warning: Instruction selection used fallback path for sum</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/redundant-copy-from-tail-duplicate.ll">redundant-copy-from-tail-duplicate.ll</a></td><td class="l">sum</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l">redundant-copy-from-tail-duplicate.30cb6b2bdb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/redundant-copy-from-tail-duplicate.ll">redundant-copy-from-tail-duplicate.ll</a><span class="dim">)</span></td><td class="l">sum</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l">redundant-copy-from-tail-duplicate.33c5bdb434.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/redundant-copy-from-tail-duplicate.ll">redundant-copy-from-tail-duplicate.ll</a><span class="dim">)</span></td><td class="l">sum</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l">redundant-copy-from-tail-duplicate.55b53c55ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/redundant-copy-from-tail-duplicate.ll">redundant-copy-from-tail-duplicate.ll</a><span class="dim">)</span></td><td class="l">sum</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

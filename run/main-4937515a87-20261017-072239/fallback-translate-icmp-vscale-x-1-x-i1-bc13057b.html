@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;vscale x 1 x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;vscale x 1 x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-4937515a87-20261017-072239.html">main-4937515a87-20261017-072239</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;vscale x 1 x i1&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">inline-asm-v-constraint.2495f6b8a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-v-constraint.ll">inline-asm-v-constraint.ll</a><span class="dim">)</span> @constraint_vm via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4937515a87</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i1&gt;
+
+; Function Attrs: nounwind
+define &lt;vscale x 1 x i1&gt; @constraint_vm(&lt;vscale x 1 x i1&gt; %0, &lt;vscale x 1 x i1&gt; %1) #0 {
+  %C = icmp ule &lt;vscale x 1 x i1&gt; %0, splat (i1 true)
+  %C1 = icmp ule &lt;2 x i64&gt; splat (i64 9223372036854775807), splat (i64 4294967296)
+  %a = tail call &lt;vscale x 1 x i1&gt; asm &quot;vadd.vv $0, $1, $2&quot;, &quot;=^vr,^vr,^vm&quot;(&lt;vscale x 1 x i1&gt; %0, &lt;vscale x 1 x i1&gt; %1)
+  store &lt;2 x i1&gt; %C1, ptr @G, align 1
+  ret &lt;vscale x 1 x i1&gt; %C
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp ule &lt;vscale x 1 x i1&gt; %0, splat (i1 true)&#x27; (in function: constraint_vm)
+warning: Instruction selection used fallback path for constraint_vm</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">inline-asm-v-constraint.2495f6b8a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-v-constraint.ll">inline-asm-v-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_vm</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">inline-asm-v-constraint.3ddff9f4f3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-v-constraint.ll">inline-asm-v-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_vm</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">inline-asm-v-constraint.6f9f535b34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-v-constraint.ll">inline-asm-v-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_vm</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">inline-asm-v-constraint.cc4a3f41a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-v-constraint.ll">inline-asm-v-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_vm</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_MUL &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_MUL &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-42ac09ceba-20261016-071206.html">main-42ac09ceba-20261016-071206</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_MUL &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zbb-zbkb.137688f794.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span> @xor_hoisted_not_i64_swapped via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbkb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+define i64 @xor_hoisted_not_i64_swapped(i64 %x, i64 %m, i1 zeroext %cond) {
+  %A = alloca &lt;2 x i64&gt;, align 16
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %LGV = load &lt;2 x i64&gt;, ptr @G, align 16
+  %B = mul &lt;2 x i64&gt; splat (i64 1), %LGV
+  %a = xor i64 %m, -1
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  br i1 %cond, label %mask, label %identity
+
+mask:                                             ; preds = %0
+  %masked = xor i64 %x, %a
+  ret i64 %masked
+
+identity:                                         ; preds = %0
+  ret i64 %x
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zbkb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zbkb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;2 x s64&gt;) = G_MUL %9:_, %7:_ (in function: xor_hoisted_not_i64_swapped)
+warning: Instruction selection used fallback path for xor_hoisted_not_i64_swapped</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64zbb-zbkb.137688f794.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">xor_hoisted_not_i64_swapped</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbkb -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbb-zbkb.46b9b80e01.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">xor_hoisted_not_i64_swapped</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbb-zbkb.74fdc4e69b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">xor_hoisted_not_i64_swapped</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcilsm-memset.3985841ac8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l">test6</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcilsm-memset.3b869efc9f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l">test6</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

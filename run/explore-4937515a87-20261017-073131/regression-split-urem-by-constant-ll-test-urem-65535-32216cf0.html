@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +65 insts: test_urem_65535 (split-urem-by-constant.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +65 insts: test_urem_65535 (split-urem-by-constant.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4937515a87-20261017-073131.html">explore-4937515a87-20261017-073131</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+65 insts: test_urem_65535 (split-urem-by-constant.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">split-urem-by-constant.82bf293105.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/split-urem-by-constant.ll">split-urem-by-constant.ll</a><span class="dim">)</span> @test_urem_65535 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4937515a87</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+define i128 @test_urem_65535(i128 %x) #0 {
+  %B = urem i128 %x, 0
+  %a = urem i128 %x, 65535
+  store i128 %B, ptr @G, align 4
+  ret i128 %a
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,14 +1,79 @@
+<span class="del">-lui a2, 524296</span>
+<span class="del">-add a1, a0, a1</span>
+<span class="del">-addi a2, a2, 1</span>
+<span class="del">-sltu a0, a1, a0</span>
+<span class="del">-slli a3, a2, 32</span>
+<span class="del">-add a0, a1, a0</span>
+<span class="del">-add a2, a2, a3</span>
+<span class="del">-mulhu a1, a0, a2</span>
+<span class="add">+addi sp, sp, -32</span>
+<span class="add">+sd ra, 24(sp)</span>
+<span class="add">+sd s0, 16(sp)</span>
+<span class="add">+sd s1, 8(sp)</span>
+<span class="add">+sd s2, 0(sp)</span>
+<span class="add">+mv s0, a0</span>
+<span class="add">+mv s1, a1</span>
+<span class="add">+lui s2, %hi(G)</span>
+<span class="add">+addi s2, s2, %lo(G)</span>
+<span class="add">+li a2, 0</span>
+<span class="add">+li a3, 0</span>
+<span class="add">+call __umodti3</span>
+<span class="add">+mv a2, a1</span>
+<span class="add">+lui a1, 983041</span>
+<span class="add">+slli a1, a1, 4</span>
+<span class="add">+lui a3, %hi(.L0)</span>
+<span class="add">+addi a1, a1, 1</span>
+<span class="add">+ld a3, %lo(.L0)(a3)</span>
+<span class="add">+slli a1, a1, 16</span>
+<span class="add">+addi a1, a1, 1</span>
+<span class="add">+slli a1, a1, 15</span>
+<span class="add">+mul a5, s0, a3</span>
+<span class="add">+addi a1, a1, 1</span>
+<span class="add">+mulhu a6, s1, a3</span>
+<span class="add">+mulhu a7, s0, a1</span>
+<span class="add">+mulhu t0, s1, a1</span>
+<span class="add">+mulhu t1, s0, a3</span>
+<span class="add">+mul t2, s1, a1</span>
+<span class="add">+mul a3, s1, a3</span>
+<span class="add">+mv a4, a6</span>
+<span class="add">+add a7, a7, a5</span>
+<span class="add">+add t0, t0, t1</span>
+<span class="add">+sltu a5, a7, a5</span>
+<span class="add">+add a7, a7, t2</span>
+<span class="add">+sltu a6, t0, t1</span>
+<span class="add">+sltu a7, a7, t2</span>
+<span class="add">+sltiu t1, t0, 0</span>
+<span class="add">+add t0, t0, a3</span>
+<span class="add">+add a6, a6, t1</span>
+<span class="add">+sltu a3, t0, a3</span>
+<span class="add">+add a5, a5, a7</span>
+<span class="add">+sltiu a7, t0, 0</span>
+<span class="add">+add a3, a6, a3</span>
+<span class="add">+add t0, t0, a5</span>
+<span class="add">+add a3, a3, a7</span>
+<span class="add">+sltu a5, t0, a5</span>
+<span class="add">+mv a1, a4</span>
+<span class="add">+add a3, a3, a5</span>
+<span class="add">+lui a4, 1048560</span>
+<span class="add">+add a1, a1, a3</span>
+<span class="add">+srli a3, t0, 15</span>
+<span class="add">+slli a5, a1, 49</span>
+ srli a1, a1, 15
+<span class="del">-slli a2, a1, 16</span>
+<span class="del">-sub a1, a1, a2</span>
+<span class="del">-add a0, a0, a1</span>
+<span class="del">-li a1, 0</span>
+<span class="add">+addi a4, a4, 1</span>
+<span class="add">+or a3, a3, a5</span>
+<span class="add">+li a5, -1</span>
+<span class="add">+mul a6, a3, a4</span>
+<span class="add">+mul a1, a1, a4</span>
+<span class="add">+mulhu a4, a3, a4</span>
+<span class="add">+mul a3, a3, a5</span>
+<span class="add">+srli a5, a0, 32</span>
+<span class="add">+add a1, s1, a1</span>
+<span class="add">+add a3, a4, a3</span>
+<span class="add">+add s0, s0, a6</span>
+<span class="add">+sltu a4, s0, a6</span>
+<span class="add">+add a1, a1, a3</span>
+<span class="add">+add a1, a1, a4</span>
+<span class="add">+sw a0, 0(s2)</span>
+<span class="add">+sw a5, 4(s2)</span>
+<span class="add">+srli a3, a2, 32</span>
+<span class="add">+mv a0, s0</span>
+<span class="add">+sw a2, 8(s2)</span>
+<span class="add">+sw a3, 12(s2)</span>
+<span class="add">+ld ra, 24(sp)</span>
+<span class="add">+ld s0, 16(sp)</span>
+<span class="add">+ld s1, 8(sp)</span>
+<span class="add">+ld s2, 0(sp)</span>
+<span class="add">+addi sp, sp, 32</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">split-urem-by-constant.82bf293105.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/split-urem-by-constant.ll">split-urem-by-constant.ll</a><span class="dim">)</span></td><td class="l">test_urem_65535</td><td class="l"><code>-mtriple=riscv64 -mattr=+m</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

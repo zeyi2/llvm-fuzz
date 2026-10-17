@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,&lt;2 x s1&gt;,s64,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,&lt;2 x s1&gt;,s64,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,&lt;2 x s1&gt;,s64,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">combine-is_fpclass.180e2a20e9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a><span class="dim">)</span> @extract_bitcast_maybe_nan via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i32&gt;
+
+; Function Attrs: nounwind
+define i1 @extract_bitcast_maybe_nan(&lt;4 x i32&gt; %bits, ptr %p) #0 {
+  %masked = and &lt;4 x i32&gt; %bits, &lt;i32 -1073741825, i32 -1, i32 -1073741825, i32 -1&gt;
+  %fvec = bitcast &lt;4 x i32&gt; %masked to &lt;4 x float&gt;
+  store &lt;4 x float&gt; %fvec, ptr %p, align 16
+  %elt = extractelement &lt;4 x float&gt; %fvec, i32 1
+  %res = call i1 @llvm.is.fpclass.f32(float %elt, /* (nan) */ i32 3)
+  %S = shufflevector &lt;4 x i32&gt; %masked, &lt;4 x i32&gt; splat (i32 42), &lt;4 x i32&gt; poison
+  store &lt;4 x i32&gt; %S, ptr @G, align 16
+  ret i1 %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i1 @llvm.is.fpclass.f32(float, i32 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+f,+d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+f,+d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %10:_(&lt;2 x s32&gt;), %13:_(&lt;2 x s32&gt;), %14:_(p0), %15:_(&lt;2 x s1&gt;), %17:_(s64) :: (store (s32) into @G) (in function: extract_bitcast_maybe_nan)
+warning: Instruction selection used fallback path for extract_bitcast_maybe_nan</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">combine-is_fpclass.180e2a20e9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a><span class="dim">)</span></td><td class="l">extract_bitcast_maybe_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l">spacemitx60-stack-reorder.8f25f4704d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/spacemitx60-stack-reorder.ll">spacemitx60-stack-reorder.ll</a><span class="dim">)</span></td><td class="l">test_stack_sort</td><td class="l"><code>-mtriple=riscv64 -mcpu=spacemit-x60 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

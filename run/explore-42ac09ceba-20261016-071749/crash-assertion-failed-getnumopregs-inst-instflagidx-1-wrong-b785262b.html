@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (getNumOpRegs(*Inst, InstFlagIdx) == 1 &amp;&amp; &quot;Wrong flag&quot;), function lowerInlineAsm, file InlineAsmLowering.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (getNumOpRegs(*Inst, InstFlagIdx) == 1 &amp;&amp; &quot;Wrong flag&quot;), function lowerInlineAsm, file InlineAsmLowering.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (getNumOpRegs(*Inst, InstFlagIdx) == 1 &amp;&amp; &quot;Wrong flag&quot;), function lowerInlineAsm, file InlineAsmLowering.cpp</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv32-inline-asm-pairs.ll">rv32-inline-asm-pairs.ll</a> @test_Pr_wide_scalar_inout via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/f6Pe8cEj3">https://godbolt.org/z/f6Pe8cEj3</a> (llc-assertions-trunk, checked 2026-10-14 11:03 UTC): <a href="https://godbolt.org/z/f6Pe8cEj3">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define { ptr, i64 } @test_Pr_wide_scalar_inout() {
+entry:
+  %0 = call { ptr, i64 } asm sideeffect &quot;/* $0; $1 */&quot;, &quot;=r,=R,0,1&quot;(ptr null, i64 0)
+  ret { ptr, i64 } %0
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/InlineAsmLowering.cpp:409: bool llvm::InlineAsmLowering::lowerInlineAsm(llvm::MachineIRBuilder&amp;, const llvm::CallBase&amp;, std::function&lt;llvm::ArrayRef&lt;llvm::Register&gt;(const llvm::Value&amp;)&gt;) const: Assertion `getNumOpRegs(*Inst, InstFlagIdx) == 1 &amp;&amp; &quot;Wrong flag&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>8</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/InlineAsmLowering.cpp:409: bool llvm::InlineAsmLowering::lowerInlineAsm(MachineIRBuilder &amp;, const CallBase &amp;, std::function&lt;ArrayRef&lt;Register&gt; (const Value &amp;)&gt;) const: Assertion `getNumOpRegs(*Inst, InstFlagIdx) == 1 &amp;&amp; &quot;Wrong flag&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@test_Pr_wide_scalar_inout&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000558776dea08b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000558776de6f31 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000558776deab0b
+3  libc.so.6 0x00007f832ac45330
+4  libc.so.6 0x00007f832ac9ec0c pthread_kill + 284
+5  libc.so.6 0x00007f832ac4527e gsignal + 30
+6  libc.so.6 0x00007f832ac288ff abort + 223
+7  libc.so.6 0x00007f832ac2881b
+8  libc.so.6 0x00007f832ac3b517
+9  llc       0x0000558778ee2da4 llvm::InlineAsmLowering::lowerInlineAsm(llvm::MachineIRBuilder&amp;, llvm::CallBase const&amp;, std::function&lt;llvm::ArrayRef&lt;llvm::Register&gt; (llvm::Value const&amp;)&gt;) const + 11140
+10 llc       0x0000558778ed1cbe llvm::IRTranslatorImpl::translateInlineAsm(llvm::CallBase const&amp;, llvm::MachineIRBuilder&amp;) + 110
+11 llc       0x0000558778ed1f2d llvm::IRTranslatorImpl::translateCall(llvm::User const&amp;, llvm::MachineIRBuilder&amp;) + 445
+12 llc       0x0000558778edaced llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 4253
+13 llc       0x0000558778edbcdd llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+14 llc       0x00005587773b2e6d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x0000558777141ce7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000055877714a1e2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x0000558777142a90 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x0000558776df16e3 llcMain + 12051
+19 llc       0x0000558776d2b76f main + 63
+20 libc.so.6 0x00007f832ac2a1ca
+21 libc.so.6 0x00007f832ac2a28b __libc_start_main + 139
+22 llc       0x0000558776d2b665 _start + 37</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv32-inline-asm-pairs.ll">rv32-inline-asm-pairs.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32-inline-asm-pairs.156c90a926.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv32-inline-asm-pairs.ll">rv32-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32-inline-asm-pairs.3da29d9fa7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv32-inline-asm-pairs.ll">rv32-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32-inline-asm-pairs.b1b18f1fc4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv32-inline-asm-pairs.ll">rv32-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32-inline-asm-pairs.e80be3f241.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv32-inline-asm-pairs.ll">rv32-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64-inline-asm-pairs.599e4ca1a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64-inline-asm-pairs.9d3c97986e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64-inline-asm-pairs.aefef556ef.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64-inline-asm-pairs.f795c62849.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

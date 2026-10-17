@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +82 insts: memset_zero_64 (memset-inline.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +82 insts: memset_zero_64 (memset-inline.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+82 insts: memset_zero_64 (memset-inline.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memset-inline.46f70e39a3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span> @memset_zero_64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @memset_zero_64(ptr %a) #0 {
+  %A3 = alloca i1, align 1
+  store i1 true, ptr %A3, align 1
+  %A = alloca i128, align 8
+  store i128 0, ptr %A, align 4
+  tail call void @llvm.memset.inline.p0.i64(ptr %a, i8 0, i64 64, i1 false)
+  %L = load i128, ptr %A, align 4
+  switch i128 %L, label %SW_D [
+    i128 10773959786756295042, label %SW_C
+    i128 1905842551333371031, label %SW_C1
+    i128 8186122156717221736, label %SW_C2
+  ]
+
+BB:                                               ; preds = %SW_C2, %SW_C1, %SW_C, %SW_D
+  ret void
+
+SW_D:                                             ; preds = %SW_D, %0
+  %L4 = load i1, ptr %A3, align 1
+  br i1 %L4, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %0
+  br label %BB
+
+SW_C1:                                            ; preds = %0
+  br label %BB
+
+SW_C2:                                            ; preds = %0
+  br label %BB
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.memset.inline.p0.i64(ptr writeonly captures(none), i8, i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,28 +1,111 @@
+ addi sp, sp, -32
+<span class="del">-li a1, 1</span>
+<span class="del">-sb a1, 31(sp)</span>
+<span class="add">+li a3, 1</span>
+<span class="add">+addi a1, sp, 8</span>
+<span class="add">+sw zero, 4(a1)</span>
+<span class="add">+sw zero, 8(a1)</span>
+<span class="add">+sw zero, 12(a1)</span>
+ sw zero, 8(sp)
+<span class="del">-sw zero, 12(sp)</span>
+<span class="del">-sw zero, 16(sp)</span>
+<span class="del">-sw zero, 20(sp)</span>
+<span class="del">-sw zero, 0(a0)</span>
+<span class="del">-sw zero, 4(a0)</span>
+<span class="del">-sw zero, 8(a0)</span>
+<span class="del">-sw zero, 12(a0)</span>
+<span class="del">-sw zero, 16(a0)</span>
+<span class="del">-sw zero, 20(a0)</span>
+<span class="del">-sw zero, 24(a0)</span>
+<span class="del">-sw zero, 28(a0)</span>
+<span class="del">-sw zero, 32(a0)</span>
+<span class="del">-sw zero, 36(a0)</span>
+<span class="del">-sw zero, 40(a0)</span>
+<span class="del">-sw zero, 44(a0)</span>
+<span class="del">-sw zero, 48(a0)</span>
+<span class="del">-sw zero, 52(a0)</span>
+<span class="del">-sw zero, 56(a0)</span>
+<span class="del">-sw zero, 60(a0)</span>
+<span class="add">+lw a1, 8(sp)</span>
+<span class="add">+lw a2, 12(sp)</span>
+<span class="add">+lui a4, 975052</span>
+<span class="add">+lui a5, 108335</span>
+<span class="add">+addi a6, a4, -873</span>
+<span class="add">+addi a7, a5, -1613</span>
+<span class="add">+lw a4, 16(sp)</span>
+<span class="add">+lw a5, 20(sp)</span>
+<span class="add">+xor a6, a1, a6</span>
+<span class="add">+xor a7, a2, a7</span>
+<span class="add">+sb a3, 31(sp)</span>
+<span class="add">+or a3, a6, a7</span>
+<span class="add">+sb zero, 0(a0)</span>
+<span class="add">+sb zero, 1(a0)</span>
+<span class="add">+sb zero, 2(a0)</span>
+<span class="add">+sb zero, 3(a0)</span>
+<span class="add">+sb zero, 4(a0)</span>
+<span class="add">+sb zero, 5(a0)</span>
+<span class="add">+sb zero, 6(a0)</span>
+<span class="add">+sb zero, 7(a0)</span>
+<span class="add">+sb zero, 8(a0)</span>
+<span class="add">+sb zero, 9(a0)</span>
+<span class="add">+sb zero, 10(a0)</span>
+<span class="add">+sb zero, 11(a0)</span>
+<span class="add">+sb zero, 12(a0)</span>
+<span class="add">+sb zero, 13(a0)</span>
+<span class="add">+sb zero, 14(a0)</span>
+<span class="add">+sb zero, 15(a0)</span>
+<span class="add">+sb zero, 16(a0)</span>
+<span class="add">+sb zero, 17(a0)</span>
+<span class="add">+sb zero, 18(a0)</span>
+<span class="add">+sb zero, 19(a0)</span>
+<span class="add">+sb zero, 20(a0)</span>
+<span class="add">+sb zero, 21(a0)</span>
+<span class="add">+sb zero, 22(a0)</span>
+<span class="add">+sb zero, 23(a0)</span>
+<span class="add">+sb zero, 24(a0)</span>
+<span class="add">+sb zero, 25(a0)</span>
+<span class="add">+sb zero, 26(a0)</span>
+<span class="add">+sb zero, 27(a0)</span>
+<span class="add">+sb zero, 28(a0)</span>
+<span class="add">+sb zero, 29(a0)</span>
+<span class="add">+sb zero, 30(a0)</span>
+<span class="add">+sb zero, 31(a0)</span>
+<span class="add">+sb zero, 32(a0)</span>
+<span class="add">+sb zero, 33(a0)</span>
+<span class="add">+sb zero, 34(a0)</span>
+<span class="add">+sb zero, 35(a0)</span>
+<span class="add">+sb zero, 36(a0)</span>
+<span class="add">+sb zero, 37(a0)</span>
+<span class="add">+sb zero, 38(a0)</span>
+<span class="add">+sb zero, 39(a0)</span>
+<span class="add">+sb zero, 40(a0)</span>
+<span class="add">+sb zero, 41(a0)</span>
+<span class="add">+sb zero, 42(a0)</span>
+<span class="add">+sb zero, 43(a0)</span>
+<span class="add">+sb zero, 44(a0)</span>
+<span class="add">+sb zero, 45(a0)</span>
+<span class="add">+sb zero, 46(a0)</span>
+<span class="add">+sb zero, 47(a0)</span>
+<span class="add">+sb zero, 48(a0)</span>
+<span class="add">+sb zero, 49(a0)</span>
+<span class="add">+sb zero, 50(a0)</span>
+<span class="add">+sb zero, 51(a0)</span>
+<span class="add">+sb zero, 52(a0)</span>
+<span class="add">+sb zero, 53(a0)</span>
+<span class="add">+sb zero, 54(a0)</span>
+<span class="add">+sb zero, 55(a0)</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+sb zero, 56(a0)</span>
+<span class="add">+sb zero, 57(a0)</span>
+<span class="add">+sb zero, 58(a0)</span>
+<span class="add">+sb zero, 59(a0)</span>
+<span class="add">+or a3, a3, a4</span>
+<span class="add">+sb zero, 60(a0)</span>
+<span class="add">+sb zero, 61(a0)</span>
+<span class="add">+sb zero, 62(a0)</span>
+<span class="add">+sb zero, 63(a0)</span>
+<span class="add">+beqz a3, .L0</span>
+<span class="add">+lui a0, 815450</span>
+<span class="add">+lui a3, 465327</span>
+<span class="add">+addi a0, a0, 1896</span>
+<span class="add">+addi a3, a3, 698</span>
+<span class="add">+xor a0, a1, a0</span>
+<span class="add">+xor a3, a2, a3</span>
+<span class="add">+or a0, a0, a3</span>
+<span class="add">+or a0, a0, a4</span>
+<span class="add">+beqz a0, .L0</span>
+<span class="add">+lui a0, 892733</span>
+<span class="add">+lui a3, 612429</span>
+<span class="add">+addi a0, a0, -1662</span>
+<span class="add">+addi a3, a3, -1193</span>
+<span class="add">+xor a0, a1, a0</span>
+<span class="add">+xor a2, a2, a3</span>
+<span class="add">+or a0, a0, a2</span>
+<span class="add">+or a0, a0, a4</span>
+<span class="add">+beqz a0, .L0</span>
+ lbu a0, 31(sp)
+<span class="add">+andi a0, a0, 1</span>
+<span class="add">+.L1:</span>
+<span class="add">+beqz a0, .L1</span>
+ .L0:
+<span class="del">-beqz a0, .L0</span>
+ addi sp, sp, 32
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memset-inline.46f70e39a3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">memset_zero_64</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

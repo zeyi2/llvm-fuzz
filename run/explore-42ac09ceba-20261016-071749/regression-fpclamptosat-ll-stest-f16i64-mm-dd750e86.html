@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +57 insts: stest_f16i64_mm (fpclamptosat.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +57 insts: stest_f16i64_mm (fpclamptosat.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+57 insts: stest_f16i64_mm (fpclamptosat.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fpclamptosat.e7abfdc863.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fpclamptosat.ll">fpclamptosat.ll</a><span class="dim">)</span> @stest_f16i64_mm via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+@G.1 = external global i1
+
+define i64 @stest_f16i64_mm(half %x) {
+entry:
+  %LGV = load i64, ptr @G, align 4
+  %conv = fptosi half %x to i128
+  %spec.store.select = call i128 @llvm.smin.i128(i128 %conv, i128 9223372036854775807)
+  %spec.store.select7 = call i128 @llvm.smax.i128(i128 %spec.store.select, i128 -9223372036854775808)
+  %C = icmp ugt i64 %LGV, 0
+  %conv6 = trunc i128 %spec.store.select7 to i64
+  store i1 %C, ptr @G.1, align 1
+  ret i64 %conv6
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i128 @llvm.smax.i128(i128, i128) #0
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i128 @llvm.smin.i128(i128, i128) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+f,+d -verify-machineinstrs -target-abi=ilp32d -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+f,+d -verify-machineinstrs -target-abi=ilp32d -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,19 +1,88 @@
+<span class="del">-addi sp, sp, -16</span>
+<span class="del">-sw ra, 12(sp)</span>
+<span class="del">-sw s0, 8(sp)</span>
+<span class="del">-sw s1, 4(sp)</span>
+<span class="add">+addi sp, sp, -32</span>
+<span class="add">+sw ra, 28(sp)</span>
+<span class="add">+sw s0, 24(sp)</span>
+<span class="add">+sw s1, 20(sp)</span>
+<span class="add">+sw s2, 16(sp)</span>
+<span class="add">+sw s3, 12(sp)</span>
+ lui a0, %hi(G)
+<span class="del">-lw s0, %lo(G+4)(a0)</span>
+<span class="del">-lw s1, %lo(G)(a0)</span>
+<span class="add">+addi a0, a0, %lo(G)</span>
+<span class="add">+lw s0, 0(a0)</span>
+<span class="add">+lw s1, 4(a0)</span>
+<span class="add">+lui s2, 524288</span>
+<span class="add">+addi s3, s2, -1</span>
+ call __extendhfsf2
+<span class="del">-or s0, s1, s0</span>
+<span class="del">-fcvt.w.s a0, fa0, rtz</span>
+<span class="del">-srai a1, a0, 31</span>
+<span class="del">-snez a2, s0</span>
+<span class="del">-lui a3, %hi(G.1)</span>
+<span class="del">-sb a2, %lo(G.1)(a3)</span>
+<span class="del">-lw ra, 12(sp)</span>
+<span class="del">-lw s0, 8(sp)</span>
+<span class="del">-lw s1, 4(sp)</span>
+<span class="del">-addi sp, sp, 16</span>
+<span class="add">+fcvt.w.s a3, fa0, rtz</span>
+<span class="add">+srai a2, a3, 31</span>
+<span class="add">+beq a2, s3, .L0</span>
+<span class="add">+sltu a1, a2, s3</span>
+<span class="add">+bnez a2, .L1</span>
+<span class="add">+j .L2</span>
+<span class="add">+.L0:</span>
+<span class="add">+sltiu a1, a3, -1</span>
+<span class="add">+beqz a2, .L2</span>
+<span class="add">+.L1:</span>
+<span class="add">+sltiu a1, a2, 0</span>
+<span class="add">+.L2:</span>
+<span class="add">+li a0, -1</span>
+<span class="add">+beqz a2, .L3</span>
+<span class="add">+srli a1, a2, 31</span>
+<span class="add">+.L3:</span>
+<span class="add">+sw a3, 0(sp)</span>
+<span class="add">+sw a2, 4(sp)</span>
+<span class="add">+fld fa5, 0(sp)</span>
+<span class="add">+sw a2, 0(sp)</span>
+<span class="add">+sw a2, 4(sp)</span>
+<span class="add">+fld fa4, 0(sp)</span>
+<span class="add">+sw a0, 0(sp)</span>
+<span class="add">+sw s3, 4(sp)</span>
+<span class="add">+fld fa3, 0(sp)</span>
+<span class="add">+sw zero, 0(sp)</span>
+<span class="add">+sw zero, 4(sp)</span>
+<span class="add">+bnez a1, .L4</span>
+<span class="add">+fld fa4, 0(sp)</span>
+<span class="add">+fmv.d fa5, fa3</span>
+<span class="add">+.L4:</span>
+<span class="add">+fsd fa5, 0(sp)</span>
+<span class="add">+lw a1, 0(sp)</span>
+<span class="add">+lw a3, 4(sp)</span>
+<span class="add">+fsd fa4, 0(sp)</span>
+<span class="add">+lw a2, 0(sp)</span>
+<span class="add">+beq a3, s2, .L5</span>
+<span class="add">+sltu a1, s2, a3</span>
+<span class="add">+lw a3, 4(sp)</span>
+<span class="add">+bne a2, a0, .L6</span>
+<span class="add">+j .L7</span>
+<span class="add">+.L5:</span>
+<span class="add">+snez a1, a1</span>
+<span class="add">+lw a3, 4(sp)</span>
+<span class="add">+beq a2, a0, .L7</span>
+<span class="add">+.L6:</span>
+<span class="add">+sltu a1, a0, a2</span>
+<span class="add">+.L7:</span>
+<span class="add">+beq a3, a0, .L8</span>
+<span class="add">+slti a0, a3, 0</span>
+<span class="add">+xori a1, a0, 1</span>
+<span class="add">+.L8:</span>
+<span class="add">+lui a0, %hi(G.1)</span>
+<span class="add">+sw zero, 0(sp)</span>
+<span class="add">+sw s2, 4(sp)</span>
+<span class="add">+bnez a1, .L9</span>
+<span class="add">+fld fa5, 0(sp)</span>
+<span class="add">+.L9:</span>
+<span class="add">+beqz s1, .L10</span>
+<span class="add">+snez a1, s1</span>
+<span class="add">+j .L11</span>
+<span class="add">+.L10:</span>
+<span class="add">+snez a1, s0</span>
+<span class="add">+.L11:</span>
+<span class="add">+sb a1, %lo(G.1)(a0)</span>
+<span class="add">+fsd fa5, 0(sp)</span>
+<span class="add">+lw a0, 0(sp)</span>
+<span class="add">+lw a1, 4(sp)</span>
+<span class="add">+lw ra, 28(sp)</span>
+<span class="add">+lw s0, 24(sp)</span>
+<span class="add">+lw s1, 20(sp)</span>
+<span class="add">+lw s2, 16(sp)</span>
+<span class="add">+lw s3, 12(sp)</span>
+<span class="add">+addi sp, sp, 32</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fpclamptosat.e7abfdc863.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fpclamptosat.ll">fpclamptosat.ll</a><span class="dim">)</span></td><td class="l">stest_f16i64_mm</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

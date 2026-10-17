@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_VECREDUCE_UMAX s32,&lt;4 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_VECREDUCE_UMAX s32,&lt;4 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_VECREDUCE_UMAX s32,&lt;4 x s32&gt;</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a> @umax_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @umax_i32(&lt;4 x i32&gt; %a, &lt;4 x i32&gt; %b) {
+  %r1 = call i32 @llvm.vector.reduce.umax.v4i32(&lt;4 x i32&gt; %a)
+  %r2 = call i32 @llvm.vector.reduce.umax.v4i32(&lt;4 x i32&gt; %b)
+  %r = call i32 @llvm.umax.i32(i32 %r1, i32 %r2)
+  ret i32 %r
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.umax.i32(i32, i32) #0
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.vector.reduce.umax.v4i32(&lt;4 x i32&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(s32) = G_VECREDUCE_UMAX %1:_(&lt;4 x s32&gt;) (in function: umax_i32)
+warning: Instruction selection used fallback path for umax_i32</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a></td><td class="l">umax_i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a></td><td class="l">umax_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

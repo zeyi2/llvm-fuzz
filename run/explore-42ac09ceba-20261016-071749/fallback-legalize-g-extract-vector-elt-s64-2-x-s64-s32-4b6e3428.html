@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">select-const.0758d314f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/select-const.ll">select-const.ll</a><span class="dim">)</span> @select_eq_1_2 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/s8r3es91E">https://godbolt.org/z/s8r3es91E</a> (llc-assertions-trunk, checked 2026-10-16 07:24 UTC): <a href="https://godbolt.org/z/s8r3es91E">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i64 @select_eq_1_2(i128 %LGV) {
+  %E = extractelement &lt;2 x i64&gt; zeroinitializer, i128 %LGV
+  ret i64 %E
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>24</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(s64) = G_EXTRACT_VECTOR_ELT %3:_(&lt;2 x s64&gt;), %5:_(s32) (in function: select_eq_1_2)<br>warning: Instruction selection used fallback path for select_eq_1_2</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>24</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(s64) = G_EXTRACT_VECTOR_ELT %3:_(&lt;2 x s64&gt;), %5:_(s32) (in function: select_eq_1_2)
+warning: Instruction selection used fallback path for select_eq_1_2</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">llvm.exp10.71825dd0c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/llvm.exp10.ll">llvm.exp10.ll</a><span class="dim">)</span></td><td class="l">exp10_v2f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l">nontemporal.04bb16011b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/nontemporal.ll">nontemporal.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_ALL_load_v2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+c</code></td></tr><tr><td class="l">nontemporal.b715a1bda7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/nontemporal.ll">nontemporal.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_ALL_load_v2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh</code></td></tr><tr><td class="l">select-const.0758d314f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/select-const.ll">select-const.ll</a><span class="dim">)</span></td><td class="l">select_eq_1_2</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">select-const.8e3ac5bce3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/select-const.ll">select-const.ll</a><span class="dim">)</span></td><td class="l">select_eq_1_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcicm,+xqcics,+xqcicli,+zca,+short-forward-branch-ialu,+conditional-cmv-fusion -verify-machineinstrs</code></td></tr><tr><td class="l">select-const.b123c61320.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/select-const.ll">select-const.ll</a><span class="dim">)</span></td><td class="l">select_eq_1_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">select-const.fa0348f4f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/select-const.ll">select-const.ll</a><span class="dim">)</span></td><td class="l">select_eq_1_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicond -target-abi=ilp32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +59 insts: test_urem_7 (split-urem-by-constant.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +59 insts: test_urem_7 (split-urem-by-constant.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4937515a87-20261017-073131.html">explore-4937515a87-20261017-073131</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+59 insts: test_urem_7 (split-urem-by-constant.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">split-urem-by-constant.231b2c54df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/split-urem-by-constant.ll">split-urem-by-constant.ll</a><span class="dim">)</span> @test_urem_7 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4937515a87</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+define i128 @test_urem_7(i128 %x) #0 {
+  %A = alloca i128, align 8
+  store i128 poison, ptr %A, align 4
+  %LGV = load i128, ptr @G, align 4
+  %a = urem i128 %x, 7
+  %B = shl i128 %LGV, %a
+  store i128 %B, ptr %A, align 4
+  ret i128 %a
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,33 +1,95 @@
+<span class="add">+lui a2, %hi(.L0)</span>
+<span class="add">+lui a3, %hi(.L1)</span>
+<span class="add">+ld a2, %lo(.L0)(a2)</span>
+<span class="add">+ld a3, %lo(.L1)(a3)</span>
+<span class="add">+mulhu a4, a0, a2</span>
+<span class="add">+mul a5, a0, a3</span>
+<span class="add">+mulhu a6, a1, a2</span>
+<span class="add">+mulhu a7, a0, a3</span>
+<span class="add">+mulhu t1, a1, a3</span>
+<span class="add">+mul a2, a1, a2</span>
+<span class="add">+mul a3, a1, a3</span>
+<span class="add">+add a4, a4, a5</span>
+<span class="add">+add a6, a6, a7</span>
+<span class="add">+mv t0, t1</span>
+<span class="add">+sltu a5, a4, a5</span>
+<span class="add">+add a4, a4, a2</span>
+<span class="add">+sltu a7, a6, a7</span>
+<span class="add">+sltiu t1, a6, 0</span>
+<span class="add">+add a6, a6, a3</span>
+<span class="add">+mv t0, t0</span>
+<span class="add">+sltu a2, a4, a2</span>
+<span class="add">+add a7, a7, t1</span>
+<span class="add">+sltu a3, a6, a3</span>
+<span class="add">+sltiu a4, a6, 0</span>
+<span class="add">+add a2, a5, a2</span>
+<span class="add">+add a3, a7, a3</span>
+<span class="add">+add a6, a6, a2</span>
+<span class="add">+add a3, a3, a4</span>
+<span class="add">+sltu a2, a6, a2</span>
+<span class="add">+sltu a4, a0, a6</span>
+<span class="add">+add a2, a3, a2</span>
+<span class="add">+sub a3, a1, a4</span>
+<span class="add">+add a2, t0, a2</span>
+<span class="add">+sub a4, a0, a6</span>
+<span class="add">+sub a3, a3, a2</span>
+<span class="add">+srli a4, a4, 1</span>
+<span class="add">+slli a5, a3, 63</span>
+<span class="add">+lui a7, %hi(G)</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+srli a3, a3, 1</span>
+<span class="add">+add a4, a4, a6</span>
+<span class="add">+add a2, a3, a2</span>
+<span class="add">+sltu a3, a4, a6</span>
+<span class="add">+addi a5, a7, %lo(G)</span>
+<span class="add">+add a2, a2, a3</span>
+<span class="add">+srli a4, a4, 2</span>
+<span class="add">+slli a3, a2, 62</span>
+<span class="add">+srli a2, a2, 2</span>
+<span class="add">+li a6, -7</span>
+<span class="add">+or a3, a4, a3</span>
+<span class="add">+li a4, -1</span>
+<span class="add">+mul a7, a3, a6</span>
+<span class="add">+mulhu t0, a3, a6</span>
+<span class="add">+mul a3, a3, a4</span>
+<span class="add">+lwu a4, 0(a5)</span>
+<span class="add">+lw t1, 4(a5)</span>
+<span class="add">+lw t2, 12(a5)</span>
+<span class="add">+lwu t3, 8(a5)</span>
+<span class="add">+mul a6, a2, a6</span>
+<span class="add">+slli a5, t1, 32</span>
+<span class="add">+slli t2, t2, 32</span>
+<span class="add">+or a5, a5, a4</span>
+<span class="add">+or a2, t2, t3</span>
+<span class="add">+add a3, t0, a3</span>
+<span class="add">+add a0, a0, a7</span>
+<span class="add">+add a4, a1, a6</span>
+<span class="add">+li a6, 64</span>
+<span class="add">+sltu a1, a0, a7</span>
+<span class="add">+add a4, a4, a3</span>
+<span class="add">+bltu a0, a6, .L2</span>
+<span class="add">+li a3, 0</span>
+<span class="add">+sub a6, a0, a6</span>
+<span class="add">+sll a5, a5, a6</span>
+<span class="add">+j .L3</span>
+<span class="add">+.L2:</span>
+<span class="add">+neg a3, a0</span>
+<span class="add">+srl a6, a5, a3</span>
+<span class="add">+sll a7, a2, a0</span>
+<span class="add">+sll a3, a5, a0</span>
+<span class="add">+or a5, a6, a7</span>
+<span class="add">+.L3:</span>
+ addi sp, sp, -16
+<span class="del">-mv a2, a1</span>
+<span class="del">-li a1, 0</span>
+<span class="del">-li a3, -1</span>
+<span class="del">-srli a3, a3, 4</span>
+<span class="del">-slli a4, a2, 4</span>
+<span class="del">-srli a5, a0, 60</span>
+<span class="del">-lui a6, %hi(.L0)</span>
+<span class="del">-or a4, a5, a4</span>
+<span class="del">-ld a5, %lo(.L0)(a6)</span>
+<span class="del">-and a0, a0, a3</span>
+<span class="del">-and a3, a4, a3</span>
+<span class="del">-add a0, a0, a3</span>
+<span class="del">-srli a2, a2, 56</span>
+<span class="del">-add a0, a0, a2</span>
+<span class="del">-mulhu a2, a0, a5</span>
+<span class="del">-lui a3, %hi(G)</span>
+<span class="del">-ld a4, %lo(G)(a3)</span>
+<span class="del">-srli a2, a2, 1</span>
+<span class="del">-ld a3, %lo(G+8)(a3)</span>
+<span class="del">-slli a5, a2, 3</span>
+<span class="del">-sub a2, a2, a5</span>
+<span class="del">-add a0, a0, a2</span>
+<span class="del">-srli a2, a4, 1</span>
+<span class="del">-xori a5, a0, 63</span>
+<span class="del">-sll a3, a3, a0</span>
+<span class="del">-srl a2, a2, a5</span>
+<span class="del">-or a2, a3, a2</span>
+<span class="del">-sll a3, a4, a0</span>
+<span class="del">-sd a3, 0(sp)</span>
+<span class="del">-sd a2, 8(sp)</span>
+<span class="add">+mv a6, sp</span>
+<span class="add">+add a1, a4, a1</span>
+<span class="add">+beqz a0, .L4</span>
+<span class="add">+mv a2, a5</span>
+<span class="add">+.L4:</span>
+<span class="add">+srli a4, a3, 32</span>
+<span class="add">+srli a5, a2, 32</span>
+<span class="add">+sw a5, 12(a6)</span>
+<span class="add">+sw a3, 0(sp)</span>
+<span class="add">+sw a4, 4(sp)</span>
+<span class="add">+sw a2, 8(sp)</span>
+ addi sp, sp, 16
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">split-urem-by-constant.231b2c54df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/split-urem-by-constant.ll">split-urem-by-constant.ll</a><span class="dim">)</span></td><td class="l">test_urem_7</td><td class="l"><code>-mtriple=riscv64 -mattr=+m</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

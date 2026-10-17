@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,&lt;2 x s1&gt;,s64,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,&lt;2 x s1&gt;,s64,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-bc8218b282-20261015-075519.html">explore-bc8218b282-20261015-075519</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,&lt;2 x s1&gt;,s64,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zero-call-used-regs-v.df625500be.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a><span class="dim">)</span> @all_arg via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;4 x float&gt;
+
+define void @all_arg() #0 {
+entry:
+  %A = alloca &lt;4 x float&gt;, align 16
+  store &lt;4 x float&gt; poison, ptr %A, align 16
+  %LGV = load &lt;4 x float&gt;, ptr @G.2, align 16
+  %S = shufflevector &lt;4 x float&gt; splat (float 4.200000e+01), &lt;4 x float&gt; %LGV, &lt;4 x i32&gt; poison
+  store &lt;4 x float&gt; %S, ptr %A, align 16
+  ret void
+}
+
+attributes #0 = { &quot;zero-call-used-regs&quot;=&quot;all-arg&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %4:_(&lt;2 x s32&gt;), %7:_(&lt;2 x s32&gt;), %0:_(p0), %8:_(&lt;2 x s1&gt;), %10:_(s64) :: (store (s32) into %ir.A) (in function: all_arg)
+warning: Instruction selection used fallback path for all_arg</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">urem-seteq-illegal-types.66884fca6f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/urem-seteq-illegal-types.ll">urem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_urem_even</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v -riscv-v-vector-bits-min=128</code></td></tr><tr><td class="l">zero-call-used-regs-v.df625500be.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a><span class="dim">)</span></td><td class="l">all_arg</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

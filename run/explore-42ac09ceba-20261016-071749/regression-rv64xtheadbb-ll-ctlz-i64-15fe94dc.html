@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +59 insts: ctlz_i64 (rv64xtheadbb.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +59 insts: ctlz_i64 (rv64xtheadbb.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+59 insts: ctlz_i64 (rv64xtheadbb.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64xtheadbb.bd3949d60c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span> @ctlz_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+@G.1 = external global i1
+
+; Function Attrs: nounwind
+define i64 @ctlz_i64(i64 %a) #0 {
+  %LGV = load i64, ptr @G, align 4
+  %1 = call i64 @llvm.ctlz.i64(i64 %a, i1 false)
+  %C = icmp sle i64 %a, %LGV
+  store i1 %C, ptr @G.1, align 1
+  ret i64 %1
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.ctlz.i64(i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,8 +1,67 @@
+ lui a1, %hi(G)
+<span class="del">-ld a1, %lo(G)(a1)</span>
+<span class="del">-slt a1, a1, a0</span>
+<span class="del">-th.ff1 a0, a0</span>
+<span class="del">-xori a1, a1, 1</span>
+<span class="del">-lui a2, %hi(G.1)</span>
+<span class="del">-sb a1, %lo(G.1)(a2)</span>
+<span class="add">+lui a2, 21845</span>
+<span class="add">+srli a3, a0, 1</span>
+<span class="add">+addi a2, a2, 1365</span>
+<span class="add">+or a3, a0, a3</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+srli a4, a3, 2</span>
+<span class="add">+addi a2, a2, 1365</span>
+<span class="add">+or a3, a3, a4</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+srli a4, a3, 4</span>
+<span class="add">+addi a2, a2, 1365</span>
+<span class="add">+or a3, a3, a4</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+srli a4, a3, 8</span>
+<span class="add">+addi a2, a2, 1365</span>
+<span class="add">+or a3, a3, a4</span>
+<span class="add">+lui a4, 13107</span>
+<span class="add">+srli a5, a3, 16</span>
+<span class="add">+addi a4, a4, 819</span>
+<span class="add">+or a3, a3, a5</span>
+<span class="add">+slli a4, a4, 12</span>
+<span class="add">+srli a5, a3, 32</span>
+<span class="add">+addi a4, a4, 819</span>
+<span class="add">+or a3, a3, a5</span>
+<span class="add">+slli a4, a4, 12</span>
+<span class="add">+srli a5, a3, 1</span>
+<span class="add">+addi a4, a4, 819</span>
+<span class="add">+and a2, a5, a2</span>
+<span class="add">+slli a4, a4, 12</span>
+<span class="add">+sub a3, a3, a2</span>
+<span class="add">+lui a2, 3855</span>
+<span class="add">+srli a5, a3, 2</span>
+<span class="add">+addi a2, a2, 241</span>
+<span class="add">+addi a4, a4, 819</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+and a5, a5, a4</span>
+<span class="add">+addi a2, a2, -241</span>
+<span class="add">+and a3, a3, a4</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+add a3, a5, a3</span>
+<span class="add">+addi a2, a2, 241</span>
+<span class="add">+srli a4, a3, 4</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+add a3, a4, a3</span>
+<span class="add">+addi a2, a2, -241</span>
+<span class="add">+addi a1, a1, %lo(G)</span>
+<span class="add">+and a2, a3, a2</span>
+<span class="add">+slli a3, a2, 8</span>
+<span class="add">+lw a4, 4(a1)</span>
+<span class="add">+lwu a1, 0(a1)</span>
+<span class="add">+add a2, a2, a3</span>
+<span class="add">+slli a3, a2, 16</span>
+<span class="add">+lui a5, %hi(G.1)</span>
+<span class="add">+add a2, a2, a3</span>
+<span class="add">+slli a4, a4, 32</span>
+<span class="add">+slli a3, a2, 32</span>
+<span class="add">+or a4, a4, a1</span>
+<span class="add">+add a2, a2, a3</span>
+<span class="add">+srli a2, a2, 56</span>
+<span class="add">+li a1, 64</span>
+<span class="add">+sub a1, a1, a2</span>
+<span class="add">+slt a0, a4, a0</span>
+<span class="add">+xori a2, a0, 1</span>
+<span class="add">+mv a0, a1</span>
+<span class="add">+sb a2, %lo(G.1)(a5)</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64xtheadbb.bd3949d60c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">ctlz_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

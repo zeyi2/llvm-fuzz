@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FMUL s128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FMUL s128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-04ca53e65f-20261014-105623.html">main-04ca53e65f-20261014-105623</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FMUL s128 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">lrint-conv.d3cabad91a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/lrint-conv.ll">lrint-conv.ll</a><span class="dim">)</span> @test_llrint_ixx_f128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global fp128
+@G.3 = external global fp128
+
+; Function Attrs: nounwind
+define i64 @test_llrint_ixx_f128(fp128 %x) #0 {
+  %LGV = load fp128, ptr @G.2, align 16
+  %res = tail call i64 @llvm.llrint.i64.f128(fp128 %x)
+  %B = fmul fp128 %x, %LGV
+  store fp128 %B, ptr @G.3, align 16
+  ret i64 %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.llrint.i64.f128(fp128) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(s128) = G_FMUL %0:_, %2:_ (in function: test_llrint_ixx_f128)
+warning: Instruction selection used fallback path for test_llrint_ixx_f128</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">lrint-conv.d3cabad91a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/lrint-conv.ll">lrint-conv.ll</a><span class="dim">)</span></td><td class="l">test_llrint_ixx_f128</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">lrint-conv.d3cabad91a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/lrint-conv.ll">lrint-conv.ll</a><span class="dim">)</span></td><td class="l">test_llrint_ixx_f128</td><td class="l"><code>-mtriple=riscv32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +54 insts: unaligned_memcpy31 (memcpy-inline.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +54 insts: unaligned_memcpy31 (memcpy-inline.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+54 insts: unaligned_memcpy31 (memcpy-inline.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a> @unaligned_memcpy31 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+unaligned-scalar-mem</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @unaligned_memcpy31(ptr captures(none) %dest, ptr %src) #0 {
+entry:
+  tail call void @llvm.memcpy.inline.p0.p0.i64(ptr %dest, ptr %src, i64 31, i1 false)
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.inline.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+unaligned-scalar-mem -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+unaligned-scalar-mem -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,9 +1,63 @@
+<span class="del">-ld a2, 23(a1)</span>
+<span class="del">-sd a2, 23(a0)</span>
+<span class="del">-ld a2, 16(a1)</span>
+<span class="del">-sd a2, 16(a0)</span>
+<span class="del">-ld a2, 8(a1)</span>
+<span class="del">-sd a2, 8(a0)</span>
+<span class="del">-ld a1, 0(a1)</span>
+<span class="del">-sd a1, 0(a0)</span>
+<span class="add">+lbu a2, 0(a1)</span>
+<span class="add">+sb a2, 0(a0)</span>
+<span class="add">+lbu a2, 1(a1)</span>
+<span class="add">+sb a2, 1(a0)</span>
+<span class="add">+lbu a2, 2(a1)</span>
+<span class="add">+sb a2, 2(a0)</span>
+<span class="add">+lbu a2, 3(a1)</span>
+<span class="add">+sb a2, 3(a0)</span>
+<span class="add">+lbu a2, 4(a1)</span>
+<span class="add">+sb a2, 4(a0)</span>
+<span class="add">+lbu a2, 5(a1)</span>
+<span class="add">+sb a2, 5(a0)</span>
+<span class="add">+lbu a2, 6(a1)</span>
+<span class="add">+sb a2, 6(a0)</span>
+<span class="add">+lbu a2, 7(a1)</span>
+<span class="add">+sb a2, 7(a0)</span>
+<span class="add">+lbu a2, 8(a1)</span>
+<span class="add">+sb a2, 8(a0)</span>
+<span class="add">+lbu a2, 9(a1)</span>
+<span class="add">+sb a2, 9(a0)</span>
+<span class="add">+lbu a2, 10(a1)</span>
+<span class="add">+sb a2, 10(a0)</span>
+<span class="add">+lbu a2, 11(a1)</span>
+<span class="add">+sb a2, 11(a0)</span>
+<span class="add">+lbu a2, 12(a1)</span>
+<span class="add">+sb a2, 12(a0)</span>
+<span class="add">+lbu a2, 13(a1)</span>
+<span class="add">+sb a2, 13(a0)</span>
+<span class="add">+lbu a2, 14(a1)</span>
+<span class="add">+sb a2, 14(a0)</span>
+<span class="add">+lbu a2, 15(a1)</span>
+<span class="add">+sb a2, 15(a0)</span>
+<span class="add">+lbu a2, 16(a1)</span>
+<span class="add">+sb a2, 16(a0)</span>
+<span class="add">+lbu a2, 17(a1)</span>
+<span class="add">+sb a2, 17(a0)</span>
+<span class="add">+lbu a2, 18(a1)</span>
+<span class="add">+sb a2, 18(a0)</span>
+<span class="add">+lbu a2, 19(a1)</span>
+<span class="add">+sb a2, 19(a0)</span>
+<span class="add">+lbu a2, 20(a1)</span>
+<span class="add">+sb a2, 20(a0)</span>
+<span class="add">+lbu a2, 21(a1)</span>
+<span class="add">+sb a2, 21(a0)</span>
+<span class="add">+lbu a2, 22(a1)</span>
+<span class="add">+sb a2, 22(a0)</span>
+<span class="add">+lbu a2, 23(a1)</span>
+<span class="add">+sb a2, 23(a0)</span>
+<span class="add">+lbu a2, 24(a1)</span>
+<span class="add">+sb a2, 24(a0)</span>
+<span class="add">+lbu a2, 25(a1)</span>
+<span class="add">+sb a2, 25(a0)</span>
+<span class="add">+lbu a2, 26(a1)</span>
+<span class="add">+sb a2, 26(a0)</span>
+<span class="add">+lbu a2, 27(a1)</span>
+<span class="add">+sb a2, 27(a0)</span>
+<span class="add">+lbu a2, 28(a1)</span>
+<span class="add">+sb a2, 28(a0)</span>
+<span class="add">+lbu a2, 29(a1)</span>
+<span class="add">+sb a2, 29(a0)</span>
+<span class="add">+lbu a1, 30(a1)</span>
+<span class="add">+sb a1, 30(a0)</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a></td><td class="l">unaligned_memcpy31</td><td class="l"><code>-mtriple=riscv64 -mattr=+unaligned-scalar-mem</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

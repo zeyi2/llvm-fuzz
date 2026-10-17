@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SREM &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SREM &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SREM &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xqcilo-xqcilia-frame-index.c35e2405ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/xqcilo-xqcilia-frame-index.ll">xqcilo-xqcilia-frame-index.ll</a><span class="dim">)</span> @fi_addr_escapes via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcilo,+xqcilia -riscv-no-aliases</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+declare void @use(ptr)
+
+; Function Attrs: nounwind
+define void @fi_addr_escapes(i32 %x) #0 {
+  %LGV = load &lt;2 x i64&gt;, ptr @G, align 16
+  %arr = alloca [4000000 x i8], align 4
+  %L = load &lt;2 x i64&gt;, ptr %arr, align 16
+  %p1 = getelementptr inbounds [4000000 x i8], ptr %arr, i32 0, i32 3000000
+  call void @use(ptr %p1)
+  %p0 = getelementptr inbounds [4000000 x i8], ptr %arr, i32 0, i32 0
+  %B = srem &lt;2 x i64&gt; %L, %LGV
+  call void @use(ptr %p0)
+  store &lt;2 x i64&gt; %B, ptr poison, align 16
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xqcilo,+xqcilia -riscv-no-aliases -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xqcilo,+xqcilia -riscv-no-aliases -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(&lt;2 x s64&gt;) = G_SREM %4:_, %1:_ (in function: fi_addr_escapes)
+warning: Instruction selection used fallback path for fi_addr_escapes</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">xqcilo-xqcilia-frame-index.c35e2405ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/xqcilo-xqcilia-frame-index.ll">xqcilo-xqcilia-frame-index.ll</a><span class="dim">)</span></td><td class="l">fi_addr_escapes</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcilo,+xqcilia -riscv-no-aliases</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

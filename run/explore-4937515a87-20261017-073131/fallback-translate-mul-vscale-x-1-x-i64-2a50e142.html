@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul &lt;vscale x 1 x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul &lt;vscale x 1 x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4937515a87-20261017-073131.html">explore-4937515a87-20261017-073131</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul &lt;vscale x 1 x i64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">inline-asm-xsfvcp.72e3f07869.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-xsfvcp.ll">inline-asm-xsfvcp.ll</a><span class="dim">)</span> @test_reorder via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+xsfvcp -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4937515a87</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;8 x i8&gt;
+@G.1 = external global &lt;2 x i64&gt;
+@G.2 = external global &lt;2 x i64&gt;
+
+define void @test_reorder(&lt;vscale x 1 x i64&gt; %vreg) {
+entry:
+  %LGV4 = load &lt;2 x i64&gt;, ptr @G.1, align 16
+  %A2 = alloca &lt;8 x i8&gt;, align 8
+  store &lt;8 x i8&gt; poison, ptr %A2, align 8
+  %LGV = load &lt;8 x i8&gt;, ptr @G, align 8
+  %A = alloca &lt;vscale x 1 x i64&gt;, align 8
+  store &lt;vscale x 1 x i64&gt; poison, ptr %A, align 8
+  %B = mul &lt;vscale x 1 x i64&gt; %vreg, %vreg
+  call void @llvm.riscv.sf.vc.iv.se.i64.nxv1i64.i64.i64(i64 0, i64 0, &lt;vscale x 1 x i64&gt; %vreg, i64 0, i64 0)
+  %B5 = shl &lt;2 x i64&gt; zeroinitializer, %LGV4
+  %S = shufflevector &lt;8 x i8&gt; %LGV, &lt;8 x i8&gt; splat (i8 16), &lt;8 x i32&gt; poison
+  %0 = call i64 asm sideeffect &quot;sf.vc.vv 0x3, 0x0, $1, $1;&quot;, &quot;=r,^vr,~{memory},~{vl},~{sf.vcix_state}&quot;(&lt;vscale x 1 x i64&gt; %vreg)
+  store &lt;vscale x 1 x i64&gt; %B, ptr %A, align 8
+  store &lt;8 x i8&gt; %S, ptr %A2, align 8
+  store &lt;2 x i64&gt; %B5, ptr @G.2, align 16
+  ret void
+}
+
+; Function Attrs: nounwind
+declare void @llvm.riscv.sf.vc.iv.se.i64.nxv1i64.i64.i64(i64 immarg, i64 immarg, &lt;vscale x 1 x i64&gt;, i64 immarg, i64) #0
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+xsfvcp -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+xsfvcp -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %B = mul &lt;vscale x 1 x i64&gt; %vreg, %vreg&#x27; (in function: test_reorder)
+warning: Instruction selection used fallback path for test_reorder</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">inline-asm-xsfvcp.72e3f07869.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-xsfvcp.ll">inline-asm-xsfvcp.ll</a><span class="dim">)</span></td><td class="l">test_reorder</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l">inline-asm-xsfvcp.c8de9de8db.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-xsfvcp.ll">inline-asm-xsfvcp.ll</a><span class="dim">)</span></td><td class="l">test_reorder</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+xsfvcp -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

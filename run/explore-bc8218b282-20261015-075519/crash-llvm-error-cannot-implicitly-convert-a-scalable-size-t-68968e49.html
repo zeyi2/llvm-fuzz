@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-bc8218b282-20261015-075519.html">explore-bc8218b282-20261015-075519</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()` <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr69586.839dab8130.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/pr69586.ll">pr69586.ll</a><span class="dim">)</span> @test via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/6hsb9ohMh">https://godbolt.org/z/6hsb9ohMh</a> (llc-assertions-trunk, checked 2026-10-15 08:04 UTC): <a href="https://godbolt.org/z/6hsb9ohMh">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define ptr @test(ptr %0, i8 %LGV1) {
+SW_C5:
+  %G = getelementptr &lt;vscale x 4 x i32&gt;, ptr %0, i8 %LGV1
+  ret ptr %G
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false -global-isel=0</code></td><td>0</td><td>7</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@test&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x00005571391ef54b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x00005571391ec3f1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x00005571391effcb
+3  libc.so.6 0x00007f0a4d445330
+4  libc.so.6 0x00007f0a4d49ec0c pthread_kill + 284
+5  libc.so.6 0x00007f0a4d44527e gsignal + 30
+6  libc.so.6 0x00007f0a4d4288ff abort + 223
+7  llc       0x0000557139131c4d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x0000557139131a96
+9  llc       0x0000557139131d9b
+10 llc       0x000055713b2bc056 llvm::IRTranslatorImpl::translateGetElementPtr(llvm::User const&amp;, llvm::MachineIRBuilder&amp;) + 2678
+11 llc       0x000055713b2c8ab9 llvm::IRTranslatorImpl::translate(llvm::Instruction const&amp;) + 889
+12 llc       0x000055713b2cb43d llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 4253
+13 llc       0x000055713b2cc42d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+14 llc       0x00005571397b69ed llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x0000557139546d37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000055713954f232 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x0000557139547ae0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x00005571391f6ba8 llcMain + 12056
+19 llc       0x00005571391316af main + 63
+20 libc.so.6 0x00007f0a4d42a1ca
+21 libc.so.6 0x00007f0a4d42a28b __libc_start_main + 139
+22 llc       0x00005571391315a5 _start + 37</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr69586.839dab8130.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/pr69586.ll">pr69586.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false</code></td></tr><tr><td class="l">pr69586.a229e40d4e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/pr69586.ll">pr69586.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+xsfvcp --riscv-use-rematerializable-movimm=true</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

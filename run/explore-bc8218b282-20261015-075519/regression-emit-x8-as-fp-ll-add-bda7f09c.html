@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +91 insts: add (emit-x8-as-fp.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +91 insts: add (emit-x8-as-fp.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-bc8218b282-20261015-075519.html">explore-bc8218b282-20261015-075519</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+91 insts: add (emit-x8-as-fp.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">emit-x8-as-fp.62b0c97eab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/emit-x8-as-fp.ll">emit-x8-as-fp.ll</a><span class="dim">)</span> @add via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -M emit-x8-as-fp -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+; Function Attrs: noinline nounwind optnone
+define signext i32 @add(i32 %0, i32 %1) #0 {
+  %A = alloca i1, align 1
+  %C = icmp sgt i32 %1, %1
+  store i1 false, ptr %A, align 1
+  %3 = alloca i32, align 4
+  %L = load i8, ptr %3, align 1
+  %4 = alloca i32, align 4
+  %B = udiv i32 %0, 0
+  store i32 %B, ptr %3, align 4
+  switch i8 %L, label %SW_D [
+    i8 -34, label %SW_C
+    i8 -28, label %SW_C1
+    i8 74, label %SW_C2
+    i8 -75, label %SW_C3
+    i8 9, label %SW_C4
+    i8 127, label %SW_C5
+    i8 96, label %SW_C6
+    i8 21, label %SW_C7
+  ]
+
+BB:                                               ; preds = %SW_C7, %SW_C6, %SW_C1, %SW_C
+  store i32 %1, ptr %4, align 4
+  %5 = load i32, ptr %3, align 4
+  %6 = load i32, ptr %4, align 4
+  %7 = add nsw i32 %5, %6
+  ret i32 %7
+
+SW_D:                                             ; preds = %2
+  ret i32 %1
+
+SW_C:                                             ; preds = %2
+  br label %BB
+
+SW_C1:                                            ; preds = %2
+  br label %BB
+
+SW_C2:                                            ; preds = %2
+  ret i32 65536
+
+SW_C3:                                            ; preds = %2
+  ret i32 %B
+
+SW_C4:                                            ; preds = %2
+  ret i32 %0
+
+SW_C5:                                            ; preds = %2
+  %LGV = load i32, ptr @G, align 4
+  ret i32 %LGV
+
+SW_C6:                                            ; preds = %2
+  br label %BB
+
+SW_C7:                                            ; preds = %SW_C7, %2
+  br i1 %C, label %BB, label %SW_C7
+}
+
+attributes #0 = { noinline nounwind optnone &quot;frame-pointer&quot;=&quot;all&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -M emit-x8-as-fp -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -M emit-x8-as-fp -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,98 +1,192 @@
+<span class="del">-addi sp, sp, -32</span>
+<span class="del">-sd ra, 24(sp)</span>
+<span class="del">-sd fp, 16(sp)</span>
+<span class="del">-addi fp, sp, 32</span>
+<span class="del">-sb zero, 15(sp)</span>
+<span class="del">-lbu a2, 8(sp)</span>
+<span class="del">-li a3, 181</span>
+<span class="del">-beq a2, a3, .L0</span>
+<span class="add">+addi sp, sp, -128</span>
+<span class="add">+sd ra, 120(sp)</span>
+<span class="add">+sd fp, 112(sp)</span>
+<span class="add">+sd s1, 104(sp)</span>
+<span class="add">+sd s2, 96(sp)</span>
+<span class="add">+sd s3, 88(sp)</span>
+<span class="add">+sd s4, 80(sp)</span>
+<span class="add">+sd s5, 72(sp)</span>
+<span class="add">+sd s6, 64(sp)</span>
+<span class="add">+sd s7, 56(sp)</span>
+<span class="add">+sd s8, 48(sp)</span>
+<span class="add">+sd s9, 40(sp)</span>
+<span class="add">+sd s10, 32(sp)</span>
+<span class="add">+sd s11, 24(sp)</span>
+<span class="add">+addi fp, sp, 128</span>
+<span class="add">+mv s2, a0</span>
+<span class="add">+mv s1, a1</span>
+<span class="add">+li s6, 21</span>
+<span class="add">+li s9, 96</span>
+<span class="add">+li s4, 127</span>
+<span class="add">+li s5, 74</span>
+<span class="add">+li s11, -28</span>
+<span class="add">+li s8, 9</span>
+<span class="add">+lui s7, %hi(G)</span>
+<span class="add">+addi s7, s7, %lo(G)</span>
+<span class="add">+sext.w s10, s1</span>
+<span class="add">+sb zero, 23(sp)</span>
+<span class="add">+lbu s3, 16(sp)</span>
+<span class="add">+slli a0, s2, 32</span>
+<span class="add">+srli a0, a0, 32</span>
+<span class="add">+li a1, 0</span>
+<span class="add">+call __udivdi3</span>
+<span class="add">+sw a0, 16(sp)</span>
+<span class="add">+slli a1, s3, 56</span>
+<span class="add">+srai a1, a1, 56</span>
+<span class="add">+bge a1, s6, .L0</span>
+ j .L1
+ .L1:
+<span class="del">-zext.b a3, a2</span>
+<span class="del">-li a4, 222</span>
+<span class="del">-beq a3, a4, .L2</span>
+<span class="add">+slli a1, s3, 56</span>
+<span class="add">+srai a1, a1, 56</span>
+<span class="add">+bge a1, s11, .L2</span>
+ j .L3
+ .L3:
+<span class="del">-zext.b a3, a2</span>
+<span class="del">-li a4, 228</span>
+<span class="del">-beq a3, a4, .L4</span>
+<span class="add">+li a1, 181</span>
+<span class="add">+beq s3, a1, .L4</span>
+ j .L5
+ .L5:
+<span class="del">-zext.b a3, a2</span>
+<span class="del">-li a4, 9</span>
+<span class="del">-beq a3, a4, .L6</span>
+<span class="add">+li a0, 222</span>
+<span class="add">+beq s3, a0, .L6</span>
+ j .L7
+<span class="del">-.L7:</span>
+<span class="del">-zext.b a0, a2</span>
+<span class="del">-li a3, 21</span>
+<span class="del">-beq a0, a3, .L8</span>
+<span class="add">+.L2:</span>
+<span class="add">+li a0, 228</span>
+<span class="add">+beq s3, a0, .L8</span>
+ j .L9
+ .L9:
+<span class="del">-zext.b a0, a2</span>
+<span class="del">-li a3, 74</span>
+<span class="del">-beq a0, a3, .L10</span>
+<span class="del">-j .L11</span>
+<span class="add">+beq s3, s8, .L10</span>
+<span class="add">+j .L7</span>
+<span class="add">+.L0:</span>
+<span class="add">+slli a0, s3, 56</span>
+<span class="add">+srai a0, a0, 56</span>
+<span class="add">+bge a0, s9, .L11</span>
+<span class="add">+j .L12</span>
+<span class="add">+.L12:</span>
+<span class="add">+beq s3, s6, .L13</span>
+<span class="add">+j .L14</span>
+<span class="add">+.L14:</span>
+<span class="add">+beq s3, s5, .L15</span>
+<span class="add">+j .L7</span>
+ .L11:
+<span class="del">-zext.b a0, a2</span>
+<span class="del">-li a3, 96</span>
+<span class="del">-beq a0, a3, .L12</span>
+<span class="del">-j .L13</span>
+<span class="add">+beq s3, s9, .L16</span>
+<span class="add">+j .L17</span>
+<span class="add">+.L17:</span>
+<span class="add">+beq s3, s4, .L18</span>
+<span class="add">+j .L7</span>
+ .L13:
+<span class="del">-zext.b a0, a2</span>
+<span class="del">-li a2, 127</span>
+<span class="del">-beq a0, a2, .L14</span>
+<span class="del">-j .L15</span>
+<span class="del">-.L8:</span>
+<span class="del">-j .L16</span>
+<span class="del">-.L17:</span>
+<span class="del">-j .L18</span>
+<span class="del">-.L18:</span>
+<span class="del">-sw a1, 4(sp)</span>
+<span class="del">-lw a0, 8(sp)</span>
+<span class="del">-lw a1, 4(sp)</span>
+<span class="add">+j .L19</span>
+<span class="add">+.L20:</span>
+<span class="add">+.L21:</span>
+<span class="add">+sw s1, 12(sp)</span>
+<span class="add">+lw a0, 16(sp)</span>
+<span class="add">+lw a1, 12(sp)</span>
+ addw a0, a0, a1
+<span class="del">-ld ra, 24(sp)</span>
+<span class="del">-ld fp, 16(sp)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="add">+sext.w a0, a0</span>
+<span class="add">+ld ra, 120(sp)</span>
+<span class="add">+ld fp, 112(sp)</span>
+<span class="add">+ld s1, 104(sp)</span>
+<span class="add">+ld s2, 96(sp)</span>
+<span class="add">+ld s3, 88(sp)</span>
+<span class="add">+ld s4, 80(sp)</span>
+<span class="add">+ld s5, 72(sp)</span>
+<span class="add">+ld s6, 64(sp)</span>
+<span class="add">+ld s7, 56(sp)</span>
+<span class="add">+ld s8, 48(sp)</span>
+<span class="add">+ld s9, 40(sp)</span>
+<span class="add">+ld s10, 32(sp)</span>
+<span class="add">+ld s11, 24(sp)</span>
+<span class="add">+addi sp, sp, 128</span>
+ ret
+<span class="del">-.L15:</span>
+<span class="del">-sext.w a0, a1</span>
+<span class="del">-ld ra, 24(sp)</span>
+<span class="del">-ld fp, 16(sp)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="del">-ret</span>
+<span class="del">-.L2:</span>
+<span class="del">-j .L18</span>
+<span class="del">-.L4:</span>
+<span class="del">-j .L18</span>
+<span class="del">-.L10:</span>
+<span class="del">-lui a0, 16</span>
+<span class="del">-ld ra, 24(sp)</span>
+<span class="del">-ld fp, 16(sp)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="del">-ret</span>
+<span class="del">-.L0:</span>
+<span class="del">-sext.w a0, a0</span>
+<span class="del">-ld ra, 24(sp)</span>
+<span class="del">-ld fp, 16(sp)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="add">+.L7:</span>
+<span class="add">+sext.w a0, s1</span>
+<span class="add">+ld ra, 120(sp)</span>
+<span class="add">+ld fp, 112(sp)</span>
+<span class="add">+ld s1, 104(sp)</span>
+<span class="add">+ld s2, 96(sp)</span>
+<span class="add">+ld s3, 88(sp)</span>
+<span class="add">+ld s4, 80(sp)</span>
+<span class="add">+ld s5, 72(sp)</span>
+<span class="add">+ld s6, 64(sp)</span>
+<span class="add">+ld s7, 56(sp)</span>
+<span class="add">+ld s8, 48(sp)</span>
+<span class="add">+ld s9, 40(sp)</span>
+<span class="add">+ld s10, 32(sp)</span>
+<span class="add">+ld s11, 24(sp)</span>
+<span class="add">+addi sp, sp, 128</span>
+ ret
+ .L6:
+<span class="add">+j .L21</span>
+<span class="add">+.L8:</span>
+<span class="add">+j .L21</span>
+<span class="add">+.L15:</span>
+<span class="add">+lui a0, 16</span>
+<span class="add">+ld ra, 120(sp)</span>
+<span class="add">+ld fp, 112(sp)</span>
+<span class="add">+ld s1, 104(sp)</span>
+<span class="add">+ld s2, 96(sp)</span>
+<span class="add">+ld s3, 88(sp)</span>
+<span class="add">+ld s4, 80(sp)</span>
+<span class="add">+ld s5, 72(sp)</span>
+<span class="add">+ld s6, 64(sp)</span>
+<span class="add">+ld s7, 56(sp)</span>
+<span class="add">+ld s8, 48(sp)</span>
+<span class="add">+ld s9, 40(sp)</span>
+<span class="add">+ld s10, 32(sp)</span>
+<span class="add">+ld s11, 24(sp)</span>
+<span class="add">+addi sp, sp, 128</span>
+<span class="add">+ret</span>
+<span class="add">+.L4:</span>
+ sext.w a0, a0
+<span class="del">-ld ra, 24(sp)</span>
+<span class="del">-ld fp, 16(sp)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="add">+ld ra, 120(sp)</span>
+<span class="add">+ld fp, 112(sp)</span>
+<span class="add">+ld s1, 104(sp)</span>
+<span class="add">+ld s2, 96(sp)</span>
+<span class="add">+ld s3, 88(sp)</span>
+<span class="add">+ld s4, 80(sp)</span>
+<span class="add">+ld s5, 72(sp)</span>
+<span class="add">+ld s6, 64(sp)</span>
+<span class="add">+ld s7, 56(sp)</span>
+<span class="add">+ld s8, 48(sp)</span>
+<span class="add">+ld s9, 40(sp)</span>
+<span class="add">+ld s10, 32(sp)</span>
+<span class="add">+ld s11, 24(sp)</span>
+<span class="add">+addi sp, sp, 128</span>
+ ret
+<span class="del">-.L14:</span>
+<span class="del">-lui a0, %hi(G)</span>
+<span class="del">-lw a0, %lo(G)(a0)</span>
+<span class="del">-ld ra, 24(sp)</span>
+<span class="del">-ld fp, 16(sp)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="add">+.L10:</span>
+<span class="add">+sext.w a0, s2</span>
+<span class="add">+ld ra, 120(sp)</span>
+<span class="add">+ld fp, 112(sp)</span>
+<span class="add">+ld s1, 104(sp)</span>
+<span class="add">+ld s2, 96(sp)</span>
+<span class="add">+ld s3, 88(sp)</span>
+<span class="add">+ld s4, 80(sp)</span>
+<span class="add">+ld s5, 72(sp)</span>
+<span class="add">+ld s6, 64(sp)</span>
+<span class="add">+ld s7, 56(sp)</span>
+<span class="add">+ld s8, 48(sp)</span>
+<span class="add">+ld s9, 40(sp)</span>
+<span class="add">+ld s10, 32(sp)</span>
+<span class="add">+ld s11, 24(sp)</span>
+<span class="add">+addi sp, sp, 128</span>
+ ret
+<span class="del">-.L12:</span>
+<span class="del">-j .L18</span>
+<span class="add">+.L18:</span>
+<span class="add">+lw a0, 0(s7)</span>
+<span class="add">+ld ra, 120(sp)</span>
+<span class="add">+ld fp, 112(sp)</span>
+<span class="add">+ld s1, 104(sp)</span>
+<span class="add">+ld s2, 96(sp)</span>
+<span class="add">+ld s3, 88(sp)</span>
+<span class="add">+ld s4, 80(sp)</span>
+<span class="add">+ld s5, 72(sp)</span>
+<span class="add">+ld s6, 64(sp)</span>
+<span class="add">+ld s7, 56(sp)</span>
+<span class="add">+ld s8, 48(sp)</span>
+<span class="add">+ld s9, 40(sp)</span>
+<span class="add">+ld s10, 32(sp)</span>
+<span class="add">+ld s11, 24(sp)</span>
+<span class="add">+addi sp, sp, 128</span>
+<span class="add">+ret</span>
+ .L16:
+<span class="del">-andi a0, zero, 1</span>
+<span class="del">-bnez a0, .L17</span>
+<span class="del">-j .L16</span>
+<span class="add">+j .L21</span>
+<span class="add">+.L19:</span>
+<span class="add">+blt s10, s10, .L20</span>
+<span class="add">+j .L19</span></pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">emit-x8-as-fp.62b0c97eab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/emit-x8-as-fp.ll">emit-x8-as-fp.ll</a><span class="dim">)</span></td><td class="l">add</td><td class="l"><code>-mtriple=riscv64 -M emit-x8-as-fp -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 1 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 1 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 1 machine code errors. <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-gprs.1a12656f61.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span> @callee via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/z331Wxd31">https://godbolt.org/z/z331Wxd31</a> (llc-assertions-trunk, checked 2026-10-14 11:49 UTC): <a href="https://godbolt.org/z/z331Wxd31">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @callee(ptr %var) {
+  store [32 x i32] zeroinitializer, ptr %var, align 4
+  store double 0.000000e+00, ptr poison, align 8
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After RISC-V Load / Store Optimizer<br># Machine code for function callee: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>34</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After RISC-V Load / Store Optimizer
+# Machine code for function callee: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+Constant Pool:
+  cp#0: double 0.000000e+00, align=8
+Function Live Ins: $x10
+bb.0 (%ir-block.0):
+  liveins: $x10
+  renamable $x11 = LUI target-flags(riscv-hi) %const.0
+  renamable $x11 = ADDI killed renamable $x11, target-flags(riscv-lo) %const.0
+  $x12_x13 = LD_RV32 killed $x11, 0 :: (load (s32) from constant-pool, align 8), (load (s32) from constant-pool + 4, basealign 8)
+  SW $x0, renamable $x10, 0 :: (store (s32) into %ir.var)
+  SW $x0, renamable $x10, 4 :: (store (s32) into %ir.var + 4)
+  SW $x0, renamable $x10, 8 :: (store (s32) into %ir.var + 8)
+  SW $x0, renamable $x10, 12 :: (store (s32) into %ir.var + 12)
+  SW $x0, renamable $x10, 16 :: (store (s32) into %ir.var + 16)
+  SW $x0, renamable $x10, 20 :: (store (s32) into %ir.var + 20)
+  SW $x0, renamable $x10, 24 :: (store (s32) into %ir.var + 24)
+  SW $x0, renamable $x10, 28 :: (store (s32) into %ir.var + 28)
+  SW $x0, renamable $x10, 32 :: (store (s32) into %ir.var + 32)
+  SW $x0, renamable $x10, 36 :: (store (s32) into %ir.var + 36)
+  SW $x0, renamable $x10, 40 :: (store (s32) into %ir.var + 40)
+  SW $x0, renamable $x10, 44 :: (store (s32) into %ir.var + 44)
+  SW $x0, renamable $x10, 48 :: (store (s32) into %ir.var + 48)
+  SW $x0, renamable $x10, 52 :: (store (s32) into %ir.var + 52)
+  SW $x0, renamable $x10, 56 :: (store (s32) into %ir.var + 56)
+  SW $x0, renamable $x10, 60 :: (store (s32) into %ir.var + 60)
+  SW $x0, renamable $x10, 64 :: (store (s32) into %ir.var + 64)
+  SW $x0, renamable $x10, 68 :: (store (s32) into %ir.var + 68)
+  SW $x0, renamable $x10, 72 :: (store (s32) into %ir.var + 72)
+  SW $x0, renamable $x10, 76 :: (store (s32) into %ir.var + 76)
+  SW $x0, renamable $x10, 80 :: (store (s32) into %ir.var + 80)
+  SW $x0, renamable $x10, 84 :: (store (s32) into %ir.var + 84)
+  SW $x0, renamable $x10, 88 :: (store (s32) into %ir.var + 88)
+  SW $x0, renamable $x10, 92 :: (store (s32) into %ir.var + 92)
+  SW $x0, renamable $x10, 96 :: (store (s32) into %ir.var + 96)
+  SW $x0, renamable $x10, 100 :: (store (s32) into %ir.var + 100)
+  SW $x0, renamable $x10, 104 :: (store (s32) into %ir.var + 104)
+  SW $x0, renamable $x10, 108 :: (store (s32) into %ir.var + 108)
+  SW $x0, renamable $x10, 112 :: (store (s32) into %ir.var + 112)
+  SW $x0, renamable $x10, 116 :: (store (s32) into %ir.var + 116)
+  SW $x0, renamable $x10, 120 :: (store (s32) into %ir.var + 120)
+  SW $x0, killed renamable $x10, 124 :: (store (s32) into %ir.var + 124)
+  SD_RV32 killed $x12_x13, $x10, 0 :: (store (s32) into `ptr poison`, align 8), (store (s32) into `ptr poison` + 4, basealign 8)
+  PseudoRET
+# End machine code for function callee.
+*** Bad machine code: Using an undefined physical register ***
+- function:    callee
+- basic block: %bb.0  (0x55de83f368a0)
+- instruction: SD_RV32 killed $x12_x13, $x10, 0 :: (store (s32) into `ptr poison`, align 8), (store (s32) into `ptr poison` + 4, basealign 8)
+- operand 1:   $x10
+LLVM ERROR: Found 1 machine code errors.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Verify generated machine code&#x27; on function &#x27;@callee&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055de6204779b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055de62044641 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055de6204821b
+3  </pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-gprs.1a12656f61.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs</code></td></tr><tr><td class="l">callee-saved-gprs.46e1402e15.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd -verify-machineinstrs -frame-pointer=all</code></td></tr><tr><td class="l">callee-saved-gprs.b7408afe2f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd -verify-machineinstrs</code></td></tr><tr><td class="l">callee-saved-gprs.fc04408341.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd -target-abi ilp32e -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +73 insts: lshr_16bytes_wordOff (wide-scalar-shift-by-byte-multiple-legalization.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +73 insts: lshr_16bytes_wordOff (wide-scalar-shift-by-byte-multiple-legalization.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4937515a87-20261017-073131.html">explore-4937515a87-20261017-073131</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+73 insts: lshr_16bytes_wordOff (wide-scalar-shift-by-byte-multiple-legalization.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">wide-scalar-shift-by-byte-multiple-legalization.6d7596e10a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span> @lshr_16bytes_wordOff via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4937515a87</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+; Function Attrs: nounwind
+define void @lshr_16bytes_wordOff(ptr %src.ptr, ptr %wordOff.ptr, ptr %dst) #0 {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load i1, ptr @G.3, align 1
+  %src = load i128, ptr %src.ptr, align 1
+  %wordOff = load i128, ptr %wordOff.ptr, align 1
+  %bitOff = shl i128 %wordOff, 5
+  %res = lshr i128 %src, %bitOff
+  %C = icmp ne i1 false, %LGV
+  store i128 %res, ptr %dst, align 1
+  store i1 %C, ptr %A, align 1
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,92 +1,185 @@
+<span class="del">-addi sp, sp, -48</span>
+<span class="del">-lui a3, %hi(G.3)</span>
+<span class="add">+addi sp, sp, -16</span>
+<span class="add">+sw s0, 12(sp)</span>
+<span class="add">+sw s1, 8(sp)</span>
+<span class="add">+sw s2, 4(sp)</span>
+<span class="add">+lbu a5, 0(a0)</span>
+ lbu a4, 1(a0)
+<span class="del">-lbu a5, 0(a0)</span>
+<span class="del">-lbu a6, 2(a0)</span>
+<span class="add">+lbu a3, 2(a0)</span>
+ lbu a7, 3(a0)
+<span class="del">-slli a4, a4, 8</span>
+<span class="add">+lbu a6, 4(a0)</span>
+ lbu t0, 5(a0)
+<span class="del">-lbu t1, 6(a0)</span>
+<span class="del">-lbu t2, 7(a0)</span>
+<span class="del">-lbu t3, 4(a0)</span>
+<span class="del">-or a4, a4, a5</span>
+<span class="del">-slli a6, a6, 16</span>
+<span class="del">-slli a7, a7, 24</span>
+<span class="del">-or a5, a7, a6</span>
+<span class="del">-slli t0, t0, 8</span>
+<span class="add">+lbu t1, 7(a0)</span>
+<span class="add">+lbu t2, 6(a0)</span>
+<span class="add">+lbu t4, 11(a0)</span>
+<span class="add">+lbu t5, 9(a0)</span>
+<span class="add">+lbu t6, 10(a0)</span>
+<span class="add">+lbu s0, 8(a0)</span>
+<span class="add">+slli a7, a7, 8</span>
+<span class="add">+or t3, a7, a3</span>
+<span class="add">+slli t1, t1, 8</span>
+<span class="add">+or t1, t1, t2</span>
+<span class="add">+slli t4, t4, 8</span>
+<span class="add">+slli t5, t5, 8</span>
+<span class="add">+or a3, t4, t6</span>
+<span class="add">+or a7, t5, s0</span>
+<span class="add">+slli a3, a3, 16</span>
+<span class="add">+lbu t2, 12(a0)</span>
+<span class="add">+lbu t4, 13(a0)</span>
+<span class="add">+lbu t5, 14(a0)</span>
+<span class="add">+lbu a0, 15(a0)</span>
+<span class="add">+lbu t6, 0(a1)</span>
+<span class="add">+lbu s0, 1(a1)</span>
+<span class="add">+lbu s1, 2(a1)</span>
+<span class="add">+lbu s2, 3(a1)</span>
+<span class="add">+or a3, a3, a7</span>
+<span class="add">+slli t4, t4, 8</span>
+<span class="add">+or a7, t4, t2</span>
+<span class="add">+slli a0, a0, 8</span>
+<span class="add">+or t2, a0, t5</span>
+<span class="add">+slli a1, a4, 8</span>
+<span class="add">+slli a0, t0, 8</span>
+<span class="add">+slli s2, s2, 8</span>
+<span class="add">+slli s0, s0, 8</span>
+<span class="add">+or a4, s2, s1</span>
+<span class="add">+or t0, s0, t6</span>
+<span class="add">+slli a4, a4, 16</span>
+<span class="add">+slli t2, t2, 16</span>
+<span class="add">+or a4, a4, t0</span>
+<span class="add">+or a7, t2, a7</span>
+<span class="add">+slli a4, a4, 5</span>
+<span class="add">+li t0, 32</span>
+<span class="add">+neg t4, a4</span>
+<span class="add">+srl t2, a3, a4</span>
+<span class="add">+sll t5, a7, t4</span>
+<span class="add">+bltu a4, t0, .L0</span>
+<span class="add">+srl t6, a7, a4</span>
+<span class="add">+j .L1</span>
+<span class="add">+.L0:</span>
+<span class="add">+or t6, t2, t5</span>
+<span class="add">+.L1:</span>
+<span class="add">+or a1, a1, a5</span>
+<span class="add">+slli t3, t3, 16</span>
+<span class="add">+or a5, a0, a6</span>
+ slli t1, t1, 16
+<span class="del">-slli t2, t2, 24</span>
+<span class="del">-lbu a6, 8(a0)</span>
+<span class="del">-lbu a7, 9(a0)</span>
+<span class="del">-or t0, t0, t3</span>
+<span class="del">-or t1, t2, t1</span>
+<span class="del">-or a4, a5, a4</span>
+<span class="del">-or a5, t1, t0</span>
+<span class="del">-lbu t0, 10(a0)</span>
+<span class="del">-lbu t1, 11(a0)</span>
+<span class="del">-slli a7, a7, 8</span>
+<span class="del">-lbu t2, 13(a0)</span>
+<span class="del">-or a6, a7, a6</span>
+<span class="del">-lbu a7, 12(a0)</span>
+<span class="del">-lbu t3, 14(a0)</span>
+<span class="del">-lbu a0, 15(a0)</span>
+<span class="del">-slli t0, t0, 16</span>
+<span class="del">-slli t1, t1, 24</span>
+<span class="del">-or t0, t1, t0</span>
+<span class="del">-slli t2, t2, 8</span>
+<span class="del">-or a7, t2, a7</span>
+<span class="del">-lbu a1, 0(a1)</span>
+<span class="del">-slli t3, t3, 16</span>
+<span class="del">-slli a0, a0, 24</span>
+<span class="del">-or t1, a0, t3</span>
+<span class="del">-lbu a0, %lo(G.3)(a3)</span>
+<span class="del">-or a3, t0, a6</span>
+<span class="del">-or a6, t1, a7</span>
+<span class="del">-slli a1, a1, 2</span>
+<span class="del">-sw zero, 24(sp)</span>
+<span class="del">-sw zero, 28(sp)</span>
+<span class="del">-sw zero, 32(sp)</span>
+<span class="del">-sw zero, 36(sp)</span>
+<span class="del">-andi a1, a1, 12</span>
+<span class="del">-addi a7, sp, 8</span>
+<span class="del">-sw a4, 8(sp)</span>
+<span class="del">-sw a5, 12(sp)</span>
+<span class="del">-sw a3, 16(sp)</span>
+<span class="del">-sw a6, 20(sp)</span>
+<span class="del">-add a1, a7, a1</span>
+<span class="del">-lw a3, 8(a1)</span>
+<span class="del">-lw a4, 4(a1)</span>
+<span class="del">-lw a5, 0(a1)</span>
+<span class="del">-lw a1, 12(a1)</span>
+<span class="del">-srli a6, a3, 16</span>
+<span class="del">-srli a7, a3, 24</span>
+<span class="del">-srli t0, a3, 8</span>
+<span class="del">-sb a3, 8(a2)</span>
+<span class="del">-sb t0, 9(a2)</span>
+<span class="del">-sb a6, 10(a2)</span>
+<span class="add">+mv a0, a3</span>
+<span class="add">+beqz a4, .L2</span>
+<span class="add">+mv a0, t6</span>
+<span class="add">+.L2:</span>
+<span class="add">+or a6, t3, a1</span>
+<span class="add">+or a5, t1, a5</span>
+<span class="add">+bltu a4, t0, .L3</span>
+<span class="add">+li a1, 0</span>
+<span class="add">+srl t6, a5, a4</span>
+<span class="add">+j .L4</span>
+<span class="add">+.L3:</span>
+<span class="add">+srl t1, a6, a4</span>
+<span class="add">+sll t3, a5, t4</span>
+<span class="add">+srl a1, a7, a4</span>
+<span class="add">+or t6, t1, t3</span>
+<span class="add">+.L4:</span>
+<span class="add">+li t1, 64</span>
+<span class="add">+mv t3, a6</span>
+<span class="add">+beqz a4, .L5</span>
+<span class="add">+mv t3, t6</span>
+<span class="add">+.L5:</span>
+<span class="add">+sub s0, t1, a4</span>
+<span class="add">+bltu a4, t0, .L6</span>
+<span class="add">+li t6, 0</span>
+<span class="add">+bgeu s0, t0, .L7</span>
+<span class="add">+.L8:</span>
+<span class="add">+neg s1, s0</span>
+<span class="add">+srl s1, a3, s1</span>
+<span class="add">+sll t4, a3, t4</span>
+<span class="add">+or s2, s1, t5</span>
+<span class="add">+j .L9</span>
+<span class="add">+.L6:</span>
+<span class="add">+srl t6, a5, a4</span>
+<span class="add">+bltu s0, t0, .L8</span>
+<span class="add">+.L7:</span>
+<span class="add">+li t4, 0</span>
+<span class="add">+sll s2, a3, s0</span>
+<span class="add">+.L9:</span>
+<span class="add">+addi s1, a4, -64</span>
+<span class="add">+mv t5, a7</span>
+<span class="add">+beqz s0, .L10</span>
+<span class="add">+mv t5, s2</span>
+<span class="add">+.L10:</span>
+<span class="add">+bltu s1, t0, .L11</span>
+<span class="add">+srl t2, a7, s1</span>
+<span class="add">+bnez s1, .L12</span>
+<span class="add">+j .L13</span>
+<span class="add">+.L11:</span>
+<span class="add">+neg s0, s1</span>
+<span class="add">+sll s0, a7, s0</span>
+<span class="add">+or t2, t2, s0</span>
+<span class="add">+beqz s1, .L13</span>
+<span class="add">+.L12:</span>
+<span class="add">+mv a3, t2</span>
+<span class="add">+.L13:</span>
+<span class="add">+bltu s1, t0, .L14</span>
+<span class="add">+li t0, 0</span>
+<span class="add">+lui a7, %hi(G.3)</span>
+<span class="add">+bltu a4, t1, .L15</span>
+<span class="add">+j .L16</span>
+<span class="add">+.L14:</span>
+<span class="add">+srl t0, a7, a4</span>
+<span class="add">+lui a7, %hi(G.3)</span>
+<span class="add">+bgeu a4, t1, .L16</span>
+<span class="add">+.L15:</span>
+<span class="add">+or a3, t3, t4</span>
+<span class="add">+or t0, t6, t5</span>
+<span class="add">+.L16:</span>
+<span class="add">+bnez a4, .L17</span>
+<span class="add">+lbu a3, %lo(G.3)(a7)</span>
+<span class="add">+bltu a4, t1, .L18</span>
+<span class="add">+.L19:</span>
+<span class="add">+li a0, 0</span>
+<span class="add">+li a1, 0</span>
+<span class="add">+.L18:</span>
+<span class="add">+lui a4, 16</span>
+<span class="add">+addi a4, a4, -1</span>
+<span class="add">+srli a7, a6, 16</span>
+<span class="add">+and t0, a6, a4</span>
+<span class="add">+srli t1, a6, 24</span>
+<span class="add">+srli t0, t0, 8</span>
+<span class="add">+sb a6, 0(a2)</span>
+<span class="add">+sb t0, 1(a2)</span>
+<span class="add">+sb a7, 2(a2)</span>
+<span class="add">+sb t1, 3(a2)</span>
+<span class="add">+srli a6, a5, 16</span>
+<span class="add">+and a7, a5, a4</span>
+<span class="add">+srli a7, a7, 8</span>
+<span class="add">+srli t0, a5, 24</span>
+<span class="add">+sb a5, 4(a2)</span>
+<span class="add">+sb a7, 5(a2)</span>
+<span class="add">+sb a6, 6(a2)</span>
+<span class="add">+sb t0, 7(a2)</span>
+<span class="add">+srli a5, a0, 16</span>
+<span class="add">+and a6, a0, a4</span>
+<span class="add">+srli a6, a6, 8</span>
+<span class="add">+srli a7, a0, 24</span>
+<span class="add">+sb a0, 8(a2)</span>
+<span class="add">+sb a6, 9(a2)</span>
+<span class="add">+sb a5, 10(a2)</span>
+ sb a7, 11(a2)
+<span class="del">-srli a3, a1, 16</span>
+<span class="del">-srli a6, a1, 24</span>
+<span class="del">-srli a7, a1, 8</span>
+<span class="add">+srli a0, a1, 16</span>
+<span class="add">+and a4, a1, a4</span>
+<span class="add">+srli a4, a4, 8</span>
+<span class="add">+srli a5, a1, 24</span>
+<span class="add">+andi a3, a3, 1</span>
+ sb a1, 12(a2)
+<span class="del">-sb a7, 13(a2)</span>
+<span class="del">-sb a3, 14(a2)</span>
+<span class="del">-sb a6, 15(a2)</span>
+<span class="del">-srli a1, a5, 16</span>
+<span class="del">-srli a3, a5, 24</span>
+<span class="del">-srli a6, a5, 8</span>
+<span class="del">-sb a5, 0(a2)</span>
+<span class="del">-sb a6, 1(a2)</span>
+<span class="del">-sb a1, 2(a2)</span>
+<span class="del">-sb a3, 3(a2)</span>
+<span class="del">-srli a1, a4, 16</span>
+<span class="del">-srli a3, a4, 24</span>
+<span class="del">-srli a5, a4, 8</span>
+<span class="del">-andi a0, a0, 1</span>
+<span class="del">-sb a4, 4(a2)</span>
+<span class="del">-sb a5, 5(a2)</span>
+<span class="del">-sb a1, 6(a2)</span>
+<span class="del">-sb a3, 7(a2)</span>
+<span class="del">-sb a0, 47(sp)</span>
+<span class="del">-addi sp, sp, 48</span>
+<span class="add">+sb a4, 13(a2)</span>
+<span class="add">+sb a0, 14(a2)</span>
+<span class="add">+sb a5, 15(a2)</span>
+<span class="add">+sb a3, 3(sp)</span>
+<span class="add">+lw s0, 12(sp)</span>
+<span class="add">+lw s1, 8(sp)</span>
+<span class="add">+lw s2, 4(sp)</span>
+<span class="add">+addi sp, sp, 16</span>
+ ret
+<span class="add">+.L17:</span>
+<span class="add">+mv a6, a3</span>
+<span class="add">+mv a5, t0</span>
+<span class="add">+lbu a3, %lo(G.3)(a7)</span>
+<span class="add">+bgeu a4, t1, .L19</span>
+<span class="add">+j .L18</span></pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.6d7596e10a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_16bytes_wordOff</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fmul bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fmul bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-bc8218b282-20261015-075519.html">explore-bc8218b282-20261015-075519</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fmul bfloat <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">bf16-promote.6ffc6d614b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/bf16-promote.ll">bf16-promote.ll</a><span class="dim">)</span> @test_fpextend_float via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -target-abi=ilp32d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global bfloat
+
+; Function Attrs: nounwind
+define float @test_fpextend_float(ptr %p) #0 {
+  %LGV1 = load bfloat, ptr @G.3, align 2
+  %a = load bfloat, ptr %p, align 2
+  %B = fmul bfloat %a, %LGV1
+  %r = fpext bfloat %a to float
+  store bfloat %B, ptr @G.3, align 2
+  ret float %r
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+d -target-abi=ilp32d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+d -target-abi=ilp32d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fmul: &#x27;  %B = fmul bfloat %a, %LGV1&#x27; (in function: test_fpextend_float)
+warning: Instruction selection used fallback path for test_fpextend_float</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bf16-promote.6ffc6d614b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/bf16-promote.ll">bf16-promote.ll</a><span class="dim">)</span></td><td class="l">test_fpextend_float</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -target-abi=ilp32d</code></td></tr><tr><td class="l">bf16-promote.9d8eef37c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/bf16-promote.ll">bf16-promote.ll</a><span class="dim">)</span></td><td class="l">test_fpextend_float</td><td class="l"><code>-mtriple=riscv64 -mattr=+d -target-abi=lp64d</code></td></tr><tr><td class="l">rv32p.d98b167086.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/rv32p.ll">rv32p.ll</a><span class="dim">)</span></td><td class="l">mm_sati_1_i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+zbb,+m -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

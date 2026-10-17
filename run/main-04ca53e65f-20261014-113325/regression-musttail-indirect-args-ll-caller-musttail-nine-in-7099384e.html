@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +124 insts: caller_musttail_nine_indirect_swap_first_last (musttail-indirect-args.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +124 insts: caller_musttail_nine_indirect_swap_first_last (musttail-indirect-args.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-04ca53e65f-20261014-113325.html">main-04ca53e65f-20261014-113325</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+124 insts: caller_musttail_nine_indirect_swap_first_last (musttail-indirect-args.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a> @caller_musttail_nine_indirect_swap_first_last via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare void @callee_musttail_nine_indirect(fp128, fp128, fp128, fp128, fp128, fp128, fp128, fp128, fp128)
+
+; Function Attrs: nounwind
+define void @caller_musttail_nine_indirect_swap_first_last(fp128 %a, fp128 %b, fp128 %c, fp128 %d, fp128 %e, fp128 %f, fp128 %g, fp128 %h, fp128 %i) #0 {
+  musttail call void @callee_musttail_nine_indirect(fp128 %i, fp128 %b, fp128 %c, fp128 %d, fp128 %e, fp128 %f, fp128 %g, fp128 %h, fp128 %a)
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,5 +1,129 @@
+<span class="del">-lw t0, 0(sp)</span>
+<span class="del">-mv t1, a0</span>
+<span class="del">-mv a0, t0</span>
+<span class="del">-sw t1, 0(sp)</span>
+<span class="del">-tail callee_musttail_nine_indirect</span>
+<span class="add">+addi sp, sp, -1264</span>
+<span class="add">+sw ra, 1260(sp)</span>
+<span class="add">+sw s0, 1256(sp)</span>
+<span class="add">+sw s1, 1252(sp)</span>
+<span class="add">+sw s2, 1248(sp)</span>
+<span class="add">+sw s3, 1244(sp)</span>
+<span class="add">+sw s4, 1240(sp)</span>
+<span class="add">+sw s5, 1236(sp)</span>
+<span class="add">+sw s6, 1232(sp)</span>
+<span class="add">+sw s7, 1228(sp)</span>
+<span class="add">+sw s8, 1224(sp)</span>
+<span class="add">+sw s9, 1220(sp)</span>
+<span class="add">+sw s10, 1216(sp)</span>
+<span class="add">+sw s11, 1212(sp)</span>
+<span class="add">+lw t0, 0(a0)</span>
+<span class="add">+sw t0, 44(sp)</span>
+<span class="add">+lw t0, 4(a0)</span>
+<span class="add">+sw t0, 40(sp)</span>
+<span class="add">+lw t0, 8(a0)</span>
+<span class="add">+sw t0, 36(sp)</span>
+<span class="add">+lw a0, 12(a0)</span>
+<span class="add">+sw a0, 32(sp)</span>
+<span class="add">+lw a0, 0(a1)</span>
+<span class="add">+sw a0, 20(sp)</span>
+<span class="add">+lw t4, 4(a1)</span>
+<span class="add">+lw t5, 8(a1)</span>
+<span class="add">+lw a0, 12(a1)</span>
+<span class="add">+sw a0, 16(sp)</span>
+<span class="add">+lw t6, 0(a2)</span>
+<span class="add">+lw s0, 4(a2)</span>
+<span class="add">+lw s1, 8(a2)</span>
+<span class="add">+lw t2, 12(a2)</span>
+<span class="add">+lw s2, 0(a3)</span>
+<span class="add">+lw s3, 4(a3)</span>
+<span class="add">+lw s4, 8(a3)</span>
+<span class="add">+lw t3, 12(a3)</span>
+<span class="add">+lw s5, 0(a4)</span>
+<span class="add">+lw s6, 4(a4)</span>
+<span class="add">+lw s7, 8(a4)</span>
+<span class="add">+lw a0, 12(a4)</span>
+<span class="add">+sw a0, 24(sp)</span>
+<span class="add">+lw s8, 0(a5)</span>
+<span class="add">+lw s9, 4(a5)</span>
+<span class="add">+lw s10, 8(a5)</span>
+<span class="add">+lw a0, 12(a5)</span>
+<span class="add">+sw a0, 28(sp)</span>
+<span class="add">+lw s11, 1264(sp)</span>
+<span class="add">+lw ra, 0(a6)</span>
+<span class="add">+lw a4, 4(a6)</span>
+<span class="add">+lw a3, 8(a6)</span>
+<span class="add">+lw a6, 12(a6)</span>
+<span class="add">+lw a5, 0(a7)</span>
+<span class="add">+lw t0, 4(a7)</span>
+<span class="add">+lw t1, 8(a7)</span>
+<span class="add">+lw a7, 12(a7)</span>
+<span class="add">+lw a0, 0(s11)</span>
+<span class="add">+lw a1, 4(s11)</span>
+<span class="add">+lw a2, 8(s11)</span>
+<span class="add">+lw s11, 12(s11)</span>
+<span class="add">+sw a0, 1072(sp)</span>
+<span class="add">+sw a1, 1076(sp)</span>
+<span class="add">+sw a2, 1080(sp)</span>
+<span class="add">+sw s11, 1084(sp)</span>
+<span class="add">+lw a0, 20(sp)</span>
+<span class="add">+sw a0, 944(sp)</span>
+<span class="add">+sw t4, 948(sp)</span>
+<span class="add">+sw t5, 952(sp)</span>
+<span class="add">+lw a0, 16(sp)</span>
+<span class="add">+sw a0, 956(sp)</span>
+<span class="add">+sw t6, 816(sp)</span>
+<span class="add">+sw s0, 820(sp)</span>
+<span class="add">+sw s1, 824(sp)</span>
+<span class="add">+sw t2, 828(sp)</span>
+<span class="add">+sw s2, 688(sp)</span>
+<span class="add">+sw s3, 692(sp)</span>
+<span class="add">+sw s4, 696(sp)</span>
+<span class="add">+sw t3, 700(sp)</span>
+<span class="add">+sw s5, 560(sp)</span>
+<span class="add">+sw s6, 564(sp)</span>
+<span class="add">+sw s7, 568(sp)</span>
+<span class="add">+lw a0, 24(sp)</span>
+<span class="add">+sw a0, 572(sp)</span>
+<span class="add">+sw s8, 432(sp)</span>
+<span class="add">+sw s9, 436(sp)</span>
+<span class="add">+sw s10, 440(sp)</span>
+<span class="add">+lw a0, 28(sp)</span>
+<span class="add">+sw a0, 444(sp)</span>
+<span class="add">+sw ra, 304(sp)</span>
+<span class="add">+sw a4, 308(sp)</span>
+<span class="add">+sw a3, 312(sp)</span>
+<span class="add">+sw a6, 316(sp)</span>
+<span class="add">+sw a5, 176(sp)</span>
+<span class="add">+sw t0, 180(sp)</span>
+<span class="add">+sw t1, 184(sp)</span>
+<span class="add">+sw a7, 188(sp)</span>
+<span class="add">+addi t0, sp, 48</span>
+<span class="add">+addi a0, sp, 1072</span>
+<span class="add">+addi a1, sp, 944</span>
+<span class="add">+addi a2, sp, 816</span>
+<span class="add">+addi a3, sp, 688</span>
+<span class="add">+addi a4, sp, 560</span>
+<span class="add">+addi a5, sp, 432</span>
+<span class="add">+addi a6, sp, 304</span>
+<span class="add">+addi a7, sp, 176</span>
+<span class="add">+lw t1, 44(sp)</span>
+<span class="add">+sw t1, 48(sp)</span>
+<span class="add">+lw t1, 40(sp)</span>
+<span class="add">+sw t1, 52(sp)</span>
+<span class="add">+lw t1, 36(sp)</span>
+<span class="add">+sw t1, 56(sp)</span>
+<span class="add">+lw t1, 32(sp)</span>
+<span class="add">+sw t1, 60(sp)</span>
+<span class="add">+sw t0, 0(sp)</span>
+<span class="add">+call callee_musttail_nine_indirect</span>
+<span class="add">+lw ra, 1260(sp)</span>
+<span class="add">+lw s0, 1256(sp)</span>
+<span class="add">+lw s1, 1252(sp)</span>
+<span class="add">+lw s2, 1248(sp)</span>
+<span class="add">+lw s3, 1244(sp)</span>
+<span class="add">+lw s4, 1240(sp)</span>
+<span class="add">+lw s5, 1236(sp)</span>
+<span class="add">+lw s6, 1232(sp)</span>
+<span class="add">+lw s7, 1228(sp)</span>
+<span class="add">+lw s8, 1224(sp)</span>
+<span class="add">+lw s9, 1220(sp)</span>
+<span class="add">+lw s10, 1216(sp)</span>
+<span class="add">+lw s11, 1212(sp)</span>
+<span class="add">+addi sp, sp, 1264</span>
+<span class="add">+ret</span></pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a></td><td class="l">caller_musttail_nine_indirect_swap_first_last</td><td class="l"><code>-mtriple=riscv32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

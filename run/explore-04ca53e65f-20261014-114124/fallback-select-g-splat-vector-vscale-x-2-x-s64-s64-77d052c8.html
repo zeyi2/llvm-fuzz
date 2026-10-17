@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_SPLAT_VECTOR &lt;vscale x 2 x s64&gt;,s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_SPLAT_VECTOR &lt;vscale x 2 x s64&gt;,s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_SPLAT_VECTOR &lt;vscale x 2 x s64&gt;,s64 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">nontemporal-scalable.444e0302db.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a><span class="dim">)</span> @test_nontemporal_P1_load_nxv2i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 2 x i64&gt; @test_nontemporal_P1_load_nxv2i64(ptr %p) {
+  %A = alloca &lt;vscale x 2 x i64&gt;, align 16
+  store &lt;vscale x 2 x i64&gt; poison, ptr %A, align 16
+  %1 = load &lt;vscale x 2 x i64&gt;, ptr %p, align 16, !nontemporal !0, !riscv-nontemporal-domain !1
+  %B = sub &lt;vscale x 2 x i64&gt; %1, splat (i64 -9223372036854775808)
+  store &lt;vscale x 2 x i64&gt; %B, ptr %A, align 16
+  ret &lt;vscale x 2 x i64&gt; %1
+}
+
+!0 = !{i32 1}
+!1 = !{i32 2}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %4:vrm2(&lt;vscale x 2 x s64&gt;) = G_SPLAT_VECTOR %6:fprb(s64) (in function: test_nontemporal_P1_load_nxv2i64)
+warning: Instruction selection used fallback path for test_nontemporal_P1_load_nxv2i64</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nontemporal-scalable.444e0302db.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_P1_load_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l">nontemporal-scalable.5664244911.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_P1_load_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

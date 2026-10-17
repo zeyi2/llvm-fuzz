@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.masked.store.nxv2i64.p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.masked.store.nxv2i64.p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-04ca53e65f-20261014-105623.html">main-04ca53e65f-20261014-105623</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.masked.store.nxv2i64.p0</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">12 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a> @test_nontemporal_masked_store_nxv2i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test_nontemporal_masked_store_nxv2i64(ptr %p, &lt;vscale x 2 x i64&gt; %v, &lt;vscale x 2 x i1&gt; %m) {
+  call void @llvm.masked.store.nxv2i64.p0(&lt;vscale x 2 x i64&gt; %v, ptr align 8 %p, &lt;vscale x 2 x i1&gt; %m), !nontemporal !0
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.masked.store.nxv2i64.p0(&lt;vscale x 2 x i64&gt;, ptr captures(none), &lt;vscale x 2 x i1&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+
+!0 = !{i32 1}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.masked.store.nxv2i64.p0: &#x27;  call void @llvm.masked.store.nxv2i64.p0(&lt;vscale x 2 x i64&gt; %v, ptr align 8 %p, &lt;vscale x 2 x i1&gt; %m), !nontemporal !1&#x27; (in function: test_nontemporal_masked_store_nxv2i64)
+warning: Instruction selection used fallback path for test_nontemporal_masked_store_nxv2i64</pre>
+<h4>Occurrences (12):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_P1_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_PALL_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_S1_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_ALL_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_P1_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_PALL_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_S1_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a></td><td class="l">test_nontemporal_ALL_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l">nontemporal-scalable.35d0a7ddd4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_ALL_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l">nontemporal-scalable.9e6fd973a8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/nontemporal-scalable.ll">nontemporal-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_ALL_masked_store_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

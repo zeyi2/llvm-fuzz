@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (VAs.size() &gt;= 2 &amp;&amp; &quot;Expected at least 2 VAs.&quot;), function int, file RISCVCallLowering.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (VAs.size() &gt;= 2 &amp;&amp; &quot;Expected at least 2 VAs.&quot;), function int, file RISCVCallLowering.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-bc8218b282-20261015-074651.html">main-bc8218b282-20261015-074651</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (VAs.size() &gt;= 2 &amp;&amp; &quot;Expected at least 2 VAs.&quot;), function int, file RISCVCallLowering.cpp</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-bf16.ll">fastcc-bf16.ll</a> @callee via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/PGbW5GG3v">https://godbolt.org/z/PGbW5GG3v</a> (llc-assertions-trunk, checked 2026-10-14 11:03 UTC): <a href="https://godbolt.org/z/PGbW5GG3v">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define fastcc bfloat @callee() {
+  ret bfloat 0.000000e+00
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVCallLowering.cpp:117: virtual unsigned int {anonymous}::RISCVOutgoingValueHandler::assignCustomValue(llvm::CallLowering::ArgInfo&amp;, llvm::ArrayRef&lt;llvm::CCValAssign&gt;, std::function&lt;void()&gt;*): Assertion `VAs.size() &gt;= 2 &amp;&amp; &quot;Expected at least 2 VAs.&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>2</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVCallLowering.cpp:117: virtual unsigned int (anonymous namespace)::RISCVOutgoingValueHandler::assignCustomValue(CallLowering::ArgInfo &amp;, ArrayRef&lt;CCValAssign&gt;, std::function&lt;void ()&gt; *): Assertion `VAs.size() &gt;= 2 &amp;&amp; &quot;Expected at least 2 VAs.&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@callee&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000559cd428154b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000559cd427e3f1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000559cd4281fcb
+3  libc.so.6 0x00007f34f9245330
+4  libc.so.6 0x00007f34f929ec0c pthread_kill + 284
+5  libc.so.6 0x00007f34f924527e gsignal + 30
+6  libc.so.6 0x00007f34f92288ff abort + 223
+7  libc.so.6 0x00007f34f922881b
+8  libc.so.6 0x00007f34f923b517
+9  llc       0x0000559cd549e5b8
+10 llc       0x0000559cd62f0d90 llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 928
+11 llc       0x0000559cd549b42d
+12 llc       0x0000559cd6345eef llvm::IRTranslatorImpl::translateRet(llvm::User const&amp;, llvm::MachineIRBuilder&amp;) + 239
+13 llc       0x0000559cd635d43d llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 4253
+14 llc       0x0000559cd635e42d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+15 llc       0x0000559cd48489ed llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+16 llc       0x0000559cd45d8d37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+17 llc       0x0000559cd45e1232 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+18 llc       0x0000559cd45d9ae0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+19 llc       0x0000559cd4288ba8 llcMain + 12056
+20 llc       0x0000559cd41c36af main + 63
+21 libc.so.6 0x00007f34f922a1ca
+22 libc.so.6 0x00007f34f922a28b __libc_start_main + 139
+23 llc       0x0000559cd41c35a5 _start + 37</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-bf16.ll">fastcc-bf16.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-bf16.be177ed943.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-bf16.ll">fastcc-bf16.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;4 x s16&gt;,&lt;4 x s8&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;4 x s16&gt;,&lt;4 x s8&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-42ac09ceba-20261016-071206.html">main-42ac09ceba-20261016-071206</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;4 x s16&gt;,&lt;4 x s8&gt;,s32</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a> @pwsll_v4i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x i16&gt; @llvm.riscv.pwsll.v4i16.v4i8(&lt;4 x i8&gt;, i32) #0
+
+define &lt;4 x i16&gt; @pwsll_v4i8(&lt;4 x i8&gt; %x, i16 %shamt) {
+  %shamt.ext = zext i16 %shamt to i32
+  %res = call &lt;4 x i16&gt; @llvm.riscv.pwsll.v4i16.v4i8(&lt;4 x i8&gt; %x, i32 %shamt.ext)
+  ret &lt;4 x i16&gt; %res
+}
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(&lt;4 x s16&gt;) = G_INTRINSIC intrinsic(@llvm.riscv.pwsll), %0:_(&lt;4 x s8&gt;), %5:_(s32) (in function: pwsll_v4i8)
+warning: Instruction selection used fallback path for pwsll_v4i8</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a></td><td class="l">pwsll_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a></td><td class="l">pwsla_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a></td><td class="l">pwslli_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a></td><td class="l">pwslai_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a></td><td class="l">pwslli_v4i8_31</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a></td><td class="l">pwslai_v4i8_16</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-widening-shift.22894cabab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a><span class="dim">)</span></td><td class="l">pwsla_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-widening-shift.4065451125.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a><span class="dim">)</span></td><td class="l">pwsla_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-widening-shift.4065451125.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a><span class="dim">)</span></td><td class="l">pwslai_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-widening-shift.a48c5c0b95.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a><span class="dim">)</span></td><td class="l">pwsla_v4i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

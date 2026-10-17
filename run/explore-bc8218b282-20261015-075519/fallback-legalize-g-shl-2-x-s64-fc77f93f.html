@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SHL &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SHL &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-bc8218b282-20261015-075519.html">explore-bc8218b282-20261015-075519</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SHL &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 10 configs, 6 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xtheadmac.7dde5bb482.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span> @commutative2 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadmac -mattr=+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Pxs4M53ns">https://godbolt.org/z/Pxs4M53ns</a> (llc-assertions-trunk, checked 2026-10-15 08:05 UTC): <a href="https://godbolt.org/z/Pxs4M53ns">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i64&gt; @commutative2(&lt;2 x i64&gt; %LGV) {
+  %B1 = shl &lt;2 x i64&gt; splat (i64 1), %LGV
+  ret &lt;2 x i64&gt; %B1
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadmac -mattr=+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>22</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;2 x s64&gt;) = G_SHL %3:_, %0:_(&lt;2 x s64&gt;) (in function: commutative2)<br>warning: Instruction selection used fallback path for commutative2</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadmac -mattr=+m -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>22</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xtheadmac -mattr=+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xtheadmac -mattr=+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;2 x s64&gt;) = G_SHL %3:_, %0:_(&lt;2 x s64&gt;) (in function: commutative2)
+warning: Instruction selection used fallback path for commutative2</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">add-imm64-to-sub.7a2cab2f50.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/add-imm64-to-sub.ll">add-imm64-to-sub.ll</a><span class="dim">)</span></td><td class="l">add_pos_and_neg_const_no_anchor</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbb,+zbs</code></td></tr><tr><td class="l">add-imm64-to-sub.c02ec08409.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/add-imm64-to-sub.ll">add-imm64-to-sub.ll</a><span class="dim">)</span></td><td class="l">add_pos_and_neg_const_no_anchor</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbb</code></td></tr><tr><td class="l">add_shl_constant.6ec1c2971c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/add_shl_constant.ll">add_shl_constant.ll</a><span class="dim">)</span></td><td class="l">add_shl_moreOneUse_inSelect_addexceedsign12</td><td class="l"><code>-mtriple=riscv32 -mattr=+xandesperf</code></td></tr><tr><td class="l">add_shl_constant.b792a1ae71.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/add_shl_constant.ll">add_shl_constant.ll</a><span class="dim">)</span></td><td class="l">add_shl_moreOneUse_inSelect_addexceedsign12</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">add_shl_constant.edb59100e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/add_shl_constant.ll">add_shl_constant.ll</a><span class="dim">)</span></td><td class="l">add_shl_moreOneUse_inSelect_addexceedsign12</td><td class="l"><code>-mtriple=riscv32 -mattr=+zba</code></td></tr><tr><td class="l">shl-demanded.1d1e66562a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/shl-demanded.ll">shl-demanded.ll</a><span class="dim">)</span></td><td class="l">zext_shl_mask_higher</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">shl-demanded.2acf61f503.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/shl-demanded.ll">shl-demanded.ll</a><span class="dim">)</span></td><td class="l">zext_shl_mask_higher</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">simplify-condbr.89d6a12c8e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/simplify-condbr.ll">simplify-condbr.ll</a><span class="dim">)</span></td><td class="l">S_regrepeat</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">xtheadmac.7dde5bb482.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span></td><td class="l">commutative2</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadmac -mattr=+m -verify-machineinstrs</code></td></tr><tr><td class="l">xtheadmac.cd33b9ced6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span></td><td class="l">commutative2</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadmac -mattr=+m -verify-machineinstrs</code></td></tr><tr><td class="l">zdinx-asm-constraint.15f96fb1af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/zdinx-asm-constraint.ll">zdinx-asm-constraint.ll</a><span class="dim">)</span></td><td class="l">zhinx_asm_cr</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinx</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT s16,&lt;2 x s16&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT s16,&lt;2 x s16&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-bc8218b282-20261015-075519.html">explore-bc8218b282-20261015-075519</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT s16,&lt;2 x s16&gt;,s32</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 6 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a> @srl_bitcast_buildvector_extract_last via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i16 @srl_bitcast_buildvector_extract_last(&lt;2 x i16&gt; %v, ptr %p) {
+  %div = sdiv &lt;2 x i16&gt; splat (i16 1), %v
+  store &lt;2 x i16&gt; %div, ptr %p, align 4
+  %e = extractelement &lt;2 x i16&gt; %div, i64 1
+  ret i16 %e
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(s16) = G_EXTRACT_VECTOR_ELT %4:_(&lt;2 x s16&gt;), %6:_(s32) (in function: srl_bitcast_buildvector_extract_last)
+warning: Instruction selection used fallback path for srl_bitcast_buildvector_extract_last</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr><tr><td class="l">fp-fcanonicalize.241c2240d6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,+zfh</code></td></tr><tr><td class="l">fp-fcanonicalize.35e5558d18.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.af7cc6b126.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv32</code></td></tr><tr><td class="l">fp-fcanonicalize.f01c28ecbe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.fd0f4bb1df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,-zfh</code></td></tr><tr><td class="l">rvp-srl-bitcast-bv.4885c5451c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr><tr><td class="l">rvp-srl-bitcast-bv.7ff1ecbc68.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr><tr><td class="l">rvp-srl-bitcast-bv.8bce7177c9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr><tr><td class="l">rvp-srl-bitcast-bv.a5d2cde189.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

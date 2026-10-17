@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +53 insts: fsrd (xtheadfmemidx.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +53 insts: fsrd (xtheadfmemidx.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+53 insts: fsrd (xtheadfmemidx.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xtheadfmemidx.8f2bfd392f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/xtheadfmemidx.ll">xtheadfmemidx.ll</a><span class="dim">)</span> @fsrd via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+xtheadfmemidx -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+
+define void @fsrd(ptr %a, i32 %b, double %c) {
+  %LGV = load i128, ptr @G.1, align 4
+  %1 = fadd double %c, %c
+  %2 = getelementptr double, ptr %a, i32 %b
+  %L = load i128, ptr %2, align 4
+  %B = ashr i128 %LGV, %L
+  store double %1, ptr %2, align 8
+  store i128 %B, ptr poison, align 4
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+d,+xtheadfmemidx -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+d,+xtheadfmemidx -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,50 +1,122 @@
+<span class="del">-addi sp, sp, -32</span>
+<span class="add">+addi sp, sp, -16</span>
+ lui a2, %hi(G.1)
+<span class="del">-addi a2, a2, %lo(G.1)</span>
+<span class="add">+addi a3, a2, %lo(G.1)</span>
+ slli a1, a1, 3
+<span class="add">+lw a6, 0(a3)</span>
+<span class="add">+lw t2, 4(a3)</span>
+ add a0, a0, a1
+<span class="del">-lw a1, 0(a2)</span>
+<span class="del">-lw a3, 4(a2)</span>
+<span class="del">-lw a4, 8(a2)</span>
+<span class="del">-lw a2, 12(a2)</span>
+<span class="del">-lw a5, 0(a0)</span>
+<span class="del">-sw a1, 0(sp)</span>
+<span class="del">-sw a3, 4(sp)</span>
+<span class="del">-sw a4, 8(sp)</span>
+<span class="del">-sw a2, 12(sp)</span>
+<span class="del">-srli a1, a5, 3</span>
+<span class="del">-srai a2, a2, 31</span>
+<span class="del">-andi a1, a1, 12</span>
+<span class="del">-mv a3, sp</span>
+<span class="del">-sw a2, 16(sp)</span>
+<span class="del">-sw a2, 20(sp)</span>
+<span class="del">-sw a2, 24(sp)</span>
+<span class="del">-sw a2, 28(sp)</span>
+<span class="del">-add a1, a3, a1</span>
+<span class="del">-lw a2, 4(a1)</span>
+<span class="del">-lw a3, 0(a1)</span>
+<span class="del">-andi a4, a5, 31</span>
+<span class="del">-lw a6, 8(a1)</span>
+<span class="del">-lw a1, 12(a1)</span>
+<span class="del">-xori a4, a4, 31</span>
+<span class="del">-slli a7, a2, 1</span>
+<span class="del">-srl a3, a3, a5</span>
+<span class="del">-sll a7, a7, a4</span>
+<span class="del">-fadd.d fa5, fa0, fa0</span>
+<span class="del">-or a3, a3, a7</span>
+<span class="del">-slli a7, a6, 1</span>
+<span class="del">-slli t0, a1, 1</span>
+<span class="del">-sll a7, a7, a4</span>
+<span class="del">-sll a4, t0, a4</span>
+<span class="del">-srl a2, a2, a5</span>
+<span class="del">-srl a6, a6, a5</span>
+<span class="del">-or a2, a2, a7</span>
+<span class="del">-or a4, a6, a4</span>
+<span class="del">-sra a1, a1, a5</span>
+<span class="del">-fsd fa5, 0(a0)</span>
+<span class="del">-sw a1, 0(a0)</span>
+<span class="del">-sw a4, 0(a0)</span>
+<span class="del">-sw a2, 0(a0)</span>
+<span class="del">-sw a3, 0(a0)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="add">+lw a1, 0(a0)</span>
+<span class="add">+lw a2, 8(a3)</span>
+<span class="add">+lw a3, 12(a3)</span>
+<span class="add">+sw a6, 8(sp)</span>
+<span class="add">+sw t2, 12(sp)</span>
+<span class="add">+li a4, 32</span>
+<span class="add">+neg t0, a1</span>
+<span class="add">+srl a5, a2, a1</span>
+<span class="add">+sll t1, a3, t0</span>
+<span class="add">+bltu a1, a4, .L0</span>
+<span class="add">+sra t3, a3, a1</span>
+<span class="add">+mv a7, a2</span>
+<span class="add">+bnez a1, .L1</span>
+<span class="add">+j .L2</span>
+<span class="add">+.L0:</span>
+<span class="add">+or t3, a5, t1</span>
+<span class="add">+mv a7, a2</span>
+<span class="add">+beqz a1, .L2</span>
+<span class="add">+.L1:</span>
+<span class="add">+mv a7, t3</span>
+<span class="add">+.L2:</span>
+<span class="add">+bltu a1, a4, .L3</span>
+<span class="add">+srai t3, a3, 31</span>
+<span class="add">+j .L4</span>
+<span class="add">+.L3:</span>
+<span class="add">+sra t3, a3, a1</span>
+<span class="add">+.L4:</span>
+<span class="add">+fld fa5, 8(sp)</span>
+<span class="add">+sw a7, 8(sp)</span>
+<span class="add">+sw t3, 12(sp)</span>
+<span class="add">+bltu a1, a4, .L5</span>
+<span class="add">+srl t3, t2, a1</span>
+<span class="add">+li a7, 64</span>
+<span class="add">+bnez a1, .L6</span>
+<span class="add">+j .L7</span>
+<span class="add">+.L5:</span>
+<span class="add">+srl a7, a6, a1</span>
+<span class="add">+sll t3, t2, t0</span>
+<span class="add">+or t3, a7, t3</span>
+<span class="add">+li a7, 64</span>
+<span class="add">+beqz a1, .L7</span>
+<span class="add">+.L6:</span>
+<span class="add">+mv a6, t3</span>
+<span class="add">+.L7:</span>
+<span class="add">+sub t3, a7, a1</span>
+<span class="add">+bltu a1, a4, .L8</span>
+<span class="add">+li t2, 0</span>
+<span class="add">+bgeu t3, a4, .L9</span>
+<span class="add">+.L10:</span>
+<span class="add">+neg t4, t3</span>
+<span class="add">+srl t5, a2, t4</span>
+<span class="add">+sll t4, a2, t0</span>
+<span class="add">+or t1, t5, t1</span>
+<span class="add">+j .L11</span>
+<span class="add">+.L8:</span>
+<span class="add">+srl t2, t2, a1</span>
+<span class="add">+bltu t3, a4, .L10</span>
+<span class="add">+.L9:</span>
+<span class="add">+li t4, 0</span>
+<span class="add">+sll t1, a2, t3</span>
+<span class="add">+.L11:</span>
+<span class="add">+addi t0, a1, -64</span>
+<span class="add">+mv t5, a3</span>
+<span class="add">+beqz t3, .L12</span>
+<span class="add">+mv t5, t1</span>
+<span class="add">+.L12:</span>
+<span class="add">+fld fa4, 8(sp)</span>
+<span class="add">+or a6, a6, t4</span>
+<span class="add">+or t1, t2, t5</span>
+<span class="add">+sw a6, 8(sp)</span>
+<span class="add">+sw t1, 12(sp)</span>
+<span class="add">+fld fa3, 8(sp)</span>
+<span class="add">+srai a6, a3, 31</span>
+<span class="add">+sw a6, 8(sp)</span>
+<span class="add">+sw a6, 12(sp)</span>
+<span class="add">+bltu t0, a4, .L13</span>
+<span class="add">+sra a5, a3, t0</span>
+<span class="add">+bnez t0, .L14</span>
+<span class="add">+j .L15</span>
+<span class="add">+.L13:</span>
+<span class="add">+neg t1, t0</span>
+<span class="add">+sll t1, a3, t1</span>
+<span class="add">+or a5, a5, t1</span>
+<span class="add">+beqz t0, .L15</span>
+<span class="add">+.L14:</span>
+<span class="add">+mv a2, a5</span>
+<span class="add">+.L15:</span>
+<span class="add">+bgeu t0, a4, .L16</span>
+<span class="add">+sra a6, a3, a1</span>
+<span class="add">+.L16:</span>
+<span class="add">+fld fa2, 8(sp)</span>
+<span class="add">+sw a2, 8(sp)</span>
+<span class="add">+sw a6, 12(sp)</span>
+<span class="add">+beqz a1, .L17</span>
+<span class="add">+fmv.d fa5, fa3</span>
+<span class="add">+bltu a1, a7, .L17</span>
+<span class="add">+fld fa5, 8(sp)</span>
+<span class="add">+.L17:</span>
+<span class="add">+fadd.d fa3, fa0, fa0</span>
+<span class="add">+bltu a1, a7, .L18</span>
+<span class="add">+fmv.d fa4, fa2</span>
+<span class="add">+.L18:</span>
+<span class="add">+fsd fa3, 0(a0)</span>
+<span class="add">+fsd fa5, 8(sp)</span>
+<span class="add">+lw a0, 8(sp)</span>
+<span class="add">+lw a1, 12(sp)</span>
+<span class="add">+fsd fa4, 8(sp)</span>
+<span class="add">+lw a2, 8(sp)</span>
+<span class="add">+lw a3, 12(sp)</span>
+<span class="add">+sw a0, 0(a0)</span>
+<span class="add">+sw a1, 4(a0)</span>
+<span class="add">+sw a2, 8(a0)</span>
+<span class="add">+sw a3, 12(a0)</span>
+<span class="add">+addi sp, sp, 16</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">xtheadfmemidx.8f2bfd392f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/xtheadfmemidx.ll">xtheadfmemidx.ll</a><span class="dim">)</span></td><td class="l">fsrd</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+xtheadfmemidx -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,s64,&lt;2 x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,s64,&lt;2 x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;2 x s32&gt;,p0,s64,&lt;2 x s1&gt;,s32</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">target datalayout = &quot;e-m:e-p:64:64-i64:64-i128:128-n32:64-S128&quot;
+target triple = &quot;riscv64-unknown-linux-gnu&quot;
+
+define void @foo() #0 !dbg !4 {
+entry:
+  %i = alloca i64, align 8, !DIAssignID !11
+  %j = alloca i64, align 8, !DIAssignID !12
+  %sar_height.i = getelementptr i8, ptr %i, i64 24
+  store ptr %sar_height.i, ptr null, align 8
+  %vui.i = getelementptr i8, ptr %i, i64 44
+  %0 = load i32, ptr %vui.i, align 4
+  %sar_width.i = getelementptr i8, ptr %i, i64 20
+  %i_sar_width.i = getelementptr i8, ptr %i, i64 48
+  %j_sar_width.j = getelementptr i8, ptr %j, i64 48
+    #dbg_assign(i32 1010, !8, !DIExpression(), !11, ptr %i_sar_width.i, !DIExpression(), !13)
+    #dbg_assign(i32 2121, !10, !DIExpression(), !12, ptr %i_sar_width.i, !DIExpression(), !13)
+  %1 = load &lt;2 x i32&gt;, ptr %sar_width.i, align 4
+  call void @llvm.experimental.vp.strided.store.v2i32.p0.i64(&lt;2 x i32&gt; %1, ptr align 4 %i_sar_width.i, i64 -4, &lt;2 x i1&gt; splat (i1 true), i32 2)
+  call void @llvm.experimental.vp.strided.store.v2i32.p0.i64(&lt;2 x i32&gt; %1, ptr align 4 %j_sar_width.j, i64 -4, &lt;2 x i1&gt; splat (i1 true), i32 2), !DIAssignID !14
+    #dbg_assign(i32 1010, !8, !DIExpression(), !15, ptr %i_sar_width.i, !DIExpression(), !13)
+    #dbg_assign(i32 2121, !10, !DIExpression(), !14, ptr %i_sar_width.i, !DIExpression(), !13)
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.experimental.vp.strided.store.v2i32.p0.i64(&lt;2 x i32&gt;, ptr captures(none), i64, &lt;2 x i1&gt;, i32) #1
+
+attributes #0 = { &quot;target-features&quot;=&quot;+v&quot; }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+
+!llvm.dbg.cu = !{!0}
+!llvm.module.flags = !{!2, !3}
+
+!0 = distinct !DICompileUnit(language: DW_LANG_C11, file: !1, producer: &quot;clang version 21.0.0git&quot;, isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug)
+!1 = !DIFile(filename: &quot;test.c&quot;, directory: &quot;/&quot;)
+!2 = !{i32 2, !&quot;Debug Info Version&quot;, i32 3}
+!3 = !{i32 7, !&quot;debug-info-assignment-tracking&quot;, i1 true}
+!4 = distinct !DISubprogram(name: &quot;foo&quot;, linkageName: &quot;foo&quot;, scope: !1, file: !1, line: 1, type: !5, scopeLine: 1, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !7)
+!5 = !DISubroutineType(types: !6)
+!6 = !{}
+!7 = !{!8, !10}
+!8 = !DILocalVariable(name: &quot;i&quot;, scope: !4, file: !1, line: 7, type: !9)
+!9 = !DIBasicType(name: &quot;int32_t&quot;, size: 32, encoding: DW_ATE_signed)
+!10 = !DILocalVariable(name: &quot;j&quot;, scope: !4, file: !1, line: 7, type: !9)
+!11 = distinct !DIAssignID()
+!12 = distinct !DIAssignID()
+!13 = !DILocation(line: 5, scope: !4)
+!14 = distinct !DIAssignID()
+!15 = distinct !DIAssignID()
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -enable-misched=false -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -enable-misched=false -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.experimental.vp.strided.store), %13:_(&lt;2 x s32&gt;), %12:_(p0), %14:_(s64), %15:_(&lt;2 x s1&gt;), %17:_(s32) (in function: foo)
+warning: Instruction selection used fallback path for foo</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">di-assignment-tracking-vector.9b6ad50672.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">di-assignment-tracking-vector.a8dd8347d0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">di-assignment-tracking-vector.ad29923028.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">di-assignment-tracking-vector.ee78c85cd7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

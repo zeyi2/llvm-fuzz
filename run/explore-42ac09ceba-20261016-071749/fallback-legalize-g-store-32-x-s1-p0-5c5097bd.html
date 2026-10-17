@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE &lt;32 x s1&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE &lt;32 x s1&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-42ac09ceba-20261016-071749.html">explore-42ac09ceba-20261016-071749</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE &lt;32 x s1&gt;,p0 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 8 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-half.8b01e17e98.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-half.ll">fastcc-half.ll</a><span class="dim">)</span> @callee via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 42ac09ceba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/f85hP6ndK">https://godbolt.org/z/f85hP6ndK</a> (llc-assertions-trunk, checked 2026-10-16 07:23 UTC): <a href="https://godbolt.org/z/f85hP6ndK">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define fastcc half @callee() {
+  store &lt;32 x i1&gt; zeroinitializer, ptr null, align 4
+  ret half 0.000000e+00
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>6</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %0:_(&lt;32 x s1&gt;), %2:_(p0) :: (store (&lt;32 x s1&gt;) into `ptr null`) (in function: callee)<br>warning: Instruction selection used fallback path for callee</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>6</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %0:_(&lt;32 x s1&gt;), %2:_(p0) :: (store (&lt;32 x s1&gt;) into `ptr null`) (in function: callee)
+warning: Instruction selection used fallback path for callee</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fastcc-float.22bb288a95.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-float.ll">fastcc-float.ll</a><span class="dim">)</span></td><td class="l">caller</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-float.3c17f74355.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-float.ll">fastcc-float.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-half.8b01e17e98.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-half.ll">fastcc-half.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.08f5d600e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_half_32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.23c8c5201c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_half_32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.4280c6688c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_half_32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.5000cf0c26.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_half_32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.60626f9295.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_half_32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.99cb89ffa4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/42ac09cebaad223f14f4c3052bcd5d6d25be0f3f/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_half_32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

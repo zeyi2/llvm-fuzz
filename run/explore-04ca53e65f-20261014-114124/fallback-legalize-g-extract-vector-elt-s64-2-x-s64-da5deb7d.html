@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">spill-fill-fold.859cff8be2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/spill-fill-fold.ll">spill-fill-fold.ll</a><span class="dim">)</span> @fill_double_to_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;2 x i64&gt;
+@G.3 = external global i16
+
+; Function Attrs: nounwind
+define i64 @fill_double_to_i64(double %a) #0 {
+  %LGV1 = load i16, ptr @G.3, align 2
+  %LGV = load &lt;2 x i64&gt;, ptr @G.2, align 16
+  call void asm sideeffect &quot;&quot;, &quot;~{x0},~{x1},~{x2},~{x3},~{x4},~{x5},~{x6},~{x7},~{x8},~{x9},~{x10},~{x11},~{x12},~{x13},~{x14},~{x15},~{x16},~{x17},~{x18},~{x19},~{x20},~{x21},~{x22},~{x23},~{x24},~{x25},~{x26},~{x27},~{x28},~{x29},~{x30},~{x31},~{f0_d},~{f1_d},~{f2_d},~{f3_d},~{f4_d},~{f5_d},~{f6_d},~{f7_d},~{f8_d},~{f9_d},~{f10_d},~{f11_d},~{f12_d},~{f13_d},~{f14_d},~{f15_d},~{f16_d},~{f17_d},~{f18_d},~{f19_d},~{f20_d},~{f21_d},~{f22_d},~{f23_d},~{f24_d},~{f25_d},~{f26_d},~{f27_d},~{f28_d},~{f29_d},~{f30_d},~{f31_d}&quot;() #0
+  %E = extractelement &lt;2 x i64&gt; %LGV, i16 %LGV1
+  ret i64 %E
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(s64) = G_EXTRACT_VECTOR_ELT %3:_(&lt;2 x s64&gt;), %6:_(s64) (in function: fill_double_to_i64)
+warning: Instruction selection used fallback path for fill_double_to_i64</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">spill-fill-fold.859cff8be2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/spill-fill-fold.ll">spill-fill-fold.ll</a><span class="dim">)</span></td><td class="l">fill_double_to_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +68 insts: test_bitreverse_srli_bitreverse_i64 (bitreverse-shift.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +68 insts: test_bitreverse_srli_bitreverse_i64 (bitreverse-shift.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-bc8218b282-20261015-074651.html">main-bc8218b282-20261015-074651</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+68 insts: test_bitreverse_srli_bitreverse_i64 (bitreverse-shift.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">bitreverse-shift.37c4c0cfe7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/bitreverse-shift.ll">bitreverse-shift.ll</a><span class="dim">)</span> @test_bitreverse_srli_bitreverse_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbkb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i64 @test_bitreverse_srli_bitreverse_i64(i64 %a) #0 {
+  %1 = call i64 @llvm.bitreverse.i64(i64 %a)
+  %B = urem i64 %a, %1
+  %2 = call i64 @llvm.bitreverse.i64(i64 %B)
+  ret i64 %2
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.bitreverse.i64(i64) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zbkb -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zbkb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,14 +1,82 @@
+ addi sp, sp, -16
+ sw ra, 12(sp)
+<span class="del">-rev8 a2, a1</span>
+<span class="del">-rev8 a3, a0</span>
+<span class="del">-brev8 a2, a2</span>
+<span class="del">-brev8 a3, a3</span>
+<span class="add">+sw s0, 8(sp)</span>
+<span class="add">+sw s1, 4(sp)</span>
+<span class="add">+sw s2, 0(sp)</span>
+<span class="add">+lui a2, 986895</span>
+<span class="add">+rev8 a3, a1</span>
+<span class="add">+addi s1, a2, 240</span>
+<span class="add">+and a2, a3, s1</span>
+<span class="add">+slli a3, a3, 4</span>
+<span class="add">+srli a2, a2, 4</span>
+<span class="add">+and a3, a3, s1</span>
+<span class="add">+lui a4, 838861</span>
+<span class="add">+or a2, a2, a3</span>
+<span class="add">+addi s0, a4, -820</span>
+<span class="add">+and a3, a2, s0</span>
+<span class="add">+srli a3, a3, 2</span>
+<span class="add">+slli a2, a2, 2</span>
+<span class="add">+and a2, a2, s0</span>
+<span class="add">+lui a4, 699051</span>
+<span class="add">+or a2, a3, a2</span>
+<span class="add">+addi s2, a4, -1366</span>
+<span class="add">+and a3, a2, s2</span>
+<span class="add">+srli a3, a3, 1</span>
+<span class="add">+rev8 a4, a0</span>
+<span class="add">+and a5, a4, s1</span>
+<span class="add">+slli a4, a4, 4</span>
+<span class="add">+srli a5, a5, 4</span>
+<span class="add">+and a4, a4, s1</span>
+<span class="add">+slli a2, a2, 1</span>
+<span class="add">+or a4, a5, a4</span>
+<span class="add">+and a5, a4, s0</span>
+<span class="add">+slli a4, a4, 2</span>
+<span class="add">+srli a5, a5, 2</span>
+<span class="add">+and a4, a4, s0</span>
+<span class="add">+and a2, a2, s2</span>
+<span class="add">+or a4, a5, a4</span>
+<span class="add">+and a5, a4, s2</span>
+<span class="add">+slli a4, a4, 1</span>
+<span class="add">+srli a5, a5, 1</span>
+<span class="add">+and a4, a4, s2</span>
+<span class="add">+or a2, a3, a2</span>
+<span class="add">+or a3, a5, a4</span>
+ call __umoddi3
+ rev8 a1, a1
+<span class="del">-rev8 a2, a0</span>
+<span class="del">-brev8 a0, a1</span>
+<span class="del">-brev8 a1, a2</span>
+<span class="add">+and a2, a1, s1</span>
+<span class="add">+slli a1, a1, 4</span>
+<span class="add">+srli a2, a2, 4</span>
+<span class="add">+and a1, a1, s1</span>
+<span class="add">+or a1, a2, a1</span>
+<span class="add">+and a2, a1, s0</span>
+<span class="add">+slli a1, a1, 2</span>
+<span class="add">+srli a2, a2, 2</span>
+<span class="add">+and a1, a1, s0</span>
+<span class="add">+rev8 a0, a0</span>
+<span class="add">+or a1, a2, a1</span>
+<span class="add">+and a2, a0, s1</span>
+<span class="add">+slli a0, a0, 4</span>
+<span class="add">+and a0, a0, s1</span>
+<span class="add">+and a3, a1, s2</span>
+<span class="add">+srli a2, a2, 4</span>
+<span class="add">+srli a3, a3, 1</span>
+<span class="add">+slli a1, a1, 1</span>
+<span class="add">+or a0, a2, a0</span>
+<span class="add">+and a2, a0, s0</span>
+<span class="add">+slli a0, a0, 2</span>
+<span class="add">+srli a2, a2, 2</span>
+<span class="add">+and a0, a0, s0</span>
+<span class="add">+and a1, a1, s2</span>
+<span class="add">+or a0, a2, a0</span>
+<span class="add">+and a2, a0, s2</span>
+<span class="add">+slli a0, a0, 1</span>
+<span class="add">+srli a2, a2, 1</span>
+<span class="add">+and a4, a0, s2</span>
+<span class="add">+or a0, a3, a1</span>
+<span class="add">+or a1, a2, a4</span>
+ lw ra, 12(sp)
+<span class="add">+lw s0, 8(sp)</span>
+<span class="add">+lw s1, 4(sp)</span>
+<span class="add">+lw s2, 0(sp)</span>
+ addi sp, sp, 16
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bitreverse-shift.37c4c0cfe7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/bitreverse-shift.ll">bitreverse-shift.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_srli_bitreverse_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbkb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

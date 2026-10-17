@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_SUBVECTOR &lt;vscale x 2 x s1&gt;,&lt;4 x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_SUBVECTOR &lt;vscale x 2 x s1&gt;,&lt;4 x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-04ca53e65f-20261014-105623.html">main-04ca53e65f-20261014-105623</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_SUBVECTOR &lt;vscale x 2 x s1&gt;,&lt;4 x s1&gt;</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a> @vselect_both_nevernan via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i1&gt; @vselect_both_nevernan(&lt;4 x i1&gt; %cond, &lt;4 x float&gt; nofpclass(nan) %a, &lt;4 x float&gt; nofpclass(nan) %b) {
+  %sel = select &lt;4 x i1&gt; %cond, &lt;4 x float&gt; %a, &lt;4 x float&gt; %b
+  %class = call &lt;4 x i1&gt; @llvm.is.fpclass.v4f32(&lt;4 x float&gt; %sel, /* (nan) */ i32 3)
+  ret &lt;4 x i1&gt; %class
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x i1&gt; @llvm.is.fpclass.v4f32(&lt;4 x float&gt;, i32 immarg) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(&lt;vscale x 2 x s1&gt;) = G_INSERT_SUBVECTOR %8:_, %7:_(&lt;4 x s1&gt;), 0 (in function: vselect_both_nevernan)
+warning: Instruction selection used fallback path for vselect_both_nevernan</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">fneg_vec_not_negative</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">fneg_vec_not_positive</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">fneg_vec_unknown_sign</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">insert_subvec_fixed_both_isneg_false</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">insert_subvec_fixed_pos_base_neg_sub_isneg_unknown</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">insert_subvec_fixed_pos_base_pos_sub_isneg_false</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a></td><td class="l">vselect_both_nevernan</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a></td><td class="l">vselect_both_neverzero</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr><tr><td class="l">combine-is_fpclass.6b8ac51c90.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a><span class="dim">)</span></td><td class="l">fneg_vec_not_positive</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l">combine-is_fpclass.9906663158.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a><span class="dim">)</span></td><td class="l">fneg_vec_not_negative</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l">combine-is_fpclass.a8ba19f70f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a><span class="dim">)</span></td><td class="l">insert_subvec_fixed_both_isneg_false</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

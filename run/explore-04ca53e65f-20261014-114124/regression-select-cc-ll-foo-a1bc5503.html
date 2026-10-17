@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +62 insts: foo (select-cc.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +62 insts: foo (select-cc.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+62 insts: foo (select-cc.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">select-cc.ec46212f9a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/select-cc.ll">select-cc.ll</a><span class="dim">)</span> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcicm,+xqcics,+xqcicli,+zca,+short-forward-branch-ialu,+conditional-cmv-fusion -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global double
+@G.1 = external global i1
+
+; Function Attrs: nounwind
+define signext i32 @foo(i32 signext %a, ptr %b) #0 {
+  %LGV = load double, ptr @G, align 8
+  %val1 = load volatile i32, ptr %b, align 4
+  %tst1 = icmp eq i32 %a, %val1
+  %val2 = select i1 %tst1, i32 %a, i32 %val1
+  %val3 = load volatile i32, ptr %b, align 4
+  %tst2 = icmp ne i32 %val2, %val3
+  %val4 = select i1 %tst2, i32 %val2, i32 %val3
+  %val5 = load volatile i32, ptr %b, align 4
+  %tst3 = icmp ugt i32 %val4, %val5
+  %val6 = select i1 %tst3, i32 %val4, i32 %val5
+  %val7 = load volatile i32, ptr %b, align 4
+  %tst4 = icmp uge i32 %val6, %val7
+  %val8 = select i1 %tst4, i32 %val6, i32 %val7
+  %val9 = load volatile i32, ptr %b, align 4
+  %tst5 = icmp ult i32 %val8, %val9
+  %val10 = select i1 %tst5, i32 %val8, i32 %val9
+  %val11 = load volatile i32, ptr %b, align 4
+  %tst6 = icmp ule i32 %val10, %val11
+  %val12 = select i1 %tst6, i32 %val10, i32 %val11
+  %val13 = load volatile i32, ptr %b, align 4
+  %tst7 = icmp sgt i32 %val12, %val13
+  %val14 = select i1 %tst7, i32 %val12, i32 %val13
+  %val15 = load volatile i32, ptr %b, align 4
+  %tst8 = icmp sge i32 %val14, %val15
+  %val16 = select i1 %tst8, i32 %val14, i32 %val15
+  %val17 = load volatile i32, ptr %b, align 4
+  %tst9 = icmp slt i32 %val16, %val17
+  %val18 = select i1 %tst9, i32 %val16, i32 %val17
+  %val19 = load volatile i32, ptr %b, align 4
+  %tst10 = icmp sle i32 %val18, %val19
+  %val20 = select i1 %tst10, i32 %val18, i32 %val19
+  %val21 = load volatile i32, ptr %b, align 4
+  %tst11 = icmp slt i32 %val21, 1
+  %val22 = select i1 %tst11, i32 %val20, i32 %val21
+  %val23 = load volatile i32, ptr %b, align 4
+  %tst12 = icmp sgt i32 %val21, -1
+  %val24 = select i1 %tst12, i32 %val22, i32 %val23
+  %val25 = load volatile i32, ptr %b, align 4
+  %C = fcmp olt double +qnan, %LGV
+  %tst13 = icmp sgt i32 %val25, 1024
+  %val26 = select i1 %tst13, i32 %val24, i32 %val25
+  %val27 = load volatile i32, ptr %b, align 4
+  %tst14 = icmp ugt i32 %val21, 2046
+  %val28 = select i1 %tst14, i32 %val26, i32 %val27
+  store i1 %C, ptr @G.1, align 1
+  ret i32 %val28
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xqcicm,+xqcics,+xqcicli,+zca,+short-forward-branch-ialu,+conditional-cmv-fusion -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xqcicm,+xqcics,+xqcicli,+zca,+short-forward-branch-ialu,+conditional-cmv-fusion -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,35 +1,118 @@
+<span class="del">-lw a2, 0(a1)</span>
+<span class="del">-lw a3, 0(a1)</span>
+<span class="add">+addi sp, sp, -32</span>
+<span class="add">+sw ra, 28(sp)</span>
+<span class="add">+sw s0, 24(sp)</span>
+<span class="add">+sw s1, 20(sp)</span>
+<span class="add">+sw s2, 16(sp)</span>
+<span class="add">+sw s3, 12(sp)</span>
+<span class="add">+sw s4, 8(sp)</span>
+<span class="add">+sw s5, 4(sp)</span>
+<span class="add">+sw s6, 0(sp)</span>
+<span class="add">+mv s0, a1</span>
+<span class="add">+lui a1, %hi(G)</span>
+<span class="add">+addi a1, a1, %lo(G)</span>
+ lw a4, 0(a1)
+<span class="del">-lw a5, 0(a1)</span>
+<span class="del">-lw a6, 0(a1)</span>
+<span class="del">-lw a7, 0(a1)</span>
+<span class="del">-lw t0, 0(a1)</span>
+<span class="del">-lw t1, 0(a1)</span>
+<span class="del">-qc.mvne a0, a0, a2, a2</span>
+<span class="del">-qc.mveq a0, a0, a3, a3</span>
+<span class="del">-qc.mvgeu a0, a4, a0, a4</span>
+<span class="del">-qc.mvltu a0, a0, a5, a5</span>
+<span class="del">-qc.mvgeu a0, a0, a6, a6</span>
+<span class="del">-lw a2, 0(a1)</span>
+<span class="del">-qc.mvltu a0, a7, a0, a7</span>
+<span class="del">-lw a3, 0(a1)</span>
+<span class="del">-qc.mvge a0, t0, a0, t0</span>
+<span class="del">-lw a4, 0(a1)</span>
+<span class="del">-qc.mvlt a0, a0, t1, t1</span>
+<span class="del">-lw a5, 0(a1)</span>
+<span class="del">-qc.mvge a0, a0, a2, a2</span>
+<span class="del">-lw a2, 0(a1)</span>
+<span class="del">-qc.mvlt a0, a3, a0, a3</span>
+<span class="del">-lw a1, 0(a1)</span>
+<span class="del">-blez a4, .L0</span>
+<span class="add">+lw a1, 4(a1)</span>
+<span class="add">+lw a2, 0(s0)</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+bne a0, a2, .L0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+beq s1, a0, .L1</span>
+<span class="add">+.L2:</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bgeu a0, s1, .L3</span>
+<span class="add">+.L4:</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bgeu a0, s1, .L5</span>
+<span class="add">+.L6:</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bgeu s1, a0, .L7</span>
+<span class="add">+.L8:</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bgeu s1, a0, .L9</span>
+<span class="add">+.L10:</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bge a0, s1, .L11</span>
+<span class="add">+.L12:</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bge a0, s1, .L13</span>
+<span class="add">+.L14:</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+blt s1, a0, .L15</span>
+<span class="add">+.L16:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+.L15:</span>
+<span class="add">+lw a2, 0(s0)</span>
+<span class="add">+lui a0, %hi(.L17)</span>
+<span class="add">+blt s1, a2, .L18</span>
+<span class="add">+mv s1, a2</span>
+<span class="add">+.L18:</span>
+<span class="add">+lw s2, 0(s0)</span>
+<span class="add">+addi a0, a0, %lo(.L17)</span>
+<span class="add">+blez s2, .L19</span>
+<span class="add">+mv s1, s2</span>
+<span class="add">+.L19:</span>
+<span class="add">+lw a2, 0(a0)</span>
+<span class="add">+lw a3, 4(a0)</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+li s4, 1024</span>
+<span class="add">+bgez s2, .L20</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+.L20:</span>
+<span class="add">+lw s6, 0(s0)</span>
+<span class="add">+lui s3, %hi(G.1)</span>
+<span class="add">+li s5, 2046</span>
+ mv a0, a4
+<span class="add">+call __gtdf2</span>
+<span class="add">+blt s4, s6, .L21</span>
+<span class="add">+mv s1, s6</span>
+<span class="add">+.L21:</span>
+<span class="add">+lw a2, 0(s0)</span>
+<span class="add">+sgtz a1, a0</span>
+<span class="add">+bltu s5, s2, .L22</span>
+<span class="add">+mv s1, a2</span>
+<span class="add">+.L22:</span>
+<span class="add">+mv a0, s1</span>
+<span class="add">+sb a1, %lo(G.1)(s3)</span>
+<span class="add">+lw ra, 28(sp)</span>
+<span class="add">+lw s0, 24(sp)</span>
+<span class="add">+lw s1, 20(sp)</span>
+<span class="add">+lw s2, 16(sp)</span>
+<span class="add">+lw s3, 12(sp)</span>
+<span class="add">+lw s4, 8(sp)</span>
+<span class="add">+lw s5, 4(sp)</span>
+<span class="add">+lw s6, 0(sp)</span>
+<span class="add">+addi sp, sp, 32</span>
+<span class="add">+ret</span>
+ .L0:
+<span class="del">-qc.mvlti a0, a4, 0, a5</span>
+<span class="del">-li a3, 1024</span>
+<span class="del">-qc.mvge a0, a3, a2, a2</span>
+<span class="del">-li a2, 2046</span>
+<span class="del">-qc.mvgeu a0, a2, a4, a1</span>
+<span class="del">-lui a1, %hi(G.1)</span>
+<span class="del">-sb zero, %lo(G.1)(a1)</span>
+<span class="del">-ret</span>
+<span class="add">+mv s1, a2</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bne a2, a0, .L2</span>
+<span class="add">+.L1:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bltu a0, s1, .L4</span>
+<span class="add">+.L3:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bltu a0, s1, .L6</span>
+<span class="add">+.L5:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bltu s1, a0, .L8</span>
+<span class="add">+.L7:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bltu s1, a0, .L10</span>
+<span class="add">+.L9:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+blt a0, s1, .L12</span>
+<span class="add">+.L11:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+blt a0, s1, .L14</span>
+<span class="add">+.L13:</span>
+<span class="add">+mv s1, a0</span>
+<span class="add">+lw a0, 0(s0)</span>
+<span class="add">+bge s1, a0, .L16</span>
+<span class="add">+j .L15</span></pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">select-cc.ec46212f9a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/select-cc.ll">select-cc.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcicm,+xqcics,+xqcicli,+zca,+short-forward-branch-ialu,+conditional-cmv-fusion -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

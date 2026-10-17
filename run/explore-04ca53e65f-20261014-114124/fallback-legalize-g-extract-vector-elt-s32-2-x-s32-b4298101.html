@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT s32,&lt;2 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT s32,&lt;2 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT s32,&lt;2 x s32&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fp-fcanonicalize.6a98eab803.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span> @fcanonicalize_v2f32 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,-zfh</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/7M5z6Mj9x">https://godbolt.org/z/7M5z6Mj9x</a> (llc-assertions-trunk, checked 2026-10-14 11:50 UTC): <a href="https://godbolt.org/z/7M5z6Mj9x">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define float @fcanonicalize_v2f32(i1 %LGV) {
+  %E = extractelement &lt;2 x float&gt; zeroinitializer, i1 %LGV
+  ret float %E
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,-zfh -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>10</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(s32) = G_EXTRACT_VECTOR_ELT %3:_(&lt;2 x s32&gt;), %5:_(s32) (in function: fcanonicalize_v2f32)<br>warning: Instruction selection used fallback path for fcanonicalize_v2f32</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,-zfh -global-isel=0</code></td><td>0</td><td>10</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc --mtriple=riscv32 --mattr=+d,-zfh -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc --mtriple=riscv32 --mattr=+d,-zfh -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(s32) = G_EXTRACT_VECTOR_ELT %3:_(&lt;2 x s32&gt;), %5:_(s32) (in function: fcanonicalize_v2f32)
+warning: Instruction selection used fallback path for fcanonicalize_v2f32</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp-fcanonicalize.6a98eab803.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f32</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,-zfh</code></td></tr><tr><td class="l">fp-fcanonicalize.a73d3ec331.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.e116aa5722.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f32</td><td class="l"><code>--mtriple=riscv32</code></td></tr><tr><td class="l">fp-fcanonicalize.f45e7686da.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.f60a9ed139.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f32</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,+zfh</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (SrcTy.isVector() &amp;&amp; &quot;mismatched cast between vector and non-vector&quot;), function validateTruncExt, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (SrcTy.isVector() &amp;&amp; &quot;mismatched cast between vector and non-vector&quot;), function validateTruncExt, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-bc8218b282-20261015-074651.html">main-bc8218b282-20261015-074651</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (SrcTy.isVector() &amp;&amp; &quot;mismatched cast between vector and non-vector&quot;), function validateTruncExt, file MachineIRBuilder.cpp</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/calling-conv-vector-float.ll">calling-conv-vector-float.ll</a> @callee_v2f32 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at bc8218b282</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/KaW5c63q1">https://godbolt.org/z/KaW5c63q1</a> (llc-assertions-trunk, checked 2026-10-14 11:03 UTC): <a href="https://godbolt.org/z/KaW5c63q1">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x float&gt; @callee_v2f32(&lt;2 x float&gt; %x) {
+  ret &lt;2 x float&gt; %x
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1271: void llvm::MachineIRBuilder::validateTruncExt(llvm::LLT, llvm::LLT, bool): Assertion `SrcTy.isVector() &amp;&amp; &quot;mismatched cast between vector and non-vector&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>1</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1271: void llvm::MachineIRBuilder::validateTruncExt(const LLT, const LLT, bool): Assertion `SrcTy.isVector() &amp;&amp; &quot;mismatched cast between vector and non-vector&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@callee_v2f32&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000558ead58454b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000558ead5813f1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000558ead584fcb
+3  libc.so.6 0x00007f4860e45330
+4  libc.so.6 0x00007f4860e9ec0c pthread_kill + 284
+5  libc.so.6 0x00007f4860e4527e gsignal + 30
+6  libc.so.6 0x00007f4860e288ff abort + 223
+7  libc.so.6 0x00007f4860e2881b
+8  libc.so.6 0x00007f4860e3b517
+9  llc       0x0000558eaf6e4089 llvm::MachineIRBuilder::validateTruncExt(llvm::LLT, llvm::LLT, bool) + 905
+10 llc       0x0000558eaf6e4f32 llvm::MachineIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 3314
+11 llc       0x0000558eaf5fe003 llvm::CSEMIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 3091
+12 llc       0x0000558eaf6e29b1 llvm::MachineIRBuilder::buildTrunc(llvm::DstOp const&amp;, llvm::SrcOp const&amp;, std::optional&lt;unsigned int&gt;) + 33
+13 llc       0x0000558eae7a24ba
+14 llc       0x0000558eaf5f3d90 llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 928
+15 llc       0x0000558eae79f6ac
+16 llc       0x0000558eaf660180 llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 3552
+17 llc       0x0000558eaf66142d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+18 llc       0x0000558eadb4b9ed llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+19 llc       0x0000558ead8dbd37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+20 llc       0x0000558ead8e4232 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+21 llc       0x0000558ead8dcae0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+22 llc       0x0000558ead58bba8 llcMain + 12056
+23 llc       0x0000558ead4c66af main + 63
+24 libc.so.6 0x00007f4860e2a1ca
+25 libc.so.6 0x00007f4860e2a28b __libc_start_main + 139
+26 llc       0x0000558ead4c65a5 _start + 37</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/calling-conv-vector-float.ll">calling-conv-vector-float.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-half.ll">fastcc-half.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-vector-float.273419ccbd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/calling-conv-vector-float.ll">calling-conv-vector-float.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-vector-float.6706ac67e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/calling-conv-vector-float.ll">calling-conv-vector-float.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-vector-float.9bb61270ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/calling-conv-vector-float.ll">calling-conv-vector-float.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-vector-float.ddddc36b36.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/calling-conv-vector-float.ll">calling-conv-vector-float.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-vector-float.e72a71a054.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/calling-conv-vector-float.ll">calling-conv-vector-float.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+f -target-abi=lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-half.250e9f6ffa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-half.ll">fastcc-half.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-half.5ab7cd7aac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-half.ll">fastcc-half.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-half.7ae41882d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-half.ll">fastcc-half.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-half.c661e092d3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/bc8218b282ea64c08087dfc5e1c5955349afc9ee/llvm/test/CodeGen/RISCV/fastcc-half.ll">fastcc-half.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

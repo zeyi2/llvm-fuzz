@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-04ca53e65f-20261014-114124.html">explore-04ca53e65f-20261014-114124</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()` <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stack-protector-vector-clobber.382922bd43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/stack-protector-vector-clobber.ll">stack-protector-vector-clobber.ll</a><span class="dim">)</span> @test_stack_protector_with_vector_clobber via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 04ca53e65f</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/n98dTWcG9">https://godbolt.org/z/n98dTWcG9</a> (llc-assertions-trunk, checked 2026-10-14 11:49 UTC): <a href="https://godbolt.org/z/n98dTWcG9">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define ptr @test_stack_protector_with_vector_clobber(ptr %0, i32 %LGV) {
+  %G = getelementptr &lt;vscale x 8 x i64&gt;, ptr %0, i32 %LGV
+  ret ptr %G
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -global-isel=0</code></td><td>0</td><td>13</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@test_stack_protector_with_vector_clobber&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055f3a6c2579b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055f3a6c22641 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055f3a6c2621b
+3  libc.so.6 0x00007f2c86045330
+4  libc.so.6 0x00007f2c8609ec0c pthread_kill + 284
+5  libc.so.6 0x00007f2c8604527e gsignal + 30
+6  libc.so.6 0x00007f2c860288ff abort + 223
+7  llc       0x000055f3a6b68bcd llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x000055f3a6b68a16
+9  llc       0x000055f3a6b68d1b
+10 llc       0x000055f3a8cee1a6 llvm::IRTranslatorImpl::translateGetElementPtr(llvm::User const&amp;, llvm::MachineIRBuilder&amp;) + 2678
+11 llc       0x000055f3a8cfab99 llvm::IRTranslatorImpl::translate(llvm::Instruction const&amp;) + 889
+12 llc       0x000055f3a8cfd51d llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 4253
+13 llc       0x000055f3a8cfe50d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+14 llc       0x000055f3a71ecd2d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x000055f3a6f7ccd7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000055f3a6f851d2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x000055f3a6f7da80 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x000055f3a6c2cdf8 llcMain + 12056
+19 llc       0x000055f3a6b6862f main + 63
+20 libc.so.6 0x00007f2c8602a1ca
+21 libc.so.6 0x00007f2c8602a28b __libc_start_main + 139
+22 llc       0x000055f3a6b68525 _start + 37</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">stack-protector-vector-clobber.382922bd43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/stack-protector-vector-clobber.ll">stack-protector-vector-clobber.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l">stack-protector-vector-clobber.9521d9b799.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/04ca53e65fb234695323008abe2ef10c7cd13b1c/llvm/test/CodeGen/RISCV/stack-protector-vector-clobber.ll">stack-protector-vector-clobber.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>

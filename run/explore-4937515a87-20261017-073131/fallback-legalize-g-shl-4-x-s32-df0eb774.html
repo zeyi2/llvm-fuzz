@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SHL &lt;4 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SHL &lt;4 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4937515a87-20261017-073131.html">explore-4937515a87-20261017-073131</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SHL &lt;4 x s32&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64m-exhaustive-w-insts.22f0f23451.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/rv64m-exhaustive-w-insts.ll">rv64m-exhaustive-w-insts.ll</a><span class="dim">)</span> @sext_remuw_zext_zext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4937515a87</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i32&gt;
+
+; Function Attrs: nounwind
+define signext i32 @sext_remuw_zext_zext(i32 zeroext %a, i32 zeroext %b) #0 {
+  %LGV = load &lt;4 x i32&gt;, ptr @G, align 16
+  %1 = urem i32 %a, %b
+  %B = shl &lt;4 x i32&gt; splat (i32 2147483647), %LGV
+  store &lt;4 x i32&gt; %B, ptr @G, align 16
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;4 x s32&gt;) = G_SHL %9:_, %6:_(&lt;4 x s32&gt;) (in function: sext_remuw_zext_zext)
+warning: Instruction selection used fallback path for sext_remuw_zext_zext</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">get-setcc-result-type.5ebf02b684.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/get-setcc-result-type.ll">get-setcc-result-type.ll</a><span class="dim">)</span></td><td class="l">getSetCCResultType</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">inline-asm-mem-constraint.4b4feff03f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_m_with_local_2</td><td class="l"><code>-mtriple=riscv64 -code-model=large -verify-machineinstrs</code></td></tr><tr><td class="l">inline-asm-mem-constraint.8db8daf86d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_m_with_local_2</td><td class="l"><code>-mtriple=riscv64 -code-model=large -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l">rv64m-exhaustive-w-insts.22f0f23451.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4937515a87d776d925ffb02efc855e6112fd9da2/llvm/test/CodeGen/RISCV/rv64m-exhaustive-w-insts.ll">rv64m-exhaustive-w-insts.ll</a><span class="dim">)</span></td><td class="l">sext_remuw_zext_zext</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-17 07:41 UTC.</p>
