@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FSUB &lt;4 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FSUB &lt;4 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FSUB &lt;4 x s32&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64m-exhaustive-w-insts.8c5296d620.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rv64m-exhaustive-w-insts.ll">rv64m-exhaustive-w-insts.ll</a><span class="dim">)</span> @sext_remuw_sext_zext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define signext i32 @sext_remuw_sext_zext(i32 signext %a, i32 zeroext %b) #0 {
+  %A = alloca &lt;4 x float&gt;, align 16
+  store &lt;4 x float&gt; poison, ptr %A, align 16
+  %B = fsub &lt;4 x float&gt; splat (float 1.000000e+00), splat (float f0x7F7FFFFF)
+  %1 = urem i32 %a, %b
+  store &lt;4 x float&gt; %B, ptr %A, align 16
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %12:_(&lt;4 x s32&gt;) = G_FSUB %8:_, %10:_ (in function: sext_remuw_sext_zext)
+warning: Instruction selection used fallback path for sext_remuw_sext_zext</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double_reduct.8e7c32ef55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a><span class="dim">)</span></td><td class="l">fmul_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l">double_reduct.ade636c5f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a><span class="dim">)</span></td><td class="l">fmul_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l">machine-sink-load-immediate.108aad5735.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/machine-sink-load-immediate.ll">machine-sink-load-immediate.ll</a><span class="dim">)</span></td><td class="l">branch_dispatch</td><td class="l"><code>-mtriple=riscv64</code></td></tr><tr><td class="l">rv64m-exhaustive-w-insts.8c5296d620.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rv64m-exhaustive-w-insts.ll">rv64m-exhaustive-w-insts.ll</a><span class="dim">)</span></td><td class="l">sext_remuw_sext_zext</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

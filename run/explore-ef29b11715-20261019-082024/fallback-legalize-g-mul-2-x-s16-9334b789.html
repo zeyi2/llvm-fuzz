@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_MUL &lt;2 x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_MUL &lt;2 x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_MUL &lt;2 x s16&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-srl-bitcast-bv.3006b5891b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span> @srl_bitcast_buildvector_extract_last via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+@G.2 = external global &lt;2 x i16&gt;
+
+define i16 @srl_bitcast_buildvector_extract_last(&lt;2 x i16&gt; %v, ptr %p) {
+  %LGV = load &lt;2 x i64&gt;, ptr @G, align 16
+  %div = sdiv &lt;2 x i16&gt; splat (i16 1), %v
+  store &lt;2 x i16&gt; %div, ptr %p, align 4
+  %e = extractelement &lt;2 x i16&gt; %div, i64 1
+  %S = shufflevector &lt;2 x i64&gt; %LGV, &lt;2 x i64&gt; splat (i64 1), &lt;2 x i32&gt; poison
+  %B = mul &lt;2 x i16&gt; %v, %v
+  store &lt;2 x i64&gt; %S, ptr @G, align 16
+  store &lt;2 x i16&gt; %B, ptr @G.2, align 4
+  ret i16 %e
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %12:_(&lt;2 x s16&gt;) = G_MUL %0:_, %0:_ (in function: srl_bitcast_buildvector_extract_last)
+warning: Instruction selection used fallback path for srl_bitcast_buildvector_extract_last</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rvp-insert-subvector.5bb8025717.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-insert-subvector.ll">rvp-insert-subvector.ll</a><span class="dim">)</span></td><td class="l">insert_zero_v2i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-srl-bitcast-bv.3006b5891b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb</code></td></tr><tr><td class="l">rvp-srl-bitcast-bv.716dbb276b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

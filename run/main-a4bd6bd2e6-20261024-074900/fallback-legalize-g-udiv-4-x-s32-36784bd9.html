@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_UDIV &lt;4 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_UDIV &lt;4 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-a4bd6bd2e6-20261024-074900.html">main-a4bd6bd2e6-20261024-074900</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_UDIV &lt;4 x s32&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 4 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zbb.5345276861.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span> @sub_if_uge_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i32&gt;
+
+define i16 @sub_if_uge_i16(i16 %x, i16 %y) {
+  %LGV = load &lt;4 x i32&gt;, ptr @G, align 16
+  %cmp = icmp ult i16 %x, %y
+  %B = udiv &lt;4 x i32&gt; splat (i32 42), %LGV
+  %select = select i1 %cmp, i16 0, i16 %y
+  %sub = sub nuw i16 %x, %select
+  store &lt;4 x i32&gt; %B, ptr poison, align 16
+  ret i16 %sub
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(&lt;4 x s32&gt;) = G_UDIV %7:_, %4:_ (in function: sub_if_uge_i16)
+warning: Instruction selection used fallback path for sub_if_uge_i16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">local-stack-slot-allocation.1dd5da1f74.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/local-stack-slot-allocation.ll">local-stack-slot-allocation.ll</a><span class="dim">)</span></td><td class="l">frame_pointer</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">local-stack-slot-allocation.8444f036e6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/local-stack-slot-allocation.ll">local-stack-slot-allocation.ll</a><span class="dim">)</span></td><td class="l">frame_pointer</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">pr63365.b42c41a051.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/pr63365.ll">pr63365.ll</a><span class="dim">)</span></td><td class="l">f</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">rv64zbb.5345276861.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">sub_if_uge_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbb.c104f736be.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">sub_if_uge_i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

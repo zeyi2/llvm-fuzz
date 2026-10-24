@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT s64,&lt;2 x s64&gt;,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">nontemporal.01324ead65.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/nontemporal.ll">nontemporal.ll</a><span class="dim">)</span> @test_nontemporal_P1_store_v8i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+@G.2 = external global i64
+
+define void @test_nontemporal_P1_store_v8i16(ptr %p, &lt;8 x i16&gt; %v) {
+  %LGV1 = load i128, ptr @G.1, align 4
+  %E = extractelement &lt;2 x i64&gt; splat (i64 -1), i128 %LGV1
+  store &lt;8 x i16&gt; %v, ptr %p, align 16, !nontemporal !0, !riscv-nontemporal-domain !1
+  store i64 %E, ptr @G.2, align 4
+  ret void
+}
+
+!0 = !{i32 1}
+!1 = !{i32 2}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(s64) = G_EXTRACT_VECTOR_ELT %6:_(&lt;2 x s64&gt;), %8:_(s32) (in function: test_nontemporal_P1_store_v8i16)
+warning: Instruction selection used fallback path for test_nontemporal_P1_store_v8i16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nontemporal.01324ead65.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/nontemporal.ll">nontemporal.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_P1_store_v8i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v</code></td></tr><tr><td class="l">nontemporal.761bbee6ad.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/nontemporal.ll">nontemporal.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_P1_store_v8i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh</code></td></tr><tr><td class="l">nontemporal.78df0c8d12.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/nontemporal.ll">nontemporal.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_P1_store_v8i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+c</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

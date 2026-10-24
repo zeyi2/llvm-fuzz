@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +90 insts: fcvt_wu_s_i8 (half-convert.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +90 insts: fcvt_wu_s_i8 (half-convert.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+90 insts: fcvt_wu_s_i8 (half-convert.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.dc67ae0e32.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -target-abi=ilp32d -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+@G.1 = external global i1
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(half %a) #0 {
+  %A = alloca i128, align 8
+  store i128 18446744073709551616, ptr %A, align 4
+  %1 = fptoui half %a to i8
+  %L = load i128, ptr %A, align 4
+  switch i128 %L, label %SW_D [
+    i128 9488229502844965586, label %SW_C
+    i128 2646362644371999989, label %SW_C1
+    i128 15200997756578375521, label %SW_C2
+    i128 2830941717845047527, label %SW_C3
+    i128 14264188034778550444, label %SW_C4
+    i128 5278300068848163477, label %SW_C5
+    i128 13606565551604058234, label %SW_C6
+  ]
+
+BB:                                               ; preds = %SW_C6, %SW_C4, %SW_C2, %SW_C1, %SW_C
+  ret i8 %1
+
+SW_D:                                             ; preds = %0
+  ret i8 %1
+
+SW_C:                                             ; preds = %0
+  br label %BB
+
+SW_C1:                                            ; preds = %0
+  br label %BB
+
+SW_C2:                                            ; preds = %0
+  br label %BB
+
+SW_C3:                                            ; preds = %0
+  %LGV = load i8, ptr @G, align 1
+  ret i8 %LGV
+
+SW_C4:                                            ; preds = %SW_C4, %0
+  %LGV7 = load i1, ptr @G.1, align 1
+  br i1 %LGV7, label %BB, label %SW_C4
+
+SW_C5:                                            ; preds = %0
+  ret i8 %1
+
+SW_C6:                                            ; preds = %0
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+d -target-abi=ilp32d -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+d -target-abi=ilp32d -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,33 +1,138 @@
+ addi sp, sp, -32
+ sw ra, 28(sp)
+ sw s0, 24(sp)
+<span class="del">-li s0, 1</span>
+<span class="del">-sw zero, 8(sp)</span>
+<span class="del">-sw zero, 12(sp)</span>
+<span class="del">-sw s0, 16(sp)</span>
+<span class="del">-sw zero, 20(sp)</span>
+<span class="add">+sw s1, 20(sp)</span>
+<span class="add">+li a0, 1</span>
+<span class="add">+lui s0, 296777</span>
+<span class="add">+addi s0, s0, 722</span>
+<span class="add">+lui s1, 539343</span>
+<span class="add">+addi s1, s1, 1654</span>
+<span class="add">+mv a1, sp</span>
+<span class="add">+sw zero, 4(a1)</span>
+<span class="add">+sw a0, 8(a1)</span>
+<span class="add">+sw zero, 12(a1)</span>
+<span class="add">+sw zero, 0(sp)</span>
+ call __extendhfsf2
+<span class="del">-fcvt.wu.s a0, fa0, rtz</span>
+<span class="del">-seqz a1, s0</span>
+<span class="del">-addi a1, a1, -1</span>
+<span class="del">-and a1, a1, s0</span>
+<span class="del">-bnez a1, .L0</span>
+<span class="del">-lui a1, 835535</span>
+<span class="del">-addi a1, a1, 1782</span>
+<span class="del">-or a1, s0, a1</span>
+<span class="add">+lw a0, 4(sp)</span>
+<span class="add">+lw a1, 0(sp)</span>
+<span class="add">+lw a3, 8(sp)</span>
+<span class="add">+beq a0, s1, .L0</span>
+<span class="add">+sltu a2, a0, s1</span>
+ j .L1
+<span class="del">-j .L1</span>
+<span class="add">+.L0:</span>
+<span class="add">+sltu a2, a1, s0</span>
+<span class="add">+.L1:</span>
+<span class="add">+xori a5, a2, 1</span>
+<span class="add">+lw a4, 12(sp)</span>
+<span class="add">+sltiu a7, a3, 0</span>
+<span class="add">+bnez a3, .L2</span>
+<span class="add">+slti t0, a4, 0</span>
+<span class="add">+bnez a4, .L3</span>
+<span class="add">+.L4:</span>
+<span class="add">+fcvt.wu.s a2, fa0, rtz</span>
+<span class="add">+beqz a5, .L5</span>
+<span class="add">+.L6:</span>
+<span class="add">+lui a5, 810825</span>
+<span class="add">+lui a6, 353701</span>
+<span class="add">+addi a5, a5, 881</span>
+<span class="add">+addi a6, a6, 172</span>
+<span class="add">+beq a0, a5, .L7</span>
+<span class="add">+sltu t1, a0, a5</span>
+<span class="add">+xori t1, t1, 1</span>
+<span class="add">+bnez a3, .L8</span>
+<span class="add">+j .L9</span>
+<span class="add">+.L2:</span>
+<span class="add">+xori a5, a7, 1</span>
+<span class="add">+slti t0, a4, 0</span>
+<span class="add">+beqz a4, .L4</span>
+<span class="add">+.L3:</span>
+<span class="add">+xori a5, t0, 1</span>
+<span class="add">+fcvt.wu.s a2, fa0, rtz</span>
+<span class="add">+bnez a5, .L6</span>
+<span class="add">+.L5:</span>
+<span class="add">+lui a5, 871041</span>
+<span class="add">+lui a6, 150428</span>
+<span class="add">+addi a5, a5, -779</span>
+<span class="add">+addi a6, a6, 1229</span>
+<span class="add">+xor a5, a1, a5</span>
+<span class="add">+xor a6, a0, a6</span>
+<span class="add">+or a5, a5, a6</span>
+<span class="add">+or a3, a3, a4</span>
+<span class="add">+or a5, a5, a3</span>
+<span class="add">+beqz a5, .L10</span>
+<span class="add">+lui a4, 327632</span>
+<span class="add">+lui a5, 160920</span>
+<span class="add">+addi a4, a4, -1817</span>
+<span class="add">+addi a5, a5, 1662</span>
+<span class="add">+xor a4, a1, a4</span>
+<span class="add">+xor a5, a0, a5</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+or a4, a4, a3</span>
+<span class="add">+beqz a4, .L11</span>
+<span class="add">+lui a4, 448982</span>
+<span class="add">+lui a5, 300037</span>
+<span class="add">+addi a4, a4, -1387</span>
+<span class="add">+addi a5, a5, -1550</span>
+<span class="add">+j .L12</span>
+<span class="add">+.L7:</span>
+<span class="add">+sltu t1, a1, a6</span>
+<span class="add">+xori t1, t1, 1</span>
+<span class="add">+beqz a3, .L9</span>
+<span class="add">+.L8:</span>
+<span class="add">+xori t1, a7, 1</span>
+<span class="add">+.L9:</span>
+<span class="add">+bnez a4, .L13</span>
+<span class="add">+bnez t1, .L14</span>
+<span class="add">+.L15:</span>
+<span class="add">+xor s0, a1, s0</span>
+<span class="add">+xor s1, a0, s1</span>
+<span class="add">+or s0, s0, s1</span>
+<span class="add">+or a3, a3, a4</span>
+<span class="add">+or s0, s0, a3</span>
+<span class="add">+beqz s0, .L10</span>
+<span class="add">+lui a4, 313045</span>
+<span class="add">+lui a5, 773444</span>
+<span class="add">+addi a4, a4, -1926</span>
+<span class="add">+addi a5, a5, -1209</span>
+<span class="add">+.L12:</span>
+<span class="add">+xor a1, a1, a4</span>
+<span class="add">+xor a0, a0, a5</span>
+<span class="add">+or a0, a1, a0</span>
+<span class="add">+or a0, a0, a3</span>
+<span class="add">+j .L10</span>
+<span class="add">+.L13:</span>
+<span class="add">+xori t1, t0, 1</span>
+<span class="add">+beqz t1, .L15</span>
+<span class="add">+.L14:</span>
+<span class="add">+lui a7, 886226</span>
+<span class="add">+lui t0, 864077</span>
+<span class="add">+addi a7, a7, 1889</span>
+<span class="add">+addi t0, t0, -1301</span>
+<span class="add">+xor a7, a1, a7</span>
+<span class="add">+xor t0, a0, t0</span>
+<span class="add">+or a7, a7, t0</span>
+<span class="add">+or a3, a3, a4</span>
+<span class="add">+or a4, a7, a3</span>
+<span class="add">+beqz a4, .L10</span>
+<span class="add">+xor a1, a1, a6</span>
+<span class="add">+xor a0, a0, a5</span>
+<span class="add">+or a0, a1, a0</span>
+<span class="add">+or a0, a0, a3</span>
+<span class="add">+bnez a0, .L10</span>
+<span class="add">+lui a0, %hi(G.1)</span>
+<span class="add">+lbu a0, %lo(G.1)(a0)</span>
+<span class="add">+andi a0, a0, 1</span>
+<span class="add">+.L16:</span>
+<span class="add">+beqz a0, .L16</span>
+<span class="add">+.L10:</span>
+<span class="add">+zext.b a0, a2</span>
+<span class="add">+.L17:</span>
+<span class="add">+lw ra, 28(sp)</span>
+<span class="add">+lw s0, 24(sp)</span>
+<span class="add">+lw s1, 20(sp)</span>
+<span class="add">+addi sp, sp, 32</span>
+<span class="add">+ret</span>
+<span class="add">+.L11:</span>
+ lui a0, %hi(G)
+ lbu a0, %lo(G)(a0)
+<span class="del">-j .L1</span>
+<span class="del">-.L0:</span>
+<span class="del">-j .L1</span>
+<span class="del">-lui a1, %hi(G.1)</span>
+<span class="del">-lbu a1, %lo(G.1)(a1)</span>
+<span class="del">-.L2:</span>
+<span class="del">-beqz a1, .L2</span>
+<span class="del">-.L1:</span>
+<span class="del">-lw ra, 28(sp)</span>
+<span class="del">-lw s0, 24(sp)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="del">-ret</span>
+<span class="add">+j .L17</span></pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-convert.dc67ae0e32.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -target-abi=ilp32d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

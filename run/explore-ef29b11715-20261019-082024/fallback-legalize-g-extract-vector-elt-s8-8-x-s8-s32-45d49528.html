@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT s8,&lt;8 x s8&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT s8,&lt;8 x s8&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT s8,&lt;8 x s8&gt;,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stack-clash-prologue-nounwind.7397cf8c78.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/stack-clash-prologue-nounwind.ll">stack-clash-prologue-nounwind.ll</a><span class="dim">)</span> @f1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i8
+
+; Function Attrs: nounwind
+define i8 @f1() #0 {
+entry:
+  %LGV1 = load i8, ptr @G.2, align 1
+  %E = extractelement &lt;8 x i8&gt; splat (i8 42), i8 %LGV1
+  %a = alloca i8, i64 4096, align 1
+  store volatile i8 3, ptr %a, align 1
+  %c = load volatile i8, ptr %a, align 1
+  ret i8 %E
+}
+
+attributes #0 = { nounwind &quot;probe-stack&quot;=&quot;inline-asm&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(s8) = G_EXTRACT_VECTOR_ELT %3:_(&lt;8 x s8&gt;), %5:_(s32) (in function: f1)
+warning: Instruction selection used fallback path for f1</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">stack-clash-prologue-nounwind.7397cf8c78.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/stack-clash-prologue-nounwind.ll">stack-clash-prologue-nounwind.ll</a><span class="dim">)</span></td><td class="l">f1</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

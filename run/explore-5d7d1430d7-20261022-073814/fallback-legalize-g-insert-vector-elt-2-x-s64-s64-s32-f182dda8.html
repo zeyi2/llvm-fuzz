@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;2 x s64&gt;,s64,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;2 x s64&gt;,s64,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5d7d1430d7-20261022-073814.html">explore-5d7d1430d7-20261022-073814</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;2 x s64&gt;,s64,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 9 configs, 5 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">split-udiv-by-constant.c2ea2d0399.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/split-udiv-by-constant.ll">split-udiv-by-constant.ll</a><span class="dim">)</span> @test_udiv_12 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/EMh6b6Woh">https://godbolt.org/z/EMh6b6Woh</a> (llc-assertions-trunk, checked 2026-10-22 07:45 UTC): <a href="https://godbolt.org/z/EMh6b6Woh">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i64&gt; @test_udiv_12(i64 %x) {
+  %I = insertelement &lt;2 x i64&gt; zeroinitializer, i64 0, i64 %x
+  ret &lt;2 x i64&gt; %I
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>21</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;2 x s64&gt;) = G_INSERT_VECTOR_ELT %5:_, %6:_(s64), %7:_(s32) (in function: test_udiv_12)<br>warning: Instruction selection used fallback path for test_udiv_12</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -global-isel=0</code></td><td>0</td><td>21</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;2 x s64&gt;) = G_INSERT_VECTOR_ELT %5:_, %6:_(s64), %7:_(s32) (in function: test_udiv_12)
+warning: Instruction selection used fallback path for test_udiv_12</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">condbinops.d13441954c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/condbinops.ll">condbinops.ll</a><span class="dim">)</span></td><td class="l">lshr64</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">condbinops.e3cc60b9cc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/condbinops.ll">condbinops.ll</a><span class="dim">)</span></td><td class="l">lshr64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicond</code></td></tr><tr><td class="l">iabs.4ef5867633.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span></td><td class="l">zext_abs32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">iabs.5dfdd5e4a3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span></td><td class="l">zext_abs32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">select-zbb.08981c71ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/select-zbb.ll">select-zbb.ll</a><span class="dim">)</span></td><td class="l">select_smin_3</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -verify-machineinstrs</code></td></tr><tr><td class="l">select-zbb.1a1f7f3e03.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/select-zbb.ll">select-zbb.ll</a><span class="dim">)</span></td><td class="l">select_smin_3</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zicond -verify-machineinstrs</code></td></tr><tr><td class="l">select-zbb.353f99db88.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/select-zbb.ll">select-zbb.ll</a><span class="dim">)</span></td><td class="l">select_smin_3</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">select-zbb.3beb18e708.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/select-zbb.ll">select-zbb.ll</a><span class="dim">)</span></td><td class="l">select_smin_3</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zicond,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">split-udiv-by-constant.c2ea2d0399.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/split-udiv-by-constant.ll">split-udiv-by-constant.ll</a><span class="dim">)</span></td><td class="l">test_udiv_12</td><td class="l"><code>-mtriple=riscv32 -mattr=+m</code></td></tr><tr><td class="l">split-urem-by-constant.fd9004a847.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/split-urem-by-constant.ll">split-urem-by-constant.ll</a><span class="dim">)</span></td><td class="l">test_urem_12</td><td class="l"><code>-mtriple=riscv32 -mattr=+m</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

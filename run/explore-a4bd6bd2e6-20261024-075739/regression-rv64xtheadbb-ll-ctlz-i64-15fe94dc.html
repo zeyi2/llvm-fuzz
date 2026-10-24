@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +54 insts: ctlz_i64 (rv64xtheadbb.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +54 insts: ctlz_i64 (rv64xtheadbb.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a4bd6bd2e6-20261024-075739.html">explore-a4bd6bd2e6-20261024-075739</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+54 insts: ctlz_i64 (rv64xtheadbb.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64xtheadbb.ll">rv64xtheadbb.ll</a> @ctlz_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i64 @ctlz_i64(i64 %a) #0 {
+  %1 = call i64 @llvm.ctlz.i64(i64 %a, i1 false)
+  ret i64 %1
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.ctlz.i64(i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,2 +1,56 @@
+<span class="del">-th.ff1 a0, a0</span>
+<span class="add">+lui a1, 21845</span>
+<span class="add">+srli a2, a0, 1</span>
+<span class="add">+or a0, a0, a2</span>
+<span class="add">+srli a2, a0, 2</span>
+<span class="add">+or a0, a0, a2</span>
+<span class="add">+lui a2, 13107</span>
+<span class="add">+srli a3, a0, 4</span>
+<span class="add">+addi a1, a1, 1365</span>
+<span class="add">+or a0, a0, a3</span>
+<span class="add">+addi a2, a2, 819</span>
+<span class="add">+srli a3, a0, 8</span>
+<span class="add">+slli a1, a1, 12</span>
+<span class="add">+or a0, a0, a3</span>
+<span class="add">+addi a1, a1, 1365</span>
+<span class="add">+srli a3, a0, 16</span>
+<span class="add">+slli a1, a1, 12</span>
+<span class="add">+or a0, a0, a3</span>
+<span class="add">+addi a1, a1, 1365</span>
+<span class="add">+srli a3, a0, 32</span>
+<span class="add">+slli a1, a1, 12</span>
+<span class="add">+or a0, a0, a3</span>
+<span class="add">+addi a1, a1, 1365</span>
+<span class="add">+srli a3, a0, 1</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+and a1, a3, a1</span>
+<span class="add">+lui a3, 3855</span>
+<span class="add">+addi a2, a2, 819</span>
+<span class="add">+addi a3, a3, 241</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+addi a2, a2, 819</span>
+<span class="add">+sub a0, a0, a1</span>
+<span class="add">+slli a2, a2, 12</span>
+<span class="add">+srli a1, a0, 2</span>
+<span class="add">+addi a2, a2, 819</span>
+<span class="add">+slli a3, a3, 12</span>
+<span class="add">+and a1, a1, a2</span>
+<span class="add">+addi a3, a3, -241</span>
+<span class="add">+and a0, a0, a2</span>
+<span class="add">+slli a3, a3, 12</span>
+<span class="add">+add a0, a1, a0</span>
+<span class="add">+addi a1, a3, 241</span>
+<span class="add">+srli a2, a0, 4</span>
+<span class="add">+slli a1, a1, 12</span>
+<span class="add">+add a0, a2, a0</span>
+<span class="add">+addi a1, a1, -241</span>
+<span class="add">+and a0, a0, a1</span>
+<span class="add">+slli a1, a0, 8</span>
+<span class="add">+add a0, a0, a1</span>
+<span class="add">+slli a1, a0, 16</span>
+<span class="add">+add a0, a0, a1</span>
+<span class="add">+slli a1, a0, 32</span>
+<span class="add">+add a0, a0, a1</span>
+<span class="add">+srli a0, a0, 56</span>
+<span class="add">+li a1, 64</span>
+<span class="add">+sub a0, a1, a0</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64xtheadbb.ll">rv64xtheadbb.ll</a></td><td class="l">ctlz_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

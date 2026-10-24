@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.riscv.vlseg2.triscv.vector.tuple_nxv8i8_2t.p0.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.riscv.vlseg2.triscv.vector.tuple_nxv8i8_2t.p0.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.riscv.vlseg2.triscv.vector.tuple_nxv8i8_2t.p0.i64</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a> @load_segmented via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i8&gt; @load_segmented(ptr %base, ptr %out, &lt;8 x i8&gt; %use_v8) #0 {
+entry:
+  %tuple = call target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2) @llvm.riscv.vlseg2.triscv.vector.tuple_nxv8i8_2t.p0.i64(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2) poison, ptr %base, i64 0, i64 3)
+  %v0 = call &lt;vscale x 8 x i8&gt; @llvm.riscv.tuple.extract.nxv8i8.triscv.vector.tuple_nxv8i8_2t(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2) %tuple, i32 0)
+  store &lt;vscale x 8 x i8&gt; %v0, ptr %out, align 8
+  ret &lt;8 x i8&gt; %use_v8
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 8 x i8&gt; @llvm.riscv.tuple.extract.nxv8i8.triscv.vector.tuple_nxv8i8_2t(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2), i32 immarg) #1
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2) @llvm.riscv.vlseg2.triscv.vector.tuple_nxv8i8_2t.p0.i64(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2), ptr captures(none), i64, i64 immarg) #2
+
+attributes #0 = { &quot;zero-call-used-regs&quot;=&quot;used&quot; }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+attributes #2 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.riscv.vlseg2.triscv.vector.tuple_nxv8i8_2t.p0.i64: &#x27;  %tuple = call target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2) @llvm.riscv.vlseg2.triscv.vector.tuple_nxv8i8_2t.p0.i64(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 8 x i8&gt;, 2) poison, ptr %base, i64 0, i64 3)&#x27; (in function: load_segmented)
+warning: Instruction selection used fallback path for load_segmented</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a></td><td class="l">load_segmented</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l">zero-call-used-regs-v.056fa1a92a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a><span class="dim">)</span></td><td class="l">load_segmented</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

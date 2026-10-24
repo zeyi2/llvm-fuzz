@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FFREXP &lt;4 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FFREXP &lt;4 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-a4bd6bd2e6-20261024-074900.html">main-a4bd6bd2e6-20261024-074900</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FFREXP &lt;4 x s32&gt;</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">18 in 6 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a> @test_frexp_v4f32_v4i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define { &lt;4 x float&gt;, &lt;4 x i32&gt; } @test_frexp_v4f32_v4i32(&lt;4 x float&gt; %a) #0 {
+  %result = call { &lt;4 x float&gt;, &lt;4 x i32&gt; } @llvm.frexp.v4f32.v4i32(&lt;4 x float&gt; %a)
+  ret { &lt;4 x float&gt;, &lt;4 x i32&gt; } %result
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare { &lt;4 x float&gt;, &lt;4 x i32&gt; } @llvm.frexp.v4f32.v4i32(&lt;4 x float&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(&lt;4 x s32&gt;), %7:_(&lt;4 x s32&gt;) = G_FFREXP %0:_ (in function: test_frexp_v4f32_v4i32)
+warning: Instruction selection used fallback path for test_frexp_v4f32_v4i32</pre>
+<h4>Occurrences (18):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_fract</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_exp</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_fract</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_exp</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_fract</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_exp</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_fract</td><td class="l"><code>-mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_exp</td><td class="l"><code>-mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_fract</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_exp</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_fract</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a></td><td class="l">test_frexp_v4f32_v4i32_only_use_exp</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

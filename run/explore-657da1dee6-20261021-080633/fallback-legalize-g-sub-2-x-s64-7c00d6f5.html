@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SUB &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SUB &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SUB &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 4 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32zba.16a8366434.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/rv32zba.ll">rv32zba.ll</a><span class="dim">)</span> @addshl_5_8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+define i32 @addshl_5_8(i32 %a, i32 %b) {
+  %A = alloca &lt;2 x i64&gt;, align 16
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %LGV = load &lt;2 x i64&gt;, ptr @G, align 16
+  %c = shl i32 %a, 5
+  %d = shl i32 %b, 8
+  %B = sub &lt;2 x i64&gt; %LGV, splat (i64 -9223372036854775808)
+  %e = add i32 %c, %d
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  ret i32 %e
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %12:_(&lt;2 x s64&gt;) = G_SUB %4:_, %10:_ (in function: addshl_5_8)
+warning: Instruction selection used fallback path for addshl_5_8</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">blockaddress.751410468c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/blockaddress.ll">blockaddress.ll</a><span class="dim">)</span></td><td class="l">test_blockaddress</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">lsr-legaladdimm.ccef7addc8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/lsr-legaladdimm.ll">lsr-legaladdimm.ll</a><span class="dim">)</span></td><td class="l">main</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32zba.16a8366434.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/rv32zba.ll">rv32zba.ll</a><span class="dim">)</span></td><td class="l">addshl_5_8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -verify-machineinstrs</code></td></tr><tr><td class="l">rv32zba.336153b73a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/rv32zba.ll">rv32zba.ll</a><span class="dim">)</span></td><td class="l">addshl_5_8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+xandesperf -verify-machineinstrs</code></td></tr><tr><td class="l">rv32zba.db9dbf37ed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/rv32zba.ll">rv32zba.ll</a><span class="dim">)</span></td><td class="l">addshl_5_8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zba -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-simd-64.08c36a62d9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/rvp-simd-64.ll">rvp-simd-64.ll</a><span class="dim">)</span></td><td class="l">test_pli_h_v2i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

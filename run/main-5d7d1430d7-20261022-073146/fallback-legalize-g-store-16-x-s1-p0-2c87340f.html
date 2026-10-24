@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE &lt;16 x s1&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE &lt;16 x s1&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-5d7d1430d7-20261022-073146.html">main-5d7d1430d7-20261022-073146</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE &lt;16 x s1&gt;,p0 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 3 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-int.559d2751d0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/fastcc-int.ll">fastcc-int.ll</a><span class="dim">)</span> @callee via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/dKPMbcfc7">https://godbolt.org/z/dKPMbcfc7</a> (llc-assertions-trunk, checked 2026-10-14 11:04 UTC): <a href="https://godbolt.org/z/dKPMbcfc7">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define fastcc i32 @callee() {
+  store &lt;16 x i1&gt; zeroinitializer, ptr null, align 2
+  ret i32 0
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>4</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %0:_(&lt;16 x s1&gt;), %2:_(p0) :: (store (&lt;16 x s1&gt;) into `ptr null`) (in function: callee)<br>warning: Instruction selection used fallback path for callee</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>4</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %0:_(&lt;16 x s1&gt;), %2:_(p0) :: (store (&lt;16 x s1&gt;) into `ptr null`) (in function: callee)
+warning: Instruction selection used fallback path for callee</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-p-ext-vector.883bef211a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/calling-conv-p-ext-vector.ll">calling-conv-p-ext-vector.ll</a><span class="dim">)</span></td><td class="l">test_cc_v16i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-int.559d2751d0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/fastcc-int.ll">fastcc-int.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-int.559d2751d0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/fastcc-int.ll">fastcc-int.ll</a><span class="dim">)</span></td><td class="l">caller</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-int.eaf99120cb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/fastcc-int.ll">fastcc-int.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-int.eaf99120cb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/fastcc-int.ll">fastcc-int.ll</a><span class="dim">)</span></td><td class="l">caller</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

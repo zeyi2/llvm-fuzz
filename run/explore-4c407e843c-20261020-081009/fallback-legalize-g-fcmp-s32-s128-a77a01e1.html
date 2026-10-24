@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FCMP s32,s128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FCMP s32,s128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4c407e843c-20261020-081009.html">explore-4c407e843c-20261020-081009</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FCMP s32,s128</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">14 in 8 configs, 4 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a> @test_load_and_cmp via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4c407e843c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@x = external local_unnamed_addr global fp128, align 16
+@y = external local_unnamed_addr global fp128, align 16
+
+; Function Attrs: nounwind
+define i32 @test_load_and_cmp() #0 {
+  %1 = load fp128, ptr @x, align 16
+  %2 = load fp128, ptr @y, align 16
+  %cmp = fcmp une fp128 %1, %2
+  %3 = zext i1 %cmp to i32
+  ret i32 %3
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(s32) = G_FCMP floatpred(une), %0:_(s128), %2:_ (in function: test_load_and_cmp)
+warning: Instruction selection used fallback path for test_load_and_cmp</pre>
+<h4>Occurrences (14):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a></td><td class="l">test_load_and_cmp</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.316d73aab6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_scalar_ret</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.6e027b5ced.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_scalar_ret</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -mattr=+d -target-abi ilp32d</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.de58c64167.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_scalar_ret</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -target-abi ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.e3a550779d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_scalar_ret</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -frame-pointer=all</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.f32aad21b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_scalar_ret</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -mattr=+f -target-abi ilp32f</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.fa3d7b4ece.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_scalar_ret</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -target-abi ilp32f -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.9073821d7d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fminimum</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.9073821d7d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">lround_f128</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.f3224aceaf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">test_load_and_cmp</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">llvm.sincos.c1eef86abf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/llvm.sincos.ll">llvm.sincos.ll</a><span class="dim">)</span></td><td class="l">test_sincos_f128</td><td class="l"><code>-mtriple=riscv32-linux-gnu -mattr=+d</code></td></tr><tr><td class="l">musttail-indirect-args.5093c1cbfa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_nine_indirect_swap_first_last</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">musttail-indirect-args.5481318af8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_nine_indirect</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">musttail-indirect-args.5b39680983.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_nine_indirect_swap_first_last</td><td class="l"><code>-mtriple=riscv32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

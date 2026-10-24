@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE &lt;3 x s33&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE &lt;3 x s33&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-5d7d1430d7-20261022-073146.html">main-5d7d1430d7-20261022-073146</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE &lt;3 x s33&gt;,p0</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">18 in 6 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a> @test_srem_vec via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @test_srem_vec(ptr %X) #0 {
+  %ld = load &lt;3 x i33&gt;, ptr %X, align 16
+  %srem = srem &lt;3 x i33&gt; %ld, &lt;i33 6, i33 7, i33 -5&gt;
+  %cmp = icmp ne &lt;3 x i33&gt; %srem, &lt;i33 0, i33 1, i33 2&gt;
+  %ext = sext &lt;3 x i1&gt; %cmp to &lt;3 x i33&gt;
+  store &lt;3 x i33&gt; %ext, ptr %X, align 16
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %12:_(&lt;3 x s33&gt;), %0:_(p0) :: (store (&lt;3 x s33&gt;) into %ir.X, align 16) (in function: test_srem_vec)
+warning: Instruction selection used fallback path for test_srem_vec</pre>
+<h4>Occurrences (18):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+m</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">srem-seteq-illegal-types.00444d3c69.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m</code></td></tr><tr><td class="l">srem-seteq-illegal-types.12422e8eed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">srem-seteq-illegal-types.2932cd9041.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">srem-seteq-illegal-types.391fec695b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64</code></td></tr><tr><td class="l">srem-seteq-illegal-types.4472e4d6a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+m</code></td></tr><tr><td class="l">srem-seteq-illegal-types.519d74f4b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+m</code></td></tr><tr><td class="l">srem-seteq-illegal-types.54b5913d23.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v</code></td></tr><tr><td class="l">srem-seteq-illegal-types.5cea03927a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">srem-seteq-illegal-types.a768667847.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv64</code></td></tr><tr><td class="l">srem-seteq-illegal-types.cf9c8ea4be.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m</code></td></tr><tr><td class="l">srem-seteq-illegal-types.f6afc50bfe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v</code></td></tr><tr><td class="l">srem-seteq-illegal-types.fe28f46bc6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

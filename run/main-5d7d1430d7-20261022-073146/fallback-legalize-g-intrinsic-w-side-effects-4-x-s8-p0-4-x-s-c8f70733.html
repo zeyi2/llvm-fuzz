@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;4 x s8&gt;,p0,&lt;4 x s1&gt;,s64,s8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;4 x s8&gt;,p0,&lt;4 x s1&gt;,s64,s8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-5d7d1430d7-20261022-073146.html">main-5d7d1430d7-20261022-073146</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;4 x s8&gt;,p0,&lt;4 x s1&gt;,s64,s8 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stack-protector-vector-clobber.985d61703e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/stack-protector-vector-clobber.ll">stack-protector-vector-clobber.ll</a><span class="dim">)</span> @test_stack_protector_with_vector_clobber via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+@G.1 = external global ptr
+@G.2 = external global &lt;8 x i8&gt;
+@G.3 = external global i128
+
+; Function Attrs: noinline nounwind
+define range(i64 0, -9223372036854775808) i64 @test_stack_protector_with_vector_clobber(ptr nofree noundef %0) #0 {
+  %2 = load i64, ptr %0, align 8
+  %3 = tail call i64 asm sideeffect &quot;&quot;, &quot;={x7},{x7}&quot;(i64 %2)
+  %4 = icmp slt i64 %3, 2
+  br i1 %4, label %7, label %5
+
+5:                                                ; preds = %1
+  %LGV3 = load i128, ptr @G.3, align 4
+  %LGV2 = load &lt;8 x i8&gt;, ptr @G.2, align 8
+  %S = shufflevector &lt;8 x i8&gt; splat (i8 127), &lt;8 x i8&gt; %LGV2, &lt;8 x i32&gt; poison
+  %6 = tail call &lt;vscale x 8 x i64&gt; @llvm.riscv.vle.nxv8i64.p0.i64(&lt;vscale x 8 x i64&gt; poison, ptr nonnull %0, i64 8)
+  tail call void asm sideeffect &quot;&quot;, &quot;~{v0},~{v1},~{v2},~{v3},~{v4},~{v5},~{v6},~{v7},~{v8},~{v9},~{v10},~{v11},~{v12},~{v13},~{v14},~{v15},~{v16},~{v17},~{v18},~{v19},~{v20},~{v21},~{v22},~{v23},~{v24},~{v25},~{v26},~{v27},~{v28},~{v29},~{v30},~{v31},~{memory}&quot;()
+  %C = icmp ult i128 18446744073709551616, %LGV3
+  tail call void @llvm.riscv.vse.nxv8i64.p0.i64(&lt;vscale x 8 x i64&gt; %6, ptr nonnull %0, i64 8)
+  store &lt;8 x i8&gt; %S, ptr poison, align 8
+  store i1 %C, ptr poison, align 1
+  br label %7
+
+7:                                                ; preds = %5, %1
+  %8 = phi i64 [ %3, %5 ], [ 0, %1 ]
+  %LGV = load i32, ptr @G, align 4
+  %G = getelementptr &lt;2 x i64&gt;, ptr %0, i32 %LGV
+  store ptr %G, ptr @G.1, align 8
+  ret i64 %8
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;vscale x 8 x i64&gt; @llvm.riscv.vle.nxv8i64.p0.i64(&lt;vscale x 8 x i64&gt;, ptr captures(none), i64) #1
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.riscv.vse.nxv8i64.p0.i64(&lt;vscale x 8 x i64&gt;, ptr captures(none), i64) #2
+
+attributes #0 = { noinline nounwind &quot;probe-stack&quot;=&quot;inline-asm&quot; &quot;stack-protector-buffer-size&quot;=&quot;8&quot; &quot;target-cpu&quot;=&quot;generic-rv64&quot; &quot;target-features&quot;=&quot;+v&quot; }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+attributes #2 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %14:_(&lt;4 x s8&gt;), %17:_(&lt;4 x s8&gt;), %18:_(p0), %19:_(&lt;4 x s1&gt;), %21:_(s64) :: (store (s8) into `ptr poison`) (in function: test_stack_protector_with_vector_clobber)
+warning: Instruction selection used fallback path for test_stack_protector_with_vector_clobber</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">stack-protector-vector-clobber.985d61703e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/stack-protector-vector-clobber.ll">stack-protector-vector-clobber.ll</a><span class="dim">)</span></td><td class="l">test_stack_protector_with_vector_clobber</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;4 x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;4 x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-5d7d1430d7-20261022-073146.html">main-5d7d1430d7-20261022-073146</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;4 x s32&gt;,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">mul.57104d2d3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/mul.ll">mul.ll</a><span class="dim">)</span> @muli64_m4352 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x i32&gt;
+
+; Function Attrs: nounwind
+define i64 @muli64_m4352(i64 %a) #0 {
+  %LGV = load &lt;4 x i32&gt;, ptr @G.1, align 16
+  %I = insertelement &lt;4 x i32&gt; %LGV, i32 -1, i64 %a
+  %1 = mul i64 %a, -4352
+  store &lt;4 x i32&gt; %I, ptr @G.1, align 16
+  ret i64 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %3:_, %6:_(s32), %7:_(s32) (in function: muli64_m4352)
+warning: Instruction selection used fallback path for muli64_m4352</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">mul.57104d2d3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/mul.ll">mul.ll</a><span class="dim">)</span></td><td class="l">muli64_m4352</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">mul.c15508951e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/mul.ll">mul.ll</a><span class="dim">)</span></td><td class="l">muli64_m4352</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -verify-machineinstrs</code></td></tr><tr><td class="l">reduction-formation.e5338b3540.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a><span class="dim">)</span></td><td class="l">reduce_sum_4xi32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

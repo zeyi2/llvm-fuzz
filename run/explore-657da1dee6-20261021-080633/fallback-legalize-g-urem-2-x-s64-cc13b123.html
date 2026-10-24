@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_UREM &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_UREM &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_UREM &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stack-clash-prologue.0866ba890d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-clash-prologue.ll">stack-clash-prologue.ll</a><span class="dim">)</span> @f11 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global &lt;2 x i64&gt;
+
+define void @f11(i32 %vla_size, i64 %i) #0 {
+  %LGV = load &lt;2 x i64&gt;, ptr @G.3, align 16
+  %a = alloca i32, i32 4096, align 32768
+  %b = getelementptr inbounds i32, ptr %a, i64 %i
+  %L = load &lt;2 x i64&gt;, ptr %b, align 16
+  store volatile i32 1, ptr %b, align 4
+  %B = urem &lt;2 x i64&gt; %L, %LGV
+  %1 = zext i32 %vla_size to i64
+  %vla = alloca i8, i64 %1, align 2048
+  %2 = load volatile i8, ptr %vla, align 2048
+  store &lt;2 x i64&gt; %B, ptr %vla, align 16
+  ret void
+}
+
+attributes #0 = { &quot;probe-stack&quot;=&quot;inline-asm&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %13:_(&lt;2 x s64&gt;) = G_UREM %11:_, %4:_ (in function: f11)
+warning: Instruction selection used fallback path for f11</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">stack-clash-prologue.0866ba890d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-clash-prologue.ll">stack-clash-prologue.ll</a><span class="dim">)</span></td><td class="l">f11</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -O2</code></td></tr><tr><td class="l">stack-clash-prologue.187bcd492f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-clash-prologue.ll">stack-clash-prologue.ll</a><span class="dim">)</span></td><td class="l">f11</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

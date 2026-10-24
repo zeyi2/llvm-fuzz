@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SELECT &lt;8 x s64&gt;,&lt;8 x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SELECT &lt;8 x s64&gt;,&lt;8 x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-a4bd6bd2e6-20261024-074900.html">main-a4bd6bd2e6-20261024-074900</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SELECT &lt;8 x s64&gt;,&lt;8 x s1&gt;</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/combine-storetomstore.ll">combine-storetomstore.ll</a> @test_masked_store_success_v8i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-- -mattr=+m,+v,+f</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test_masked_store_success_v8i64(&lt;8 x i64&gt; %x, ptr %ptr, &lt;8 x i1&gt; %mask) {
+  %load = load &lt;8 x i64&gt;, ptr %ptr, align 32
+  %sel = select &lt;8 x i1&gt; %mask, &lt;8 x i64&gt; %x, &lt;8 x i64&gt; %load
+  store &lt;8 x i64&gt; %sel, ptr %ptr, align 32
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-- -mattr=+m,+v,+f -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-- -mattr=+m,+v,+f -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(&lt;8 x s64&gt;) = G_SELECT %2:_(&lt;8 x s1&gt;), %0:_, %5:_ (in function: test_masked_store_success_v8i64)
+warning: Instruction selection used fallback path for test_masked_store_success_v8i64</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/combine-storetomstore.ll">combine-storetomstore.ll</a></td><td class="l">test_masked_store_success_v8i64</td><td class="l"><code>-mtriple=riscv64-- -mattr=+m,+v,+f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/combine-storetomstore.ll">combine-storetomstore.ll</a></td><td class="l">test_masked_store_success_v8f64</td><td class="l"><code>-mtriple=riscv64-- -mattr=+m,+v,+f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/combine-storetomstore.ll">combine-storetomstore.ll</a></td><td class="l">test_masked_store_multiple_v8i64</td><td class="l"><code>-mtriple=riscv64-- -mattr=+m,+v,+f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/combine-storetomstore.ll">combine-storetomstore.ll</a></td><td class="l">test_masked_store_unaligned_v8i64</td><td class="l"><code>-mtriple=riscv64-- -mattr=+m,+v,+f</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

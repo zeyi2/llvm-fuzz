@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;2 x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;2 x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;2 x s16&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-simd-32.5fc36dced8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span> @test_psas_x_h via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;2 x i16&gt;
+
+define &lt;2 x i16&gt; @test_psas_x_h(&lt;2 x i16&gt; %a, &lt;2 x i16&gt; %b) {
+  %B = add &lt;2 x i16&gt; %a, %a
+  %res = call &lt;2 x i16&gt; @llvm.riscv.psas.v2i16(&lt;2 x i16&gt; %a, &lt;2 x i16&gt; %b)
+  store &lt;2 x i16&gt; %B, ptr @G.2, align 4
+  ret &lt;2 x i16&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i16&gt; @llvm.riscv.psas.v2i16(&lt;2 x i16&gt;, &lt;2 x i16&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %3:_(&lt;2 x s16&gt;) = G_INTRINSIC intrinsic(@llvm.riscv.psas), %0:_(&lt;2 x s16&gt;), %1:_(&lt;2 x s16&gt;) (in function: test_psas_x_h)
+warning: Instruction selection used fallback path for test_psas_x_h</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rvp-simd-32.5fc36dced8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_psas_x_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SUB &lt;4 x s8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SUB &lt;4 x s8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-a4bd6bd2e6-20261024-074900.html">main-a4bd6bd2e6-20261024-074900</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SUB &lt;4 x s8&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-simd-32.70b277dacc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span> @test_psrem_b via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i8&gt;
+@G.1 = external global &lt;4 x i8&gt;
+
+define &lt;4 x i8&gt; @test_psrem_b(&lt;4 x i8&gt; %a, &lt;4 x i8&gt; %b) {
+  %LGV = load &lt;4 x i8&gt;, ptr @G, align 4
+  %res = srem &lt;4 x i8&gt; %a, %b
+  %B = sub &lt;4 x i8&gt; %res, %LGV
+  store &lt;4 x i8&gt; %B, ptr @G.1, align 4
+  ret &lt;4 x i8&gt; %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;4 x s8&gt;) = G_SUB %4:_, %2:_ (in function: test_psrem_b)
+warning: Instruction selection used fallback path for test_psrem_b</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rvp-simd-32.70b277dacc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_psrem_b</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

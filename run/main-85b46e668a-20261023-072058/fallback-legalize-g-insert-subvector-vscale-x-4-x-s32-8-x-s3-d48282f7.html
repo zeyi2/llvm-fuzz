@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_SUBVECTOR &lt;vscale x 4 x s32&gt;,&lt;8 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_SUBVECTOR &lt;vscale x 4 x s32&gt;,&lt;8 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-85b46e668a-20261023-072058.html">main-85b46e668a-20261023-072058</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_SUBVECTOR &lt;vscale x 4 x s32&gt;,&lt;8 x s32&gt;</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a> @used_arg_lmul2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 85b46e668a</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i32&gt; @used_arg_lmul2(&lt;8 x i32&gt; %a, &lt;8 x i32&gt; %b) #0 {
+entry:
+  %sum = add &lt;8 x i32&gt; %a, %b
+  ret &lt;8 x i32&gt; %sum
+}
+
+attributes #0 = { &quot;zero-call-used-regs&quot;=&quot;used-arg&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(&lt;vscale x 4 x s32&gt;) = G_INSERT_SUBVECTOR %5:_, %4:_(&lt;8 x s32&gt;), 0 (in function: used_arg_lmul2)
+warning: Instruction selection used fallback path for used_arg_lmul2</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a></td><td class="l">vmadd_non_constant</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a></td><td class="l">vmadd_fixed_no_chain</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a></td><td class="l">vmadd_fixed</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a></td><td class="l">vmadd_fixed_long</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a></td><td class="l">used_arg_lmul2</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l">vmadd-reassociate.37b5a79f30.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a><span class="dim">)</span></td><td class="l">vmadd_fixed_no_chain</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">vmadd-reassociate.7265d3bc28.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a><span class="dim">)</span></td><td class="l">vmadd_fixed</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">vmadd-reassociate.7c4367ed38.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a><span class="dim">)</span></td><td class="l">vmadd_fixed</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">vmadd-reassociate.7c4367ed38.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/vmadd-reassociate.ll">vmadd-reassociate.ll</a><span class="dim">)</span></td><td class="l">vmadd_fixed_long</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">zero-call-used-regs-v.311049b538.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/zero-call-used-regs-v.ll">zero-call-used-regs-v.ll</a><span class="dim">)</span></td><td class="l">used_arg_lmul2</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

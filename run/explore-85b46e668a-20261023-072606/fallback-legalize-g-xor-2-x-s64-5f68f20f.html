@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_XOR &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_XOR &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-85b46e668a-20261023-072606.html">explore-85b46e668a-20261023-072606</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_XOR &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64m-exhaustive-w-insts.6eb13569bb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/rv64m-exhaustive-w-insts.ll">rv64m-exhaustive-w-insts.ll</a><span class="dim">)</span> @sext_mulw_sext_aext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 85b46e668a</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define signext i32 @sext_mulw_sext_aext(i32 signext %a, i32 %b) #0 {
+  %A = alloca &lt;2 x i64&gt;, align 16
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %LGV = load &lt;2 x i64&gt;, ptr @G, align 16
+  %B = xor &lt;2 x i64&gt; splat (i64 4294967296), %LGV
+  %1 = mul i32 %a, %b
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;2 x s64&gt;) = G_XOR %9:_, %7:_ (in function: sext_mulw_sext_aext)
+warning: Instruction selection used fallback path for sext_mulw_sext_aext</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64m-exhaustive-w-insts.6eb13569bb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/rv64m-exhaustive-w-insts.ll">rv64m-exhaustive-w-insts.ll</a><span class="dim">)</span></td><td class="l">sext_mulw_sext_aext</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

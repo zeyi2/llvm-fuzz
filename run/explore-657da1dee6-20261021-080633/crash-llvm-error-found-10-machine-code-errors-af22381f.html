@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 10 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 10 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 10 machine code errors. <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-gprs.7b9cedad8c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span> @callee via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/sGsbz38fq">https://godbolt.org/z/sGsbz38fq</a> (llc-assertions-trunk, checked 2026-10-21 08:16 UTC): <a href="https://godbolt.org/z/sGsbz38fq">G</a> <span class="fp">crashes differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @callee([32 x i32] %val, i32 %LGV1) {
+  %val1 = load [32 x i32], ptr null, align 4
+  %I = insertvalue [32 x i32] %val1, i32 %LGV1, 25
+  store [32 x i32] %I, ptr poison, align 4
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After RISC-V Load / Store Optimizer<br># Machine code for function callee: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>50</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After RISC-V Load / Store Optimizer
+# Machine code for function callee: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+Frame Objects:
+  fi#-27: size=4, align=4, fixed, at location [SP+104]
+  fi#-26: size=4, align=4, fixed, at location [SP+100]
+  fi#-25: size=4, align=4, fixed, at location [SP+96]
+  fi#-24: size=4, align=4, fixed, at location [SP+92]
+  fi#-23: size=4, align=4, fixed, at location [SP+88]
+  fi#-22: size=4, align=4, fixed, at location [SP+84]
+  fi#-21: size=4, align=4, fixed, at location [SP+80]
+  fi#-20: size=4, align=4, fixed, at location [SP+76]
+  fi#-19: size=4, align=4, fixed, at location [SP+72]
+  fi#-18: size=4, align=4, fixed, at location [SP+68]
+  fi#-17: size=4, align=4, fixed, at location [SP+64]
+  fi#-16: size=4, align=4, fixed, at location [SP+60]
+  fi#-15: size=4, align=4, fixed, at location [SP+56]
+  fi#-14: size=4, align=4, fixed, at location [SP+52]
+  fi#-13: size=4, align=4, fixed, at location [SP+48]
+  fi#-12: size=4, align=4, fixed, at location [SP+44]
+  fi#-11: size=4, align=4, fixed, at location [SP+40]
+  fi#-10: size=4, align=4, fixed, at location [SP+36]
+  fi#-9: size=4, align=4, fixed, at location [SP+32]
+  fi#-8: size=4, align=4, fixed, at location [SP+28]
+  fi#-7: size=4, align=4, fixed, at location [SP+24]
+  fi#-6: size=4, align=4, fixed, at location [SP+20]
+  fi#-5: size=4, align=4, fixed, at location [SP+16]
+  fi#-4: size=4, align=4, fixed, at location [SP+12]
+  fi#-3: size=4, align=4, fixed, at location [SP+8]
+  fi#-2: size=4, align=4, fixed, at location [SP+4]
+  fi#-1: size=4, align=4, fixed, at location [SP]
+save/restore points:
+save points are empty
+restore points are empty
+Function Live Ins: $x10, $x11, $x12, $x13, $x14, $x15
+bb.0 (%ir-block.0):
+  liveins: $x10, $x11, $x12, $x13, $x14, $x15
+  $x10_x11 = LD_RV32 $x0, 0 :: (load (s32) from `ptr null`), (load (s32) from `ptr null` + 4)
+  renamable $x13 = LW $x2, 104 :: (load (s32) from %fixed-stack.0)
+  $x12 = LW $x0, 8 :: (load (s32) from `ptr null` + 8), (load (s32) from `ptr null` + 12)
+  $x15 = LW $x0, 12 :: (load (s32) from `ptr null` + 8), (load (s32) from `ptr null` + 12)
+  $x14 = LW $x0, 16 :: (load (s32) from `ptr null` + 16), (load (s32) from `ptr null` + 20)
+  $x17 = LW $x0, 20 :: (load (s32) from `ptr null` + 16), (load (s32) from `ptr null` + 20)
+  $x16 = LW $x0, 24 :: (load (s32) from `ptr null` + 24), (load (s32) from `ptr null` + 28)
+  $x7 = LW $x0, 28 :: (load (s32) from `ptr null` + 24), (load (s32) from `ptr null` + 28)
+  $x6 = LW $x0, 32 :: (load (s32) from `ptr null` + 32), (load (s32) from `ptr null` + 36)
+  $x29 = LW $x0, 36 :: (load (s32) from `ptr null` + 32), (load (s32) from `ptr null` + 36)
+  SD_RV32 killed $x10_x11, $x10, 0 :: (store (s32) into `ptr poison`), (store (s32) into `ptr poison` + 4)
+  $x10_x11 = LD_RV32 $x0, 40 :: (load (s32) from `ptr null` + 40), (load (s32) from `ptr null` + 44)
+  SW killed $x12, $x10, 8 :: (store (s32) into `ptr poison` + 8), (store (s32) into `ptr poison` + 12)
+  SW killed $x15, $x10, 12 :: (store (s32) into `ptr poison` + 8), (store (s32) into `ptr poison` + 12)
+  $x12 = LW $x0, 48 :: (load (s32) from `ptr null` + 48), (load (s32) from `ptr null` + 52)
+  $x15 = LW $x0, 52 :: (load (s32) from `ptr null` + 48), (load (s32) from `ptr null` + 52)
+  SW killed $x14, $x10, 16 :: (store (s32) into `ptr poison` + 16), (store (s32) into `ptr poison` + 20)
+  SW killed $x17, $x10, 20 :: (store (s32) into `ptr poison` + 16), (store (s32) into `ptr poison` + 20)
+  $x14 = LW $x0, 56 :: (load (s32) from `ptr null` + 56), (load (s32) from `ptr null` + 60)
+  $x17 = LW $x0, 60 :: (load (s32) from `ptr null` + 56), (load (s32) from `ptr null` + 60)
+  SW killed $x16, $x10, 24 :: (store (s32) into `ptr poison` + 24), (store (s32) into `ptr poison` + 28)
+  SW killed $x7, $x10, 28 :: (store (s32) into `ptr poison` + 24), (store (s32) into `ptr poison` + 28)
+  $x16 = LW $x0, 64 :: (load (s32) from `ptr null` + 64), (load (s32) fr</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-gprs.7b9cedad8c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -target-abi ilp32e -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

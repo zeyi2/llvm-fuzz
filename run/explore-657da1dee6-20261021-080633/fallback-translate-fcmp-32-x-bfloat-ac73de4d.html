@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fcmp &lt;32 x bfloat&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fcmp &lt;32 x bfloat&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fcmp &lt;32 x bfloat&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-bf16.7d14b1ecd1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/fastcc-bf16.ll">fastcc-bf16.ll</a><span class="dim">)</span> @callee via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i16
+@G.1 = external global i16
+@G.2 = external global &lt;32 x i1&gt;
+@G.3 = external global &lt;32 x i1&gt;
+
+; Function Attrs: nounwind
+define fastcc bfloat @callee(&lt;32 x bfloat&gt; %A) #0 {
+  %LGV = load i16, ptr @G, align 2
+  %B = extractelement &lt;32 x bfloat&gt; %A, i32 0
+  %C = fcmp ult &lt;32 x bfloat&gt; %A, %A
+  %B2 = and i16 %LGV, 0
+  store i16 %B2, ptr @G.1, align 2
+  store &lt;32 x i1&gt; %C, ptr @G.2, align 4
+  %C3 = fcmp olt &lt;32 x bfloat&gt; %A, %A
+  store &lt;32 x i1&gt; %C3, ptr @G.3, align 4
+  ret bfloat %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fcmp: &#x27;  %C = fcmp ult &lt;32 x bfloat&gt; %A, %A&#x27; (in function: callee)
+warning: Instruction selection used fallback path for callee</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fastcc-bf16.7d14b1ecd1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/fastcc-bf16.ll">fastcc-bf16.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfbfmin -target-abi=ilp32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

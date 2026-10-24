@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SHL &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SHL &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SHL &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zilsd.257a3f3cea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/zilsd.ll">zilsd.ll</a><span class="dim">)</span> @store via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define void @store(ptr %a, i64 %b) #0 {
+  %LGV1 = load &lt;2 x i64&gt;, ptr @G.1, align 16
+  store i64 %b, ptr %a, align 4
+  %1 = getelementptr i64, ptr %a, i32 11
+  %B = shl &lt;2 x i64&gt; splat (i64 1), %LGV1
+  store i64 %b, ptr %1, align 4
+  store &lt;2 x i64&gt; %B, ptr @G.1, align 16
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(&lt;2 x s64&gt;) = G_SHL %8:_, %4:_(&lt;2 x s64&gt;) (in function: store)
+warning: Instruction selection used fallback path for store</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-sext-zext.388794d54a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/calling-conv-sext-zext.ll">calling-conv-sext-zext.ll</a><span class="dim">)</span></td><td class="l">pass_uint8_as_uint8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">memmove.82946bc394.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/memmove.ll">memmove.ll</a><span class="dim">)</span></td><td class="l">unaligned_memmove1</td><td class="l"><code>-mtriple=riscv64</code></td></tr><tr><td class="l">memmove.84ab308856.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/memmove.ll">memmove.ll</a><span class="dim">)</span></td><td class="l">unaligned_memmove1</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">memmove.9f3326e4a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/memmove.ll">memmove.ll</a><span class="dim">)</span></td><td class="l">unaligned_memmove1</td><td class="l"><code>-mtriple=riscv32 -mattr=+unaligned-scalar-mem</code></td></tr><tr><td class="l">memmove.c0de8f42a4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/memmove.ll">memmove.ll</a><span class="dim">)</span></td><td class="l">unaligned_memmove1</td><td class="l"><code>-mtriple=riscv64 -mattr=+unaligned-scalar-mem</code></td></tr><tr><td class="l">zilsd.257a3f3cea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l">store</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem -verify-machineinstrs</code></td></tr><tr><td class="l">zilsd.41d82cb507.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l">store</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd -verify-machineinstrs</code></td></tr><tr><td class="l">zilsd.ec321b7a59.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l">store</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zilsd-word-align -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

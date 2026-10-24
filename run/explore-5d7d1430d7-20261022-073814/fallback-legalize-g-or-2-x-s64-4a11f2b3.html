@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_OR &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_OR &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5d7d1430d7-20261022-073814.html">explore-5d7d1430d7-20261022-073814</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_OR &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zba.17d95a33bc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span> @shr_and_add via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+xandesperf -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Kf18aToKK">https://godbolt.org/z/Kf18aToKK</a> (llc-assertions-trunk, checked 2026-10-22 07:45 UTC): <a href="https://godbolt.org/z/Kf18aToKK">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i64&gt; @shr_and_add(&lt;2 x i64&gt; %LGV) {
+  %B = or &lt;2 x i64&gt; %LGV, splat (i64 1)
+  ret &lt;2 x i64&gt; %B
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+xandesperf -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>3</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;2 x s64&gt;) = G_OR %0:_, %3:_ (in function: shr_and_add)<br>warning: Instruction selection used fallback path for shr_and_add</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+xandesperf -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>3</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+xandesperf -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+xandesperf -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;2 x s64&gt;) = G_OR %0:_, %3:_ (in function: shr_and_add)
+warning: Instruction selection used fallback path for shr_and_add</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64zba.17d95a33bc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span></td><td class="l">shr_and_add</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+xandesperf -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zba.50faba7e5b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span></td><td class="l">shr_and_add</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zba.b7170b2a6e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span></td><td class="l">shr_and_add</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zba,+zbb,+zbs -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zba.c55090ed3f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span></td><td class="l">shr_and_add</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zba -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zba.fd8a246568.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span></td><td class="l">shr_and_add</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zba,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-scalar.0fdd11d046.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rvp-scalar.ll">rvp-scalar.ll</a><span class="dim">)</span></td><td class="l">test_plui_h_remat</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p</code></td></tr><tr><td class="l">rvp-scalar.ebd817f00f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/rvp-scalar.ll">rvp-scalar.ll</a><span class="dim">)</span></td><td class="l">test_plui_h_remat</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

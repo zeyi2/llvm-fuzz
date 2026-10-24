@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +73 insts: callee (callee-saved-fpr32s.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +73 insts: callee (callee-saved-fpr32s.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+73 insts: callee (callee-saved-fpr32s.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-fpr32s.6d6e420596.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/callee-saved-fpr32s.ll">callee-saved-fpr32s.ll</a><span class="dim">)</span> @callee via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -target-abi ilp32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var = external global [32 x float]
+@G = external global [32 x float]
+
+; Function Attrs: nounwind
+define void @callee() #0 {
+  %val = load [32 x float], ptr @var, align 4
+  %I2 = insertvalue [32 x float] %val, float 1.000000e+00, 2
+  %I = insertvalue [32 x float] %val, float f0x7F7FFFFF, 20
+  %I1 = insertvalue [32 x float] %val, float 4.200000e+01, 6
+  store volatile [32 x float] %I1, ptr @var, align 4
+  store [32 x float] %I, ptr @G, align 4
+  store [32 x float] %I2, ptr @G, align 4
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+f -target-abi ilp32 -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+f -target-abi ilp32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,137 +1,210 @@
+<span class="del">-lui a1, %hi(var)</span>
+<span class="del">-addi a1, a1, %lo(var)</span>
+<span class="del">-flw fa5, 0(a1)</span>
+<span class="del">-flw fa4, 4(a1)</span>
+<span class="del">-flw ft11, 8(a1)</span>
+<span class="del">-flw fa3, 12(a1)</span>
+<span class="del">-flw fa1, 16(a1)</span>
+<span class="del">-flw fa0, 20(a1)</span>
+<span class="del">-flw fa2, 24(a1)</span>
+<span class="del">-flw ft0, 28(a1)</span>
+<span class="del">-flw ft1, 32(a1)</span>
+<span class="del">-flw ft2, 36(a1)</span>
+<span class="del">-flw ft3, 40(a1)</span>
+<span class="del">-flw ft4, 44(a1)</span>
+<span class="del">-flw ft5, 48(a1)</span>
+<span class="del">-flw ft6, 52(a1)</span>
+<span class="del">-flw ft7, 56(a1)</span>
+<span class="del">-flw fa6, 60(a1)</span>
+<span class="del">-flw fa7, 64(a1)</span>
+<span class="del">-flw ft8, 68(a1)</span>
+<span class="del">-flw ft9, 72(a1)</span>
+<span class="del">-flw ft10, 76(a1)</span>
+<span class="del">-flw fs8, 112(a1)</span>
+<span class="del">-flw fs9, 116(a1)</span>
+<span class="del">-flw fs10, 120(a1)</span>
+<span class="del">-flw fs11, 124(a1)</span>
+<span class="del">-flw fs4, 96(a1)</span>
+<span class="del">-flw fs5, 100(a1)</span>
+<span class="del">-flw fs6, 104(a1)</span>
+<span class="del">-flw fs7, 108(a1)</span>
+<span class="del">-flw fs0, 80(a1)</span>
+<span class="del">-flw fs1, 84(a1)</span>
+<span class="del">-flw fs2, 88(a1)</span>
+<span class="del">-flw fs3, 92(a1)</span>
+<span class="del">-fsw fs11, 124(a1)</span>
+<span class="del">-fsw fs10, 120(a1)</span>
+<span class="del">-fsw fs9, 116(a1)</span>
+<span class="del">-fsw fs8, 112(a1)</span>
+<span class="del">-fsw fs7, 108(a1)</span>
+<span class="del">-fsw fs6, 104(a1)</span>
+<span class="del">-fsw fs5, 100(a1)</span>
+<span class="del">-fsw fs4, 96(a1)</span>
+<span class="del">-fsw fs3, 92(a1)</span>
+<span class="del">-fsw fs2, 88(a1)</span>
+<span class="del">-fsw fs1, 84(a1)</span>
+<span class="del">-fsw fs0, 80(a1)</span>
+<span class="del">-fsw ft10, 76(a1)</span>
+<span class="del">-fsw ft9, 72(a1)</span>
+<span class="del">-fsw ft8, 68(a1)</span>
+<span class="del">-fsw fa7, 64(a1)</span>
+<span class="del">-fsw fa6, 60(a1)</span>
+<span class="del">-fsw ft7, 56(a1)</span>
+<span class="del">-fsw ft6, 52(a1)</span>
+<span class="del">-fsw ft5, 48(a1)</span>
+<span class="del">-fsw ft4, 44(a1)</span>
+<span class="del">-fsw ft3, 40(a1)</span>
+<span class="del">-fsw ft2, 36(a1)</span>
+<span class="del">-fsw ft1, 32(a1)</span>
+<span class="del">-lui a0, 270976</span>
+<span class="del">-fsw ft0, 28(a1)</span>
+<span class="del">-sw a0, 24(a1)</span>
+<span class="del">-fsw fa0, 20(a1)</span>
+<span class="del">-fsw fa1, 16(a1)</span>
+<span class="del">-fsw fa3, 12(a1)</span>
+<span class="del">-fsw ft11, 8(a1)</span>
+<span class="del">-fsw fa4, 4(a1)</span>
+<span class="del">-lui a0, %hi(G)</span>
+<span class="del">-addi a0, a0, %lo(G)</span>
+<span class="del">-fsw fa5, 0(a1)</span>
+<span class="del">-fsw fs8, 112(a0)</span>
+<span class="del">-fsw fs9, 116(a0)</span>
+<span class="del">-fsw fs10, 120(a0)</span>
+<span class="del">-fsw fs11, 124(a0)</span>
+<span class="add">+addi sp, sp, -96</span>
+<span class="add">+sw ra, 92(sp)</span>
+<span class="add">+sw s0, 88(sp)</span>
+<span class="add">+sw s1, 84(sp)</span>
+<span class="add">+sw s2, 80(sp)</span>
+<span class="add">+sw s3, 76(sp)</span>
+<span class="add">+sw s4, 72(sp)</span>
+<span class="add">+sw s5, 68(sp)</span>
+<span class="add">+sw s6, 64(sp)</span>
+<span class="add">+sw s7, 60(sp)</span>
+<span class="add">+sw s8, 56(sp)</span>
+<span class="add">+sw s9, 52(sp)</span>
+<span class="add">+sw s10, 48(sp)</span>
+<span class="add">+sw s11, 44(sp)</span>
+<span class="add">+lui a0, %hi(var)</span>
+<span class="add">+lui a1, 260096</span>
+<span class="add">+addi a0, a0, %lo(var)</span>
+<span class="add">+fmv.w.x fa5, a1</span>
+ lui a1, 522240
+ addi a1, a1, -1
+<span class="del">-fsw fs4, 96(a0)</span>
+<span class="del">-fsw fs5, 100(a0)</span>
+<span class="del">-fsw fs6, 104(a0)</span>
+<span class="del">-fsw fs7, 108(a0)</span>
+<span class="del">-sw a1, 80(a0)</span>
+<span class="del">-fsw fs1, 84(a0)</span>
+<span class="del">-fsw fs2, 88(a0)</span>
+<span class="del">-fsw fs3, 92(a0)</span>
+<span class="del">-fsw fa7, 64(a0)</span>
+<span class="del">-fsw ft8, 68(a0)</span>
+<span class="del">-fsw ft9, 72(a0)</span>
+<span class="del">-fsw ft10, 76(a0)</span>
+<span class="del">-fsw ft5, 48(a0)</span>
+<span class="del">-fsw ft6, 52(a0)</span>
+<span class="del">-fsw ft7, 56(a0)</span>
+<span class="del">-fsw fa6, 60(a0)</span>
+<span class="del">-fsw ft1, 32(a0)</span>
+<span class="del">-fsw ft2, 36(a0)</span>
+<span class="del">-fsw ft3, 40(a0)</span>
+<span class="del">-fsw ft4, 44(a0)</span>
+<span class="del">-fsw fa1, 16(a0)</span>
+<span class="del">-fsw fa0, 20(a0)</span>
+<span class="del">-fsw fa2, 24(a0)</span>
+<span class="del">-fsw ft0, 28(a0)</span>
+<span class="del">-fsw fa5, 0(a0)</span>
+<span class="del">-fsw fa4, 4(a0)</span>
+<span class="del">-fsw ft11, 8(a0)</span>
+<span class="del">-fsw fa3, 12(a0)</span>
+<span class="del">-fsw fs8, 112(a0)</span>
+<span class="del">-fsw fs9, 116(a0)</span>
+<span class="del">-fsw fs10, 120(a0)</span>
+<span class="del">-fsw fs11, 124(a0)</span>
+<span class="del">-fsw fs4, 96(a0)</span>
+<span class="del">-fsw fs5, 100(a0)</span>
+<span class="del">-fsw fs6, 104(a0)</span>
+<span class="del">-fsw fs7, 108(a0)</span>
+<span class="del">-fsw fs0, 80(a0)</span>
+<span class="del">-fsw fs1, 84(a0)</span>
+<span class="del">-fsw fs2, 88(a0)</span>
+<span class="del">-fsw fs3, 92(a0)</span>
+<span class="del">-fsw fa7, 64(a0)</span>
+<span class="del">-fsw ft8, 68(a0)</span>
+<span class="del">-fsw ft9, 72(a0)</span>
+<span class="del">-fsw ft10, 76(a0)</span>
+<span class="del">-fsw ft5, 48(a0)</span>
+<span class="del">-fsw ft6, 52(a0)</span>
+<span class="del">-fsw ft7, 56(a0)</span>
+<span class="del">-fsw fa6, 60(a0)</span>
+<span class="del">-fsw ft1, 32(a0)</span>
+<span class="del">-fsw ft2, 36(a0)</span>
+<span class="del">-fsw ft3, 40(a0)</span>
+<span class="del">-fsw ft4, 44(a0)</span>
+<span class="del">-fsw fa1, 16(a0)</span>
+<span class="del">-fsw fa0, 20(a0)</span>
+<span class="del">-fsw fa2, 24(a0)</span>
+<span class="del">-fsw ft0, 28(a0)</span>
+<span class="del">-lui a1, 260096</span>
+<span class="del">-fsw fa5, 0(a0)</span>
+<span class="del">-fsw fa4, 4(a0)</span>
+<span class="add">+lui a2, 270976</span>
+<span class="add">+fmv.w.x fa4, a1</span>
+<span class="add">+fmv.w.x fa3, a2</span>
+<span class="add">+lw s11, 0(a0)</span>
+<span class="add">+sw s11, 16(sp)</span>
+<span class="add">+lw a1, 4(a0)</span>
+<span class="add">+sw a1, 36(sp)</span>
+<span class="add">+lw a1, 8(a0)</span>
+<span class="add">+sw a1, 40(sp)</span>
+<span class="add">+lw t2, 12(a0)</span>
+<span class="add">+sw t2, 32(sp)</span>
+<span class="add">+lw s10, 16(a0)</span>
+<span class="add">+sw s10, 20(sp)</span>
+<span class="add">+lw s9, 20(a0)</span>
+<span class="add">+lw a1, 24(a0)</span>
+<span class="add">+sw a1, 28(sp)</span>
+<span class="add">+lw s8, 28(a0)</span>
+<span class="add">+sw s8, 24(sp)</span>
+<span class="add">+lw s7, 32(a0)</span>
+<span class="add">+lw s6, 36(a0)</span>
+<span class="add">+lw s5, 40(a0)</span>
+<span class="add">+lw s4, 44(a0)</span>
+<span class="add">+lw s3, 48(a0)</span>
+<span class="add">+lw s2, 52(a0)</span>
+<span class="add">+lw s1, 56(a0)</span>
+<span class="add">+lw s0, 60(a0)</span>
+<span class="add">+lw t6, 64(a0)</span>
+<span class="add">+lw t5, 68(a0)</span>
+<span class="add">+lw t4, 72(a0)</span>
+<span class="add">+lw t3, 76(a0)</span>
+<span class="add">+lw t1, 80(a0)</span>
+<span class="add">+lw a1, 84(a0)</span>
+<span class="add">+sw a1, 12(sp)</span>
+<span class="add">+lw a1, 88(a0)</span>
+<span class="add">+lw a2, 92(a0)</span>
+<span class="add">+sw a2, 8(sp)</span>
+<span class="add">+lw t0, 96(a0)</span>
+<span class="add">+lw a7, 100(a0)</span>
+<span class="add">+lw a6, 104(a0)</span>
+<span class="add">+lw a5, 108(a0)</span>
+<span class="add">+lw a4, 112(a0)</span>
+<span class="add">+lw a3, 116(a0)</span>
+<span class="add">+lw a2, 120(a0)</span>
+<span class="add">+lw ra, 124(a0)</span>
+<span class="add">+sw s11, 0(a0)</span>
+<span class="add">+lw s11, 36(sp)</span>
+<span class="add">+sw s11, 4(a0)</span>
+<span class="add">+lw s11, 40(sp)</span>
+<span class="add">+sw s11, 8(a0)</span>
+<span class="add">+sw t2, 12(a0)</span>
+<span class="add">+sw s10, 16(a0)</span>
+<span class="add">+sw s9, 20(a0)</span>
+<span class="add">+mv s11, s9</span>
+<span class="add">+fsw fa3, 24(a0)</span>
+<span class="add">+sw s8, 28(a0)</span>
+<span class="add">+sw s7, 32(a0)</span>
+<span class="add">+mv s10, s7</span>
+<span class="add">+sw s6, 36(a0)</span>
+<span class="add">+mv s9, s6</span>
+<span class="add">+sw s5, 40(a0)</span>
+<span class="add">+mv s8, s5</span>
+<span class="add">+sw s4, 44(a0)</span>
+<span class="add">+mv s7, s4</span>
+<span class="add">+sw s3, 48(a0)</span>
+<span class="add">+mv s6, s3</span>
+<span class="add">+sw s2, 52(a0)</span>
+<span class="add">+mv s5, s2</span>
+<span class="add">+sw s1, 56(a0)</span>
+<span class="add">+mv s4, s1</span>
+<span class="add">+sw s0, 60(a0)</span>
+<span class="add">+mv s3, s0</span>
+<span class="add">+sw t6, 64(a0)</span>
+<span class="add">+mv s2, t6</span>
+<span class="add">+sw t5, 68(a0)</span>
+<span class="add">+mv s1, t5</span>
+<span class="add">+sw t4, 72(a0)</span>
+<span class="add">+mv s0, t4</span>
+<span class="add">+sw t3, 76(a0)</span>
+<span class="add">+mv t6, t3</span>
+<span class="add">+sw t1, 80(a0)</span>
+<span class="add">+mv t4, t1</span>
+<span class="add">+lw t2, 12(sp)</span>
+<span class="add">+sw t2, 84(a0)</span>
+<span class="add">+sw a1, 88(a0)</span>
+<span class="add">+mv t5, a1</span>
+<span class="add">+lw t1, 8(sp)</span>
+<span class="add">+sw t1, 92(a0)</span>
+<span class="add">+sw t0, 96(a0)</span>
+<span class="add">+mv t3, t0</span>
+<span class="add">+sw a7, 100(a0)</span>
+<span class="add">+mv t0, a7</span>
+<span class="add">+sw a6, 104(a0)</span>
+<span class="add">+mv a7, a6</span>
+<span class="add">+sw a5, 108(a0)</span>
+<span class="add">+mv a6, a5</span>
+<span class="add">+sw a4, 112(a0)</span>
+<span class="add">+mv a5, a4</span>
+<span class="add">+sw a3, 116(a0)</span>
+<span class="add">+mv a4, a3</span>
+<span class="add">+sw a2, 120(a0)</span>
+<span class="add">+mv a3, a2</span>
+<span class="add">+lui a1, %hi(G)</span>
+<span class="add">+sw ra, 124(a0)</span>
+<span class="add">+addi a0, a1, %lo(G)</span>
+<span class="add">+lw a1, 40(sp)</span>
+ sw a1, 8(a0)
+<span class="del">-fsw fa3, 12(a0)</span>
+<span class="add">+lw a1, 16(sp)</span>
+<span class="add">+sw a1, 0(a0)</span>
+<span class="add">+lw a2, 36(sp)</span>
+<span class="add">+sw a2, 4(a0)</span>
+<span class="add">+sw a1, 0(a0)</span>
+<span class="add">+sw a2, 4(a0)</span>
+<span class="add">+lw a1, 20(sp)</span>
+<span class="add">+sw a1, 16(a0)</span>
+<span class="add">+sw s11, 20(a0)</span>
+<span class="add">+sw a1, 16(a0)</span>
+<span class="add">+lw a1, 28(sp)</span>
+<span class="add">+sw a1, 24(a0)</span>
+<span class="add">+sw s11, 20(a0)</span>
+<span class="add">+lw a2, 24(sp)</span>
+<span class="add">+sw a2, 28(a0)</span>
+<span class="add">+sw a1, 24(a0)</span>
+<span class="add">+sw a2, 28(a0)</span>
+<span class="add">+sw s10, 32(a0)</span>
+<span class="add">+sw s9, 36(a0)</span>
+<span class="add">+sw s10, 32(a0)</span>
+<span class="add">+sw s8, 40(a0)</span>
+<span class="add">+sw s9, 36(a0)</span>
+<span class="add">+sw s7, 44(a0)</span>
+<span class="add">+sw s8, 40(a0)</span>
+<span class="add">+sw s7, 44(a0)</span>
+<span class="add">+sw s6, 48(a0)</span>
+<span class="add">+sw s5, 52(a0)</span>
+<span class="add">+sw s6, 48(a0)</span>
+<span class="add">+sw s4, 56(a0)</span>
+<span class="add">+sw s5, 52(a0)</span>
+<span class="add">+sw s3, 60(a0)</span>
+<span class="add">+sw s4, 56(a0)</span>
+<span class="add">+sw s3, 60(a0)</span>
+<span class="add">+sw s2, 64(a0)</span>
+<span class="add">+sw s1, 68(a0)</span>
+<span class="add">+sw s2, 64(a0)</span>
+<span class="add">+sw s0, 72(a0)</span>
+<span class="add">+sw s1, 68(a0)</span>
+<span class="add">+sw t6, 76(a0)</span>
+<span class="add">+sw s0, 72(a0)</span>
+<span class="add">+sw t6, 76(a0)</span>
+<span class="add">+fsw fa4, 80(a0)</span>
+<span class="add">+sw t2, 84(a0)</span>
+<span class="add">+sw t4, 80(a0)</span>
+<span class="add">+sw t5, 88(a0)</span>
+<span class="add">+sw t2, 84(a0)</span>
+<span class="add">+sw t1, 92(a0)</span>
+<span class="add">+sw t5, 88(a0)</span>
+<span class="add">+sw t1, 92(a0)</span>
+<span class="add">+sw t3, 96(a0)</span>
+<span class="add">+sw t0, 100(a0)</span>
+<span class="add">+sw t3, 96(a0)</span>
+<span class="add">+sw a7, 104(a0)</span>
+<span class="add">+sw t0, 100(a0)</span>
+<span class="add">+sw a6, 108(a0)</span>
+<span class="add">+sw a7, 104(a0)</span>
+<span class="add">+sw a6, 108(a0)</span>
+<span class="add">+sw a5, 112(a0)</span>
+<span class="add">+sw a4, 116(a0)</span>
+<span class="add">+sw a5, 112(a0)</span>
+<span class="add">+sw a3, 120(a0)</span>
+<span class="add">+sw a4, 116(a0)</span>
+<span class="add">+sw ra, 124(a0)</span>
+<span class="add">+sw a3, 120(a0)</span>
+<span class="add">+sw ra, 124(a0)</span>
+<span class="add">+lw a1, 32(sp)</span>
+<span class="add">+sw a1, 12(a0)</span>
+<span class="add">+sw a1, 12(a0)</span>
+<span class="add">+fsw fa5, 8(a0)</span>
+<span class="add">+lw ra, 92(sp)</span>
+<span class="add">+lw s0, 88(sp)</span>
+<span class="add">+lw s1, 84(sp)</span>
+<span class="add">+lw s2, 80(sp)</span>
+<span class="add">+lw s3, 76(sp)</span>
+<span class="add">+lw s4, 72(sp)</span>
+<span class="add">+lw s5, 68(sp)</span>
+<span class="add">+lw s6, 64(sp)</span>
+<span class="add">+lw s7, 60(sp)</span>
+<span class="add">+lw s8, 56(sp)</span>
+<span class="add">+lw s9, 52(sp)</span>
+<span class="add">+lw s10, 48(sp)</span>
+<span class="add">+lw s11, 44(sp)</span>
+<span class="add">+addi sp, sp, 96</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-fpr32s.6d6e420596.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/callee-saved-fpr32s.ll">callee-saved-fpr32s.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -target-abi ilp32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

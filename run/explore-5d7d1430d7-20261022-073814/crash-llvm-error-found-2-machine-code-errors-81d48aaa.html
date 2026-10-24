@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 2 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 2 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5d7d1430d7-20261022-073814.html">explore-5d7d1430d7-20261022-073814</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 2 machine code errors. <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xqcilsm-memset.1122f2c344.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span> @test15b via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/vhW1MKq5j">https://godbolt.org/z/vhW1MKq5j</a> (llc-assertions-trunk, checked 2026-10-22 07:44 UTC): <a href="https://godbolt.org/z/vhW1MKq5j">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test15b(i128 %LGV) {
+  tail call void @llvm.memset.p0.i32(ptr null, i8 0, i32 0, i1 false)
+  store i128 %LGV, ptr poison, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.memset.p0.i32(ptr writeonly captures(none), i8, i32, i1 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After RISC-V Load / Store Optimizer<br># Machine code for function test15b: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm -global-isel=0</code></td><td>0</td><td>8</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After RISC-V Load / Store Optimizer
+# Machine code for function test15b: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+Frame Objects:
+  fi#0: size=4, align=4, at location [SP-4]
+  fi#1: size=4, align=4, at location [SP-8]
+  fi#2: size=4, align=4, at location [SP-12]
+  fi#3: size=4, align=4, at location [SP-16]
+  fi#4: size=4, align=4, at location [SP-20]
+save/restore points:
+save points are empty
+restore points are empty
+Function Live Ins: $x10
+bb.0 (%ir-block.0):
+  liveins: $x10, $x1, $x8, $x9, $x18, $x19
+  $x2 = frame-setup ADDI $x2, -32
+  frame-setup CFI_INSTRUCTION def_cfa_offset 32
+  frame-setup SW killed $x1, $x2, 28 :: (store (s32) into %stack.0)
+  frame-setup SW killed $x8, $x2, 24 :: (store (s32) into %stack.1)
+  frame-setup SW killed $x9, $x2, 20 :: (store (s32) into %stack.2)
+  frame-setup SW killed $x18, $x2, 16 :: (store (s32) into %stack.3)
+  frame-setup SW killed $x19, $x2, 12 :: (store (s32) into %stack.4)
+  frame-setup CFI_INSTRUCTION offset $x1, -4
+  frame-setup CFI_INSTRUCTION offset $x8, -8
+  frame-setup CFI_INSTRUCTION offset $x9, -12
+  frame-setup CFI_INSTRUCTION offset $x18, -16
+  frame-setup CFI_INSTRUCTION offset $x19, -20
+  $x8 = QC_LWMI $x10, 2, 0, implicit-def $x9 :: (load (s32), align 8), (load (s32) from unknown-address + 4)
+  $x18 = QC_LWMI $x10, 2, 8, implicit-def $x19 :: (load (s32) from unknown-address + 8, align 8), (load (s32) from unknown-address + 12)
+  $x10 = ADDI $x0, 0
+  $x11 = ADDI $x0, 0
+  $x12 = ADDI $x0, 0
+  PseudoCALL target-flags(riscv-call) &amp;memset, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $x0_h $x1_h $x8_h $x9_h $x18_h $x19_h $x20_h $x21_h $x22_h $x23_h $x24_h $x25_h $x26_h $x27_h $x0_w $x1_w $x8_w $x9_w and 17 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit $x12
+  QC_SWMI killed $x8, $x10, 2, 0, implicit killed $x9 :: (store (s32) into `ptr poison`), (store (s32) into `ptr poison` + 4)
+  QC_SWMI killed $x18, $x10, 2, 8, implicit killed $x19 :: (store (s32) into `ptr poison` + 8), (store (s32) into `ptr poison` + 12)
+  $x1 = frame-destroy LW $x2, 28 :: (load (s32) from %stack.0)
+  $x8 = frame-destroy LW $x2, 24 :: (load (s32) from %stack.1)
+  $x9 = frame-destroy LW $x2, 20 :: (load (s32) from %stack.2)
+  $x18 = frame-destroy LW $x2, 16 :: (load (s32) from %stack.3)
+  $x19 = frame-destroy LW $x2, 12 :: (load (s32) from %stack.4)
+  frame-destroy CFI_INSTRUCTION restore $x1
+  frame-destroy CFI_INSTRUCTION restore $x8
+  frame-destroy CFI_INSTRUCTION restore $x9
+  frame-destroy CFI_INSTRUCTION restore $x18
+  frame-destroy CFI_INSTRUCTION restore $x19
+  $x2 = frame-destroy ADDI $x2, 32
+  frame-destroy CFI_INSTRUCTION def_cfa_offset 0
+  PseudoRET
+# End machine code for function test15b.
+*** Bad machine code: Using an undefined physical register ***
+- function:    test15b
+- basic block: %bb.0  (0x5576c7fb9470)
+- instruction: QC_SWMI killed $x8, $x10, 2, 0, implicit killed $x9 :: (store (s32) into `ptr poison`), (store (s32) into `ptr poison` + 4)
+- operand 1:   $x10
+*** Bad machine code: Using an undefined physical register ***
+- function:    test15b
+- basic block: %bb.0  (0x5576c7fb9470)
+- instruction: QC_SWMI killed $x18, $x10, 2, 8, implicit killed $x19 :: (store (s32) into `ptr poison` + 8), (store (s32) into `ptr poison` + 12)
+- operand 1:   $x10
+LLVM ERROR: Found 2 machine code errors.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Verify generated machine code&#x27; on function &#x27;@test15b&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PAT</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">xqcilsm-memset.1122f2c344.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +85 insts: fld_fsd_constant (double-mem.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +85 insts: fld_fsd_constant (double-mem.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5d7d1430d7-20261022-073814.html">explore-5d7d1430d7-20261022-073814</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+85 insts: fld_fsd_constant (double-mem.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-mem.44cd4ad178.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/double-mem.ll">double-mem.ll</a><span class="dim">)</span> @fld_fsd_constant via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+; Function Attrs: nounwind
+define dso_local double @fld_fsd_constant(double %a) #0 {
+  %A11 = alloca i1, align 1
+  store i1 true, ptr %A11, align 1
+  %A9 = alloca i1, align 1
+  store i1 true, ptr %A9, align 1
+  %A = alloca i128, align 8
+  store i128 -170141183460469231731687303715884105728, ptr %A, align 4
+  %1 = inttoptr i32 -559038737 to ptr
+  %L = load i128, ptr %1, align 4
+  %2 = load volatile double, ptr %1, align 8
+  %3 = fadd double %a, %2
+  %L1 = load i128, ptr %A, align 4
+  switch i128 %L1, label %SW_D [
+    i128 16825487932998630535, label %SW_C
+    i128 17991466054390011633, label %SW_C2
+    i128 16388269529691961006, label %SW_C3
+    i128 9457883115066350551, label %SW_C4
+    i128 13688962303513592304, label %SW_C5
+    i128 12160690217386428228, label %SW_C6
+    i128 4497414133775182115, label %SW_C7
+    i128 34204197046786047, label %SW_C8
+  ]
+
+BB:                                               ; preds = %SW_C8, %SW_C7, %SW_C6, %SW_C5, %SW_C4, %SW_C3, %SW_C2, %SW_C
+  store double %3, ptr %1, align 8
+  ret double %3
+
+SW_D:                                             ; preds = %0
+  ret double %2
+
+SW_C:                                             ; preds = %0
+  br label %BB
+
+SW_C2:                                            ; preds = %0
+  br label %BB
+
+SW_C3:                                            ; preds = %0
+  br label %BB
+
+SW_C4:                                            ; preds = %SW_C4, %0
+  %LGV = load i1, ptr @G.1, align 1
+  br i1 %LGV, label %BB, label %SW_C4
+
+SW_C5:                                            ; preds = %SW_C5, %0
+  %L10 = load i1, ptr %A9, align 1
+  br i1 %L10, label %SW_C5, label %BB
+
+SW_C6:                                            ; preds = %0
+  br label %BB
+
+SW_C7:                                            ; preds = %0
+  br label %BB
+
+SW_C8:                                            ; preds = %SW_C8, %0
+  %L12 = load i1, ptr %A11, align 1
+  br i1 %L12, label %SW_C8, label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,80 +1,184 @@
+<span class="del">-addi sp, sp, -32</span>
+<span class="add">+addi sp, sp, -48</span>
+<span class="add">+sw ra, 44(sp)</span>
+<span class="add">+sw s0, 40(sp)</span>
+<span class="add">+sw s1, 36(sp)</span>
+<span class="add">+sw s2, 32(sp)</span>
+<span class="add">+sw s3, 28(sp)</span>
+<span class="add">+sw s4, 24(sp)</span>
+<span class="add">+lui s2, 912092</span>
+ li a2, 1
+<span class="del">-lui a4, 912092</span>
+<span class="del">-sb a2, 31(sp)</span>
+<span class="del">-sb a2, 30(sp)</span>
+<span class="del">-lui a5, 524288</span>
+<span class="del">-sw zero, 8(sp)</span>
+<span class="del">-sw zero, 12(sp)</span>
+<span class="del">-sw zero, 16(sp)</span>
+<span class="del">-sw a5, 20(sp)</span>
+<span class="del">-lw a2, -273(a4)</span>
+<span class="del">-lw a3, -269(a4)</span>
+<span class="del">-seqz a6, a5</span>
+<span class="del">-sgtz a7, a5</span>
+<span class="del">-addi a6, a6, -1</span>
+<span class="del">-and a6, a6, a7</span>
+<span class="del">-bnez a6, .L0</span>
+<span class="del">-lui a6, 225241</span>
+<span class="add">+lui a3, 524288</span>
+<span class="add">+sb a2, 23(sp)</span>
+<span class="add">+sb a2, 22(sp)</span>
+<span class="add">+mv a2, sp</span>
+<span class="add">+sw zero, 4(a2)</span>
+<span class="add">+sw zero, 8(a2)</span>
+<span class="add">+sw a3, 12(a2)</span>
+<span class="add">+sw zero, 0(sp)</span>
+<span class="add">+lw s0, -273(s2)</span>
+<span class="add">+lw s1, -269(s2)</span>
+<span class="add">+lui a2, 84544</span>
+<span class="add">+lui a3, 778127</span>
+<span class="add">+addi s3, a2, 496</span>
+<span class="add">+addi s4, a3, 1712</span>
+<span class="add">+fmv.d a2, s0</span>
+<span class="add">+call __adddf3</span>
+<span class="add">+lw a2, 4(sp)</span>
+<span class="add">+lw a3, 0(sp)</span>
+<span class="add">+lw a4, 8(sp)</span>
+<span class="add">+beq a2, s4, .L0</span>
+<span class="add">+sltu a5, a2, s4</span>
+<span class="add">+j .L1</span>
+<span class="add">+.L0:</span>
+<span class="add">+sltu a5, a3, s3</span>
+<span class="add">+.L1:</span>
+<span class="add">+xori t0, a5, 1</span>
+<span class="add">+lw a5, 12(sp)</span>
+<span class="add">+sltiu a7, a4, 0</span>
+<span class="add">+bnez a4, .L2</span>
+<span class="add">+slti a6, a5, 0</span>
+<span class="add">+bnez a5, .L3</span>
+<span class="add">+.L4:</span>
+<span class="add">+bnez t0, .L5</span>
+<span class="add">+.L6:</span>
+<span class="add">+lui t0, 537618</span>
+<span class="add">+lui t1, 297758</span>
+<span class="add">+addi t0, t0, 1685</span>
+<span class="add">+addi t1, t1, -1065</span>
+<span class="add">+beq a2, t0, .L7</span>
+<span class="add">+sltu t2, a2, t0</span>
+<span class="add">+xori t2, t2, 1</span>
+<span class="add">+bnez a4, .L8</span>
+<span class="add">+j .L9</span>
+<span class="add">+.L2:</span>
+<span class="add">+xori t0, a7, 1</span>
+<span class="add">+slti a6, a5, 0</span>
+<span class="add">+beqz a5, .L4</span>
+<span class="add">+.L3:</span>
+<span class="add">+xori t0, a6, 1</span>
+<span class="add">+beqz t0, .L6</span>
+<span class="add">+.L5:</span>
+<span class="add">+lui t0, 956418</span>
+<span class="add">+lui t1, 241684</span>
+<span class="add">+addi t0, t0, 1057</span>
+<span class="add">+addi t1, t1, -889</span>
+<span class="add">+beq a2, t0, .L10</span>
+<span class="add">+sltu t2, a2, t0</span>
+<span class="add">+xori t2, t2, 1</span>
+<span class="add">+bnez a4, .L11</span>
+<span class="add">+j .L12</span>
+<span class="add">+.L7:</span>
+<span class="add">+sltu t2, a3, t1</span>
+<span class="add">+xori t2, t2, 1</span>
+<span class="add">+beqz a4, .L9</span>
+<span class="add">+.L8:</span>
+<span class="add">+xori t2, a7, 1</span>
+<span class="add">+.L9:</span>
+<span class="add">+bnez a5, .L13</span>
+<span class="add">+bnez t2, .L14</span>
+<span class="add">+.L15:</span>
+<span class="add">+lui a6, 224465</span>
+<span class="add">+lui a7, 1944</span>
+ addi a6, a6, 2047
+<span class="del">-or a6, a5, a6</span>
+<span class="del">-beqz a6, .L1</span>
+<span class="del">-lui a6, 784379</span>
+<span class="del">-addi a6, a6, -141</span>
+<span class="add">+addi a7, a7, 1161</span>
+<span class="add">+xor a6, a3, a6</span>
+<span class="add">+xor a7, a2, a7</span>
+<span class="add">+or a6, a6, a7</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+or a5, a6, a4</span>
+<span class="add">+beqz a5, .L16</span>
+<span class="add">+lui a5, 571355</span>
+<span class="add">+lui a6, 255648</span>
+<span class="add">+addi a5, a5, -1757</span>
+<span class="add">+addi a6, a6, 1619</span>
+<span class="add">+j .L17</span>
+<span class="add">+.L10:</span>
+<span class="add">+sltu t2, a3, t1</span>
+<span class="add">+xori t2, t2, 1</span>
+<span class="add">+beqz a4, .L12</span>
+<span class="add">+.L11:</span>
+<span class="add">+xori t2, a7, 1</span>
+<span class="add">+.L12:</span>
+<span class="add">+bnez a5, .L18</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+bnez t2, .L19</span>
+<span class="add">+.L20:</span>
+<span class="add">+xor a5, a3, s3</span>
+<span class="add">+xor a6, a2, s4</span>
+ or a5, a5, a6
+<span class="del">-beqz a5, .L2</span>
+<span class="del">-j .L3</span>
+<span class="del">-bnez a6, .L4</span>
+<span class="del">-lui a6, 778191</span>
+<span class="del">-addi a6, a6, 2032</span>
+<span class="del">-or a6, a5, a6</span>
+<span class="del">-beqz a6, .L5</span>
+<span class="del">-lui a6, 1031935</span>
+<span class="del">-addi a6, a6, 1774</span>
+<span class="add">+or a5, a5, a4</span>
+<span class="add">+beqz a5, .L21</span>
+<span class="add">+lui a5, 1018459</span>
+<span class="add">+lui a6, 931565</span>
+<span class="add">+addi a5, a5, 1710</span>
+<span class="add">+addi a6, a6, 1102</span>
+<span class="add">+j .L17</span>
+<span class="add">+.L13:</span>
+<span class="add">+xori t2, a6, 1</span>
+<span class="add">+beqz t2, .L15</span>
+<span class="add">+.L14:</span>
+<span class="add">+xor a6, a3, t1</span>
+<span class="add">+xor a7, a2, t0</span>
+<span class="add">+or a6, a6, a7</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+or a5, a6, a4</span>
+<span class="add">+beqz a5, .L22</span>
+<span class="add">+lui a5, 618028</span>
+<span class="add">+lui a6, 691255</span>
+<span class="add">+addi a5, a5, 1860</span>
+<span class="add">+addi a6, a6, 850</span>
+<span class="add">+j .L17</span>
+<span class="add">+.L18:</span>
+<span class="add">+xori t2, a6, 1</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+beqz t2, .L20</span>
+<span class="add">+.L19:</span>
+<span class="add">+xor a5, a3, t1</span>
+<span class="add">+xor a6, a2, t0</span>
+ or a5, a5, a6
+<span class="del">-beqz a5, .L2</span>
+<span class="del">-j .L3</span>
+<span class="del">-.L0:</span>
+<span class="del">-lui a6, 835360</span>
+<span class="del">-addi a6, a6, -41</span>
+<span class="del">-or a6, a5, a6</span>
+<span class="del">-beqz a6, .L6</span>
+<span class="del">-lui a6, 781887</span>
+<span class="del">-addi a6, a6, 1878</span>
+<span class="del">-or a5, a5, a6</span>
+<span class="del">-beqz a5, .L2</span>
+<span class="del">-j .L3</span>
+<span class="del">-.L4:</span>
+<span class="del">-lui a6, 1030164</span>
+<span class="del">-addi a6, a6, -857</span>
+<span class="del">-or a6, a5, a6</span>
+<span class="del">-beqz a6, .L2</span>
+<span class="del">-lui a6, 1023725</span>
+<span class="del">-addi a6, a6, 2045</span>
+<span class="del">-or a5, a5, a6</span>
+<span class="del">-beqz a5, .L2</span>
+<span class="del">-.L3:</span>
+<span class="del">-fmv.d a0, a2</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="add">+or a5, a5, a4</span>
+<span class="add">+beqz a5, .L23</span>
+<span class="add">+lui a5, 755365</span>
+<span class="add">+lui a6, 1022696</span>
+<span class="add">+addi a5, a5, 1777</span>
+<span class="add">+addi a6, a6, 1805</span>
+<span class="add">+.L17:</span>
+<span class="add">+xor a3, a3, a5</span>
+<span class="add">+xor a2, a2, a6</span>
+<span class="add">+or a2, a3, a2</span>
+<span class="add">+or a2, a2, a4</span>
+<span class="add">+bnez a2, .L24</span>
+<span class="add">+.L23:</span>
+<span class="add">+sw a0, -273(s2)</span>
+<span class="add">+sw a1, -269(s2)</span>
+<span class="add">+.L25:</span>
+<span class="add">+lw ra, 44(sp)</span>
+<span class="add">+lw s0, 40(sp)</span>
+<span class="add">+lw s1, 36(sp)</span>
+<span class="add">+lw s2, 32(sp)</span>
+<span class="add">+lw s3, 28(sp)</span>
+<span class="add">+lw s4, 24(sp)</span>
+<span class="add">+addi sp, sp, 48</span>
+ ret
+<span class="del">-.L1:</span>
+<span class="del">-lbu a5, 31(sp)</span>
+<span class="del">-.L7:</span>
+<span class="del">-bnez a5, .L7</span>
+<span class="del">-j .L2</span>
+<span class="del">-.L5:</span>
+<span class="del">-lbu a5, 30(sp)</span>
+<span class="del">-.L8:</span>
+<span class="del">-bnez a5, .L8</span>
+<span class="del">-j .L2</span>
+<span class="del">-.L6:</span>
+<span class="del">-lui a5, %hi(G.1)</span>
+<span class="del">-lbu a5, %lo(G.1)(a5)</span>
+<span class="del">-.L9:</span>
+<span class="del">-beqz a5, .L9</span>
+<span class="del">-.L2:</span>
+<span class="del">-fadd.d a0, a0, a2</span>
+<span class="del">-sw a0, -273(a4)</span>
+<span class="del">-sw a1, -269(a4)</span>
+<span class="del">-addi sp, sp, 32</span>
+<span class="del">-ret</span>
+<span class="add">+.L16:</span>
+<span class="add">+lbu a2, 23(sp)</span>
+<span class="add">+andi a2, a2, 1</span>
+<span class="add">+.L26:</span>
+<span class="add">+bnez a2, .L26</span>
+<span class="add">+j .L23</span>
+<span class="add">+.L21:</span>
+<span class="add">+lbu a2, 22(sp)</span>
+<span class="add">+andi a2, a2, 1</span>
+<span class="add">+.L27:</span>
+<span class="add">+bnez a2, .L27</span>
+<span class="add">+j .L23</span>
+<span class="add">+.L22:</span>
+<span class="add">+lui a2, %hi(G.1)</span>
+<span class="add">+lbu a2, %lo(G.1)(a2)</span>
+<span class="add">+andi a2, a2, 1</span>
+<span class="add">+.L28:</span>
+<span class="add">+beqz a2, .L28</span>
+<span class="add">+j .L23</span>
+<span class="add">+.L24:</span>
+<span class="add">+fmv.d a0, s0</span>
+<span class="add">+j .L25</span></pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-mem.44cd4ad178.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/double-mem.ll">double-mem.ll</a><span class="dim">)</span></td><td class="l">fld_fsd_constant</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

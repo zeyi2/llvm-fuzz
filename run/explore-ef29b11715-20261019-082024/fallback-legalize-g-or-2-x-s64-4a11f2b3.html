@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_OR &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_OR &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_OR &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 7 configs, 4 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32-move-merge.3041bb6dfc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rv32-move-merge.ll">rv32-move-merge.ll</a><span class="dim">)</span> @pli_b_pair_negative via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define i64 @pli_b_pair_negative() #0 {
+  %LGV = load &lt;2 x i64&gt;, ptr @G, align 16
+  %B = or &lt;2 x i64&gt; %LGV, splat (i64 9223372036854775807)
+  store &lt;2 x i64&gt; %B, ptr @G, align 16
+  ret i64 -144680345676153347
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;2 x s64&gt;) = G_OR %0:_, %2:_ (in function: pli_b_pair_negative)
+warning: Instruction selection used fallback path for pli_b_pair_negative</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fold-mem-offset-zilsd.65cdd522e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/fold-mem-offset-zilsd.ll">fold-mem-offset-zilsd.ll</a><span class="dim">)</span></td><td class="l">test_sh3add_store</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd</code></td></tr><tr><td class="l">fold-mem-offset-zilsd.b1261386fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/fold-mem-offset-zilsd.ll">fold-mem-offset-zilsd.ll</a><span class="dim">)</span></td><td class="l">test_sh3add_store</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+zba</code></td></tr><tr><td class="l">rv32-move-merge.3041bb6dfc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rv32-move-merge.ll">rv32-move-merge.ll</a><span class="dim">)</span></td><td class="l">pli_b_pair_negative</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs</code></td></tr><tr><td class="l">rv32-move-merge.969bc1d47f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rv32-move-merge.ll">rv32-move-merge.ll</a><span class="dim">)</span></td><td class="l">pli_b_pair_negative</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l">rv32zbb.31e37807e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a><span class="dim">)</span></td><td class="l">ctpop_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32zbb.92c7e4a4dc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a><span class="dim">)</span></td><td class="l">ctpop_v2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">split-offsets.87432621ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/split-offsets.ll">split-offsets.ll</a><span class="dim">)</span></td><td class="l">test3</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">split-offsets.a45672be2c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/split-offsets.ll">split-offsets.ll</a><span class="dim">)</span></td><td class="l">test3</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

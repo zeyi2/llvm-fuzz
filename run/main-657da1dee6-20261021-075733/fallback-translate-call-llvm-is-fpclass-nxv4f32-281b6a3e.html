@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.is.fpclass.nxv4f32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.is.fpclass.nxv4f32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-657da1dee6-20261021-075733.html">main-657da1dee6-20261021-075733</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.is.fpclass.nxv4f32</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a> @splat_constant_is_pos_normal via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 4 x i1&gt; @splat_constant_is_pos_normal() {
+  %res = call &lt;vscale x 4 x i1&gt; @llvm.is.fpclass.nxv4f32(&lt;vscale x 4 x float&gt; splat (float 1.000000e+00), /* (psub) */ i32 128)
+  ret &lt;vscale x 4 x i1&gt; %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 4 x i1&gt; @llvm.is.fpclass.nxv4f32(&lt;vscale x 4 x float&gt;, i32 immarg) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+f,+d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+f,+d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.is.fpclass.nxv4f32: &#x27;  %res = call &lt;vscale x 4 x i1&gt; @llvm.is.fpclass.nxv4f32(&lt;vscale x 4 x float&gt; splat (float 1.000000e+00), /* (psub) */ i32 128)&#x27; (in function: splat_constant_is_pos_normal)
+warning: Instruction selection used fallback path for splat_constant_is_pos_normal</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">splat_constant_is_pos_normal</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">splat_constant_isnan_false</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a></td><td class="l">test_full_pinf_vs_pinf</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a></td><td class="l">test_partial_nan_from_nan_pinf</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a></td><td class="l">test_partial_pinf_from_inf</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a></td><td class="l">test_no_overlap_pinf_vs_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/known-fpclass.ll">known-fpclass.ll</a></td><td class="l">test_no_overlap_nan_vs_pinf</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d -target-abi=lp64d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

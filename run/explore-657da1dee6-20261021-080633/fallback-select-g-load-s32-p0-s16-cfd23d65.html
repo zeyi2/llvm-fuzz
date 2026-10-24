@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_LOAD s32,p0,s16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_LOAD s32,p0,s16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_LOAD s32,p0,s16</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 5 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/fp16-promote.ll">fp16-promote.ll</a> @test_fpextend_float via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr +d -target-abi ilp32d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define float @test_fpextend_float(ptr %p) #0 {
+  %a = load half, ptr %p, align 2
+  %r = fpext half %a to float
+  ret float %r
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr +d -target-abi ilp32d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr +d -target-abi ilp32d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %3:fprb(s32) = G_LOAD %0:gprb(p0) :: (load (s16) from %ir.p) (in function: test_fpextend_float)
+warning: Instruction selection used fallback path for test_fpextend_float</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/fp16-promote.ll">fp16-promote.ll</a></td><td class="l">test_fpextend_float</td><td class="l"><code>-mtriple=riscv32 -mattr +d -target-abi ilp32d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/fp16-promote.ll">fp16-promote.ll</a></td><td class="l">test_fpextend_double</td><td class="l"><code>-mtriple=riscv32 -mattr +d -target-abi ilp32d</code></td></tr><tr><td class="l">double-imm.f234c813dc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/double-imm.ll">double-imm.ll</a><span class="dim">)</span></td><td class="l">poison</td><td class="l"><code>-mtriple=riscv64 -mattr=+d -verify-machineinstrs -target-abi=lp64d</code></td></tr><tr><td class="l">double-imm.f3848af7a4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/double-imm.ll">double-imm.ll</a><span class="dim">)</span></td><td class="l">poison</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l">fp16-promote.4db77b2898.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/fp16-promote.ll">fp16-promote.ll</a><span class="dim">)</span></td><td class="l">test_fpextend_double</td><td class="l"><code>-mtriple=riscv32 -mattr +d -target-abi ilp32d</code></td></tr><tr><td class="l">fp16-promote.f4a23c7ded.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/fp16-promote.ll">fp16-promote.ll</a><span class="dim">)</span></td><td class="l">test_fpextend_double</td><td class="l"><code>-mtriple=riscv32 -mattr +d -target-abi ilp32d</code></td></tr><tr><td class="l">saverestore.91cab27eb3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/saverestore.ll">saverestore.ll</a><span class="dim">)</span></td><td class="l">alloca</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+save-restore -target-abi=lp64d</code></td></tr><tr><td class="l">saverestore.c81917bc00.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/saverestore.ll">saverestore.ll</a><span class="dim">)</span></td><td class="l">alloca</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+save-restore -target-abi=ilp32f</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

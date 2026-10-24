@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +52 insts: test21 (sextw-removal.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +52 insts: test21 (sextw-removal.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+52 insts: test21 (sextw-removal.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">sextw-removal.45d1c7cd52.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span> @test21 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zknh,+v -target-abi=lp64f</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+define signext i32 @test21(i64 %arg1, i64 %arg2, i64 %arg3) {
+entry:
+  br label %bb2
+
+bb2:                                              ; preds = %bb2, %entry
+  %i1 = phi i64 [ %arg1, %entry ], [ %i5, %bb2 ]
+  %i2 = phi i64 [ %arg3, %entry ], [ %i3, %bb2 ]
+  %i3 = add i64 %i2, 1
+  %bswap = call i64 @llvm.bswap.i64(i64 %i1)
+  %bitreverse = call i64 @llvm.bitreverse.i64(i64 %bswap)
+  %i4 = and i64 %bitreverse, 1234
+  %i5 = add i64 %i4, %arg2
+  %i6 = icmp ugt i64 %i2, 255
+  br i1 %i6, label %bb7, label %bb2
+
+bb7:                                              ; preds = %bb2
+  %C = icmp ne i64 %arg3, 4294967296
+  %i7 = trunc i64 %i5 to i32
+  store i1 %C, ptr @G, align 1
+  ret i32 %i7
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.bitreverse.i64(i64) #0
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.bswap.i64(i64) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+f,+zknh,+v -target-abi=lp64f -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+f,+zknh,+v -target-abi=lp64f -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,36 +1,88 @@
+<span class="del">-addi a3, a2, -1</span>
+<span class="del">-lui a4, 61681</span>
+<span class="del">-addi a4, a4, -241</span>
+<span class="del">-lui a5, 209715</span>
+<span class="del">-slli a6, a4, 32</span>
+<span class="del">-addi a5, a5, 819</span>
+<span class="del">-add a4, a4, a6</span>
+<span class="del">-slli a6, a5, 32</span>
+<span class="del">-add a5, a5, a6</span>
+<span class="del">-li a6, 256</span>
+<span class="del">-.L0:</span>
+<span class="del">-srli a7, a0, 4</span>
+<span class="del">-and a0, a0, a4</span>
+<span class="del">-and a7, a7, a4</span>
+<span class="add">+addi sp, sp, -16</span>
+<span class="add">+sd s0, 8(sp)</span>
+<span class="add">+sd s1, 0(sp)</span>
+<span class="add">+li a3, 255</span>
+<span class="add">+li a4, 1</span>
+<span class="add">+lui a5, %hi(.L0)</span>
+<span class="add">+slli a4, a4, 32</span>
+<span class="add">+ld a6, %lo(.L0)(a5)</span>
+<span class="add">+lui a5, %hi(.L1)</span>
+<span class="add">+lui t0, %hi(.L2)</span>
+<span class="add">+ld a7, %lo(.L1)(a5)</span>
+<span class="add">+ld t0, %lo(.L2)(t0)</span>
+<span class="add">+lui a5, %hi(G)</span>
+<span class="add">+lui t2, 16</span>
+<span class="add">+addi t1, a2, -1</span>
+<span class="add">+addi t2, t2, -256</span>
+<span class="add">+lui t3, 4080</span>
+<span class="add">+slli t4, a3, 24</span>
+<span class="add">+.L3:</span>
+<span class="add">+slli t5, a0, 56</span>
+<span class="add">+srli t6, a0, 56</span>
+<span class="add">+and s0, a0, t2</span>
+<span class="add">+or t5, t6, t5</span>
+<span class="add">+slli s0, s0, 40</span>
+<span class="add">+or t5, t5, s0</span>
+<span class="add">+srli t6, a0, 40</span>
+<span class="add">+and s0, a0, t3</span>
+<span class="add">+and t6, t6, t2</span>
+<span class="add">+slli s0, s0, 24</span>
+<span class="add">+or t6, t6, s0</span>
+<span class="add">+srli s0, a0, 24</span>
+<span class="add">+and s0, s0, t3</span>
+<span class="add">+and s1, a0, t4</span>
+<span class="add">+slli s1, s1, 8</span>
+<span class="add">+srli a0, a0, 8</span>
+<span class="add">+or s0, s0, s1</span>
+<span class="add">+and a0, a0, t4</span>
+<span class="add">+or t5, t5, t6</span>
+<span class="add">+or a0, s0, a0</span>
+<span class="add">+or a0, t5, a0</span>
+<span class="add">+slli t5, a0, 56</span>
+<span class="add">+srli t6, a0, 56</span>
+<span class="add">+and s0, a0, t2</span>
+<span class="add">+or t5, t6, t5</span>
+<span class="add">+slli s0, s0, 40</span>
+<span class="add">+or t5, t5, s0</span>
+<span class="add">+srli t6, a0, 40</span>
+<span class="add">+and s0, a0, t3</span>
+<span class="add">+and t6, t6, t2</span>
+<span class="add">+slli s0, s0, 24</span>
+<span class="add">+or t6, t6, s0</span>
+<span class="add">+srli s0, a0, 24</span>
+<span class="add">+and s0, s0, t3</span>
+<span class="add">+and s1, a0, t4</span>
+<span class="add">+slli s1, s1, 8</span>
+<span class="add">+srli a0, a0, 8</span>
+<span class="add">+or s0, s0, s1</span>
+<span class="add">+and a0, a0, t4</span>
+<span class="add">+or t5, t5, t6</span>
+<span class="add">+or a0, s0, a0</span>
+<span class="add">+or a0, t5, a0</span>
+<span class="add">+and t5, a0, a6</span>
+ slli a0, a0, 4
+<span class="del">-or a0, a7, a0</span>
+<span class="del">-srli a7, a0, 2</span>
+<span class="del">-and a0, a0, a5</span>
+<span class="del">-and a7, a7, a5</span>
+<span class="add">+srli t5, t5, 4</span>
+<span class="add">+and a0, a0, a6</span>
+<span class="add">+or a0, t5, a0</span>
+<span class="add">+and t5, a0, a7</span>
+ slli a0, a0, 2
+<span class="del">-or a0, a7, a0</span>
+<span class="del">-andi a7, a0, 65</span>
+<span class="del">-srli a0, a0, 1</span>
+<span class="del">-slli a7, a7, 1</span>
+<span class="del">-andi a0, a0, 1104</span>
+<span class="del">-or a0, a0, a7</span>
+<span class="del">-addi a3, a3, 1</span>
+<span class="del">-addw a0, a0, a1</span>
+<span class="del">-bltu a3, a6, .L0</span>
+<span class="del">-li a1, 1</span>
+<span class="del">-slli a1, a1, 32</span>
+<span class="del">-xor a1, a2, a1</span>
+<span class="del">-snez a1, a1</span>
+<span class="del">-lui a2, %hi(G)</span>
+<span class="del">-sb a1, %lo(G)(a2)</span>
+<span class="add">+srli t5, t5, 2</span>
+<span class="add">+and a0, a0, a7</span>
+<span class="add">+or a0, t5, a0</span>
+<span class="add">+and t5, a0, t0</span>
+<span class="add">+slli a0, a0, 1</span>
+<span class="add">+srli t5, t5, 1</span>
+<span class="add">+and a0, a0, t0</span>
+<span class="add">+or a0, t5, a0</span>
+<span class="add">+andi a0, a0, 1234</span>
+<span class="add">+addi t1, t1, 1</span>
+<span class="add">+add a0, a0, a1</span>
+<span class="add">+bgeu a3, t1, .L3</span>
+<span class="add">+xor a2, a2, a4</span>
+<span class="add">+sext.w a0, a0</span>
+<span class="add">+snez a1, a2</span>
+<span class="add">+sb a1, %lo(G)(a5)</span>
+<span class="add">+ld s0, 8(sp)</span>
+<span class="add">+ld s1, 0(sp)</span>
+<span class="add">+addi sp, sp, 16</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">sextw-removal.45d1c7cd52.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">test21</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zknh,+v -target-abi=lp64f</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

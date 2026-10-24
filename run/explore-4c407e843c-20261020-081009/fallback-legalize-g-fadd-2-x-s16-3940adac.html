@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FADD &lt;2 x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FADD &lt;2 x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4c407e843c-20261020-081009.html">explore-4c407e843c-20261020-081009</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FADD &lt;2 x s16&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fp-fcanonicalize.0a007fea6f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span> @fcanonicalize_v2f16_nnan via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4c407e843c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/z8WxsxYYG">https://godbolt.org/z/z8WxsxYYG</a> (llc-assertions-trunk, checked 2026-10-20 08:20 UTC): <a href="https://godbolt.org/z/z8WxsxYYG">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x half&gt; @fcanonicalize_v2f16_nnan() {
+  %B = fadd &lt;2 x half&gt; zeroinitializer, zeroinitializer
+  ret &lt;2 x half&gt; %B
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>3</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(&lt;2 x s16&gt;) = G_FADD %0:_, %0:_ (in function: fcanonicalize_v2f16_nnan)<br>warning: Instruction selection used fallback path for fcanonicalize_v2f16_nnan</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>3</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(&lt;2 x s16&gt;) = G_FADD %0:_, %0:_ (in function: fcanonicalize_v2f16_nnan)
+warning: Instruction selection used fallback path for fcanonicalize_v2f16_nnan</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp-fcanonicalize.0a007fea6f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.9baea16a71.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,+zfh</code></td></tr><tr><td class="l">fp-fcanonicalize.9da30f6535.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv32 --mattr=+d,-zfh</code></td></tr><tr><td class="l">fp-fcanonicalize.b8427dab4b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv64</code></td></tr><tr><td class="l">fp-fcanonicalize.bfbd241a67.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv64 --mattr=+d,+zfh</code></td></tr><tr><td class="l">fp-fcanonicalize.c0cefd192a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.c31d33b7ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv32</code></td></tr><tr><td class="l">fp-fcanonicalize.cda6a5ca60.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.e2ec9bc153.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>--mtriple=riscv64 --mattr=+d,-zfh</code></td></tr><tr><td class="l">fp-fcanonicalize.e30249f11e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.fa291fdd6d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16_nnan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

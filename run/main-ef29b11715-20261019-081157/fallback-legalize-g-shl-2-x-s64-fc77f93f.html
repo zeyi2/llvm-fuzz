@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SHL &lt;2 x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SHL &lt;2 x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-ef29b11715-20261019-081157.html">main-ef29b11715-20261019-081157</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SHL &lt;2 x s64&gt; <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">ghccc-rv32.4fa2fc3357.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/ghccc-rv32.ll">ghccc-rv32.ll</a><span class="dim">)</span> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@base = external global i32
+@sp = external global i32
+@hp = external global i32
+@r1 = external global i32
+@r2 = external global i32
+@r3 = external global i32
+@r4 = external global i32
+@r5 = external global i32
+@r6 = external global i32
+@r7 = external global i32
+@splim = external global i32
+@f1 = external global float
+@f2 = external global float
+@f3 = external global float
+@f4 = external global float
+@f5 = external global float
+@f6 = external global float
+@d2 = external global double
+@d3 = external global double
+@d4 = external global double
+@d5 = external global double
+@d6 = external global double
+@G = external global &lt;2 x i64&gt;
+@G.1 = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define ghccc void @foo() #0 {
+entry:
+  %LGV1 = load &lt;2 x i64&gt;, ptr @G, align 16
+  %0 = load double, ptr @d6, align 8
+  %B2 = fsub double %0, 4.200000e+01
+  %1 = load double, ptr @d5, align 8
+  %2 = load double, ptr @d4, align 8
+  %3 = load double, ptr @d3, align 8
+  %4 = load double, ptr @d2, align 8
+  %5 = load float, ptr @f6, align 4
+  %6 = load float, ptr @f5, align 4
+  %7 = load float, ptr @f4, align 4
+  %8 = load float, ptr @f3, align 4
+  %9 = load float, ptr @f2, align 4
+  %10 = load float, ptr @f1, align 4
+  %11 = load i32, ptr @splim, align 4
+  %12 = load i32, ptr @r7, align 4
+  %13 = load i32, ptr @r6, align 4
+  %14 = load i32, ptr @r5, align 4
+  %15 = load i32, ptr @r4, align 4
+  %B = shl &lt;2 x i64&gt; splat (i64 42), %LGV1
+  %16 = load i32, ptr @r3, align 4
+  %17 = load i32, ptr @r2, align 4
+  %18 = load i32, ptr @r1, align 4
+  %19 = load i32, ptr @hp, align 4
+  %20 = load i32, ptr @sp, align 4
+  %21 = load i32, ptr @base, align 4
+  tail call ghccc void @bar(i32 %21, i32 %20, i32 %19, i32 %18, i32 %17, i32 %16, i32 %15, i32 %14, i32 %13, i32 %12, i32 %11, float %10, float %9, float %8, float %7, float %6, float %5, double %B2, double %4, double %3, double %2, double %1, double %0) #0
+  store &lt;2 x i64&gt; %B, ptr @G.1, align 16
+  ret void
+}
+
+declare ghccc void @bar(i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float, float, double, double, double, double, double, double)
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+f,+d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+f,+d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %38:_(&lt;2 x s64&gt;) = G_SHL %36:_, %0:_(&lt;2 x s64&gt;) (in function: foo)
+warning: Instruction selection used fallback path for foo</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">ghccc-rv32.4fa2fc3357.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/ghccc-rv32.ll">ghccc-rv32.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d</code></td></tr><tr><td class="l">ghccc-rv64.af6f9bea03.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/ghccc-rv64.ll">ghccc-rv64.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

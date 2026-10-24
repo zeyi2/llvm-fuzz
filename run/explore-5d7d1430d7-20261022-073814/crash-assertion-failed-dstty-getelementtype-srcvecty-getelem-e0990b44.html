@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (DstTy.getElementType() == SrcVecTy.getElementType() &amp;&amp; &quot;Extract subvector VTs must have the same element type!&quot;), function buildInstr, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (DstTy.getElementType() == SrcVecTy.getElementType() &amp;&amp; &quot;Extract subvector VTs must have the same element type!&quot;), function buildInstr, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5d7d1430d7-20261022-073814.html">explore-5d7d1430d7-20261022-073814</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (DstTy.getElementType() == SrcVecTy.getElementType() &amp;&amp; &quot;Extract subvector VTs must have the same element type!&quot;), function buildInstr, file MachineIRBuilder.cpp <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">smulh.46fb94b5f5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span> @smulh_v2i48 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Y3dhrv3j3">https://godbolt.org/z/Y3dhrv3j3</a> (llc-assertions-trunk, checked 2026-10-22 07:44 UTC): <a href="https://godbolt.org/z/Y3dhrv3j3">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i48&gt; @smulh_v2i48(&lt;2 x i48&gt; %x) {
+  ret &lt;2 x i48&gt; %x
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1514: virtual llvm::MachineInstrBuilder llvm::MachineIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;): Assertion `DstTy.getElementType() == SrcVecTy.getElementType() &amp;&amp; &quot;Extract subvector VTs must have the same element type!&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -global-isel=0</code></td><td>0</td><td>1</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1515: virtual MachineInstrBuilder llvm::MachineIRBuilder::buildInstr(unsigned int, ArrayRef&lt;DstOp&gt;, ArrayRef&lt;SrcOp&gt;, std::optional&lt;unsigned int&gt;): Assertion `DstTy.getElementType() == SrcVecTy.getElementType() &amp;&amp; &quot;Extract subvector VTs must have the same element type!&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+m,+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@smulh_v2i48&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055aa3a2cc6ab llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055aa3a2c9551 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055aa3a2cd12b
+3  libc.so.6 0x00007f064c045330
+4  libc.so.6 0x00007f064c09ec0c pthread_kill + 284
+5  libc.so.6 0x00007f064c04527e gsignal + 30
+6  libc.so.6 0x00007f064c0288ff abort + 223
+7  libc.so.6 0x00007f064c02881b
+8  libc.so.6 0x00007f064c03b517
+9  llc       0x000055aa3c461585 llvm::MachineIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 12405
+10 llc       0x000055aa3c37406f llvm::CSEMIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 2991
+11 llc       0x000055aa3c45cf6c llvm::MachineIRBuilder::buildExtractSubvector(llvm::DstOp const&amp;, llvm::SrcOp const&amp;, unsigned int) + 76
+12 llc       0x000055aa3b4fc23f
+13 llc       0x000055aa3c369c10 llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 928
+14 llc       0x000055aa3b4f931c
+15 llc       0x000055aa3c3d95e0 llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 3552
+16 llc       0x000055aa3c3da88d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+17 llc       0x000055aa3a897c4d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+18 llc       0x000055aa3a625d47 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+19 llc       0x000055aa3a62e1e2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+20 llc       0x000055aa3a626af0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+21 llc       0x000055aa3a2d3d87 llcMain + 12183
+22 llc       0x000055aa3a20dc6f main + 63
+23 libc.so.6 0x00007f064c02a1ca
+24 libc.so.6 0x00007f064c02a28b __libc_start_main + 139
+25 llc       0x000055aa3a20db65 _start + 37</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">smulh.46fb94b5f5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v</code></td></tr><tr><td class="l">smulh.baff279862.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">umulh.487e21436d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v</code></td></tr><tr><td class="l">umulh.97576b66ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +49 insts: foo (ghccc-rv64.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +49 insts: foo (ghccc-rv64.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+49 insts: foo (ghccc-rv64.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">ghccc-rv64.b58091482e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/ghccc-rv64.ll">ghccc-rv64.ll</a><span class="dim">)</span> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@base = external global i64
+@sp = external global i64
+@hp = external global i64
+@r1 = external global i64
+@r2 = external global i64
+@r3 = external global i64
+@r4 = external global i64
+@r5 = external global i64
+@r6 = external global i64
+@r7 = external global i64
+@splim = external global i64
+@f1 = external global float
+@f2 = external global float
+@f3 = external global float
+@f4 = external global float
+@f5 = external global float
+@f6 = external global float
+@d1 = external global double
+@d2 = external global double
+@d3 = external global double
+@d4 = external global double
+@d5 = external global double
+@d6 = external global double
+@G = external global i16
+@G.1 = external global i16
+@G.2 = external global i1
+
+; Function Attrs: nounwind
+define ghccc void @foo() #0 {
+entry:
+  %C = fcmp false float 4.200000e+01, +qnan
+  %A3 = alloca i16, align 2
+  store i16 poison, ptr %A3, align 2
+  %LGV = load i16, ptr @G.1, align 2
+  %A = alloca i16, align 2
+  store i16 poison, ptr %A, align 2
+  %LGV1 = load i16, ptr @G, align 2
+  %0 = load double, ptr @d6, align 8
+  %1 = load double, ptr @d5, align 8
+  %2 = load double, ptr @d4, align 8
+  %3 = load double, ptr @d3, align 8
+  %4 = load double, ptr @d2, align 8
+  %5 = load double, ptr @d1, align 8
+  %6 = load float, ptr @f6, align 4
+  %B2 = ashr i16 -1, %LGV
+  %B = sdiv i16 -32768, %LGV1
+  %7 = load float, ptr @f5, align 4
+  %8 = load float, ptr @f4, align 4
+  %9 = load float, ptr @f3, align 4
+  %10 = load float, ptr @f2, align 4
+  %11 = load float, ptr @f1, align 4
+  %12 = load i64, ptr @splim, align 4
+  %13 = load i64, ptr @r7, align 4
+  %14 = load i64, ptr @r6, align 4
+  %15 = load i64, ptr @r5, align 4
+  %16 = load i64, ptr @r4, align 4
+  %17 = load i64, ptr @r3, align 4
+  %18 = load i64, ptr @r2, align 4
+  %19 = load i64, ptr @r1, align 4
+  %20 = load i64, ptr @hp, align 4
+  %21 = load i64, ptr @sp, align 4
+  %22 = load i64, ptr @base, align 4
+  tail call ghccc void @bar(i64 %22, i64 %21, i64 %20, i64 %19, i64 %18, i64 %17, i64 %16, i64 %15, i64 %14, i64 %13, i64 %12, float %11, float %10, float %9, float %8, float %7, float %6, double %5, double %4, double %3, double %2, double %1, double %0) #0
+  store i16 %B, ptr %A, align 2
+  store i16 %B2, ptr %A3, align 2
+  store i1 %C, ptr @G.2, align 1
+  ret void
+}
+
+declare ghccc void @bar(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64, i64, float, float, float, float, float, float, double, double, double, double, double, double)
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+f,+d -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+f,+d -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,59 +1,108 @@
+<span class="del">-lui a0, %hi(G)</span>
+<span class="del">-lui a1, %hi(d6)</span>
+<span class="del">-fld fs11, %lo(d6)(a1)</span>
+<span class="del">-lui a1, %hi(d5)</span>
+<span class="del">-fld fs10, %lo(d5)(a1)</span>
+<span class="del">-lui a1, %hi(d4)</span>
+<span class="del">-fld fs9, %lo(d4)(a1)</span>
+<span class="del">-lui a1, %hi(d3)</span>
+<span class="del">-fld fs8, %lo(d3)(a1)</span>
+<span class="del">-lui a1, %hi(d2)</span>
+<span class="del">-fld fs7, %lo(d2)(a1)</span>
+<span class="del">-lui a1, %hi(d1)</span>
+<span class="del">-fld fs6, %lo(d1)(a1)</span>
+<span class="del">-lui a2, %hi(f6)</span>
+<span class="del">-lh a1, %lo(G)(a0)</span>
+<span class="del">-flw fs5, %lo(f6)(a2)</span>
+<span class="add">+lui a0, %hi(G.1)</span>
+<span class="add">+lui a1, %hi(G)</span>
+<span class="add">+lui a2, %hi(d6)</span>
+<span class="add">+lui a3, %hi(d5)</span>
+<span class="add">+lui a4, %hi(d4)</span>
+<span class="add">+lui a5, %hi(d3)</span>
+<span class="add">+lui a6, %hi(d2)</span>
+<span class="add">+lui a7, %hi(d1)</span>
+<span class="add">+lui t0, %hi(f6)</span>
+<span class="add">+li t1, -1</span>
+<span class="add">+lui s11, %hi(f5)</span>
+<span class="add">+lui t2, %hi(splim)</span>
+<span class="add">+addi s8, t2, %lo(splim)</span>
+<span class="add">+lui t2, %hi(r7)</span>
+<span class="add">+addi s9, t2, %lo(r7)</span>
+<span class="add">+lui t2, %hi(r6)</span>
+<span class="add">+addi s10, t2, %lo(r6)</span>
+<span class="add">+lui s7, %hi(r5)</span>
+<span class="add">+addi s7, s7, %lo(r5)</span>
+<span class="add">+lui s6, %hi(r4)</span>
+<span class="add">+addi s6, s6, %lo(r4)</span>
+<span class="add">+lui s4, %hi(r3)</span>
+<span class="add">+addi s4, s4, %lo(r3)</span>
+<span class="add">+lui s3, %hi(r2)</span>
+<span class="add">+addi s3, s3, %lo(r2)</span>
+<span class="add">+lui s1, %hi(r1)</span>
+<span class="add">+addi s1, s1, %lo(r1)</span>
+<span class="add">+lui s0, %hi(hp)</span>
+<span class="add">+addi s0, s0, %lo(hp)</span>
+<span class="add">+lhu a0, %lo(G.1)(a0)</span>
+<span class="add">+lh a1, %lo(G)(a1)</span>
+<span class="add">+fld fs11, %lo(d6)(a2)</span>
+<span class="add">+fld fs10, %lo(d5)(a3)</span>
+<span class="add">+fld fs9, %lo(d4)(a4)</span>
+<span class="add">+fld fs8, %lo(d3)(a5)</span>
+<span class="add">+fld fs7, %lo(d2)(a6)</span>
+<span class="add">+fld fs6, %lo(d1)(a7)</span>
+<span class="add">+flw fs5, %lo(f6)(t0)</span>
+<span class="add">+lui a2, %hi(sp)</span>
+<span class="add">+lui a3, %hi(base)</span>
+<span class="add">+addi s5, a2, %lo(sp)</span>
+<span class="add">+addi s2, a3, %lo(base)</span>
+<span class="add">+sra a0, t1, a0</span>
+<span class="add">+sd a0, 16(sp)</span>
+ lui a0, 1048568
+ call __divdi3
+<span class="del">-lui a1, %hi(f5)</span>
+<span class="del">-lui a2, %hi(f4)</span>
+<span class="del">-flw fs4, %lo(f5)(a1)</span>
+<span class="del">-flw fs3, %lo(f4)(a2)</span>
+<span class="del">-lui a1, %hi(f3)</span>
+<span class="del">-lui a2, %hi(f2)</span>
+<span class="del">-flw fs2, %lo(f3)(a1)</span>
+<span class="del">-flw fs1, %lo(f2)(a2)</span>
+<span class="del">-lui a1, %hi(f1)</span>
+<span class="del">-lui a2, %hi(splim)</span>
+<span class="del">-flw fs0, %lo(f1)(a1)</span>
+<span class="del">-ld s11, %lo(splim)(a2)</span>
+<span class="del">-lui a1, %hi(r7)</span>
+<span class="del">-lui a2, %hi(r6)</span>
+<span class="del">-ld s10, %lo(r7)(a1)</span>
+<span class="del">-ld s9, %lo(r6)(a2)</span>
+<span class="del">-lui a1, %hi(r5)</span>
+<span class="del">-lui a2, %hi(r4)</span>
+<span class="del">-ld s8, %lo(r5)(a1)</span>
+<span class="del">-ld s7, %lo(r4)(a2)</span>
+<span class="del">-lui a1, %hi(r3)</span>
+<span class="del">-lui a2, %hi(r2)</span>
+<span class="del">-ld s6, %lo(r3)(a1)</span>
+<span class="del">-ld s5, %lo(r2)(a2)</span>
+<span class="del">-lui a1, %hi(r1)</span>
+<span class="del">-lui a2, %hi(hp)</span>
+<span class="del">-ld s4, %lo(r1)(a1)</span>
+<span class="del">-ld s3, %lo(hp)(a2)</span>
+<span class="del">-lui a1, %hi(sp)</span>
+<span class="del">-lui a2, %hi(base)</span>
+<span class="del">-ld s2, %lo(sp)(a1)</span>
+<span class="del">-ld s1, %lo(base)(a2)</span>
+<span class="del">-sd a0, 0(sp)</span>
+<span class="add">+sd a0, 8(sp)</span>
+<span class="add">+flw fs4, %lo(f5)(s11)</span>
+<span class="add">+lwu a0, 0(s8)</span>
+<span class="add">+lw a1, 4(s8)</span>
+<span class="add">+lwu a2, 0(s9)</span>
+<span class="add">+lw a3, 4(s9)</span>
+<span class="add">+lwu a4, 0(s10)</span>
+<span class="add">+lw a5, 4(s10)</span>
+<span class="add">+lui a6, %hi(f4)</span>
+<span class="add">+flw fs3, %lo(f4)(a6)</span>
+<span class="add">+lui a6, %hi(f3)</span>
+<span class="add">+flw fs2, %lo(f3)(a6)</span>
+<span class="add">+lui a6, %hi(f2)</span>
+<span class="add">+flw fs1, %lo(f2)(a6)</span>
+<span class="add">+slli a1, a1, 32</span>
+<span class="add">+lui a6, %hi(f1)</span>
+<span class="add">+flw fs0, %lo(f1)(a6)</span>
+<span class="add">+or s11, a1, a0</span>
+<span class="add">+slli a3, a3, 32</span>
+<span class="add">+slli a5, a5, 32</span>
+<span class="add">+lwu a0, 0(s7)</span>
+<span class="add">+lw a1, 4(s7)</span>
+<span class="add">+lwu a6, 0(s6)</span>
+<span class="add">+lw a7, 4(s6)</span>
+<span class="add">+lwu t0, 0(s4)</span>
+<span class="add">+lw t1, 4(s4)</span>
+<span class="add">+lwu t2, 0(s3)</span>
+<span class="add">+lw t3, 4(s3)</span>
+<span class="add">+or s10, a3, a2</span>
+<span class="add">+or s9, a5, a4</span>
+<span class="add">+slli a1, a1, 32</span>
+<span class="add">+slli a7, a7, 32</span>
+<span class="add">+or s8, a1, a0</span>
+<span class="add">+or s7, a7, a6</span>
+<span class="add">+slli t1, t1, 32</span>
+<span class="add">+slli t3, t3, 32</span>
+<span class="add">+lwu a0, 0(s1)</span>
+<span class="add">+lw a1, 4(s1)</span>
+<span class="add">+lwu a2, 0(s0)</span>
+<span class="add">+lw a3, 4(s0)</span>
+<span class="add">+lwu a4, 0(s5)</span>
+<span class="add">+lw a5, 4(s5)</span>
+<span class="add">+lwu a6, 0(s2)</span>
+<span class="add">+lw a7, 4(s2)</span>
+<span class="add">+or s6, t1, t0</span>
+<span class="add">+or s5, t3, t2</span>
+<span class="add">+slli a1, a1, 32</span>
+<span class="add">+slli a3, a3, 32</span>
+<span class="add">+or s4, a1, a0</span>
+<span class="add">+or s3, a3, a2</span>
+<span class="add">+slli a5, a5, 32</span>
+<span class="add">+slli a7, a7, 32</span>
+<span class="add">+or s2, a5, a4</span>
+<span class="add">+or s1, a7, a6</span>
+ call bar
+<span class="del">-ld a0, 0(sp)</span>
+<span class="del">-sh a0, 12(sp)</span>
+<span class="del">-li a0, -1</span>
+<span class="del">-lui a1, %hi(G.2)</span>
+<span class="del">-sh a0, 14(sp)</span>
+<span class="del">-sb zero, %lo(G.2)(a1)</span>
+<span class="add">+ld a0, 8(sp)</span>
+<span class="add">+sh a0, 28(sp)</span>
+<span class="add">+ld a0, 16(sp)</span>
+<span class="add">+sh a0, 30(sp)</span>
+<span class="add">+lui a0, %hi(G.2)</span>
+<span class="add">+sb zero, %lo(G.2)(a0)</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">ghccc-rv64.b58091482e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/ghccc-rv64.ll">ghccc-rv64.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

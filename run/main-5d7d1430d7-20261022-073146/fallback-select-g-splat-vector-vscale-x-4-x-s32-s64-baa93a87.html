@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_SPLAT_VECTOR &lt;vscale x 4 x s32&gt;,s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_SPLAT_VECTOR &lt;vscale x 4 x s32&gt;,s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-5d7d1430d7-20261022-073146.html">main-5d7d1430d7-20261022-073146</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_SPLAT_VECTOR &lt;vscale x 4 x s32&gt;,s64 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">shadow-stack-frame-opts-v.7f8ec16ffd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/shadow-stack-frame-opts-v.ll">shadow-stack-frame-opts-v.ll</a><span class="dim">)</span> @w via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zimop,+save-restore</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare void @g()
+
+; Function Attrs: shadowcallstack
+define &lt;vscale x 4 x i32&gt; @w(&lt;vscale x 4 x i32&gt; %a) #0 {
+  call void @g()
+  %B1 = sub &lt;vscale x 4 x i32&gt; %a, zeroinitializer
+  ret &lt;vscale x 4 x i32&gt; %B1
+}
+
+attributes #0 = { shadowcallstack }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+zimop,+save-restore -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+zimop,+save-restore -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %1:vrm2(&lt;vscale x 4 x s32&gt;) = G_SPLAT_VECTOR %5:gprb(s64) (in function: w)
+warning: Instruction selection used fallback path for w</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">shadow-stack-frame-opts-v.7f8ec16ffd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/shadow-stack-frame-opts-v.ll">shadow-stack-frame-opts-v.ll</a><span class="dim">)</span></td><td class="l">w</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zimop,+save-restore</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

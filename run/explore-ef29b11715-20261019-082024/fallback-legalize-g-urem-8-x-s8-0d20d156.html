@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_UREM &lt;8 x s8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_UREM &lt;8 x s8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_UREM &lt;8 x s8&gt;</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">13 in 10 configs, 6 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-simd-64.ll">rvp-simd-64.ll</a> @test_purem_b via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i8&gt; @test_purem_b(&lt;8 x i8&gt; %a, &lt;8 x i8&gt; %b) {
+  %res = urem &lt;8 x i8&gt; %a, %b
+  ret &lt;8 x i8&gt; %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(&lt;8 x s8&gt;) = G_UREM %0:_, %1:_ (in function: test_purem_b)
+warning: Instruction selection used fallback path for test_purem_b</pre>
+<h4>Occurrences (13):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-simd-64.ll">rvp-simd-64.ll</a></td><td class="l">test_purem_b</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">add-imm.6da57b29cb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/add-imm.ll">add-imm.ll</a><span class="dim">)</span></td><td class="l">add32_accept</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">add-imm.b8ffe4ef19.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/add-imm.ll">add-imm.ll</a><span class="dim">)</span></td><td class="l">add32_accept</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">hoist-global-addr-base.07a0976605.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">offset_addi_addi_neg</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">hoist-global-addr-base.16baf44fbb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">offset_addi_addi_neg</td><td class="l"><code>-mtriple=riscv64</code></td></tr><tr><td class="l">hoist-global-addr-base.1ec95d6e57.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">offset_addi_addi_neg</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcili,+xqcilia</code></td></tr><tr><td class="l">hoist-global-addr-base.5eafcbf361.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">offset_addi_addi_neg</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba</code></td></tr><tr><td class="l">hoist-global-addr-base.6702688e4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">offset_addi_addi_neg</td><td class="l"><code>-mtriple=riscv32 -mattr=+zba,+xqcili,+xqcilia</code></td></tr><tr><td class="l">hoist-global-addr-base.e8f3ee855d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">offset_addi_addi_neg</td><td class="l"><code>-mtriple=riscv32 -mattr=+zba</code></td></tr><tr><td class="l">rvp-bitreverse-zbkb.36f09bc280.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-bitreverse-zbkb.ll">rvp-bitreverse-zbkb.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_v8i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb,+zbkb -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-reverse.b2f6f394cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/rvp-reverse.ll">rvp-reverse.ll</a><span class="dim">)</span></td><td class="l">test_prev_v8i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">select-constant-xor.5c5e0037d9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/select-constant-xor.ll">select-constant-xor.ll</a><span class="dim">)</span></td><td class="l">icmpasreq</td><td class="l"><code>-mtriple=riscv64</code></td></tr><tr><td class="l">select-constant-xor.8115831eed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/select-constant-xor.ll">select-constant-xor.ll</a><span class="dim">)</span></td><td class="l">icmpasreq</td><td class="l"><code>-mtriple=riscv32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

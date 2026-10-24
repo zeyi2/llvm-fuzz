@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE p0,p1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE p0,p1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5d7d1430d7-20261022-073814.html">explore-5d7d1430d7-20261022-073814</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE p0,p1 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">addrspacecast.8211b4e521.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span> @cast0 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @cast0(ptr addrspace(1) %ptr) {
+  %ptr0 = addrspacecast ptr addrspace(1) %ptr to ptr
+  %G3 = getelementptr double, ptr %ptr0, i8 0
+  %L = load i64, ptr %ptr0, align 4
+  %G = getelementptr ptr addrspace(1), ptr addrspace(1) %ptr, i64 %L
+  store i32 0, ptr %ptr0, align 4
+  store ptr addrspace(1) %G, ptr poison, align 8
+  store ptr %G3, ptr addrspace(1) %G, align 8
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %1:_(p0), %5:_(p1) :: (store (p0) into %ir.G, addrspace 1) (in function: cast0)
+warning: Instruction selection used fallback path for cast0</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">addrspacecast.8211b4e521.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">addrspacecast.f131360f89.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

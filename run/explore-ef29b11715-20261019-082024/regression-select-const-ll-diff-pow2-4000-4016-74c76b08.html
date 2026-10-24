@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +56 insts: diff_pow2_4000_4016 (select-const.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +56 insts: diff_pow2_4000_4016 (select-const.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+56 insts: diff_pow2_4000_4016 (select-const.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">select-const.483d6d76f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/select-const.ll">select-const.ll</a><span class="dim">)</span> @diff_pow2_4000_4016 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicond -target-abi=ilp32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+define i32 @diff_pow2_4000_4016(i32 signext %x) {
+  %A5 = alloca i1, align 1
+  store i1 true, ptr %A5, align 1
+  %A = alloca i64, align 8
+  store i64 0, ptr %A, align 4
+  %cmp = icmp slt i32 %x, 5
+  %cond = select i1 %cmp, i32 4000, i32 4016
+  %L = load i64, ptr %A, align 4
+  switch i64 %L, label %SW_D [
+    i64 -3611984547871947560, label %SW_C
+    i64 4714374396004685115, label %SW_C1
+    i64 -3118353345124960650, label %SW_C2
+    i64 5220959299286189261, label %SW_C3
+    i64 -3123232091635660053, label %SW_C4
+  ]
+
+BB:                                               ; preds = %SW_C4, %SW_C1, %SW_C
+  ret i32 %cond
+
+SW_D:                                             ; preds = %0
+  ret i32 65536
+
+SW_C:                                             ; preds = %SW_C, %0
+  br i1 %cmp, label %BB, label %SW_C
+
+SW_C1:                                            ; preds = %SW_C1, %0
+  %L6 = load i1, ptr %A5, align 1
+  br i1 %L6, label %BB, label %SW_C1
+
+SW_C2:                                            ; preds = %0
+  %LGV = load i32, ptr @G, align 4
+  ret i32 %LGV
+
+SW_C3:                                            ; preds = %0
+  ret i32 %x
+
+SW_C4:                                            ; preds = %0
+  br label %BB
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zicond -target-abi=ilp32 -verify-machineinstrs -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zicond -target-abi=ilp32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,27 +1,90 @@
+ addi sp, sp, -16
+<span class="del">-li a1, 1</span>
+<span class="del">-sb a1, 15(sp)</span>
+<span class="add">+mv a1, a0</span>
+<span class="add">+li a2, 1</span>
+<span class="add">+li a4, 5</span>
+<span class="add">+lui a0, 1</span>
+<span class="add">+lui a3, 871318</span>
+<span class="add">+lui a6, 539343</span>
+<span class="add">+addi a5, a3, 551</span>
+<span class="add">+sb a2, 15(sp)</span>
+<span class="add">+mv a2, sp</span>
+<span class="add">+sw zero, 4(a2)</span>
+ sw zero, 0(sp)
+<span class="del">-sw zero, 4(sp)</span>
+<span class="del">-j .L0</span>
+<span class="add">+blt a1, a4, .L0</span>
+<span class="add">+addi a0, a0, -80</span>
+<span class="add">+j .L1</span>
+<span class="add">+.L0:</span>
+<span class="add">+addi a0, a0, -96</span>
+<span class="add">+.L1:</span>
+<span class="add">+lw a2, 4(sp)</span>
+<span class="add">+lw a3, 0(sp)</span>
+<span class="add">+addi a6, a6, 1654</span>
+<span class="add">+beq a2, a5, .L2</span>
+<span class="add">+slt a7, a2, a5</span>
+<span class="add">+xori a7, a7, 1</span>
+<span class="add">+beqz a7, .L3</span>
+<span class="add">+.L4:</span>
+<span class="add">+xor a4, a3, a6</span>
+<span class="add">+xor a5, a2, a5</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+beqz a4, .L5</span>
+<span class="add">+lui a4, 150428</span>
+<span class="add">+lui a5, 296777</span>
+<span class="add">+addi a4, a4, 1229</span>
+<span class="add">+addi a5, a5, 722</span>
+<span class="add">+xor a4, a3, a4</span>
+<span class="add">+xor a5, a2, a5</span>
+<span class="add">+or a4, a4, a5</span>
+<span class="add">+beqz a4, .L6</span>
+<span class="add">+lui a1, 49381</span>
+<span class="add">+lui a4, 267981</span>
+<span class="add">+addi a1, a1, 1339</span>
+<span class="add">+addi a4, a4, 649</span>
+<span class="add">+xor a1, a3, a1</span>
+<span class="add">+xor a2, a2, a4</span>
+<span class="add">+or a1, a1, a2</span>
+<span class="add">+bnez a1, .L7</span>
+ lbu a1, 15(sp)
+<span class="del">-.L1:</span>
+<span class="del">-beqz a1, .L1</span>
+<span class="del">-j .L2</span>
+<span class="del">-.L0:</span>
+<span class="add">+andi a1, a1, 1</span>
+<span class="add">+.L8:</span>
+<span class="add">+beqz a1, .L8</span>
+<span class="add">+j .L9</span>
+<span class="add">+.L2:</span>
+<span class="add">+sltu a7, a3, a6</span>
+<span class="add">+xori a7, a7, 1</span>
+<span class="add">+bnez a7, .L4</span>
+<span class="add">+.L3:</span>
+<span class="add">+lui a5, 892488</span>
+<span class="add">+lui a6, 843258</span>
+<span class="add">+addi a5, a5, 1240</span>
+<span class="add">+addi a6, a6, 1840</span>
+<span class="add">+xor a5, a3, a5</span>
+<span class="add">+xor a6, a2, a6</span>
+<span class="add">+or a5, a5, a6</span>
+<span class="add">+beqz a5, .L10</span>
+<span class="add">+lui a1, 864077</span>
+<span class="add">+lui a4, 871041</span>
+<span class="add">+addi a1, a1, -1301</span>
+<span class="add">+addi a4, a4, -779</span>
+<span class="add">+xor a1, a3, a1</span>
+<span class="add">+xor a2, a2, a4</span>
+<span class="add">+or a1, a1, a2</span>
+<span class="add">+beqz a1, .L9</span>
+<span class="add">+.L7:</span>
+ lui a0, 16
+ addi sp, sp, 16
+ ret
+<span class="add">+.L10:</span>
+<span class="add">+bge a1, a4, .L10</span>
+<span class="add">+.L9:</span>
+<span class="add">+addi sp, sp, 16</span>
+<span class="add">+ret</span>
+<span class="add">+.L5:</span>
+ lui a0, %hi(G)
+ lw a0, %lo(G)(a0)
+ addi sp, sp, 16
+ ret
+<span class="del">-li a1, 5</span>
+<span class="del">-.L3:</span>
+<span class="del">-bge a0, a1, .L3</span>
+<span class="del">-.L2:</span>
+<span class="del">-slti a0, a0, 5</span>
+<span class="del">-xori a0, a0, 251</span>
+<span class="del">-slli a0, a0, 4</span>
+<span class="add">+.L6:</span>
+<span class="add">+mv a0, a1</span>
+ addi sp, sp, 16
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">select-const.483d6d76f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/select-const.ll">select-const.ll</a><span class="dim">)</span></td><td class="l">diff_pow2_4000_4016</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicond -target-abi=ilp32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

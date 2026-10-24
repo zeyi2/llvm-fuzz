@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-5d7d1430d7-20261022-073146.html">main-5d7d1430d7-20261022-073146</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()` <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">redundant-copy-from-tail-duplicate.ecd6d065ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/redundant-copy-from-tail-duplicate.ll">redundant-copy-from-tail-duplicate.ll</a><span class="dim">)</span> @sum via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5d7d1430d7</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/ddM6G4Mbb">https://godbolt.org/z/ddM6G4Mbb</a> (llc-assertions-trunk, checked 2026-10-14 11:03 UTC): <a href="https://godbolt.org/z/ddM6G4Mbb">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define ptr @sum(ptr %a, i32 %n) {
+entry:
+  %G1 = getelementptr &lt;vscale x 8 x i1&gt;, ptr %a, i32 %n
+  ret ptr %G1
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -global-isel=0</code></td><td>0</td><td>13</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@sum&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055f7bd0746ab llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055f7bd071551 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055f7bd07512b
+3  libc.so.6 0x00007f6014645330
+4  libc.so.6 0x00007f601469ec0c pthread_kill + 284
+5  libc.so.6 0x00007f601464527e gsignal + 30
+6  libc.so.6 0x00007f60146288ff abort + 223
+7  llc       0x000055f7bcfb620d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x000055f7bcfb6056
+9  llc       0x000055f7bcfb635b
+10 llc       0x000055f7bf171ff6 llvm::IRTranslatorImpl::translateGetElementPtr(llvm::User const&amp;, llvm::MachineIRBuilder&amp;) + 2678
+11 llc       0x000055f7bf17edc9 llvm::IRTranslatorImpl::translate(llvm::Instruction const&amp;) + 889
+12 llc       0x000055f7bf18189d llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 4253
+13 llc       0x000055f7bf18288d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+14 llc       0x000055f7bd63fc4d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x000055f7bd3cdd47 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000055f7bd3d61e2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x000055f7bd3ceaf0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x000055f7bd07bd87 llcMain + 12183
+19 llc       0x000055f7bcfb5c6f main + 63
+20 libc.so.6 0x00007f601462a1ca
+21 libc.so.6 0x00007f601462a28b __libc_start_main + 139
+22 llc       0x000055f7bcfb5b65 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr69586.4b2529f45d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/pr69586.ll">pr69586.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+xsfvcp -riscv-use-rematerializable-movimm=false</code></td></tr><tr><td class="l">pr69586.86660ad4e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/pr69586.ll">pr69586.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+xsfvcp --riscv-use-rematerializable-movimm=true</code></td></tr><tr><td class="l">redundant-copy-from-tail-duplicate.ecd6d065ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5d7d1430d7470552c6130d525f7cecbab46819ad/llvm/test/CodeGen/RISCV/redundant-copy-from-tail-duplicate.ll">redundant-copy-from-tail-duplicate.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

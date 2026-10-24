@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STRICT_FADD s16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STRICT_FADD s16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a4bd6bd2e6-20261024-075739.html">explore-a4bd6bd2e6-20261024-075739</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STRICT_FADD s16</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">16 in 8 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a> @fadd_h via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfh -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32f</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind strictfp
+define half @fadd_h(half %a, half %b) #0 {
+  %1 = call half @llvm.experimental.constrained.fadd.f16(half %a, half %b, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.strict&quot;) #2
+  ret half %1
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare half @llvm.experimental.constrained.fadd.f16(half, half, metadata, metadata) #1
+
+attributes #0 = { nounwind strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+attributes #2 = { strictfp }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zfh -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32f -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zfh -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32f -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(s16) = G_STRICT_FADD %0:_, %1:_ (in function: fadd_h)
+warning: Instruction selection used fallback path for fadd_h</pre>
+<h4>Occurrences (16):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfh -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinxmin -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfh -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfhmin -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64</code></td></tr><tr><td class="l">half-arith-strict.1e811bfc51.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64</code></td></tr><tr><td class="l">half-arith-strict.39733fccc3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinxmin -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32</code></td></tr><tr><td class="l">half-arith-strict.4fd584c7a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32</code></td></tr><tr><td class="l">half-arith-strict.8a8c47a7d8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64</code></td></tr><tr><td class="l">half-arith-strict.b40ff35ea4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfhmin -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32f</code></td></tr><tr><td class="l">half-arith-strict.cd26b80ded.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfhmin -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64f</code></td></tr><tr><td class="l">half-arith-strict.d446bf0dc5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfh -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64f</code></td></tr><tr><td class="l">half-arith-strict.ee76f23eb6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfh -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32f</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

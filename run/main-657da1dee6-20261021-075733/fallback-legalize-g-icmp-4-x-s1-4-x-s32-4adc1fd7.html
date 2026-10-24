@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_ICMP &lt;4 x s1&gt;,&lt;4 x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_ICMP &lt;4 x s1&gt;,&lt;4 x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-657da1dee6-20261021-075733.html">main-657da1dee6-20261021-075733</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_ICMP &lt;4 x s1&gt;,&lt;4 x s32&gt;</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/get-setcc-result-type.ll">get-setcc-result-type.ll</a> @getSetCCResultType via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @getSetCCResultType(ptr %p, ptr %q) #0 {
+entry:
+  %0 = load &lt;4 x i32&gt;, ptr %p, align 16
+  %cmp = icmp eq &lt;4 x i32&gt; %0, zeroinitializer
+  %sext = sext &lt;4 x i1&gt; %cmp to &lt;4 x i32&gt;
+  store &lt;4 x i32&gt; %sext, ptr %p, align 16
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;4 x s1&gt;) = G_ICMP intpred(eq), %2:_(&lt;4 x s32&gt;), %3:_ (in function: getSetCCResultType)
+warning: Instruction selection used fallback path for getSetCCResultType</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/get-setcc-result-type.ll">get-setcc-result-type.ll</a></td><td class="l">getSetCCResultType</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">get-setcc-result-type.2393268406.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/get-setcc-result-type.ll">get-setcc-result-type.ll</a><span class="dim">)</span></td><td class="l">getSetCCResultType</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">get-setcc-result-type.e35d753e53.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/get-setcc-result-type.ll">get-setcc-result-type.ll</a><span class="dim">)</span></td><td class="l">getSetCCResultType</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l">get-setcc-result-type.ea680c9ff0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/get-setcc-result-type.ll">get-setcc-result-type.ll</a><span class="dim">)</span></td><td class="l">getSetCCResultType</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

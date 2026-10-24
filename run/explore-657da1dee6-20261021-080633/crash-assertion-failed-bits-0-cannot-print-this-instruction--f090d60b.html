@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (Bits != 0 &amp;&amp; &quot;Cannot print this instruction.&quot;), function printInstruction, file RISCVGenAsmWriter.inc</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (Bits != 0 &amp;&amp; &quot;Cannot print this instruction.&quot;), function printInstruction, file RISCVGenAsmWriter.inc</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-657da1dee6-20261021-080633.html">explore-657da1dee6-20261021-080633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (Bits != 0 &amp;&amp; &quot;Cannot print this instruction.&quot;), function printInstruction, file RISCVGenAsmWriter.inc</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-protector-target.ll">stack-protector-target.ll</a> @func via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-linux</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 657da1dee6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/3ET67dxe6">https://godbolt.org/z/3ET67dxe6</a> (llc-assertions-trunk, checked 2026-10-14 11:03 UTC): <a href="https://godbolt.org/z/3ET67dxe6">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: sspreq
+define void @func() #0 {
+  ret void
+}
+
+attributes #0 = { sspreq }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64-linux -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/build/lib/Target/RISCV/RISCVGenAsmWriter.inc:53883: void llvm::RISCVInstPrinter::printInstruction(const llvm::MCInst*, uint64_t, const llvm::MCSubtargetInfo&amp;, llvm::raw_ostream&amp;): Assertion `Bits != 0 &amp;&amp; &quot;Cannot print this instruction.&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64-linux -global-isel=0</code></td><td>0</td><td>12</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-linux -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-linux -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/lib/Target/RISCV/RISCVGenAsmWriter.inc:53883: void llvm::RISCVInstPrinter::printInstruction(const MCInst *, uint64_t, const MCSubtargetInfo &amp;, raw_ostream &amp;): Assertion `Bits != 0 &amp;&amp; &quot;Cannot print this instruction.&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64-linux -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISC-V Assembly Printer&#x27; on function &#x27;@func&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000056330b8f92ab llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000056330b8f6151 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000056330b8f9d2b
+3  libc.so.6 0x00007f7ecf445330
+4  libc.so.6 0x00007f7ecf49ec0c pthread_kill + 284
+5  libc.so.6 0x00007f7ecf44527e gsignal + 30
+6  libc.so.6 0x00007f7ecf4288ff abort + 223
+7  libc.so.6 0x00007f7ecf42881b
+8  libc.so.6 0x00007f7ecf43b517
+9  llc       0x000056330c6b9fbe
+10 llc       0x000056330c6bc499
+11 llc       0x000056330b916735 llvm::MCTargetStreamer::prettyPrintAsm(llvm::MCInstPrinter&amp;, unsigned long, llvm::MCInst const&amp;, llvm::MCSubtargetInfo const&amp;, llvm::raw_ostream&amp;) + 37
+12 llc       0x000056330b98c66c
+13 llc       0x000056330cbbb69a
+14 llc       0x000056330cbc9a37 llvm::AsmPrinter::emitFunctionBody() + 4855
+15 llc       0x000056330cbb64a7
+16 llc       0x000056330bec428d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+17 llc       0x000056330bc52d17 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+18 llc       0x000056330bc5b212 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+19 llc       0x000056330bc53ac0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+20 llc       0x000056330b900988 llcMain + 12184
+21 llc       0x000056330b83a86f main + 63
+22 libc.so.6 0x00007f7ecf42a1ca
+23 libc.so.6 0x00007f7ecf42a28b __libc_start_main + 139
+24 llc       0x000056330b83a765 _start + 37</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-guard-global.ll">stack-guard-global.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-protector-target.ll">stack-protector-target.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64-linux</code></td></tr><tr><td class="l">stack-guard-global.cbd5afb809.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-guard-global.ll">stack-guard-global.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">stack-guard-global.e650398924.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-guard-global.ll">stack-guard-global.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">stack-guard-global.eb4b7e68ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-guard-global.ll">stack-guard-global.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">stack-protector-target.808d9b75cc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-protector-target.ll">stack-protector-target.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64-linux</code></td></tr><tr><td class="l">stack-protector-target.974b602da9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/657da1dee692fd43ba75bda19691b8ce96bbf91c/llvm/test/CodeGen/RISCV/stack-protector-target.ll">stack-protector-target.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64-linux</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

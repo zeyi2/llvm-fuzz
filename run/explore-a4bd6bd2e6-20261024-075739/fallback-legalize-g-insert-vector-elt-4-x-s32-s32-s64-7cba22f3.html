@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;4 x s32&gt;,s32,s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;4 x s32&gt;,s32,s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a4bd6bd2e6-20261024-075739.html">explore-a4bd6bd2e6-20261024-075739</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;4 x s32&gt;,s32,s64 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zbb.6d39f81179.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span> @cttz_zero_poison_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i32&gt;
+
+; Function Attrs: nounwind
+define signext i32 @cttz_zero_poison_i32(i32 signext %a) #0 {
+  %1 = call i32 @llvm.cttz.i32(i32 %a, i1 true)
+  %I = insertelement &lt;4 x i32&gt; splat (i32 -2147483648), i32 -1, i32 %a
+  store &lt;4 x i32&gt; %I, ptr @G, align 16
+  ret i32 %1
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.cttz.i32(i32, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %5:_, %7:_(s32), %8:_(s64) (in function: cttz_zero_poison_i32)
+warning: Instruction selection used fallback path for cttz_zero_poison_i32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64zbb.6d39f81179.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">cttz_zero_poison_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbb.c01b0bd9e2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">cttz_zero_poison_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l">setcc-logic.408cfe7374.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/setcc-logic.ll">setcc-logic.ll</a><span class="dim">)</span></td><td class="l">or_uge_ne</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

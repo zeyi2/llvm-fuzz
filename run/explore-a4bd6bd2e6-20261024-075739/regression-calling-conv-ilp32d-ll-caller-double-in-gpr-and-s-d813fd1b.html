@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +64 insts: caller_double_in_gpr_and_stack_almost_exhausted_gprs_fprs (calling-conv-ilp32d.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +64 insts: caller_double_in_gpr_and_stack_almost_exhausted_gprs_fprs (calling-conv-ilp32d.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a4bd6bd2e6-20261024-075739.html">explore-a4bd6bd2e6-20261024-075739</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+64 insts: caller_double_in_gpr_and_stack_almost_exhausted_gprs_fprs (calling-conv-ilp32d.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-ilp32d.4cba7a3964.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/calling-conv-ilp32d.ll">calling-conv-ilp32d.ll</a><span class="dim">)</span> @caller_double_in_gpr_and_stack_almost_exhausted_gprs_fprs via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+declare i32 @callee_double_in_gpr_and_stack_almost_exhausted_gprs_fprs(i64, double, i64, double, i64, double, i32, double, double, double, double, double, double) #0
+
+; Function Attrs: nounwind
+define i32 @caller_double_in_gpr_and_stack_almost_exhausted_gprs_fprs() #0 {
+  %LGV = load i128, ptr @G, align 4
+  %B = ashr i128 170141183460469231731687303715884105727, %LGV
+  %1 = call i32 @callee_double_in_gpr_and_stack_almost_exhausted_gprs_fprs(i64 1, double 2.000000e+00, i64 3, double 4.000000e+00, i64 5, double 6.000000e+00, i32 7, double 8.000000e+00, double 9.000000e+00, double 1.000000e+01, double 1.100000e+01, double 1.200000e+01, double 1.300000e+01)
+  store i128 %B, ptr poison, align 4
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d -global-isel snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,62 +1,141 @@
+<span class="del">-addi sp, sp, -64</span>
+<span class="del">-sw ra, 60(sp)</span>
+<span class="del">-sw s0, 56(sp)</span>
+<span class="del">-sw s1, 52(sp)</span>
+<span class="del">-sw s2, 48(sp)</span>
+<span class="del">-sw s3, 44(sp)</span>
+<span class="add">+addi sp, sp, -48</span>
+<span class="add">+sw ra, 44(sp)</span>
+<span class="add">+fsd fs0, 32(sp)</span>
+<span class="add">+fsd fs1, 24(sp)</span>
+ lui a0, %hi(G)
+<span class="add">+lui a1, 262144</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+lui a1, 262400</span>
+<span class="add">+fld fa0, 16(sp)</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+fld fa1, 16(sp)</span>
+<span class="add">+lui a1, 262528</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+fld fa2, 16(sp)</span>
+<span class="add">+lui a1, 262656</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+fld fa3, 16(sp)</span>
+<span class="add">+lui a1, 262688</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+fld fa4, 16(sp)</span>
+<span class="add">+lui a1, 262720</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+fld fa5, 16(sp)</span>
+<span class="add">+lui a1, 262752</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+fld fa6, 16(sp)</span>
+<span class="add">+lui a1, 262784</span>
+<span class="add">+sw zero, 16(sp)</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+lw a0, %lo(G)(a0)</span>
+ li a1, -1
+<span class="del">-lw a0, %lo(G)(a0)</span>
+ lui a2, 524288
+<span class="del">-addi a3, sp, 8</span>
+<span class="del">-sw zero, 24(sp)</span>
+<span class="del">-sw zero, 28(sp)</span>
+<span class="del">-sw zero, 32(sp)</span>
+<span class="del">-sw zero, 36(sp)</span>
+ addi a2, a2, -1
+<span class="del">-srli a4, a0, 3</span>
+<span class="del">-andi a4, a4, 12</span>
+<span class="del">-sw a1, 8(sp)</span>
+<span class="del">-sw a1, 12(sp)</span>
+<span class="add">+fld fa7, 16(sp)</span>
+ sw a1, 16(sp)
+<span class="del">-sw a2, 20(sp)</span>
+<span class="del">-add a3, a3, a4</span>
+<span class="del">-lw a1, 4(a3)</span>
+<span class="del">-lw a2, 0(a3)</span>
+<span class="del">-andi a4, a0, 31</span>
+<span class="del">-lw a5, 8(a3)</span>
+<span class="del">-xori a4, a4, 31</span>
+<span class="del">-lw a3, 12(a3)</span>
+<span class="del">-slli a6, a1, 1</span>
+<span class="del">-srl a2, a2, a0</span>
+<span class="del">-sll s0, a6, a4</span>
+<span class="del">-or s0, a2, s0</span>
+<span class="del">-slli a2, a5, 1</span>
+<span class="del">-srl a1, a1, a0</span>
+<span class="del">-sll s1, a2, a4</span>
+<span class="del">-or s1, a1, s1</span>
+<span class="del">-slli a1, a3, 1</span>
+<span class="del">-srl a2, a5, a0</span>
+<span class="del">-sll a1, a1, a4</span>
+<span class="del">-or s2, a2, a1</span>
+<span class="del">-srl s3, a3, a0</span>
+<span class="add">+sw a1, 20(sp)</span>
+<span class="add">+li a3, 32</span>
+<span class="add">+neg a4, a0</span>
+<span class="add">+srl a5, a1, a0</span>
+<span class="add">+sll a6, a2, a4</span>
+<span class="add">+bltu a0, a3, .L0</span>
+<span class="add">+sra t0, a2, a0</span>
+<span class="add">+li a7, -1</span>
+<span class="add">+bnez a0, .L1</span>
+<span class="add">+j .L2</span>
+<span class="add">+.L0:</span>
+<span class="add">+or t0, a5, a6</span>
+<span class="add">+li a7, -1</span>
+<span class="add">+beqz a0, .L2</span>
+<span class="add">+.L1:</span>
+<span class="add">+mv a7, t0</span>
+<span class="add">+.L2:</span>
+<span class="add">+bltu a0, a3, .L3</span>
+<span class="add">+srai t0, a2, 31</span>
+<span class="add">+j .L4</span>
+<span class="add">+.L3:</span>
+<span class="add">+sra t0, a2, a0</span>
+<span class="add">+.L4:</span>
+<span class="add">+fld fs0, 16(sp)</span>
+<span class="add">+sw a7, 16(sp)</span>
+<span class="add">+sw t0, 20(sp)</span>
+<span class="add">+srl t1, a1, a0</span>
+<span class="add">+sll a7, a1, a4</span>
+<span class="add">+bgeu a0, a3, .L5</span>
+<span class="add">+or t1, t1, a7</span>
+<span class="add">+.L5:</span>
+<span class="add">+li a4, 64</span>
+<span class="add">+li t0, -1</span>
+<span class="add">+bnez a0, .L6</span>
+<span class="add">+sub t1, a4, a0</span>
+<span class="add">+bgeu a0, a3, .L7</span>
+<span class="add">+.L8:</span>
+<span class="add">+bltu t1, a3, .L9</span>
+<span class="add">+.L10:</span>
+<span class="add">+li a7, 0</span>
+<span class="add">+sll t2, a1, t1</span>
+<span class="add">+j .L11</span>
+<span class="add">+.L6:</span>
+<span class="add">+mv t0, t1</span>
+<span class="add">+sub t1, a4, a0</span>
+<span class="add">+bltu a0, a3, .L8</span>
+<span class="add">+.L7:</span>
+<span class="add">+li a5, 0</span>
+<span class="add">+bgeu t1, a3, .L10</span>
+<span class="add">+.L9:</span>
+<span class="add">+neg t2, t1</span>
+<span class="add">+srl t2, a1, t2</span>
+<span class="add">+or t2, t2, a6</span>
+<span class="add">+.L11:</span>
+<span class="add">+addi a6, a0, -64</span>
+<span class="add">+mv t3, a2</span>
+<span class="add">+beqz t1, .L12</span>
+<span class="add">+mv t3, t2</span>
+<span class="add">+.L12:</span>
+<span class="add">+fld fs1, 16(sp)</span>
+<span class="add">+or a7, t0, a7</span>
+<span class="add">+or a5, a5, t3</span>
+<span class="add">+sw a7, 16(sp)</span>
+<span class="add">+sw a5, 20(sp)</span>
+<span class="add">+fld ft0, 16(sp)</span>
+<span class="add">+srai a5, a2, 31</span>
+<span class="add">+sw a5, 16(sp)</span>
+<span class="add">+sw a5, 20(sp)</span>
+<span class="add">+bltu a6, a3, .L13</span>
+<span class="add">+sra a7, a2, a6</span>
+<span class="add">+bnez a6, .L14</span>
+<span class="add">+j .L15</span>
+<span class="add">+.L13:</span>
+<span class="add">+neg a7, a6</span>
+<span class="add">+srl t0, a1, a0</span>
+<span class="add">+sll a7, a2, a7</span>
+<span class="add">+or a7, t0, a7</span>
+<span class="add">+beqz a6, .L15</span>
+<span class="add">+.L14:</span>
+<span class="add">+mv a1, a7</span>
+<span class="add">+.L15:</span>
+<span class="add">+bgeu a6, a3, .L16</span>
+<span class="add">+sra a5, a2, a0</span>
+<span class="add">+.L16:</span>
+<span class="add">+fld ft1, 16(sp)</span>
+<span class="add">+sw a1, 16(sp)</span>
+<span class="add">+sw a5, 20(sp)</span>
+<span class="add">+beqz a0, .L17</span>
+<span class="add">+fmv.d fs0, ft0</span>
+<span class="add">+bltu a0, a4, .L17</span>
+<span class="add">+fld fs0, 16(sp)</span>
+<span class="add">+.L17:</span>
+<span class="add">+bltu a0, a4, .L18</span>
+<span class="add">+fmv.d fs1, ft1</span>
+<span class="add">+.L18:</span>
+ lui t0, 262816
+<span class="del">-lui a0, %hi(.L0)</span>
+<span class="del">-lui a1, %hi(.L1)</span>
+<span class="del">-fld fa0, %lo(.L0)(a0)</span>
+<span class="del">-fld fa1, %lo(.L1)(a1)</span>
+<span class="del">-lui a0, %hi(.L2)</span>
+<span class="del">-lui a1, %hi(.L3)</span>
+<span class="del">-fld fa2, %lo(.L2)(a0)</span>
+<span class="del">-fld fa3, %lo(.L3)(a1)</span>
+<span class="del">-lui a0, %hi(.L4)</span>
+<span class="del">-lui a1, %hi(.L5)</span>
+<span class="del">-fld fa4, %lo(.L4)(a0)</span>
+<span class="del">-fld fa5, %lo(.L5)(a1)</span>
+<span class="del">-lui a0, %hi(.L6)</span>
+<span class="del">-lui a1, %hi(.L7)</span>
+<span class="del">-fld fa6, %lo(.L6)(a0)</span>
+<span class="del">-fld fa7, %lo(.L7)(a1)</span>
+ li a0, 1
+ li a2, 3
+ li a4, 5
+@@ -67,14 +146,18 @@
+ li a7, 0
+ sw t0, 0(sp)
+ call callee_double_in_gpr_and_stack_almost_exhausted_gprs_fprs
+<span class="del">-sw s3, 0(a0)</span>
+<span class="del">-sw s2, 0(a0)</span>
+<span class="del">-sw s1, 0(a0)</span>
+<span class="del">-sw s0, 0(a0)</span>
+<span class="del">-lw ra, 60(sp)</span>
+<span class="del">-lw s0, 56(sp)</span>
+<span class="del">-lw s1, 52(sp)</span>
+<span class="del">-lw s2, 48(sp)</span>
+<span class="del">-lw s3, 44(sp)</span>
+<span class="del">-addi sp, sp, 64</span>
+<span class="add">+fsd fs0, 16(sp)</span>
+<span class="add">+lw a1, 16(sp)</span>
+<span class="add">+lw a2, 20(sp)</span>
+<span class="add">+fsd fs1, 16(sp)</span>
+<span class="add">+lw a3, 16(sp)</span>
+<span class="add">+lw a4, 20(sp)</span>
+<span class="add">+sw a1, 0(a0)</span>
+<span class="add">+sw a2, 4(a0)</span>
+<span class="add">+sw a3, 8(a0)</span>
+<span class="add">+sw a4, 12(a0)</span>
+<span class="add">+lw ra, 44(sp)</span>
+<span class="add">+fld fs0, 32(sp)</span>
+<span class="add">+fld fs1, 24(sp)</span>
+<span class="add">+addi sp, sp, 48</span>
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-ilp32d.4cba7a3964.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/calling-conv-ilp32d.ll">calling-conv-ilp32d.ll</a><span class="dim">)</span></td><td class="l">caller_double_in_gpr_and_stack_almost_exhausted_gprs_fprs</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

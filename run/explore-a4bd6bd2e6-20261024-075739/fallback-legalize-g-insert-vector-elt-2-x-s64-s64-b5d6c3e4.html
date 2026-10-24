@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;2 x s64&gt;,s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;2 x s64&gt;,s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a4bd6bd2e6-20261024-075739.html">explore-a4bd6bd2e6-20261024-075739</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;2 x s64&gt;,s64 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64xtheadba.9931cda608.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64xtheadba.ll">rv64xtheadba.ll</a><span class="dim">)</span> @th_addsl_2_extra_sext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a4bd6bd2e6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+define i64 @th_addsl_2_extra_sext(i32 %x, i32 %y, i32 %z) {
+  %A = alloca &lt;2 x i64&gt;, align 16
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %LGV = load i64, ptr @G.1, align 4
+  %a = shl i32 %x, 2
+  %b = add i32 %a, %y
+  %c = shl i32 %z, %b
+  %I = insertelement &lt;2 x i64&gt; zeroinitializer, i64 9223372036854775807, i64 %LGV
+  %d = ashr i32 %b, 2
+  %e = sext i32 %c to i64
+  %f = sext i32 %d to i64
+  %g = mul i64 %e, %f
+  store &lt;2 x i64&gt; %I, ptr %A, align 16
+  ret i64 %g
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %14:_(&lt;2 x s64&gt;) = G_INSERT_VECTOR_ELT %15:_, %17:_(s64), %8:_(s64) (in function: th_addsl_2_extra_sext)
+warning: Instruction selection used fallback path for th_addsl_2_extra_sext</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64xtheadba.9931cda608.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64xtheadba.ll">rv64xtheadba.ll</a><span class="dim">)</span></td><td class="l">th_addsl_2_extra_sext</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -verify-machineinstrs</code></td></tr><tr><td class="l">rv64xtheadba.bb2eca86a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a4bd6bd2e68184b38f828ca8ec51e5cd40b4f64c/llvm/test/CodeGen/RISCV/rv64xtheadba.ll">rv64xtheadba.ll</a><span class="dim">)</span></td><td class="l">th_addsl_2_extra_sext</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+xtheadba -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

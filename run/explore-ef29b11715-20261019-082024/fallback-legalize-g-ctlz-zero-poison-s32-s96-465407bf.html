@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CTLZ_ZERO_POISON s32,s96</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CTLZ_ZERO_POISON s32,s96</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ef29b11715-20261019-082024.html">explore-ef29b11715-20261019-082024</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CTLZ_ZERO_POISON s32,s96 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr56110.2f4cb11334.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/pr56110.ll">pr56110.ll</a><span class="dim">)</span> @foo_set via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ef29b11715</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i96
+@G.1 = external global i128
+
+define void @foo_set(ptr noundef captures(none) %a, i32 noundef %v) {
+entry:
+  %A = alloca i128, align 8
+  store i128 poison, ptr %A, align 4
+  %LGV1 = load i128, ptr @G.1, align 4
+  %E = extractelement &lt;4 x i32&gt; splat (i32 2147483647), i64 -1
+  %LGV = load i96, ptr @G, align 4
+  %bf.load = load i96, ptr %a, align 1
+  %B2 = and i128 0, %LGV1
+  %B = udiv i96 %bf.load, %LGV
+  %0 = and i32 %v, 65535
+  %bf.value = zext i32 %0 to i96
+  %bf.shl = shl nuw nsw i96 %bf.value, 24
+  %bf.clear = and i96 %bf.load, -1099494850561
+  %bf.set = or i96 %bf.clear, %bf.shl
+  store i96 %bf.set, ptr %a, align 1
+  store i96 %B, ptr @G, align 4
+  store i32 %E, ptr poison, align 4
+  store i128 %B2, ptr %A, align 4
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %1249:_(s32) = G_CTLZ_ZERO_POISON %16:_(s96) (in function: foo_set)
+warning: Instruction selection used fallback path for foo_set</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr56110.2f4cb11334.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/pr56110.ll">pr56110.ll</a><span class="dim">)</span></td><td class="l">foo_set</td><td class="l"><code>-mtriple=riscv32</code></td></tr><tr><td class="l">pr56110.526dcd59fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ef29b11715d1f100bb7c60ce3cce9070a6fcae8e/llvm/test/CodeGen/RISCV/pr56110.ll">pr56110.ll</a><span class="dim">)</span></td><td class="l">foo_set</td><td class="l"><code>-mtriple=riscv32 -mattr=+unaligned-scalar-mem</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

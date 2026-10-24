@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;4 x s64&gt;,s64,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;4 x s64&gt;,s64,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-4c407e843c-20261020-081009.html">explore-4c407e843c-20261020-081009</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;4 x s64&gt;,s64,s32 <span class="new">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">llvm.exp10.c1fee38770.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/llvm.exp10.ll">llvm.exp10.ll</a><span class="dim">)</span> @exp10_v4f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 4c407e843c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global double
+
+define &lt;4 x double&gt; @exp10_v4f64(&lt;4 x double&gt; %x) {
+  %A = alloca &lt;4 x double&gt;, align 32
+  store &lt;4 x double&gt; poison, ptr %A, align 32
+  %LGV = load double, ptr @G.1, align 8
+  %r = call &lt;4 x double&gt; @llvm.exp10.v4f64(&lt;4 x double&gt; %x)
+  %I = insertelement &lt;4 x double&gt; %r, double %LGV, i1 false
+  store &lt;4 x double&gt; %I, ptr %A, align 32
+  ret &lt;4 x double&gt; %r
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x double&gt; @llvm.exp10.v4f64(&lt;4 x double&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;4 x s64&gt;) = G_INSERT_VECTOR_ELT %10:_, %8:_(s64), %12:_(s32) (in function: exp10_v4f64)
+warning: Instruction selection used fallback path for exp10_v4f64</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">llvm.exp10.c1fee38770.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/4c407e843c975298b6892d50afd9e72cfb0cbe46/llvm/test/CodeGen/RISCV/llvm.exp10.ll">llvm.exp10.ll</a><span class="dim">)</span></td><td class="l">exp10_v4f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>

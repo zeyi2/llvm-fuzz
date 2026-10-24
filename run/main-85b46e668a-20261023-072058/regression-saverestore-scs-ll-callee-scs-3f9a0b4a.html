@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>regression: +54 insts: callee_scs (saverestore-scs.ll)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>regression: +54 insts: callee_scs (saverestore-scs.ll)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-85b46e668a-20261023-072058.html">main-85b46e668a-20261023-072058</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">regression</td></tr>
+<tr><td class="l">Category:</td><td class="l">+54 insts: callee_scs (saverestore-scs.ll)</td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">saverestore-scs.0e8bbeb6dd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/saverestore-scs.ll">saverestore-scs.ll</a><span class="dim">)</span> @callee_scs via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+save-restore</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 85b46e668a</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var2 = external global [30 x i32]
+@G = external global float
+@G.1 = external global i8
+@G.2 = external global i8
+
+; Function Attrs: nounwind shadowcallstack
+define void @callee_scs() #0 {
+  %LGV2 = load i8, ptr @G.1, align 1
+  %C4 = fcmp uno double 4.940660e-324, 1.000000e+00
+  %A = alloca i1, align 1
+  %L = load i8, ptr %A, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load float, ptr @G, align 4
+  %val = load [30 x i32], ptr @var2, align 4
+  %C = fcmp one float %LGV, f0x7F7FFFFF
+  %B = sub i8 %L, %LGV2
+  store volatile [30 x i32] %val, ptr @var2, align 4
+  store i1 %C, ptr %A, align 1
+  store i8 %B, ptr @G.2, align 1
+  store i1 %C4, ptr %A, align 1
+  ret void
+}
+
+attributes #0 = { nounwind shadowcallstack }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+save-restore -global-isel snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+save-restore -global-isel=0 snippet.ll -o -</pre>
+<h4>Assembly diff (SelectionDAG vs GlobalISel):</h4>
+<pre class="code">--- sdag
++++ gisel
+@@ -1,100 +1,154 @@
+ addi gp, gp, 8
+ sd ra, -8(gp)
+ call t0, __riscv_save_12
+<span class="del">-addi sp, sp, -48</span>
+<span class="del">-lui a1, %hi(G.1)</span>
+<span class="del">-lbu a0, 47(sp)</span>
+<span class="add">+addi sp, sp, -208</span>
+<span class="add">+lui a0, %hi(G.1)</span>
+<span class="add">+lui a1, %hi(G)</span>
+<span class="add">+lui s2, %hi(var2)</span>
+<span class="add">+addi s2, s2, %lo(var2)</span>
+<span class="add">+lbu a0, %lo(G.1)(a0)</span>
+<span class="add">+sd a0, 8(sp)</span>
+<span class="add">+lbu s4, 207(sp)</span>
+<span class="add">+lw s0, %lo(G)(a1)</span>
+<span class="add">+lw s5, 0(s2)</span>
+<span class="add">+lw s6, 4(s2)</span>
+<span class="add">+lw s7, 8(s2)</span>
+<span class="add">+lw s8, 12(s2)</span>
+<span class="add">+lw s9, 16(s2)</span>
+<span class="add">+lw s10, 20(s2)</span>
+<span class="add">+lw s11, 24(s2)</span>
+<span class="add">+lw a0, 28(s2)</span>
+<span class="add">+sd a0, 192(sp)</span>
+<span class="add">+lw a0, 32(s2)</span>
+<span class="add">+sd a0, 184(sp)</span>
+<span class="add">+lw a0, 36(s2)</span>
+<span class="add">+sd a0, 176(sp)</span>
+<span class="add">+lw a0, 40(s2)</span>
+<span class="add">+sd a0, 168(sp)</span>
+<span class="add">+lw a0, 44(s2)</span>
+<span class="add">+sd a0, 160(sp)</span>
+<span class="add">+lw a0, 48(s2)</span>
+<span class="add">+sd a0, 152(sp)</span>
+<span class="add">+lw a0, 52(s2)</span>
+<span class="add">+sd a0, 144(sp)</span>
+<span class="add">+lw a0, 56(s2)</span>
+<span class="add">+sd a0, 136(sp)</span>
+<span class="add">+lw a0, 60(s2)</span>
+<span class="add">+sd a0, 128(sp)</span>
+<span class="add">+lw a0, 64(s2)</span>
+<span class="add">+sd a0, 120(sp)</span>
+<span class="add">+lw a0, 68(s2)</span>
+<span class="add">+sd a0, 112(sp)</span>
+<span class="add">+lw a0, 72(s2)</span>
+<span class="add">+sd a0, 104(sp)</span>
+<span class="add">+lw a0, 76(s2)</span>
+<span class="add">+sd a0, 96(sp)</span>
+<span class="add">+lw a0, 80(s2)</span>
+<span class="add">+sd a0, 88(sp)</span>
+<span class="add">+lw a0, 84(s2)</span>
+<span class="add">+sd a0, 80(sp)</span>
+<span class="add">+lw a0, 88(s2)</span>
+<span class="add">+sd a0, 72(sp)</span>
+<span class="add">+lw a0, 92(s2)</span>
+<span class="add">+sd a0, 64(sp)</span>
+<span class="add">+lw a0, 96(s2)</span>
+<span class="add">+sd a0, 56(sp)</span>
+<span class="add">+lw a0, 100(s2)</span>
+<span class="add">+sd a0, 48(sp)</span>
+<span class="add">+lw a0, 104(s2)</span>
+<span class="add">+sd a0, 40(sp)</span>
+<span class="add">+lw a0, 108(s2)</span>
+ sd a0, 32(sp)
+<span class="del">-lui a2, %hi(var2)</span>
+<span class="del">-addi a2, a2, %lo(var2)</span>
+<span class="del">-lbu a0, %lo(G.1)(a1)</span>
+<span class="add">+lw a0, 112(s2)</span>
+ sd a0, 24(sp)
+<span class="del">-lw a0, 112(a2)</span>
+<span class="del">-sd a0, 8(sp)</span>
+<span class="del">-lw a0, 116(a2)</span>
+<span class="add">+lw a0, 116(s2)</span>
+ sd a0, 16(sp)
+<span class="del">-lw t0, 96(a2)</span>
+<span class="del">-lw a7, 100(a2)</span>
+<span class="del">-lw a6, 104(a2)</span>
+<span class="del">-lw a0, 108(a2)</span>
+<span class="del">-sd a0, 0(sp)</span>
+<span class="del">-lw t4, 80(a2)</span>
+<span class="del">-lw t3, 84(a2)</span>
+<span class="del">-lw t2, 88(a2)</span>
+<span class="del">-lw t1, 92(a2)</span>
+<span class="del">-lw t5, 64(a2)</span>
+<span class="del">-lw t6, 68(a2)</span>
+<span class="del">-lw s0, 72(a2)</span>
+<span class="del">-lw s1, 76(a2)</span>
+<span class="del">-lw s2, 48(a2)</span>
+<span class="del">-lw s3, 52(a2)</span>
+<span class="del">-lw s4, 56(a2)</span>
+<span class="del">-lw s5, 60(a2)</span>
+<span class="del">-lw s6, 32(a2)</span>
+<span class="del">-lw s7, 36(a2)</span>
+<span class="del">-lw s8, 40(a2)</span>
+<span class="del">-lw s9, 44(a2)</span>
+<span class="del">-lw s10, 0(a2)</span>
+<span class="del">-lw s11, 4(a2)</span>
+<span class="del">-lw ra, 8(a2)</span>
+<span class="del">-lw a0, 12(a2)</span>
+<span class="del">-lw a1, 16(a2)</span>
+<span class="del">-lw a3, 20(a2)</span>
+<span class="del">-lw a4, 24(a2)</span>
+<span class="del">-lw a5, 28(a2)</span>
+<span class="del">-sw s10, 0(a2)</span>
+<span class="del">-sw s11, 4(a2)</span>
+<span class="del">-sw ra, 8(a2)</span>
+<span class="del">-sw a0, 12(a2)</span>
+<span class="del">-sw a1, 16(a2)</span>
+<span class="del">-sw a3, 20(a2)</span>
+<span class="del">-sw a4, 24(a2)</span>
+<span class="del">-sw a5, 28(a2)</span>
+<span class="del">-sw s6, 32(a2)</span>
+<span class="del">-sw s7, 36(a2)</span>
+<span class="del">-sw s8, 40(a2)</span>
+<span class="del">-sw s9, 44(a2)</span>
+<span class="del">-sw s2, 48(a2)</span>
+<span class="del">-sw s3, 52(a2)</span>
+<span class="del">-sw s4, 56(a2)</span>
+<span class="del">-sw s5, 60(a2)</span>
+<span class="del">-sw t5, 64(a2)</span>
+<span class="del">-sw t6, 68(a2)</span>
+<span class="del">-sw s0, 72(a2)</span>
+<span class="del">-sw s1, 76(a2)</span>
+<span class="del">-sw t4, 80(a2)</span>
+<span class="del">-sw t3, 84(a2)</span>
+<span class="del">-sw t2, 88(a2)</span>
+<span class="del">-sw t1, 92(a2)</span>
+<span class="del">-sw t0, 96(a2)</span>
+<span class="del">-sw a7, 100(a2)</span>
+<span class="del">-sw a6, 104(a2)</span>
+<span class="del">-ld a0, 0(sp)</span>
+<span class="del">-sw a0, 108(a2)</span>
+<span class="del">-ld a0, 8(sp)</span>
+<span class="del">-sw a0, 112(a2)</span>
+<span class="del">-ld a0, 16(sp)</span>
+<span class="del">-sw a0, 116(a2)</span>
+<span class="del">-ld a0, 32(sp)</span>
+<span class="del">-ld a1, 24(sp)</span>
+<span class="del">-sub a0, a0, a1</span>
+<span class="del">-lui a1, %hi(G.2)</span>
+<span class="del">-sb a0, %lo(G.2)(a1)</span>
+<span class="del">-sb zero, 47(sp)</span>
+<span class="del">-ld ra, 152(sp)</span>
+<span class="del">-ld s0, 144(sp)</span>
+<span class="del">-ld s1, 136(sp)</span>
+<span class="del">-ld s2, 128(sp)</span>
+<span class="del">-ld s3, 120(sp)</span>
+<span class="del">-ld s4, 112(sp)</span>
+<span class="del">-ld s5, 104(sp)</span>
+<span class="del">-ld s6, 96(sp)</span>
+<span class="del">-ld s7, 88(sp)</span>
+<span class="del">-ld s8, 80(sp)</span>
+<span class="del">-ld s9, 72(sp)</span>
+<span class="del">-ld s10, 64(sp)</span>
+<span class="del">-ld s11, 56(sp)</span>
+<span class="del">-addi sp, sp, 160</span>
+<span class="add">+lui s1, 522240</span>
+<span class="add">+addi s1, s1, -1</span>
+<span class="add">+mv a0, s0</span>
+<span class="add">+mv a1, s1</span>
+<span class="add">+call __eqsf2</span>
+<span class="add">+sext.w a0, a0</span>
+<span class="add">+snez s3, a0</span>
+<span class="add">+mv a0, s0</span>
+<span class="add">+mv a1, s1</span>
+<span class="add">+call __unordsf2</span>
+<span class="add">+ld a1, 8(sp)</span>
+<span class="add">+sub a1, s4, a1</span>
+<span class="add">+sw s5, 0(s2)</span>
+<span class="add">+sw s6, 4(s2)</span>
+<span class="add">+sw s7, 8(s2)</span>
+<span class="add">+sw s8, 12(s2)</span>
+<span class="add">+sw s9, 16(s2)</span>
+<span class="add">+sw s10, 20(s2)</span>
+<span class="add">+sw s11, 24(s2)</span>
+<span class="add">+sext.w a0, a0</span>
+<span class="add">+seqz a0, a0</span>
+<span class="add">+and a0, s3, a0</span>
+<span class="add">+ld a2, 192(sp)</span>
+<span class="add">+sw a2, 28(s2)</span>
+<span class="add">+ld a2, 184(sp)</span>
+<span class="add">+sw a2, 32(s2)</span>
+<span class="add">+ld a2, 176(sp)</span>
+<span class="add">+sw a2, 36(s2)</span>
+<span class="add">+ld a2, 168(sp)</span>
+<span class="add">+sw a2, 40(s2)</span>
+<span class="add">+ld a2, 160(sp)</span>
+<span class="add">+sw a2, 44(s2)</span>
+<span class="add">+ld a2, 152(sp)</span>
+<span class="add">+sw a2, 48(s2)</span>
+<span class="add">+ld a2, 144(sp)</span>
+<span class="add">+sw a2, 52(s2)</span>
+<span class="add">+ld a2, 136(sp)</span>
+<span class="add">+sw a2, 56(s2)</span>
+<span class="add">+ld a2, 128(sp)</span>
+<span class="add">+sw a2, 60(s2)</span>
+<span class="add">+ld a2, 120(sp)</span>
+<span class="add">+sw a2, 64(s2)</span>
+<span class="add">+ld a2, 112(sp)</span>
+<span class="add">+sw a2, 68(s2)</span>
+<span class="add">+ld a2, 104(sp)</span>
+<span class="add">+sw a2, 72(s2)</span>
+<span class="add">+ld a2, 96(sp)</span>
+<span class="add">+sw a2, 76(s2)</span>
+<span class="add">+ld a2, 88(sp)</span>
+<span class="add">+sw a2, 80(s2)</span>
+<span class="add">+ld a2, 80(sp)</span>
+<span class="add">+sw a2, 84(s2)</span>
+<span class="add">+ld a2, 72(sp)</span>
+<span class="add">+sw a2, 88(s2)</span>
+<span class="add">+ld a2, 64(sp)</span>
+<span class="add">+sw a2, 92(s2)</span>
+<span class="add">+ld a2, 56(sp)</span>
+<span class="add">+sw a2, 96(s2)</span>
+<span class="add">+ld a2, 48(sp)</span>
+<span class="add">+sw a2, 100(s2)</span>
+<span class="add">+ld a2, 40(sp)</span>
+<span class="add">+sw a2, 104(s2)</span>
+<span class="add">+ld a2, 32(sp)</span>
+<span class="add">+sw a2, 108(s2)</span>
+<span class="add">+ld a2, 24(sp)</span>
+<span class="add">+sw a2, 112(s2)</span>
+<span class="add">+ld a2, 16(sp)</span>
+<span class="add">+sw a2, 116(s2)</span>
+<span class="add">+sb a0, 207(sp)</span>
+<span class="add">+lui a0, %hi(G.2)</span>
+<span class="add">+sb a1, %lo(G.2)(a0)</span>
+<span class="add">+sb zero, 207(sp)</span>
+<span class="add">+ld ra, 312(sp)</span>
+<span class="add">+ld s0, 304(sp)</span>
+<span class="add">+ld s1, 296(sp)</span>
+<span class="add">+ld s2, 288(sp)</span>
+<span class="add">+ld s3, 280(sp)</span>
+<span class="add">+ld s4, 272(sp)</span>
+<span class="add">+ld s5, 264(sp)</span>
+<span class="add">+ld s6, 256(sp)</span>
+<span class="add">+ld s7, 248(sp)</span>
+<span class="add">+ld s8, 240(sp)</span>
+<span class="add">+ld s9, 232(sp)</span>
+<span class="add">+ld s10, 224(sp)</span>
+<span class="add">+ld s11, 216(sp)</span>
+<span class="add">+addi sp, sp, 320</span>
+ ld ra, -8(gp)
+ addi gp, gp, -8
+ ret</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">saverestore-scs.0e8bbeb6dd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/85b46e668a8a905338b9fa5bd6d5e4ec96d0ec73/llvm/test/CodeGen/RISCV/saverestore-scs.ll">saverestore-scs.ll</a><span class="dim">)</span></td><td class="l">callee_scs</td><td class="l"><code>-mtriple=riscv64 -mattr=+save-restore</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-24 08:07 UTC.</p>
