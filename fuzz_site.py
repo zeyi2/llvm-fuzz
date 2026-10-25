@@ -41,11 +41,15 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import exec_oracle as EO  # noqa: E402
 import isel_diff as ID  # noqa: E402
 
 ROOT = ID.llvm_src()
 
 GODBOLT = "https://godbolt.org"
+# Everything the interestingness test run by llvm-reduce needs to know.
+SPEC_ARGS = ("llc", "ir_mutate", "timeout", "exec_inputs", "exec_timeout",
+             "exec_budget", "exec_restarts", "exec_max_funcs", "qemu", "lld")
 GISEL_FLAGS = ["-global-isel", "-global-isel-abort=2", "-pass-remarks-missed=gisel.*"]
 SDAG_FLAGS = ["-global-isel=0"]
 
@@ -86,6 +90,23 @@ def check(args, spec, src):
     """Does `src` still show the finding described by `spec`? Returns details or None."""
     flags = shlex.split(spec["config"])
     kind = spec["kind"]
+    if kind == "miscompile":
+        fn = spec.get("function")
+        # check() is also the llvm-reduce interestingness test, and the oracle
+        # sanitizes the module every time, so reduction cannot pass by
+        # introducing undefined behaviour.
+        hits = [r for r in EO.check(args, src, flags, [fn] if fn else [])
+                if not fn or r["function"] == fn]
+        if not hits:
+            return None
+        r = hits[0]
+        opts = "\n".join(f"{k}: llc {v}" for k, v in sorted(r["options"].items()))
+        return {"function": r["function"],
+                "output": f"{r['input_count']} of {r['of_inputs']} inputs differ "
+                          f"(first: #{r['inputs'][0]})\n"
+                          f"SelectionDAG hash {r['sdag']}, GlobalISel hash {r['gisel']}\n"
+                          f"{opts}",
+                "inputs": r["inputs"], "input_count": r["input_count"]}
     if kind == "crash":
         rc, _, err = llc(args, flags + GISEL_FLAGS, src)
         if rc == 0:
@@ -151,7 +172,11 @@ def reduce(args, spec, src):
         with open(inp, "w") as f:
             f.write(src)
         with open(sp, "w") as f:
-            json.dump(dict(spec, llc=args.llc, timeout=args.timeout), f)
+            extra = {k: getattr(args, k) for k in SPEC_ARGS}
+            # Each interestingness run compiles and executes three binaries;
+            # keep that cheap so llvm-reduce gets through many of them.
+            extra["exec_budget"] = min(args.exec_budget, 10)
+            json.dump(dict(spec, **extra), f)
         cmd = [args.llvm_reduce, f"--test={sys.executable}",
                f"--test-arg={os.path.abspath(__file__)}", "--test-arg=--check",
                f"--test-arg={sp}", "-o", out, inp]
@@ -220,7 +245,7 @@ def make_snippet(args, finding):
 
 def reduce_snippet(args, finding):
     best = finding["snippet"]
-    if not best or finding["kind"] not in ("crash", "fallback"):
+    if not best or finding["kind"] not in ("crash", "fallback", "miscompile"):
         return
     spec = {"kind": finding["kind"], "key": finding["key"], "config": best["config"],
             "function": best["function"]}
@@ -340,12 +365,24 @@ def slug(*parts):
 def collect_findings(report, top_regressions):
     crashes = collections.defaultdict(list)
     fallbacks = collections.defaultdict(list)
+    miscompiles = collections.defaultdict(list)
     regs = {}
     status = collections.Counter()
+    # Mutants the explore pass counted without keeping (see explore.py).
+    counted_only = collections.Counter()
+    dropped = 0
     skipped = 0
     for r in report:
         base = {"file": r["file"], "config": r["config"], "seds": r.get("seds", []),
                 "mutant_of": r.get("mutant_of")}
+        if r.get("dropped"):
+            dropped += r["results"]
+            status.update(r["status"])
+            for key, n in r["reasons"].items():
+                counted_only[("fallback", key)] += n
+            for key, n in r["crashes"].items():
+                counted_only[("crash", key)] += n
+            continue
         if "skipped" in r:
             skipped += 1
             continue
@@ -353,6 +390,11 @@ def collect_findings(report, top_regressions):
             status["crash"] += 1
             crashes[crash_sig(r["crash"])].append(base)
             continue
+        for mc in r.get("miscompiles", []):
+            status["miscompile"] += 1
+            miscompiles[mc["key"]].append(dict(
+                base, function=mc["function"], inputs=mc["inputs"],
+                input_count=mc["input_count"], of_inputs=mc["of_inputs"]))
         for fn in r["functions"]:
             status[fn["status"]] += 1
             if fn["status"] == "fallback":
@@ -364,13 +406,21 @@ def collect_findings(report, top_regressions):
                     regs[k] = dict(base, function=fn["name"], delta=d, sdag=fn["sdag"], gisel=fn["gisel"])
 
     findings = []
-    for kind, groups in (("crash", crashes), ("fallback", fallbacks)):
+    groups_by_kind = (("miscompile", miscompiles), ("crash", crashes), ("fallback", fallbacks))
+    for kind, groups in groups_by_kind:
         for key, occ in groups.items():
+            extra = counted_only.pop((kind, key), 0)
             findings.append({
-                "id": slug(kind, key), "kind": kind, "key": key, "count": len(occ),
+                "id": slug(kind, key), "kind": kind, "key": key,
+                "count": len(occ) + extra, "counted_only": extra,
                 "configs": len({o["config"] for o in occ}),
                 "files": len({o.get("mutant_of") or o["file"] for o in occ}),
                 "new": all(o["mutant_of"] for o in occ), "occurrences": occ})
+    # Categories that only turned up in results the explore pass did not keep.
+    for (kind, key), n in counted_only.items():
+        findings.append({
+            "id": slug(kind, key), "kind": kind, "key": key, "count": n,
+            "counted_only": n, "configs": 0, "files": 0, "new": True, "occurrences": []})
     for occ in sorted(regs.values(), key=lambda o: -o["delta"])[:top_regressions]:
         name = os.path.basename(occ.get("mutant_of") or occ["file"])
         key = f"+{occ['delta']} insts: {occ['function']} ({name})"
@@ -378,10 +428,33 @@ def collect_findings(report, top_regressions):
             "id": slug("regression", name, occ["function"]), "kind": "regression", "key": key,
             "count": occ["delta"], "configs": 1, "files": 1, "new": bool(occ["mutant_of"]),
             "occurrences": [occ]})
-    order = {"crash": 0, "fallback": 1, "regression": 2}
+    order = {"miscompile": 0, "crash": 1, "fallback": 2, "regression": 3}
     findings.sort(key=lambda f: (order[f["kind"]], not f["new"] if f["kind"] == "fallback" else 0,
                                  -f["count"]))
-    return findings, status, skipped
+    return findings, status, skipped, dropped
+
+
+def category_key(kind, key):
+    """Identity of a category across runs. Fallback keys are normalized so that
+    runs made before normalization still compare."""
+    return f"{kind}|{ID.normalize_key(key) if kind == 'fallback' else key}"
+
+
+def seen_categories(site, exclude=()):
+    """Every category any earlier run on the site has already reported."""
+    keys = set()
+    ddir = os.path.join(site, "data")
+    for n in sorted(os.listdir(ddir)) if os.path.isdir(ddir) else []:
+        if not n.endswith(".json"):
+            continue
+        with open(os.path.join(ddir, n)) as f:
+            run = json.load(f)
+        if run["id"] in exclude:
+            continue
+        for f_ in run["findings"]:
+            if f_["kind"] != "regression":
+                keys.add(category_key(f_["kind"], f_["key"]))
+    return keys
 
 
 def ingest(args):
@@ -389,16 +462,30 @@ def ingest(args):
         report = json.load(f)
     with open(os.path.join(args.results, "meta.json")) as f:
         meta = json.load(f)
-    findings, status, skipped = collect_findings(report, args.top_regressions)
-    print(f"{len(findings)} findings; building snippets", file=sys.stderr)
+    findings, status, skipped, dropped = collect_findings(report, args.top_regressions)
+    seen = seen_categories(args.site)
+    for f in findings:
+        # "new" has always meant "only mutants reach this"; first_seen is the
+        # stronger statement: no run on this site ever reported it.
+        f["first_seen"] = f["kind"] != "regression" \
+            and category_key(f["kind"], f["key"]) not in seen
+    # The recursive test tree yields thousands of categories per run, and the
+    # whole site is republished daily; only the most interesting findings get a
+    # snippet and a page of their own.
+    detail = findings[: args.detail_limit]
+    for f in findings[args.detail_limit:]:
+        f["no_detail"] = True
+    print(f"{len(findings)} findings; building snippets for {len(detail)}", file=sys.stderr)
 
     with cf.ThreadPoolExecutor(args.jobs) as ex:
-        snippets = list(ex.map(lambda f: make_snippet(args, f), findings))
-    for f, s in zip(findings, snippets):
+        snippets = list(ex.map(lambda f: make_snippet(args, f), detail))
+    for f in findings:
+        f["snippet"] = None
+    for f, s in zip(detail, snippets):
         f["snippet"] = s
     if args.reduce:
         # Only the findings that will get a Compiler Explorer link: reduction is slow.
-        todo = [f for f in findings if f["snippet"]][: args.godbolt_limit]
+        todo = [f for f in detail if f["snippet"]][: args.godbolt_limit]
         print(f"reducing {len(todo)} snippets", file=sys.stderr)
         with cf.ThreadPoolExecutor(args.jobs) as ex:
             list(ex.map(lambda f: reduce_snippet(args, f), todo))
@@ -408,7 +495,9 @@ def ingest(args):
     uploaded = 0
     if args.godbolt:
         for f in findings:
-            if not f["snippet"] or uploaded >= args.godbolt_limit:
+            # Compiler Explorer compiles but cannot execute RISC-V, so a
+            # miscompile has nothing to verify remotely.
+            if not f["snippet"] or f["kind"] == "miscompile" or uploaded >= args.godbolt_limit:
                 continue
             try:
                 f["godbolt"] = godbolt(args, f, f["snippet"], cache)
@@ -421,13 +510,15 @@ def ingest(args):
 
     for f in findings:
         f["occurrence_total"] = len(f["occurrences"])
+        keep = 0 if f.get("no_detail") else args.max_occurrences
         f["occurrences"] = [{k: v for k, v in o.items() if k != "seds"}
-                            for o in f["occurrences"][: args.max_occurrences]]
+                            for o in f["occurrences"][:keep]]
 
     started = dt.datetime.fromtimestamp(meta["started"], dt.timezone.utc)
     run_id = f"{args.label}-{meta['revision'][:10]}-{started.strftime('%Y%m%d-%H%M%S')}"
     run = {"id": run_id, "label": args.label, "meta": meta, "status": dict(status),
-           "skipped": skipped, "findings": findings, "compiler": args.compiler}
+           "skipped": skipped, "dropped": dropped, "findings": findings,
+           "compiler": args.compiler}
     os.makedirs(os.path.join(args.site, "data"), exist_ok=True)
     with open(os.path.join(args.site, "data", run_id + ".json"), "w") as f:
         json.dump(run, f)
@@ -471,7 +562,7 @@ def prune(site, keep_full):
 
 
 def finding_link(run, f, prefix=""):
-    if run.get("archived"):
+    if run.get("archived") or f.get("no_detail"):
         return E(f["key"])
     return f'<a href="{prefix}{run["id"]}/{f["id"]}.html">{E(f["key"])}</a>'
 
@@ -521,9 +612,11 @@ FILTER_JS = """\
 E = html.escape
 STATUS_COLS = [("identical", "identical", False), ("different", "different", None),
                ("gisel-better", "better", False), ("gisel-worse", "worse", True),
-               ("fallback", "fallback", True), ("crash", "crash", True)]
+               ("fallback", "fallback", True), ("crash", "crash", True),
+               ("miscompile", "miscompile", True)]
 # Statuses that have rows in the findings table; the rest only appear in the run summary.
-STATUS_QUERY = {"gisel-worse": "regression", "fallback": "fallback", "crash": "crash"}
+STATUS_QUERY = {"gisel-worse": "regression", "fallback": "fallback", "crash": "crash",
+                "miscompile": "miscompile"}
 
 
 def page(title, depth, body, footer):
@@ -575,6 +668,8 @@ def occ_label(meta, o):
 def verdict_span(f):
     g = f.get("godbolt")
     if not g:
+        if f["kind"] == "miscompile":
+            return '<span class="dim" title="Compiler Explorer cannot execute RISC-V">n/a</span>'
         if f.get("godbolt_error"):
             return '<span class="fp" title="{}">error</span>'.format(E(f["godbolt_error"]))
         return '<span class="dim">-</span>'
@@ -585,9 +680,23 @@ def verdict_span(f):
 def counts(run):
     st = dict(run["status"])
     kinds = collections.Counter(f["kind"] for f in run["findings"])
-    new = sum(1 for f in run["findings"] if f["new"] and f["kind"] != "regression")
+    new = sum(1 for f in run["findings"] if f.get("first_seen"))
     repro = sum(1 for f in run["findings"] if f.get("godbolt", {}).get("verdict") == "reproduces")
     return st, kinds, new, repro
+
+
+def mutant_only(run):
+    return sum(1 for f in run["findings"] if f["new"] and f["kind"] != "regression")
+
+
+def tags(f):
+    """NEW (never seen on this site) and M (only mutants reach it)."""
+    out = []
+    if f.get("first_seen"):
+        out.append('<span class="new" title="never reported by any earlier run">NEW</span>')
+    if f["new"] and f["kind"] != "regression":
+        out.append('<span class="dim" title="only mutants reach this category">M</span>')
+    return " ".join(out)
 
 
 def render_index(runs, site):
@@ -625,8 +734,8 @@ def render_index(runs, site):
                 q = f'?q={STATUS_QUERY[k]}' if k in STATUS_QUERY else "#summary"
                 cells.append(f'<td{cls}><a href="run/{r["id"]}.html{q}">{v}</a></td>'
                              f'<td class="d">{delta(v, pst.get(k, 0), bad_up) if pst else ""}</td>')
-            ncat = kinds["crash"] + kinds["fallback"]
-            pcat = (lambda k: k["crash"] + k["fallback"])(counts(prev)[1]) if prev else None
+            ncat = kinds["crash"] + kinds["fallback"] + kinds["miscompile"]
+            pcat = (lambda k: k["crash"] + k["fallback"] + k["miscompile"])(counts(prev)[1]) if prev else None
             cells.append(f"<td>{ncat}</td><td class=\"d\">{delta(ncat, pcat, True)}</td>"
                          f"<td>{new}</td><td>{repro}</td>")
             rows.append("<tr>" + "".join(cells) + "</tr>")
@@ -637,8 +746,9 @@ def render_index(runs, site):
             "Click \"C\" to compare a run with the previous run of the same label, \"B\" to compare with the\n"
             "latest main run. \"Godbolt\" counts findings that reproduce on Compiler Explorer trunk.\n"
             "<p><b>main</b> uses the same mutation seeds every day, so its deltas come from LLVM changes.\n"
-            "<b>explore</b> uses new seeds every day to find new problems; its \"B\" link lists what it\n"
-            "found beyond main, and its own deltas are partly chance.</p>\n"
+            "<b>explore</b> runs until its time budget is spent, with new seeds, varying mutation counts\n"
+            "and mutated llc flags; its \"B\" link lists what it found beyond main, and its own deltas\n"
+            "are partly chance. \"NEW\" counts categories that no earlier run on this site reported.</p>\n"
             f"<div class=\"wide\">\n<table>\n{''.join(rows)}\n</table>\n</div>\n"
             "<p id=\"nomatch\" class=\"dim\" hidden>No runs match the filter.</p>\n"
             "<script src=\"filter.js\"></script>")
@@ -662,6 +772,29 @@ def run_inputs(m):
     return ", ".join(parts)
 
 
+def mutation_info(m):
+    if m.get("explore"):
+        parts = [f"explore: seeds from {m.get('explore_seed')}, 1-{m.get('max_mutations', 8)} "
+                 f"mutations per mutant, llc flags mutated",
+                 f"{m.get('kept', 0)} results kept, {m.get('dropped', 0)} counted only",
+                 f"{m.get('new_category_count', 0)} categories the run's history did not have"]
+        if m.get("corpus_in") or m.get("corpus_out"):
+            parts.append(f"corpus {m.get('corpus_in', 0)} in, {m.get('corpus_out', 0)} saved")
+        return "; ".join(parts)
+    if m.get("mutate"):
+        return (f"{m['mutate']} mutants per config, {m['mutations']} mutations each, "
+                f"seeds from {m['mutate_seed']}")
+    return '<span class="dim">none</span>'
+
+
+def exec_info(m):
+    if not m.get("exec"):
+        return '<span class="dim">off</span>'
+    where = "input tests only" if m.get("exec_originals_only") else \
+        f"{100 * m.get('exec_rate', 1):.0f}% of mutants"
+    return f"qemu, {m.get('exec_inputs')} inputs per function, {where}"
+
+
 def render_run(run):
     m = run["meta"]
     st, kinds, new, repro = counts(run)
@@ -671,12 +804,13 @@ def render_run(run):
         ("LLVM revision", rev_link(m)),
         ("llc", E(m.get("llc_version") or m["llc"])),
         ("Inputs", run_inputs(m)),
-        ("Mutation", f"{m['mutate']} mutants per config, {m['mutations']} mutations each, seeds from {m['mutate_seed']}"
-         if m.get("mutate") else '<span class="dim">none</span>'),
+        ("Mutation", mutation_info(m)),
+        ("Execution oracle", exec_info(m)),
         ("Started", f"{when(m['started']):%Y-%m-%d %H:%M} UTC"),
         ("Finished", f"{when(m['finished']):%Y-%m-%d %H:%M} UTC"),
         ("Duration", dur(m["finished"] - m["started"])),
-        ("Configurations", f"{m['jobs']} ({run['skipped']} skipped: SDAG failed or mutator gave up"
+        ("Configurations", f"{m['jobs']} ({run['skipped'] or sum(m.get('skipped_reasons', {}).values())}"
+                           " skipped: SDAG failed or mutator gave up"
                            + (f", {m['budget_skipped']} mutants over the {m['time_budget']:g} min time budget"
                               if m.get("budget_skipped") else "") + ")"),
         ("Compiler Explorer", f"{E(run['compiler'])} ({repro} of {sum(1 for f in run['findings'] if f.get('godbolt'))} checked findings reproduce)"),
@@ -687,22 +821,31 @@ def render_run(run):
         pct = "" if k == "crash" else f"{100 * v / total:.1f}"
         unit = " configs" if k == "crash" else ""
         summ.append(f'<tr><td class="l">{E(k)}</td><td>{v}{unit}</td><td>{pct}</td></tr>')
-    summ.append(f'<tr><td class="l">categories</td><td>{kinds["crash"]} crash, {kinds["fallback"]} fallback</td><td></td></tr>')
-    summ.append(f'<tr><td class="l">NEW (mutants only)</td><td>{new}</td><td></td></tr>')
+    summ.append(f'<tr><td class="l">categories</td><td>{kinds["miscompile"]} miscompile, '
+                f'{kinds["crash"]} crash, {kinds["fallback"]} fallback</td><td></td></tr>')
+    summ.append(f'<tr><td class="l">NEW (never seen before)</td><td>{new}</td><td></td></tr>')
+    summ.append(f'<tr><td class="l">M (mutants only)</td><td>{mutant_only(run)}</td><td></td></tr>')
+    if run.get("dropped"):
+        summ.append(f'<tr><td class="l">counted only</td><td>{run["dropped"]} mutants</td><td></td></tr>')
     summ.append("</table>")
 
     rows = ["<tr><th class=\"l\">Kind</th><th class=\"l\"></th><th>Count</th><th>Configs</th><th>Files</th>"
             "<th class=\"l\">Category</th><th class=\"l\">Snippet</th><th class=\"l\">Compiler Explorer</th></tr>"]
     for f in run["findings"]:
         k = f["kind"]
-        key = f'{k} {f["key"]} {"new" if f["new"] else ""} {f.get("godbolt", {}).get("verdict", "")}'.lower()
-        kind = f'<span class="fp">{k}</span>' if k == "crash" else E(k)
-        newc = '<span class="new">NEW</span>' if f["new"] and k != "regression" else ""
+        key = (f'{k} {f["key"]} {"new" if f.get("first_seen") else ""} '
+               f'{"mutant-only" if f["new"] else ""} '
+               f'{f.get("godbolt", {}).get("verdict", "")}').lower()
+        kind = f'<span class="fp">{k}</span>' if k in ("crash", "miscompile") else E(k)
+        newc = tags(f)
         sn = f["snippet"]
         nlines = sn.get("lines", sn.get("source", "").count("\n")) if sn else 0
-        snip = (f'{E(sn["how"])} ({nlines} lines)' if sn
-                else '<span class="dim">not reproduced</span>')
+        snip = (f'{E(sn["how"])} ({nlines} lines)' if sn else
+                '<span class="dim">no detail</span>' if f.get("no_detail") else
+                '<span class="dim">not reproduced</span>')
         cnt = f"+{f['count']}" if k == "regression" else str(f["count"])
+        if f.get("counted_only"):
+            cnt = f'<span title="{f["counted_only"]} of these were counted without being kept">{cnt}*</span>'
         rows.append(f'<tr class="group" data-key="{E(key)}"><td class="l">{kind}</td><td class="l">{newc}</td>'
                     f'<td>{cnt}</td><td>{f["configs"]}</td><td>{f["files"]}</td>'
                     f'<td class="msg">{finding_link(run, f)}</td>'
@@ -710,11 +853,16 @@ def render_run(run):
     body = (f"<h3>Run {E(run['id'])}:</h3>\n{info}\n<h4 id=\"summary\">Summary:</h4>\n{''.join(summ)}\n"
             f"<h4>Findings ({len(run['findings'])}):</h4>\n"
             "<form onsubmit=\"return false\">\n<label>Filter: <input id=\"filter\" placeholder=\"kind, opcode, type, new, reproduces\" /></label>\n</form>\n"
-            "<p>Crashes are clustered by assertion; fallbacks by GlobalISel remark (opcode + types);\n"
+            "<p>Miscompiles are clustered by the instructions the two selectors disagree on;\n"
+            "crashes by assertion; fallbacks by GlobalISel remark (opcode + types);\n"
             "regressions are the functions where GlobalISel emits the most extra instructions.\n"
-            "NEW marks categories that only mutants reach.</p>\n"
+            "<b>NEW</b> marks categories no earlier run reported, <b>M</b> categories that only\n"
+            "mutants reach. A count with <code>*</code> includes mutants that were counted without\n"
+            "being kept.</p>\n"
             + ('<p class="dim">This run is archived: snippets and occurrences were dropped.</p>\n'
-               if run.get("archived") else "")
+               if run.get("archived") else
+               '<p class="dim">Findings below the snippet cutoff are listed without a page of their own.</p>\n'
+               if any(f.get("no_detail") for f in run["findings"]) else "")
             +
             f"<div class=\"wide\">\n<table>\n{''.join(rows)}\n</table>\n</div>\n"
             "<p id=\"nomatch\" class=\"dim\" hidden>No findings match the filter. The findings table lists crash,\n"
@@ -728,15 +876,22 @@ def render_finding(run, f):
     sn = f["snippet"]
     rows = [("Run", f'<a href="../{run["id"]}.html">{E(run["id"])}</a>'),
             ("Kind", E(f["kind"])),
-            ("Category", E(f["key"]) + (' <span class="new">NEW</span>' if f["new"] and f["kind"] != "regression" else "")),
+            ("Category", E(f["key"]) + " " + tags(f)),
             ("Occurrences", f"{f['occurrence_total'] if f['kind'] != 'regression' else 1} "
-                            f"in {f['configs']} configs, {f['files']} test files")]
+                            f"in {f['configs']} configs, {f['files']} test files"
+                            + (f", {f['counted_only']} more counted only"
+                               if f.get("counted_only") else ""))]
     parts = []
     if sn:
         src_file = occ_label(m, {"file": sn["origin"], "mutant_of": sn.get("mutant_of")})
         gflags = ["-global-isel"] if f["kind"] == "regression" else GISEL_FLAGS
-        llc_cmd = (f"llc {sn['config']} {' '.join(gflags)} snippet.ll -o -\n"
-                   f"llc {sn['config']} {' '.join(SDAG_FLAGS)} snippet.ll -o -")
+        if f["kind"] == "miscompile":
+            llc_cmd = (f"./exec_oracle.py --flags '{sn['config']}'"
+                       + (f" --funcs {sn['function']}" if sn.get("function") else "")
+                       + " snippet.ll")
+        else:
+            llc_cmd = (f"llc {sn['config']} {' '.join(gflags)} snippet.ll -o -\n"
+                       f"llc {sn['config']} {' '.join(SDAG_FLAGS)} snippet.ll -o -")
         rows += [("Snippet from", f'{src_file}{" @" + E(sn["function"]) if sn.get("function") else ""} via {E(sn["how"])}'),
                  ("Config", f'<code>{E(sn["config"])}</code>'),
                  ("Local check", f'<span class="tp">reproduces</span> at {E(m["revision"][:10])}')]
@@ -744,13 +899,18 @@ def render_finding(run, f):
         if g:
             rows.append(("Compiler Explorer", f'<a href="{E(g["url"])}">{E(g["url"])}</a> '
                                               f'({E(g["compiler"])}, checked {E(g["checked"])}): {verdict_span(f)}'))
+        elif f["kind"] == "miscompile":
+            rows.append(("Compiler Explorer",
+                         '<span class="dim">not applicable: Compiler Explorer compiles RISC-V '
+                         'but cannot run it</span>'))
         elif f.get("godbolt_error"):
             rows.append(("Compiler Explorer", f'<span class="fp">{E(f["godbolt_error"])}</span>'))
         else:
             rows.append(("Compiler Explorer", '<span class="dim">not uploaded (over --godbolt-limit or disabled)</span>'))
         parts.append(f"<h4>Snippet:</h4>\n<pre class=\"code\">{E(sn['source'])}</pre>")
         parts.append(f"<h4>Reproduce:</h4>\n<pre>{E(llc_cmd)}</pre>")
-        title = "Assembly diff (SelectionDAG vs GlobalISel):" if f["kind"] == "regression" else "Local llc output:"
+        title = "Assembly diff (SelectionDAG vs GlobalISel):" if f["kind"] == "regression" else \
+            "Local execution result:" if f["kind"] == "miscompile" else "Local llc output:"
         parts.append(f"<h4>{title}</h4>\n<pre class=\"code\">{diff_html(sn['local']['output']) if f['kind'] == 'regression' else E(sn['local']['output'])}</pre>")
         if g:
             pr = ["<table>", "<tr><th class=\"l\">Pane</th><th class=\"l\">Options</th><th>Exit</th><th>Insts</th><th class=\"l\">stderr</th></tr>"]
@@ -830,14 +990,30 @@ ABOUT = """\
 count), <b>better</b>/<b>worse</b> (GlobalISel emits fewer/more instructions), <b>fallback</b> (GlobalISel gave
 up and SelectionDAG was used). <b>crash</b> counts configurations where GlobalISel llc failed but SelectionDAG
 succeeded.</p>
+<p><b>miscompile</b> means the generated code computes something else. Functions whose assembly differs are
+sanitized (<code>ir-mutate -sanitize</code> replaces undef/poison, drops poison-generating and fast-math
+flags, and guards divisors and shift amounts), linked into a freestanding harness
+(<code>ir-mutate -harness</code>) that calls them on 64 pseudo-random argument tuples and hashes the return
+value and a memory arena, and run under qemu-user. The function is reported only when two SelectionDAG builds
+at different <code>-O</code> levels agree and GlobalISel differs, which filters out results that still depend
+on undefined behaviour or on the frame layout. Compiler Explorer compiles RISC-V but cannot run it, so
+miscompiles have no remote verdict.</p>
+<p>Fallback categories are normalized: vector element counts become <code>N</code> (<code>&lt;4 x s32&gt;</code>
+and <code>&lt;8 x s32&gt;</code> are the same gap) and non-standard scalar widths are bucketed to the next
+standard width with a trailing <code>~</code>. <b>NEW</b> marks a category no earlier run reported;
+<b>M</b> marks one that only mutants reach. The explore pass keeps only a few occurrences per category and
+counts the rest, which is what a <code>*</code> on a count means.</p>
 <p>Snippets are the smallest candidate that reproduces the finding with the local llc: the single function
 extracted with <code>llvm-extract</code> (for crashes, the first function that reproduces), optionally
 reduced with <code>llvm-reduce</code>. Compiler Explorer links are created only after compiling the snippet
 remotely on every pane in the link; the verdict compares the remote result with the local one.
 "reproduces" means the same category on trunk; anything else usually means trunk moved on.</p>
-<p>Older runs keep only their summary and findings table; snippets and occurrences are kept for the
-most recent runs of each label. Source: <a href="https://github.com/zeyi2/llvm-fuzz">zeyi2/llvm-fuzz</a>.</p>
-<pre>python3 isel_diff.py --mutate 5
+<p>Within a run, findings are ordered miscompile, crash, fallback (categories only mutants reach first),
+regression, and the leading <code>--detail-limit</code> of them get a snippet and a page; the rest are
+listed in the run's table only. Older runs keep only their summary and findings table; snippets and
+occurrences are kept for the most recent runs of each label. Source: <a href="https://github.com/zeyi2/llvm-fuzz">zeyi2/llvm-fuzz</a>.</p>
+<pre>python3 isel_diff.py --mutate 5 --exec --exec-originals-only
+python3 isel_diff.py --explore --time-budget 60 --exec --exec-rate 0.1 --out out-explore
 python3 fuzz_site.py [--label NAME] [--reduce] [--no-godbolt]</pre>
 """
 
@@ -869,6 +1045,8 @@ def render(site):
             shutil.rmtree(os.path.join(site, "run", r["id"]), ignore_errors=True)
             continue
         for f in r["findings"]:
+            if f.get("no_detail"):
+                continue
             write(f"run/{r['id']}/{f['id']}.html", render_finding(r, f))
     mains = sorted(by_label.get("main", []), key=lambda r: r["meta"]["started"])
     for label, rs in by_label.items():
@@ -891,8 +1069,19 @@ def check_main(spec_path, file):
         spec = json.load(f)
     with open(file) as f:
         src = f.read()
-    ns = argparse.Namespace(llc=spec["llc"], timeout=spec["timeout"])
+    ns = argparse.Namespace(**{k: spec[k] for k in SPEC_ARGS})
     return 0 if check(ns, spec, src) else 1
+
+
+def dump_keys(site, out):
+    keys = sorted(seen_categories(site))
+    text = json.dumps({"keys": keys}, indent=0)
+    if out == "-":
+        print(text)
+    else:
+        with open(out, "w") as f:
+            f.write(text)
+    print(f"{len(keys)} categories seen so far", file=sys.stderr)
 
 
 def main():
@@ -906,24 +1095,36 @@ def main():
     ap.add_argument("--llc", default=ID.llvm_bin("llc"))
     ap.add_argument("--llvm-extract", default=ID.llvm_bin("llvm-extract"))
     ap.add_argument("--llvm-reduce", default=ID.llvm_bin("llvm-reduce"))
+    ap.add_argument("--ir-mutate", default=ID.llvm_bin("ir-mutate"))
+    ap.add_argument("--dump-keys", metavar="FILE",
+                    help="write the categories every run on the site has reported "
+                         "(for isel_diff.py --history) and exit; \"-\" for stdout")
+    EO.add_arguments(ap)
     ap.add_argument("--reduce", action="store_true",
                     help="shrink crash/fallback snippets of the first --godbolt-limit findings with llvm-reduce")
     ap.add_argument("--reduce-timeout", type=int, default=120)
     ap.add_argument("--candidates", type=int, default=4, help="occurrences tried per finding")
     ap.add_argument("--crash-tries", type=int, default=60, help="functions tried per crashing input")
     ap.add_argument("--top-regressions", type=int, default=30)
-    ap.add_argument("--max-occurrences", type=int, default=50)
+    ap.add_argument("--max-occurrences", type=int, default=15)
+    ap.add_argument("--detail-limit", type=int, default=1200,
+                    help="findings per run that get a snippet and a page of their own")
     ap.add_argument("--no-godbolt", dest="godbolt", action="store_false")
     ap.add_argument("--godbolt-limit", type=int, default=40, help="max findings checked on Compiler Explorer per run")
     ap.add_argument("--godbolt-delay", type=float, default=0.5)
     ap.add_argument("--compiler", default="llc-assertions-trunk")
     ap.add_argument("-j", "--jobs", type=int, default=os.cpu_count())
     ap.add_argument("--timeout", type=int, default=60)
-    ap.add_argument("--keep-full", type=int, default=6,
+    # The whole site is republished every day and GitHub Pages caps it at 1 GB;
+    # a run of the recursive test tree carries a few thousand findings.
+    ap.add_argument("--keep-full", type=int, default=3,
                     help="runs per label that keep snippets and finding pages; older runs are archived")
     args = ap.parse_args()
 
     os.makedirs(os.path.join(args.site, "data"), exist_ok=True)
+    if args.dump_keys:
+        dump_keys(args.site, args.dump_keys)
+        return
     if not args.render_only:
         run_id = ingest(args)
         print(f"ingested {run_id}", file=sys.stderr)

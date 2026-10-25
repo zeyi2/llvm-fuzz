@@ -18,9 +18,12 @@ on:
         description: Group name on the results index
         default: main
       explore:
-        description: Also run the rotating-seed "explore" pass
+        description: Also run the deadline-driven "explore" pass
         type: boolean
         default: true
+      exec_rate:
+        description: Fraction of explore mutants the qemu execution oracle runs on
+        default: '0.1'
 
 permissions: {}
 
@@ -50,6 +53,10 @@ jobs:
       MUTATE: ${{ inputs.mutate || '5' }}
       MUTATE_SEED: ${{ inputs.mutate_seed || '1' }}
       LABEL: ${{ inputs.label || 'main' }}
+      EXEC_RATE: ${{ inputs.exec_rate || '0.1' }}
+      # Each oracle configuration builds and runs three binaries; cap the qemu
+      # time so a mutant with a slow loop cannot eat the budget.
+      EXEC_BUDGET: '15'
       # Scheduled runs have no inputs (and null == false in expressions).
       EXPLORE: ${{ (github.event_name == 'workflow_dispatch' && !inputs.explore) && 'false' || 'true' }}
     steps:
@@ -63,7 +70,9 @@ jobs:
           persist-credentials: false
 
       - name: Install build tools
-        run: sudo apt-get update -q && sudo apt-get install -y -q ninja-build lld
+        # lld also provides ld.lld, which links the execution oracle's binaries;
+        # qemu-user-static runs them.
+        run: sudo apt-get update -q && sudo apt-get install -y -q ninja-build lld qemu-user-static
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
@@ -75,8 +84,25 @@ jobs:
       - name: sccache stats
         run: sccache --show-stats || true
 
+      # Everything published so far: the findings of every earlier run (which
+      # is what makes a category "NEW"), the Compiler Explorer cache, the
+      # explore corpus and the energy weights.
+      - name: Restore previous results
+        run: |
+          mkdir -p site
+          if git fetch --depth 1 origin gh-pages; then
+            # One archive per path: git archive fails on a path that does not
+            # exist yet, and the others must still be restored.
+            for p in data godbolt-cache.json corpus energy.json; do
+              git archive FETCH_HEAD "$p" | tar -x -C site || true
+            done
+          fi
+          python3 fuzz_site.py --site site --dump-keys history.json
+          ls site site/data site/corpus || true
+
       # Fixed seeds: the same mutants every day, so changes between runs
-      # come from LLVM, not from the mutator.
+      # come from LLVM, not from the mutator. The execution oracle runs on the
+      # input tests only, which keeps this pass deterministic and bounded.
       - name: Campaign (main, fixed seeds)
         run: |
           set -euo pipefail
@@ -89,35 +115,35 @@ jobs:
           if [ "$budget" -lt 10 ]; then budget=10; fi
           echo "elapsed ${elapsed} min, mutation time budget ${budget} min"
           timeout $(( (budget + 15) * 60 )) \
-            python3 isel_diff.py --mutate "$MUTATE" --mutate-seed "$MUTATE_SEED" --time-budget "$budget"
-
-      - name: Restore previous results
-        run: |
-          mkdir -p site
-          if git fetch --depth 1 origin gh-pages; then
-            git archive FETCH_HEAD data godbolt-cache.json | tar -x -C site || true
-          fi
-          ls site site/data || true
+            python3 isel_diff.py --mutate "$MUTATE" --mutate-seed "$MUTATE_SEED" \
+              --time-budget "$budget" --history history.json \
+              --exec --exec-originals-only --exec-budget "$EXEC_BUDGET"
 
       - name: Build site (main)
         timeout-minutes: 45
         run: python3 fuzz_site.py --reduce --label "$LABEL" --site site
 
-      # New seeds every day (1000 + 5 per day since the epoch), disjoint from
-      # main's. Reruns on the same day reuse the same seeds.
-      - name: Campaign (explore, rotating seeds)
+      # Takes whatever main left over: mutant rounds with new seeds, varying
+      # mutation counts and mutated llc flags until the deadline. Results are
+      # only kept when they add a category, novelty or a top regression.
+      - name: Campaign (explore)
         id: explore
         if: env.EXPLORE == 'true'
         continue-on-error: true
         run: |
           set -euo pipefail
-          seed=$(( 1000 + $(date -u +%s) / 86400 * MUTATE ))
           elapsed=$(( ($(date +%s) - JOB_START) / 60 ))
           budget=$(( JOB_MINUTES - SITE_MINUTES - elapsed ))
           if [ "$budget" -lt 5 ]; then echo "no time left"; exit 1; fi
-          echo "seeds from ${seed}, elapsed ${elapsed} min, mutation time budget ${budget} min"
+          echo "elapsed ${elapsed} min, explore time budget ${budget} min"
+          # Re-dumped so that what main already reported today does not count
+          # as novelty here.
+          python3 fuzz_site.py --site site --dump-keys history.json
           timeout $(( (budget + 10) * 60 )) \
-            python3 isel_diff.py --mutate "$MUTATE" --mutate-seed "$seed" --time-budget "$budget" --out out-explore
+            python3 isel_diff.py --explore --time-budget "$budget" --out out-explore \
+              --history history.json --energy site/energy.json \
+              --corpus site/corpus --corpus-out site/corpus \
+              --exec --exec-rate "$EXEC_RATE" --exec-budget "$EXEC_BUDGET"
 
       - name: Build site (explore)
         if: env.EXPLORE == 'true' && steps.explore.outcome == 'success'
