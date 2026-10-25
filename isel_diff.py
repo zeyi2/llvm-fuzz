@@ -638,7 +638,9 @@ def write_meta(args, root, started, njobs, budget_skipped=0, extra=None):
         "budget_skipped": budget_skipped,
         "recursive": args.recursive,
         "explore": args.explore,
-        "exec": bool(args.exec_oracle),
+        # False when qemu or the linker turned out to be unusable, so the site
+        # never claims the oracle ran when it did not.
+        "exec": bool(args.exec_oracle) and not getattr(args, "_exec_broken", False),
         "exec_rate": args.exec_rate,
         "exec_inputs": args.exec_inputs,
     }

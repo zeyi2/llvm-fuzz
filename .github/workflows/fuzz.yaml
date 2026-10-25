@@ -57,6 +57,8 @@ jobs:
       # Each oracle configuration builds and runs three binaries; cap the qemu
       # time so a mutant with a slow loop cannot eat the budget.
       EXEC_BUDGET: '15'
+      # qemu-user-static installs the interpreters under their -static names.
+      QEMU: 'qemu-riscv{xlen}-static'
       # Scheduled runs have no inputs (and null == false in expressions).
       EXPLORE: ${{ (github.event_name == 'workflow_dispatch' && !inputs.explore) && 'false' || 'true' }}
     steps:
@@ -72,7 +74,12 @@ jobs:
       - name: Install build tools
         # lld also provides ld.lld, which links the execution oracle's binaries;
         # qemu-user-static runs them.
-        run: sudo apt-get update -q && sudo apt-get install -y -q ninja-build lld qemu-user-static
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ninja-build lld qemu-user-static
+          qemu-riscv64-static --version | head -1
+          qemu-riscv32-static --version | head -1
+          ld.lld --version
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
@@ -117,11 +124,12 @@ jobs:
           timeout $(( (budget + 15) * 60 )) \
             python3 isel_diff.py --mutate "$MUTATE" --mutate-seed "$MUTATE_SEED" \
               --time-budget "$budget" --history history.json \
-              --exec --exec-originals-only --exec-budget "$EXEC_BUDGET"
+              --exec --exec-originals-only --exec-budget "$EXEC_BUDGET" --qemu "$QEMU"
 
       - name: Build site (main)
         timeout-minutes: 45
-        run: python3 fuzz_site.py --reduce --label "$LABEL" --site site
+        # --qemu: re-running a miscompile for its page needs the oracle again.
+        run: python3 fuzz_site.py --reduce --label "$LABEL" --site site --qemu "$QEMU"
 
       # Takes whatever main left over: mutant rounds with new seeds, varying
       # mutation counts and mutated llc flags until the deadline. Results are
@@ -143,13 +151,13 @@ jobs:
             python3 isel_diff.py --explore --time-budget "$budget" --out out-explore \
               --history history.json --energy site/energy.json \
               --corpus site/corpus --corpus-out site/corpus \
-              --exec --exec-rate "$EXEC_RATE" --exec-budget "$EXEC_BUDGET"
+              --exec --exec-rate "$EXEC_RATE" --exec-budget "$EXEC_BUDGET" --qemu "$QEMU"
 
       - name: Build site (explore)
         if: env.EXPLORE == 'true' && steps.explore.outcome == 'success'
         continue-on-error: true
         timeout-minutes: 45
-        run: python3 fuzz_site.py --reduce --label explore --results out-explore --site site
+        run: python3 fuzz_site.py --reduce --label explore --results out-explore --site site --qemu "$QEMU"
 
       - name: Publish to gh-pages
         env:
