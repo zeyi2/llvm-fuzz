@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem i64 <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 27 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rem.4f6c012a54.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rem.ll">rem.ll</a><span class="dim">)</span> @urem64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global i1
+
+; Function Attrs: nounwind
+define i64 @urem64(i64 %a, i64 %b) #0 {
+  %1 = urem i64 %a, %b
+  %C = icmp ule i64 %1, 1
+  store i1 %C, ptr @G.4, align 1
+  ret i64 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %1 = urem i64 %a, %b&#x27; (in function: urem64)
+warning: Instruction selection used fallback path for urem64</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">alu64.d23240d06b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/alu64.ll">alu64.ll</a><span class="dim">)</span></td><td class="l">andi</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbs,+zfinx -O2</code></td></tr><tr><td class="l">atomic-load-zext.4f4cc8d2d5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/atomic-load-zext.ll">atomic-load-zext.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i32_seq_cst</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zhinx -O2</code></td></tr><tr><td class="l">float-convert.6cfde237ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-convert.ll">float-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_s_lu</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfinx -O1</code></td></tr><tr><td class="l">rem.4f6c012a54.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rem.ll">rem.ll</a><span class="dim">)</span></td><td class="l">urem64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">rem.769d119037.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rem.ll">rem.ll</a><span class="dim">)</span></td><td class="l">urem64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">shifts.f74e51a39e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/shifts.ll">shifts.ll</a><span class="dim">)</span></td><td class="l">shl64_minsize</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+zhinx -O3</code></td></tr><tr><td class="l">short-forward-branch-opt-min-max.c4dff66e82.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/short-forward-branch-opt-min-max.ll">short-forward-branch-opt-min-max.ll</a><span class="dim">)</span></td><td class="l">select_example_smin_1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zba,+zhinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

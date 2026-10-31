@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_INTRINSIC_W_SIDE_EFFECTS &lt;vscale x N x s64&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_INTRINSIC_W_SIDE_EFFECTS &lt;vscale x N x s64&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_INTRINSIC_W_SIDE_EFFECTS &lt;vscale x N x s64&gt;,s32 </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">52 in 2 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a> @test_sf_vc_vv_se_e64m1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test_sf_vc_vv_se_e64m1(&lt;vscale x 1 x i64&gt; %vs2, &lt;vscale x 1 x i64&gt; %vs1, i32 %vl) {
+entry:
+  tail call void @llvm.riscv.sf.vc.vv.se.i32.nxv1i64.nxv1i64.i32(i32 3, i32 31, &lt;vscale x 1 x i64&gt; %vs2, &lt;vscale x 1 x i64&gt; %vs1, i32 %vl)
+  ret void
+}
+
+; Function Attrs: nounwind
+declare void @llvm.riscv.sf.vc.vv.se.i32.nxv1i64.nxv1i64.i32(i32 immarg, i32 immarg, &lt;vscale x 1 x i64&gt;, &lt;vscale x 1 x i64&gt;, i32) #0
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.sf.vc.vv.se), 3, 31, %0:vrb(&lt;vscale x 1 x s64&gt;), %1:vrb(&lt;vscale x 1 x s64&gt;), %2:gprb(s32) (in function: test_sf_vc_vv_se_e64m1)
+warning: Instruction selection used fallback path for test_sf_vc_vv_se_e64m1</pre>
+<h4>Occurrences (52) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/sifive_sf_mm_f_f.ll">sifive_sf_mm_f_f.ll</a></td><td class="l">test_sf_mm_f_f_w1_f64m8</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -mattr=+zvfh -mattr=+xsfmm32a32f -mattr=+xsfmm64a64f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_vv_se_e64m1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_vv_se_e64m2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_vv_se_e64m4</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_vv_se_e64m8</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_v_vv_se_e64m1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_v_vv_se_e64m2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_v_vv_se_e64m4</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_v_vv_se_e64m8</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_iv_se_e64m1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_iv_se_e64m2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_iv_se_e64m4</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_iv_se_e64m8</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_v_iv_se_e64m1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xsfvcp-xv.ll">xsfvcp-xv.ll</a></td><td class="l">test_sf_vc_v_iv_se_e64m2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+xsfvcp -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

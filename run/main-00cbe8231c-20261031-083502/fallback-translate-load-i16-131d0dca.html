@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">41 in 25 configs, 13 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-mem.2c9d2c61ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-mem.ll">half-mem.ll</a><span class="dim">)</span> @flh via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Mezv8aGbe">https://godbolt.org/z/Mezv8aGbe</a> (llc-assertions-trunk, checked 2026-10-30 09:36 UTC): <a href="https://godbolt.org/z/Mezv8aGbe">G</a> <span class="fp">falls back differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i16
+@G.3 = external global ptr
+
+; Function Attrs: nounwind
+define half @flh(ptr %a) #0 {
+  %LGV2 = load i16, ptr @G.2, align 2
+  %1 = load half, ptr %a, align 2
+  %2 = getelementptr half, ptr %a, i32 3
+  %3 = load half, ptr %2, align 2
+  %G = getelementptr bfloat, ptr %2, i16 %LGV2
+  %4 = fadd half %1, %3
+  store ptr %G, ptr @G.3, align 8
+  ret half %4
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>15</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(s16) = G_FADD %3:_, %6:_ (in function: flh)<br>warning: Instruction selection used fallback path for flh</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel=0</code></td><td>0</td><td>15</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV2 = load i16, ptr @G.2, align 2&#x27; (in function: flh)
+warning: Instruction selection used fallback path for flh</pre>
+<h4>Occurrences (41) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-br-fcmp.2a522f18f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-br-fcmp.ll">double-br-fcmp.ll</a><span class="dim">)</span></td><td class="l">br_fcmp_oeq_alt</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-br-fcmp.a52ee0caec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-br-fcmp.ll">double-br-fcmp.ll</a><span class="dim">)</span></td><td class="l">br_fcmp_oeq_alt</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-convert-strict.5c3d6f43fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_w_d</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">double-convert-strict.7d458ded18.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_w_d</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">double-convert-strict.85c61b1cf6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w_i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">double-convert-strict.86345e4662.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w_i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">double-convert.34a77164b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w_load</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-convert.ee18b6d7c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w_load</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-intrinsics.c24b04ed15.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">sin_f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-intrinsics.eb12b2e7c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">sin_f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-round-conv.62ae2a436a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-round-conv.ll">double-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_floor_si32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-round-conv.beef458697.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-round-conv.ll">double-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_floor_si32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-convert-strict.1ada0c9e58.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-convert-strict.ll">float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_wu_s_multiple_use</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">float-convert-strict.85fd3599db.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-convert-strict.ll">float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_wu_s_multiple_use</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">float-mem.39044cc899.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-mem.ll">float-mem.ll</a><span class="dim">)</span></td><td class="l">flw</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

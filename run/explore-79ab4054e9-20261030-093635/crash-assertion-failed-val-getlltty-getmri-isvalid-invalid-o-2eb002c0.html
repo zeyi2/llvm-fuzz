@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;), function buildStore, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;), function buildStore, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;), function buildStore, file MachineIRBuilder.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vlsseg-rv32.4b544c8cd4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vlsseg-rv32.ll">vlsseg-rv32.ll</a><span class="dim">)</span> @test_vlsseg4_nxv16i8_triscv.vector.tuple_nxv16i8_4t via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/MdzM1e9h4">https://godbolt.org/z/MdzM1e9h4</a> (llc-assertions-trunk, checked 2026-10-30 12:58 UTC): <a href="https://godbolt.org/z/MdzM1e9h4">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 16 x i8&gt; @test_vlsseg4_nxv16i8_triscv.vector.tuple_nxv16i8_4t(ptr %base, i32 %offset, i32 %vl) {
+entry:
+  %A = alloca target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4), align 64
+  store target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4) poison, ptr %A, align 64
+  %0 = tail call target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4) @llvm.riscv.vlsseg4.triscv.vector.tuple_nxv16i8_4t.p0.i32(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4) poison, ptr %base, i32 %offset, i32 %vl, i32 3)
+  %1 = call &lt;vscale x 16 x i8&gt; @llvm.riscv.tuple.extract.nxv16i8.triscv.vector.tuple_nxv16i8_4t(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4) %0, i32 1)
+  store target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4) %0, ptr %A, align 64
+  ret &lt;vscale x 16 x i8&gt; %1
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 16 x i8&gt; @llvm.riscv.tuple.extract.nxv16i8.triscv.vector.tuple_nxv16i8_4t(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4), i32 immarg) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4) @llvm.riscv.vlsseg4.triscv.vector.tuple_nxv16i8_4t.p0.i32(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 4), ptr captures(none), i32, i32, i32 immarg) #1
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(read) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:520: llvm::MachineInstrBuilder llvm::MachineIRBuilder::buildStore(const llvm::SrcOp&amp;, const llvm::SrcOp&amp;, llvm::MachineMemOperand&amp;): Assertion `Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O0 -global-isel=0</code></td><td>0</td><td>29</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:520: MachineInstrBuilder llvm::MachineIRBuilder::buildStore(const SrcOp &amp;, const SrcOp &amp;, MachineMemOperand &amp;): Assertion `Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@test_vlsseg4_nxv16i8_triscv.vector.tuple_nxv16i8_4t&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055e4864d970b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055e4864d65b1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055e4864da18b
+3  libc.so.6 0x00007fc510c45330
+4  libc.so.6 0x00007fc510c9ec0c pthread_kill + 284
+5  libc.so.6 0x00007fc510c4527e gsignal + 30
+6  libc.so.6 0x00007fc510c288ff abort + 223
+7  libc.so.6 0x00007fc510c2881b
+8  libc.so.6 0x00007fc510c3b517
+9  llc       0x000055e4886880b9 llvm::MachineIRBuilder::buildStore(llvm::SrcOp const&amp;, llvm::SrcOp const&amp;, llvm::MachineMemOperand&amp;) + 265
+10 llc       0x000055e4885f7667 llvm::IRTranslatorImpl::translateStore(llvm::User const&amp;, llvm::MachineIRBuilder&amp;) + 1239
+11 llc       0x000055e488605e03 llvm::IRTranslatorImpl::translate(llvm::Instruction const&amp;) + 611
+12 llc       0x000055e4886089ad llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 4189
+13 llc       0x000055e48860999d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+14 llc       0x000055e486aa960d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x000055e4868337f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000055e48683bd12 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x000055e4868345a0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x000055e4864e0dc7 llcMain + 12151
+19 llc       0x000055e48641ceaf main + 63
+20 libc.so.6 0x00007fc510c2a1ca
+21 libc.so.6 0x00007fc510c2a28b __libc_start_main + 139
+22 llc       0x000055e48641cda5 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64-spill-zvlsseg.67177cc67b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/rv64-spill-zvlsseg.ll">rv64-spill-zvlsseg.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=128 -mattr=+v -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">vlsegff-rv64.6cb6b8b885.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vlsegff-rv64.ll">vlsegff-rv64.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O1</code></td></tr><tr><td class="l">vlsseg-rv32.4b544c8cd4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vlsseg-rv32.ll">vlsseg-rv32.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

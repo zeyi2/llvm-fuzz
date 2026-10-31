@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: cmpxchg ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: cmpxchg ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: cmpxchg ptr <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 32 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-cmpxchg.93fde4aff1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span> @cmpxchg_i32_release_monotonic via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zacas,+zhinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @cmpxchg_i32_release_monotonic(ptr %ptr, i32 %cmp, i32 %val) #0 {
+  %res = cmpxchg ptr %ptr, i32 %cmp, i32 %val release monotonic, align 4
+  store { i32, i1 } %res, ptr poison, align 4
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+a,+zacas,+zhinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+a,+zacas,+zhinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: cmpxchg: &#x27;  %res = cmpxchg ptr %ptr, i32 %cmp, i32 %val release monotonic, align 4&#x27; (in function: cmpxchg_i32_release_monotonic)
+warning: Instruction selection used fallback path for cmpxchg_i32_release_monotonic</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-cmpxchg.596889490b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i64_seq_cst_monotonic</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zacas,+zhinx -O2 -code-model=small</code></td></tr><tr><td class="l">atomic-cmpxchg.791aa2a59a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i32_seq_cst_acquire</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+ztso,+zacas,+zabha,+zbb,+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">atomic-cmpxchg.93fde4aff1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i32_release_monotonic</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zacas,+zhinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

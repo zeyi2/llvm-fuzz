@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.scatter.nxv8i8.nxv8p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.scatter.nxv8i8.nxv8p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.scatter.nxv8i8.nxv8p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 2 test files, 2 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vpscatter-sdnode.b38623cb4d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span> @vpscatter_nxv8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zvfbfmin,+v,+m,+zvbb -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global half
+@G.3 = external global i1
+
+define void @vpscatter_nxv8i8(&lt;vscale x 8 x i8&gt; %val, &lt;vscale x 8 x ptr&gt; %ptrs, &lt;vscale x 8 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load half, ptr @G.2, align 2
+  call void @llvm.vp.scatter.nxv8i8.nxv8p0(&lt;vscale x 8 x i8&gt; %val, &lt;vscale x 8 x ptr&gt; %ptrs, &lt;vscale x 8 x i1&gt; %m, i32 %evl)
+  %C = fcmp olt half 6.550400e+04, %LGV
+  store i1 %C, ptr @G.3, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare void @llvm.vp.scatter.nxv8i8.nxv8p0(&lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x ptr&gt;, &lt;vscale x 8 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zvfbfmin,+v,+m,+zvbb -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zvfbfmin,+v,+m,+zvbb -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.scatter.nxv8i8.nxv8p0: &#x27;  call void @llvm.vp.scatter.nxv8i8.nxv8p0(&lt;vscale x 8 x i8&gt; %val, &lt;vscale x 8 x ptr&gt; %ptrs, &lt;vscale x 8 x i1&gt; %m, i32 %evl)&#x27; (in function: vpscatter_nxv8i8)
+warning: Instruction selection used fallback path for vpscatter_nxv8i8</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nontemporal-vp-scalable.2e3e6cfd62.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_nxv8i8_S1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v,+zfa,+zcb -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.67eac3e520.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_nxv8i8_P1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+c -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.daadcd5b96.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_nxv8i8_DEFAULT</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v,+zihintpause,+m -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.e327db7132.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_nxv8i8_P1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v,+c -O1 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">vpscatter-sdnode.b38623cb4d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zvfbfmin,+v,+m,+zvbb -O3</code></td></tr><tr><td class="l">vpscatter-sdnode.d2ebfc6b08.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zfh,+zvfbfmin,+v,+m,+zvbb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

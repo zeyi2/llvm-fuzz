@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;), function emitPrologue, file RISCVFrameLowering.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;), function emitPrologue, file RISCVFrameLowering.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;), function emitPrologue, file RISCVFrameLowering.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-fpr32s.88b8e07c87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/callee-saved-fpr32s.ll">callee-saved-fpr32s.ll</a><span class="dim">)</span> @callee via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zve32x,+a -O0 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/bbd8jMo4e">https://godbolt.org/z/bbd8jMo4e</a> (llc-assertions-trunk, checked 2026-10-30 12:59 UTC): <a href="https://godbolt.org/z/bbd8jMo4e">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var = external global [32 x float]
+
+; Function Attrs: nounwind
+define void @callee() #0 {
+  %val = load [32 x float], ptr @var, align 4
+  store volatile [32 x float] %val, ptr @var, align 4
+  store [32 x float] %val, ptr poison, align 4
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zve32x,+a -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/RISCVFrameLowering.cpp:1180: virtual void llvm::RISCVFrameLowering::emitPrologue(llvm::MachineFunction&amp;, llvm::MachineBasicBlock&amp;) const: Assertion `MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zve32x,+a -O0 -code-model=medium -global-isel=0</code></td><td>0</td><td>100</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zve32x,+a -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zve32x,+a -O0 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVFrameLowering.cpp:1180: virtual void llvm::RISCVFrameLowering::emitPrologue(MachineFunction &amp;, MachineBasicBlock &amp;) const: Assertion `MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zve32x,+a -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Prologue/Epilogue Insertion &amp; Frame Finalization&#x27; on function &#x27;@callee&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055f5936db70b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055f5936d85b1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055f5936dc18b
+3  libc.so.6 0x00007fe76d045330
+4  libc.so.6 0x00007fe76d09ec0c pthread_kill + 284
+5  libc.so.6 0x00007fe76d04527e gsignal + 30
+6  libc.so.6 0x00007fe76d0288ff abort + 223
+7  libc.so.6 0x00007fe76d02881b
+8  libc.so.6 0x00007fe76d03b517
+9  llc       0x000055f5944c457e
+10 llc       0x000055f5942749a0
+11 llc       0x000055f594277ab7
+12 llc       0x000055f593cab60d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+13 llc       0x000055f593a357f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x000055f593a3dd12 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x000055f593a365a0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x000055f5936e2dc7 llcMain + 12151
+17 llc       0x000055f59361eeaf main + 63
+18 libc.so.6 0x00007fe76d02a1ca
+19 libc.so.6 0x00007fe76d02a28b __libc_start_main + 139
+20 llc       0x000055f59361eda5 _start + 37</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-fpr32s.88b8e07c87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/callee-saved-fpr32s.ll">callee-saved-fpr32s.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zve32x,+a -O0 -code-model=medium</code></td></tr><tr><td class="l">callee-saved-fpr32s.9c9d7ce28d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/callee-saved-fpr32s.ll">callee-saved-fpr32s.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi lp64e -verify-machineinstrs -mattr=+f,+zvkb -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT p0,&lt;N x p0&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT p0,&lt;N x p0&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT p0,&lt;N x p0&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 2 test files, 26 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-unaligned.9146f8ccb4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-unaligned.ll">fixed-vectors-unaligned.ll</a><span class="dim">)</span> @mscatter_v4i16_align1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i32
+
+define void @mscatter_v4i16_align1(&lt;4 x i16&gt; %val, &lt;4 x ptr&gt; %ptrs, &lt;4 x i1&gt; %m) {
+  %LGV = load i32, ptr @G.2, align 4
+  %B = add i32 -1, %LGV
+  call void @llvm.masked.scatter.v4i16.v4p0(&lt;4 x i16&gt; %val, &lt;4 x ptr&gt; align 1 %ptrs, &lt;4 x i1&gt; %m)
+  store i32 %B, ptr @G.2, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(write)
+declare void @llvm.masked.scatter.v4i16.v4p0(&lt;4 x i16&gt;, &lt;4 x ptr&gt;, &lt;4 x i1&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %35:_(p0) = G_EXTRACT_VECTOR_ELT %1:_(&lt;4 x p0&gt;), %34:_(s32) (in function: mscatter_v4i16_align1)
+warning: Instruction selection used fallback path for mscatter_v4i16_align1</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-unaligned.9146f8ccb4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-unaligned.ll">fixed-vectors-unaligned.ll</a><span class="dim">)</span></td><td class="l">mscatter_v4i16_align1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">nontemporal-vp.d3814f8ccd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_v16i8_P1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+a -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp.d3814f8ccd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_v4i32_ALL</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+a -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: phi &lt;vscale x N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: phi &lt;vscale x N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: phi &lt;vscale x N x i32&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">35 in 4 configs, 4 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vl-opt.ll">vl-opt.ll</a> @recurrence via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @recurrence(&lt;vscale x 4 x i32&gt; %v, ptr %p, i32 %n, i32 %vl) {
+entry:
+  br label %loop
+
+loop:                                             ; preds = %loop, %entry
+  %iv = phi i32 [ 0, %entry ], [ %iv.next, %loop ]
+  %phi = phi &lt;vscale x 4 x i32&gt; [ zeroinitializer, %entry ], [ %x, %loop ]
+  %x = add &lt;vscale x 4 x i32&gt; %phi, %v
+  %iv.next = add i32 %iv, 1
+  %done = icmp eq i32 %iv.next, %n
+  br i1 %done, label %exit, label %loop
+
+exit:                                             ; preds = %loop
+  call void @llvm.riscv.vse.nxv4i32.p0.i32(&lt;vscale x 4 x i32&gt; %x, ptr %p, i32 %vl)
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.riscv.vse.nxv4i32.p0.i32(&lt;vscale x 4 x i32&gt;, ptr captures(none), i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: phi: &#x27;  %phi = phi &lt;vscale x 4 x i32&gt; [ zeroinitializer, %entry ], [ %x, %loop ]&#x27; (in function: recurrence)
+warning: Instruction selection used fallback path for recurrence</pre>
+<h4>Occurrences (35) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/pr141907.ll">pr141907.ll</a></td><td class="l">pr141907</td><td class="l"><code>-mtriple=riscv64 -mcpu=sifive-p670</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/reproducer-pr146855.ll">reproducer-pr146855.ll</a></td><td class="l">_ZN4Mesh12rezone_countESt6vectorIiSaIiEERiS3_</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_add</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_and</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_or</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_xor</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_smax</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_smin</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_umax</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">vp_reduce_umin</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vl-opt.ll">vl-opt.ll</a></td><td class="l">recurrence</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vl-opt.ll">vl-opt.ll</a></td><td class="l">recurrence_vleff</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vl-opt.ll">vl-opt.ll</a></td><td class="l">recurrence</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vl-opt.ll">vl-opt.ll</a></td><td class="l">recurrence_vleff</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">pr141907.2e8ab49876.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/pr141907.ll">pr141907.ll</a><span class="dim">)</span></td><td class="l">pr141907</td><td class="l"><code>-mtriple=riscv64 -mcpu=sifive-p670</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

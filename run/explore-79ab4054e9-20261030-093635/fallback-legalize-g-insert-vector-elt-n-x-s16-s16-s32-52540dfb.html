@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s16&gt;,s16,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s16&gt;,s16,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x s16&gt;,s16,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-insert.3d9599734b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert.ll">fixed-vectors-insert.ll</a><span class="dim">)</span> @insertelt_v32i16_store via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+define void @insertelt_v32i16_store(ptr %x, i16 %y, i32 %idx) {
+  %a = load &lt;32 x i16&gt;, ptr %x, align 64
+  %b = insertelement &lt;32 x i16&gt; %a, i16 %y, i32 %idx
+  store &lt;32 x i16&gt; %b, ptr %x, align 64
+  %C = icmp ne i16 %y, %y
+  store i1 %C, ptr @G.2, align 1
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;32 x s16&gt;) = G_INSERT_VECTOR_ELT %4:_, %1:_(s16), %2:_(s32) (in function: insertelt_v32i16_store)
+warning: Instruction selection used fallback path for insertelt_v32i16_store</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-insert.3d9599734b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert.ll">fixed-vectors-insert.ll</a><span class="dim">)</span></td><td class="l">insertelt_v32i16_store</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d -O3</code></td></tr><tr><td class="l">fp-fcanonicalize.6b6905290e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f16</td><td class="l"><code>--mtriple=riscv32 -mattr=+d,+-zfh -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-srl-bitcast-bv.2b852593ba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvp-srl-bitcast-bv.ll">rvp-srl-bitcast-bv.ll</a><span class="dim">)</span></td><td class="l">srl_bitcast_buildvector_extract_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

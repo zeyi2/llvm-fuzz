@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.reduce.xor.nxv16i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.reduce.xor.nxv16i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.reduce.xor.nxv16i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vreductions-mask-vp.bfe1a39ca5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span> @vpreduce_xor_nxv16i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zve64d -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define zeroext i1 @vpreduce_xor_nxv16i1(i1 zeroext %s, &lt;vscale x 16 x i1&gt; %v, &lt;vscale x 16 x i1&gt; %m, i32 zeroext %evl) {
+  %r = call i1 @llvm.vp.reduce.xor.nxv16i1(i1 %s, &lt;vscale x 16 x i1&gt; %v, &lt;vscale x 16 x i1&gt; %m, i32 %evl)
+  %B = ashr i1 %s, %s
+  store i1 %B, ptr poison, align 1
+  ret i1 %r
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i1 @llvm.vp.reduce.xor.nxv16i1(i1, &lt;vscale x 16 x i1&gt;, &lt;vscale x 16 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zve64d -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zve64d -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.reduce.xor.nxv16i1: &#x27;  %r = call i1 @llvm.vp.reduce.xor.nxv16i1(i1 %s, &lt;vscale x 16 x i1&gt; %v, &lt;vscale x 16 x i1&gt; %m, i32 %evl)&#x27; (in function: vpreduce_xor_nxv16i1)
+warning: Instruction selection used fallback path for vpreduce_xor_nxv16i1</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vreductions-mask-vp.3a9ba14958.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O0</code></td></tr><tr><td class="l">vreductions-mask-vp.50d13f6f81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zve32x -O3</code></td></tr><tr><td class="l">vreductions-mask-vp.802a3a0b86.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv16i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zfhmin -O1</code></td></tr><tr><td class="l">vreductions-mask-vp.bfe1a39ca5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zve64d -O2</code></td></tr><tr><td class="l">vreductions-mask-vp.c8f5354333.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O0</code></td></tr><tr><td class="l">vreductions-mask-vp.e850b4b357.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zve64d -O0</code></td></tr><tr><td class="l">vreductions-mask-vp.fa94cb8952.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

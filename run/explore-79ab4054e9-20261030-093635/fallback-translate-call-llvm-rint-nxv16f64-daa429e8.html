@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.rint.nxv16f64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.rint.nxv16f64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.rint.nxv16f64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rint-vp.bc1d28f5b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/rint-vp.ll">rint-vp.ll</a><span class="dim">)</span> @vp_rint_nxv16f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 16 x double&gt; @vp_rint_nxv16f64(&lt;vscale x 16 x double&gt; %va, &lt;vscale x 16 x i1&gt; %m, i32 zeroext %evl) {
+  %v = call &lt;vscale x 16 x double&gt; @llvm.rint.nxv16f64(&lt;vscale x 16 x double&gt; %va)
+  %C = fcmp ole &lt;vscale x 16 x double&gt; %va, splat (double 4.200000e+01)
+  store &lt;vscale x 16 x i1&gt; %C, ptr poison, align 2
+  ret &lt;vscale x 16 x double&gt; %v
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 16 x double&gt; @llvm.rint.nxv16f64(&lt;vscale x 16 x double&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.rint.nxv16f64: &#x27;  %v = call &lt;vscale x 16 x double&gt; @llvm.rint.nxv16f64(&lt;vscale x 16 x double&gt; %va)&#x27; (in function: vp_rint_nxv16f64)
+warning: Instruction selection used fallback path for vp_rint_nxv16f64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rint-vp.16229be7cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/rint-vp.ll">rint-vp.ll</a><span class="dim">)</span></td><td class="l">vp_rint_nxv16f64_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v,+zvkb -O0</code></td></tr><tr><td class="l">rint-vp.9de5bf3c56.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/rint-vp.ll">rint-vp.ll</a><span class="dim">)</span></td><td class="l">vp_rint_nxv16f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v,+a,+zihintpause -O0</code></td></tr><tr><td class="l">rint-vp.bc1d28f5b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/rint-vp.ll">rint-vp.ll</a><span class="dim">)</span></td><td class="l">vp_rint_nxv16f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

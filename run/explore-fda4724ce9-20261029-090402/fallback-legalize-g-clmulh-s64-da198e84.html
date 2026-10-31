@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CLMULH s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CLMULH s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CLMULH s64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 25 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmul-rv64.5dd57c1800.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/GlobalISel/clmul-rv64.ll">clmul-rv64.ll</a><span class="dim">)</span> @clmulh_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i64
+@G.3 = external global i1
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.riscv.clmulh.i64(i64, i64) #0
+
+define i64 @clmulh_i64(i64 %a, i64 %b) {
+  %LGV1 = load i64, ptr @G.2, align 4
+  %C = icmp ult i64 %b, %LGV1
+  %r = call i64 @llvm.riscv.clmulh.i64(i64 %a, i64 %b)
+  store i1 %C, ptr @G.3, align 1
+  ret i64 %r
+}
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(s64) = G_CLMULH %0:_, %1:_ (in function: clmulh_i64)
+warning: Instruction selection used fallback path for clmulh_i64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul-rv64.15068f2020.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/GlobalISel/clmul-rv64.ll">clmul-rv64.ll</a><span class="dim">)</span></td><td class="l">clmulh_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O3</code></td></tr><tr><td class="l">clmul-rv64.5dd57c1800.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/GlobalISel/clmul-rv64.ll">clmul-rv64.ll</a><span class="dim">)</span></td><td class="l">clmulh_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">rv64zbc-zbkc-intrinsic.f7ddef8ccb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rv64zbc-zbkc-intrinsic.ll">rv64zbc-zbkc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul64h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

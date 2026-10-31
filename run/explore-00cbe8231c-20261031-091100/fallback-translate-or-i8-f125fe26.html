@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 21 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-rmw.62355e9275.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-rmw.ll">atomic-rmw.ll</a><span class="dim">)</span> @atomicrmw_umin_i8_release via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zvbb,+zfinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i8
+
+; Function Attrs: nounwind
+define i8 @atomicrmw_umin_i8_release(ptr %a, i8 %b) #0 {
+  %B = or i8 %b, %b
+  %1 = atomicrmw umin ptr %a, i8 %b release, align 1
+  store i8 %B, ptr @G.1, align 1
+  ret i8 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zvbb,+zfinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zvbb,+zfinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B = or i8 %b, %b&#x27; (in function: atomicrmw_umin_i8_release)
+warning: Instruction selection used fallback path for atomicrmw_umin_i8_release</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-rmw.62355e9275.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-rmw.ll">atomic-rmw.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_umin_i8_release</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zvbb,+zfinx -O2</code></td></tr><tr><td class="l">avgceilu.2ea700acde.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/avgceilu.ll">avgceilu.ll</a><span class="dim">)</span></td><td class="l">test_fixed_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zfinx -O2</code></td></tr><tr><td class="l">rotl-rotr.41d1ffcb.865a44aa88.ll <span class="dim">(mutant of</span> rotl-rotr.41d1ffcb.ll<span class="dim">)</span></td><td class="l">rotr_32_mask_multiple</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+m,+zhinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

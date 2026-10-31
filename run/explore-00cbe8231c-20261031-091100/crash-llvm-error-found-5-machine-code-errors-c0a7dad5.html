@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 5 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 5 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 5 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">masked-load-vl-predicatable.cafb617e9f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/masked-load-vl-predicatable.ll">masked-load-vl-predicatable.ll</a><span class="dim">)</span> @masked_load_signed_cmp via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+unaligned-vector-mem -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/s1EKcojsx">https://godbolt.org/z/s1EKcojsx</a> (llc-assertions-trunk, checked 2026-10-31 12:54 UTC): <a href="https://godbolt.org/z/s1EKcojsx">G</a> <span class="fp">crashes differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;16 x float&gt; @masked_load_signed_cmp(ptr %p, i32 signext %n, i32 signext %iv) #0 {
+  %base = lshr i32 %iv, 3
+  %1 = insertelement &lt;16 x i32&gt; poison, i32 %base, i32 0
+  %G = getelementptr &lt;8 x i8&gt;, ptr %p, i32 %base
+  %2 = shufflevector &lt;16 x i32&gt; %1, &lt;16 x i32&gt; poison, &lt;16 x i32&gt; zeroinitializer
+  %3 = or disjoint &lt;16 x i32&gt; %2, &lt;i32 0, i32 1, i32 2, i32 3, i32 4, i32 5, i32 6, i32 7, i32 8, i32 9, i32 10, i32 11, i32 12, i32 13, i32 14, i32 15&gt;
+  %4 = insertelement &lt;16 x i32&gt; poison, i32 %n, i32 0
+  %5 = shufflevector &lt;16 x i32&gt; %4, &lt;16 x i32&gt; poison, &lt;16 x i32&gt; zeroinitializer
+  %6 = icmp slt &lt;16 x i32&gt; %3, %5
+  %7 = tail call &lt;16 x float&gt; %G(ptr %p, &lt;16 x i1&gt; %6, &lt;16 x float&gt; zeroinitializer)
+  ret &lt;16 x float&gt; %7
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+unaligned-vector-mem -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After IRTranslator<br># Machine code for function masked_load_signed_cmp: IsSSA, TracksLiveness</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+unaligned-vector-mem -O1 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>118</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+d,+unaligned-vector-mem -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+d,+unaligned-vector-mem -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After IRTranslator
+# Machine code for function masked_load_signed_cmp: IsSSA, TracksLiveness
+Frame Objects:
+  fi#0: size=64, align=64, at location [SP]
+  fi#1: size=1, align=2, at location [SP]
+save/restore points:
+save points are empty
+restore points are empty
+Function Live Ins: $x10, $x11, $x12, $x13
+bb.1 (%ir-block.0):
+  liveins: $x10, $x11, $x12, $x13
+  %3:_(p0) = COPY $x10
+  %0:_(p0) = COPY $x11
+  %4:_(s64) = COPY $x12
+  %5:_(s64) = G_ASSERT_SEXT %4:_, 32
+  %1:_(s32) = G_TRUNC %5:_(s64)
+  %6:_(s64) = COPY $x13
+  %7:_(s64) = G_ASSERT_SEXT %6:_, 32
+  %2:_(s32) = G_TRUNC %7:_(s64)
+  %8:_(s32) = G_CONSTANT i32 3
+  %11:_(&lt;16 x s32&gt;) = G_IMPLICIT_DEF
+  %12:_(s64) = G_CONSTANT i64 0
+  %19:_(s32) = G_CONSTANT i32 0
+  %20:_(s32) = G_CONSTANT i32 1
+  %21:_(s32) = G_CONSTANT i32 2
+  %22:_(s32) = G_CONSTANT i32 4
+  %23:_(s32) = G_CONSTANT i32 5
+  %24:_(s32) = G_CONSTANT i32 6
+  %25:_(s32) = G_CONSTANT i32 7
+  %26:_(s32) = G_CONSTANT i32 8
+  %27:_(s32) = G_CONSTANT i32 9
+  %28:_(s32) = G_CONSTANT i32 10
+  %29:_(s32) = G_CONSTANT i32 11
+  %30:_(s32) = G_CONSTANT i32 12
+  %31:_(s32) = G_CONSTANT i32 13
+  %32:_(s32) = G_CONSTANT i32 14
+  %33:_(s32) = G_CONSTANT i32 15
+  %18:_(&lt;16 x s32&gt;) = G_BUILD_VECTOR %19:_(s32), %20:_(s32), %21:_(s32), %8:_(s32), %22:_(s32), %23:_(s32), %24:_(s32), %25:_(s32), %26:_(s32), %27:_(s32), %28:_(s32), %29:_(s32), %30:_(s32), %31:_(s32), %32:_(s32), %33:_(s32)
+  %40:_(s32) = G_FCONSTANT float 0.000000e+00
+  %39:_(&lt;16 x s32&gt;) = G_BUILD_VECTOR %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32), %40:_(s32)
+  %9:_(s32) = G_LSHR %2:_, %8:_(s32)
+  %10:_(&lt;16 x s32&gt;) = G_INSERT_VECTOR_ELT %11:_, %9:_(s32), %12:_(s64)
+  %13:_(s64) = G_SEXT %9:_(s32)
+  %14:_(s64) = G_CONSTANT i64 8
+  %15:_(s64) = G_MUL %13:_, %14:_
+  %16:gprjalrnonx7(p0) = G_PTR_ADD %0:_, %15:_(s64)
+  %17:_(&lt;16 x s32&gt;) = G_SHUFFLE_VECTOR %10:_(&lt;16 x s32&gt;), %11:_, shufflemask(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+  %34:_(&lt;16 x s32&gt;) = disjoint G_OR %17:_, %18:_
+  %35:_(&lt;16 x s32&gt;) = G_INSERT_VECTOR_ELT %11:_, %1:_(s32), %12:_(s64)
+  %36:_(&lt;16 x s32&gt;) = G_SHUFFLE_VECTOR %35:_(&lt;16 x s32&gt;), %11:_, shufflemask(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+  %37:_(&lt;16 x s1&gt;) = G_ICMP intpred(slt), %34:_(&lt;16 x s32&gt;), %36:_
+  %41:_(p0) = G_FRAME_INDEX %stack.0
+  ADJCALLSTACKDOWN 24, 0, implicit-def $x2, implicit $x2
+  %42:_(p0) = G_FRAME_INDEX %stack.1
+  G_STORE %37:_(&lt;16 x s1&gt;), %42:_(p0) :: (store (&lt;16 x s1&gt;) into %stack.1)
+  %43:_(s32), %44:_(s32), %45:_(s32), %46:_(s32), %47:_(s32), %48:_(s32), %49:_(s32), %50:_(s32), %51:_(s32), %52:_(s32), %53:_(s32), %54:_(s32), %55:_(s32), %56:_(s32), %57:_(s32), %58:_(s32) = G_UNMERGE_VALUES %39:_(&lt;16 x s32&gt;)
+  %59:_(p0) = COPY $x2
+  %60:_(s64) = G_CONSTANT i64 0
+  %61:_(p0) = G_PTR_ADD %59:_, %60:_(s64)
+  G_STORE %56:_(s32), %61:_(p0) :: (store (s32) into stack, align 16)
+  %62:_(p0) = G_PTR_ADD %59:_, %14:_(s64)
+  G_STORE %57:_(s32), %62:_(p0) :: (store (s32) into stack + 8, align 8)
+  %63:_(s64) = G_CONSTANT i64 16
+  %64:_(p0) = G_PTR_ADD %59:_, %63:_(s64)
+  G_STORE %58:_(s32), %64:_(p0) :: (store (s32) into stack + 16, align 16)
+  $x10 = COPY %41:_(p0)
+  $x11 = COPY %0:_(p0)
+  $x12 = COPY %42:_(p0)
+  $f10_f = COPY %43:_(s32)
+  $f11_f = COPY %44:_(s32)
+  $f12_f = COPY %45:_(s32)
+  $f13_f = COPY %46:_(s32)
+  $f14_f = COPY %47:_(s32)
+  $f15_f = COPY %48:_(s32)
+  $f16_f = COPY %49:_(s32)
+  $f17_f = COPY %50:_(s32)
+  $x13 = COPY %51:_(s32)
+  $x14 = COPY %52:_(s32)
+  $x15 = COPY %53:_(s32)
+  $x16 = COPY %54:_(s32)
+  $x17 = COPY %55:_(s32)
+  PseudoCALLIndirect %16:gprjalrnonx7(p0), &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_d $f9_d $f18_d $f19_d $f20_d $f21_d $f22_d $f23_d $f24_d $f25_d $f26_d $f27_d $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f and 53 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit $x12, implicit $f10_</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">masked-load-vl-predicatable.cafb617e9f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/masked-load-vl-predicatable.ll">masked-load-vl-predicatable.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+unaligned-vector-mem -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

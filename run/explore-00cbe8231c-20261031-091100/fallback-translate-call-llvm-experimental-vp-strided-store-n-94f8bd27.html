@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.vp.strided.store.nxv1i16.p0.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.vp.strided.store.nxv1i16.p0.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.vp.strided.store.nxv1i16.p0.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">strided-vpstore.44c6b04e6c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span> @strided_vpstore_nxv1i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zvfhmin,+zvfbfmin -O3 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i32
+@G.3 = external global i32
+
+define void @strided_vpstore_nxv1i16(&lt;vscale x 1 x i16&gt; %val, ptr %ptr, i32 signext %strided, &lt;vscale x 1 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load i32, ptr @G.2, align 4
+  %B = urem i32 %strided, %LGV
+  call void @llvm.experimental.vp.strided.store.nxv1i16.p0.i32(&lt;vscale x 1 x i16&gt; %val, ptr %ptr, i32 %strided, &lt;vscale x 1 x i1&gt; %m, i32 %evl)
+  store i32 %B, ptr @G.3, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.experimental.vp.strided.store.nxv1i16.p0.i32(&lt;vscale x 1 x i16&gt;, ptr captures(none), i32, &lt;vscale x 1 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zvfhmin,+zvfbfmin -O3 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zvfhmin,+zvfbfmin -O3 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.vp.strided.store.nxv1i16.p0.i32: &#x27;  call void @llvm.experimental.vp.strided.store.nxv1i16.p0.i32(&lt;vscale x 1 x i16&gt; %val, ptr %ptr, i32 %strided, &lt;vscale x 1 x i1&gt; %m, i32 %evl)&#x27; (in function: strided_vpstore_nxv1i16)
+warning: Instruction selection used fallback path for strided_vpstore_nxv1i16</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">strided-vpstore.03c9fbef81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin,+zihintpause -O3 -code-model=small</code></td></tr><tr><td class="l">strided-vpstore.25fea5fc8d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin -O1</code></td></tr><tr><td class="l">strided-vpstore.44c6b04e6c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zvfhmin,+zvfbfmin -O3 -code-model=medium</code></td></tr><tr><td class="l">strided-vpstore.a1625f7206.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -O3</code></td></tr><tr><td class="l">strided-vpstore.c21a775ed5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin -O2</code></td></tr><tr><td class="l">strided-vpstore.f54e9a4f9b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+zvfh -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

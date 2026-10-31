@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem &lt;vscale x N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem &lt;vscale x N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem &lt;vscale x N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-shuffle-zvzip-zve32f.c92b7c62ed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-zvzip-zve32f.ll">fixed-vectors-shuffle-zvzip-zve32f.ll</a><span class="dim">)</span> @deinterleave_v4i16_even via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -lower-interleaved-accesses=false -verify-machineinstrs -mattr=+m,+zve32f,+zvfh,+zvl128b,+experimental-zvzip -O2 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @deinterleave_v4i16_even(ptr %in, ptr %out) {
+entry:
+  %A = alloca &lt;vscale x 2 x float&gt;, align 8
+  store &lt;vscale x 2 x float&gt; poison, ptr %A, align 8
+  %B = frem &lt;vscale x 2 x float&gt; splat (float 1.401300e-45), splat (float 4.200000e+01)
+  %v = load &lt;4 x i16&gt;, ptr %in, align 2
+  %s = shufflevector &lt;4 x i16&gt; %v, &lt;4 x i16&gt; poison, &lt;2 x i32&gt; &lt;i32 0, i32 2&gt;
+  store &lt;2 x i16&gt; %s, ptr %out, align 2
+  store &lt;vscale x 2 x float&gt; %B, ptr %A, align 8
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -lower-interleaved-accesses=false -verify-machineinstrs -mattr=+m,+zve32f,+zvfh,+zvl128b,+experimental-zvzip -O2 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -lower-interleaved-accesses=false -verify-machineinstrs -mattr=+m,+zve32f,+zvfh,+zvl128b,+experimental-zvzip -O2 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem &lt;vscale x 2 x float&gt; splat (float 1.401300e-45), splat (float 4.200000e+01)&#x27; (in function: deinterleave_v4i16_even)
+warning: Instruction selection used fallback path for deinterleave_v4i16_even</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-shuffle-zvzip-zve32f.c92b7c62ed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-zvzip-zve32f.ll">fixed-vectors-shuffle-zvzip-zve32f.ll</a><span class="dim">)</span></td><td class="l">deinterleave_v4i16_even</td><td class="l"><code>-mtriple=riscv64 -lower-interleaved-accesses=false -verify-machineinstrs -mattr=+m,+zve32f,+zvfh,+zvl128b,+experimental-zvzip -O2 -code-model=small</code></td></tr><tr><td class="l">half-arith-strict.33ce51ab78.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fmsub_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64f -mattr=+zfhmin,+zve64d -O1</code></td></tr><tr><td class="l">vfrdiv.99940adc06.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfrdiv.ll">vfrdiv.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfrdiv_vf_nxv8f64_nxv8f64_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+xtheadba -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

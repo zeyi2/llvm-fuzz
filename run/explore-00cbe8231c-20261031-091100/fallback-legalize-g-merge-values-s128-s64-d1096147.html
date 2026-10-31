@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_MERGE_VALUES s128,s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_MERGE_VALUES s128,s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_MERGE_VALUES s128,s64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 3 configs, 2 test files, 18 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">smulh.702034a8.995f73c119.ll <span class="dim">(mutant of</span> smulh.702034a8.ll<span class="dim">)</span> @smulh_i96 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zbs,+zfh,+zfhmin -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i96
+@G.3 = external global i96
+
+; Function Attrs: nounwind
+define i96 @smulh_i96(i96 %x, i96 %y) #0 {
+  %B3 = mul i96 %x, %y
+  %B = shl i96 %x, 0
+  %B2 = xor i96 %y, %B
+  %B4 = urem i96 %B2, -39614081257132168796771975168
+  store i96 %B, ptr @G.1, align 4
+  %B1 = sub i96 %y, 281474976710656
+  store i96 %B2, ptr @G.1, align 4
+  store i96 %B3, ptr @G.3, align 4
+  store i96 %B4, ptr poison, align 4
+  ret i96 %B1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zbs,+zfh,+zfhmin -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zbs,+zfh,+zfhmin -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %98:_(s128) = G_MERGE_VALUES %103:_(s64), %108:_(s64) (in function: smulh_i96)
+warning: Instruction selection used fallback path for smulh_i96</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">smulh.702034a8.995f73c119.ll <span class="dim">(mutant of</span> smulh.702034a8.ll<span class="dim">)</span></td><td class="l">smulh_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zbs,+zfh,+zfhmin -O0</code></td></tr><tr><td class="l">smulh.702034a8.f88d111588.ll <span class="dim">(mutant of</span> smulh.702034a8.ll<span class="dim">)</span></td><td class="l">smulh_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zbs,+f -O0</code></td></tr><tr><td class="l">umulh.0de8e2e3d3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_i96</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">umulh.dc6f61fb04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_i96</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

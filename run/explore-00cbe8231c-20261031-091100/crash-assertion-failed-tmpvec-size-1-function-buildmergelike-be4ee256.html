@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (TmpVec.size() &gt; 1), function buildMergeLikeInstr, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (TmpVec.size() &gt; 1), function buildMergeLikeInstr, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (TmpVec.size() &gt; 1), function buildMergeLikeInstr, file MachineIRBuilder.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">231 in 91 configs, 71 test files, 637 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/legalize-store-sdnode.ll">legalize-store-sdnode.ll</a> @store_nxv7f64 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/5jd6Phx6s">https://godbolt.org/z/5jd6Phx6s</a> (llc-assertions-trunk, checked 2026-10-25 18:43 UTC): <a href="https://godbolt.org/z/5jd6Phx6s">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 7 x double&gt; @store_nxv7f64(&lt;vscale x 7 x double&gt; %val) {
+  ret &lt;vscale x 7 x double&gt; %val
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:726: llvm::MachineInstrBuilder llvm::MachineIRBuilder::buildMergeLikeInstr(const llvm::DstOp&amp;, llvm::ArrayRef&lt;llvm::Register&gt;): Assertion `TmpVec.size() &gt; 1&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>1</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:726: MachineInstrBuilder llvm::MachineIRBuilder::buildMergeLikeInstr(const DstOp &amp;, ArrayRef&lt;Register&gt;): Assertion `TmpVec.size() &gt; 1&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@store_nxv7f64&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000559f13183c0b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000559f13180ab1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000559f1318468b
+3  libc.so.6 0x00007f5c92445330
+4  libc.so.6 0x00007f5c9249ec0c pthread_kill + 284
+5  libc.so.6 0x00007f5c9244527e gsignal + 30
+6  libc.so.6 0x00007f5c924288ff abort + 223
+7  libc.so.6 0x00007f5c9242881b
+8  libc.so.6 0x00007f5c9243b517
+9  llc       0x0000559f1533be83 llvm::MachineIRBuilder::buildMergeLikeInstr(llvm::DstOp const&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) + 483
+10 llc       0x0000559f1524adeb
+11 llc       0x0000559f152491a2 llvm::CallLowering::buildCopyFromRegs(llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;, llvm::ArrayRef&lt;llvm::Register&gt;, llvm::LLT, llvm::LLT, llvm::ISD::ArgFlagsTy) + 2306
+12 llc       0x0000559f1524e02d llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 5261
+13 llc       0x0000559f143bf6cc
+14 llc       0x0000559f152bdf83 llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 3507
+15 llc       0x0000559f152bf21d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+16 llc       0x0000559f13754c7d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+17 llc       0x0000559f134de0b7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+18 llc       0x0000559f134e65d2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+19 llc       0x0000559f134dee60 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+20 llc       0x0000559f1318b2c7 llcMain + 12151
+21 llc       0x0000559f130c73af main + 63
+22 libc.so.6 0x00007f5c9242a1ca
+23 libc.so.6 0x00007f5c9242a28b __libc_start_main + 139
+24 llc       0x0000559f130c72a5 _start + 37</pre>
+<h4>Occurrences (231) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/abs-vp.ll">abs-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/abs-vp.ll">abs-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m,+experimental-zvabd -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/abs-vp.ll">abs-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/abs-vp.ll">abs-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m,+experimental-zvabd -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bitreverse-vp.ll">bitreverse-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bitreverse-vp.ll">bitreverse-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvbb,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bitreverse-vp.ll">bitreverse-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bitreverse-vp.ll">bitreverse-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvbb,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bswap-vp.ll">bswap-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bswap-vp.ll">bswap-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvkb,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bswap-vp.ll">bswap-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/bswap-vp.ll">bswap-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvkb,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/ceil-vp.ll">ceil-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/ceil-vp.ll">ceil-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfhmin,+zfbfmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/ceil-vp.ll">ceil-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

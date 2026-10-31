@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,&lt;N x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,&lt;N x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,&lt;N x s1&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vpstore.1a8593091a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpstore.ll">fixed-vectors-vpstore.ll</a><span class="dim">)</span> @vpstore_v4i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @vpstore_v4i16(&lt;4 x i16&gt; %val, ptr %ptr, &lt;4 x i1&gt; %m, i32 zeroext %evl) {
+  call void @llvm.vp.store.v4i16.p0(&lt;4 x i16&gt; %val, ptr %ptr, &lt;4 x i1&gt; %m, i32 %evl)
+  %G = getelementptr i1, ptr %ptr, i8 -1
+  store ptr %G, ptr poison, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.vp.store.v4i16.p0(&lt;4 x i16&gt;, ptr captures(none), &lt;4 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+d,+zvfh,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+d,+zvfh,+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.vp.store), %0:_(&lt;4 x s16&gt;), %1:_(p0), %2:_(&lt;4 x s1&gt;), %3:_(s32) (in function: vpstore_v4i16)
+warning: Instruction selection used fallback path for vpstore_v4i16</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vpstore.1a8593091a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpstore.ll">fixed-vectors-vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_v4i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+v -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vpstore.33426225bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpstore.ll">fixed-vectors-vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_v4i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

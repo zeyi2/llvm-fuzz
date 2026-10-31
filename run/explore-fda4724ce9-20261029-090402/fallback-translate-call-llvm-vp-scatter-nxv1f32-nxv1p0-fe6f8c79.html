@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.scatter.nxv1f32.nxv1p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.scatter.nxv1f32.nxv1p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.scatter.nxv1f32.nxv1p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vpscatter-sdnode.abdd7a8d24.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span> @vpscatter_nxv1f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+v,+m -O1 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i32
+
+define void @vpscatter_nxv1f32(&lt;vscale x 1 x float&gt; %val, &lt;vscale x 1 x ptr&gt; %ptrs, &lt;vscale x 1 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load i32, ptr @G.2, align 4
+  %B = xor i32 %evl, %LGV
+  call void @llvm.vp.scatter.nxv1f32.nxv1p0(&lt;vscale x 1 x float&gt; %val, &lt;vscale x 1 x ptr&gt; %ptrs, &lt;vscale x 1 x i1&gt; %m, i32 %B)
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare void @llvm.vp.scatter.nxv1f32.nxv1p0(&lt;vscale x 1 x float&gt;, &lt;vscale x 1 x ptr&gt;, &lt;vscale x 1 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+v,+m -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+v,+m -O1 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.scatter.nxv1f32.nxv1p0: &#x27;  call void @llvm.vp.scatter.nxv1f32.nxv1p0(&lt;vscale x 1 x float&gt; %val, &lt;vscale x 1 x ptr&gt; %ptrs, &lt;vscale x 1 x i1&gt; %m, i32 %B)&#x27; (in function: vpscatter_nxv1f32)
+warning: Instruction selection used fallback path for vpscatter_nxv1f32</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nontemporal-vp-scalable.2e3414b05f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_nxv1f32_ALL</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+d,+zfh,+v,+c -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.3b7ee7dd7b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_nxv1f32_ALL</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v,+c -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.5d6ce35c75.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_scatter_nxv1f32_S1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+c,+xtheadba -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vpscatter-sdnode.abdd7a8d24.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv1f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+v,+m -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

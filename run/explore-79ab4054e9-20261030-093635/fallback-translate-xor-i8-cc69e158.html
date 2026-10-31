@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor i8 <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 4 test files, 13 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fold-masked-merge.922257e002.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/fold-masked-merge.ll">fold-masked-merge.ll</a><span class="dim">)</span> @masked_merge2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zfinx,+zbs -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+define i8 @masked_merge2(i8 %a0, i8 %a1, i8 %a2) {
+  %not = xor i8 %a0, -1
+  %C = icmp ule i8 %not, 0
+  %and0 = and i8 %not, %a1
+  %and1 = and i8 %a1, %a0
+  %or = or i8 %and0, %and1
+  store i1 %C, ptr @G, align 1
+  ret i8 %or
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zbb,+zfinx,+zbs -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zbb,+zfinx,+zbs -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %not = xor i8 %a0, -1&#x27; (in function: masked_merge2)
+warning: Instruction selection used fallback path for masked_merge2</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-cmpxchg.353e01a31d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i8_release_acquire</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zabha,+zhinx -O1</code></td></tr><tr><td class="l">bitreverse-zbkb.fda78a5675.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/GlobalISel/bitreverse-zbkb.ll">bitreverse-zbkb.ll</a><span class="dim">)</span></td><td class="l">bitreverse_i8_zext_arg</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zhinx -O3</code></td></tr><tr><td class="l">fold-masked-merge.900ec51a10.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/fold-masked-merge.ll">fold-masked-merge.ll</a><span class="dim">)</span></td><td class="l">masked_merge2</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fold-masked-merge.922257e002.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/fold-masked-merge.ll">fold-masked-merge.ll</a><span class="dim">)</span></td><td class="l">masked_merge2</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zfinx,+zbs -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">srem-vector-lkk.62c73f9d65.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/srem-vector-lkk.ll">srem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_urem_i16_smax</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

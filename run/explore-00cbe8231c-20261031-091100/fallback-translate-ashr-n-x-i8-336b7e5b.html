@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: ashr &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: ashr &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: ashr &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-rmw-sub.0ab0f69f92.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-rmw-sub.ll">atomic-rmw-sub.ll</a><span class="dim">)</span> @atomicrmw_sub_i32_neg via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;4 x i1&gt;
+@G.7 = external global &lt;8 x i8&gt;
+
+; Function Attrs: nounwind
+define i32 @atomicrmw_sub_i32_neg(ptr %a, i32 %x, i32 %y) #0 {
+  %B = ashr &lt;8 x i8&gt; zeroinitializer, splat (i8 127)
+  %C = fcmp uge &lt;4 x float&gt; splat (float 4.200000e+01), splat (float +inf)
+  %b = sub i32 %x, %y
+  %1 = atomicrmw sub ptr %a, i32 %b seq_cst, align 4
+  store &lt;4 x i1&gt; %C, ptr @G.2, align 1
+  store &lt;8 x i8&gt; %B, ptr @G.7, align 8
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: ashr: &#x27;  %B = ashr &lt;8 x i8&gt; zeroinitializer, splat (i8 127)&#x27; (in function: atomicrmw_sub_i32_neg)
+warning: Instruction selection used fallback path for atomicrmw_sub_i32_neg</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-rmw-sub.0ab0f69f92.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-rmw-sub.ll">atomic-rmw-sub.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_sub_i32_neg</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vsaddu-vp.7a0784dcd6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vsaddu-vp.ll">fixed-vectors-vsaddu-vp.ll</a><span class="dim">)</span></td><td class="l">vsaddu_vv_v5i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">shl-cttz.3a9832e858.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/shl-cttz.ll">shl-cttz.ll</a><span class="dim">)</span></td><td class="l">shl_cttz_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">smulh.f929295c.7bd3937eeb.ll <span class="dim">(mutant of</span> smulh.f929295c.ll<span class="dim">)</span></td><td class="l">smulh_v16i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx,+zihintpause -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

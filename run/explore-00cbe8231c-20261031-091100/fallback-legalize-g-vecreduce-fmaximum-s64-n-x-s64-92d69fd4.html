@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_VECREDUCE_FMAXIMUM s64,&lt;N x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_VECREDUCE_FMAXIMUM s64,&lt;N x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_VECREDUCE_FMAXIMUM s64,&lt;N x s64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 28 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-fp.1cfa7224a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span> @vreduce_fmaximum_v32f64_nonans via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfh,+zvfh,+f,+d -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define double @vreduce_fmaximum_v32f64_nonans(ptr %x) {
+  %v = load &lt;32 x double&gt;, ptr %x, align 256
+  %G = getelementptr float, ptr %x, i64 0
+  %red = call nnan double @llvm.vector.reduce.fmaximum.v32f64(&lt;32 x double&gt; %v)
+  store ptr %G, ptr poison, align 8
+  ret double %red
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare double @llvm.vector.reduce.fmaximum.v32f64(&lt;32 x double&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfh,+zvfh,+f,+d -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfh,+zvfh,+f,+d -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(s64) = nnan G_VECREDUCE_FMAXIMUM %1:_(&lt;32 x s64&gt;) (in function: vreduce_fmaximum_v32f64_nonans)
+warning: Instruction selection used fallback path for vreduce_fmaximum_v32f64_nonans</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-fp.1cfa7224a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l">vreduce_fmaximum_v32f64_nonans</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfh,+zvfh,+f,+d -O1</code></td></tr><tr><td class="l">fixed-vectors-reduction-fp.552a3a185d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l">vreduce_fmaximum_v2f64_nonans</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfh,+zvfh,+f,+d -O2</code></td></tr><tr><td class="l">fixed-vectors-reduction-fp.816b741113.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l">vreduce_fmaximum_v32f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfh,+zvfh,+f,+d,+a,+zihintpause -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

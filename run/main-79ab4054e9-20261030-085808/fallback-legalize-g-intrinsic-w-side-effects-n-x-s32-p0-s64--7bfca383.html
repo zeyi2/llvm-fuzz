@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s32&gt;,p0,s64,&lt;N x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s32&gt;,p0,s64,&lt;N x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s32&gt;,p0,s64,&lt;N x s1&gt;,s32 </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">17 in 5 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a> @scatter_pow2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @scatter_pow2(ptr noalias captures(none) %A, ptr noalias readonly captures(none) %B) {
+entry:
+  br label %vector.body
+
+vector.body:                                      ; preds = %vector.body, %entry
+  %index = phi i64 [ 0, %entry ], [ %index.next, %vector.body ]
+  %vec.ind = phi &lt;8 x i64&gt; [ &lt;i64 0, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6, i64 7&gt;, %entry ], [ %vec.ind.next, %vector.body ]
+  %i = getelementptr inbounds i32, ptr %B, i64 %index
+  %wide.load = load &lt;8 x i32&gt;, ptr %i, align 1
+  %i2 = shl nuw nsw &lt;8 x i64&gt; %vec.ind, splat (i64 2)
+  %i3 = getelementptr inbounds i32, ptr %A, &lt;8 x i64&gt; %i2
+  %wide.masked.gather = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i3, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i4 = add &lt;8 x i32&gt; %wide.masked.gather, %wide.load
+  call void @llvm.masked.scatter.v8i32.v8p0(&lt;8 x i32&gt; %i4, &lt;8 x ptr&gt; align 4 %i3, &lt;8 x i1&gt; splat (i1 true))
+  %index.next = add nuw i64 %index, 8
+  %vec.ind.next = add &lt;8 x i64&gt; %vec.ind, splat (i64 8)
+  %i5 = icmp eq i64 %index.next, 1024
+  br i1 %i5, label %for.cond.cleanup, label %vector.body
+
+for.cond.cleanup:                                 ; preds = %vector.body
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt;, &lt;8 x i1&gt;, &lt;8 x i32&gt;) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(write)
+declare void @llvm.masked.scatter.v8i32.v8p0(&lt;8 x i32&gt;, &lt;8 x ptr&gt;, &lt;8 x i1&gt;) #1
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.experimental.vp.strided.store), %12:_(&lt;8 x s32&gt;), %4:_(p0), %8:_(s64), %9:_(&lt;8 x s1&gt;), %11:_(s32) (in function: scatter_pow2)
+warning: Instruction selection used fallback path for scatter_pow2</pre>
+<h4>Occurrences (17) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">scatter_pow2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">gather_unroll</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">scatter_pow2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+zvl256b</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">gather_unroll</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+zvl256b</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">scatter_pow2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+optimized-zero-stride-load,+zvl256b</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">gather_unroll</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+optimized-zero-stride-load,+zvl256b</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">scatter_pow2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvl256b</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a></td><td class="l">gather_unroll</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvl256b</code></td></tr><tr><td class="l">di-assignment-tracking-vector.4e4d4892df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">di-assignment-tracking-vector.d6493866f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">di-assignment-tracking-vector.e6d3ebe6e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">di-assignment-tracking-vector.feb8e722e2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/di-assignment-tracking-vector.ll">di-assignment-tracking-vector.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -enable-misched=false</code></td></tr><tr><td class="l">fixed-vectors-strided-load-store-asm.1f81cb1b9c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a><span class="dim">)</span></td><td class="l">gather_unroll</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+optimized-zero-stride-load,+zvl256b</code></td></tr><tr><td class="l">fixed-vectors-strided-load-store-asm.201152b03d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a><span class="dim">)</span></td><td class="l">gather_unroll</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+zvl256b</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

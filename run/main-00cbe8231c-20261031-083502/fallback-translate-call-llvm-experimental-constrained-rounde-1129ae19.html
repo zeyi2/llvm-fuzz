@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.roundeven.v2f32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.roundeven.v2f32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.roundeven.v2f32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-froundeven-constrained-sdnode.6a446b539b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-froundeven-constrained-sdnode.ll">fixed-vectors-froundeven-constrained-sdnode.ll</a><span class="dim">)</span> @roundeven_v2f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: strictfp
+define &lt;2 x float&gt; @roundeven_v2f32(&lt;2 x float&gt; %x) #0 {
+  %C = fcmp oeq &lt;2 x float&gt; %x, splat (float +qnan)
+  %a = call &lt;2 x float&gt; @llvm.experimental.constrained.roundeven.v2f32(&lt;2 x float&gt; %x, metadata !&quot;fpexcept.strict&quot;)
+  store &lt;2 x i1&gt; %C, ptr poison, align 1
+  ret &lt;2 x float&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;2 x float&gt; @llvm.experimental.constrained.roundeven.v2f32(&lt;2 x float&gt;, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.roundeven.v2f32: &#x27;  %a = call &lt;2 x float&gt; @llvm.experimental.constrained.roundeven.v2f32(&lt;2 x float&gt; %x, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: roundeven_v2f32)
+warning: Instruction selection used fallback path for roundeven_v2f32</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-froundeven-constrained-sdnode.6a446b539b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-froundeven-constrained-sdnode.ll">fixed-vectors-froundeven-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">roundeven_v2f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-froundeven-constrained-sdnode.990d8a6bea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-froundeven-constrained-sdnode.ll">fixed-vectors-froundeven-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">roundeven_v2f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

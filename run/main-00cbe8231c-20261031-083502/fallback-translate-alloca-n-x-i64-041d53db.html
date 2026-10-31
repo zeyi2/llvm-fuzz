@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 4 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-convert.4845330a4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span> @fcvt_l_d_sat via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i64 @fcvt_l_d_sat(double %a) #0 {
+start:
+  %A = alloca &lt;2 x i64&gt;, align 16
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %0 = tail call i64 @llvm.fptosi.sat.i64.f64(double %a)
+  %B = udiv &lt;2 x i64&gt; zeroinitializer, splat (i64 1)
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  ret i64 %0
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.fptosi.sat.i64.f64(double) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca &lt;2 x i64&gt;, align 16&#x27; (in function: fcvt_l_d_sat)
+warning: Instruction selection used fallback path for fcvt_l_d_sat</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert.4845330a4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_l_d_sat</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-convert.9061862cfe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_l_d_sat</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-intrinsics-strict.200c6ff6fe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-intrinsics-strict.ll">double-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">tanh_f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">double-intrinsics-strict.6d6937e294.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-intrinsics-strict.ll">double-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">tanh_f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">float-intrinsics-strict.3ddac57e9d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-intrinsics-strict.ll">float-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">tanh_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">float-intrinsics-strict.e487972104.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-intrinsics-strict.ll">float-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">tanh_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">ghccc-without-f-reg.009f628c9f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/ghccc-without-f-reg.ll">ghccc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">caller_float</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zdinx</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

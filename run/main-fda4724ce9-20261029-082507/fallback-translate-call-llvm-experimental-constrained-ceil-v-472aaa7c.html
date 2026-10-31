@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.ceil.v16f16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.ceil.v16f16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.ceil.v16f16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fceil-constrained-sdnode.7ea0b0c9d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span> @ceil_v16f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;16 x i1&gt;
+
+; Function Attrs: strictfp
+define &lt;16 x half&gt; @ceil_v16f16(&lt;16 x half&gt; %x) #0 {
+  %C = fcmp ugt &lt;16 x half&gt; %x, %x
+  %a = call &lt;16 x half&gt; @llvm.experimental.constrained.ceil.v16f16(&lt;16 x half&gt; %x, metadata !&quot;fpexcept.strict&quot;)
+  store &lt;16 x i1&gt; %C, ptr @G.2, align 2
+  ret &lt;16 x half&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;16 x half&gt; @llvm.experimental.constrained.ceil.v16f16(&lt;16 x half&gt;, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.ceil.v16f16: &#x27;  %a = call &lt;16 x half&gt; @llvm.experimental.constrained.ceil.v16f16(&lt;16 x half&gt; %x, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: ceil_v16f16)
+warning: Instruction selection used fallback path for ceil_v16f16</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.7ea0b0c9d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v16f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.d826559766.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v16f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

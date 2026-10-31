@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_INTRINSIC &lt;vscale x N x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_INTRINSIC &lt;vscale x N x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_INTRINSIC &lt;vscale x N x s32&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 2 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vmv.v.x.1124f25c7e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vmv.v.x.ll">vmv.v.x.ll</a><span class="dim">)</span> @intrinsic_vmv.v.x_i_nxv1i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i64
+
+; Function Attrs: nounwind
+define &lt;vscale x 1 x i32&gt; @intrinsic_vmv.v.x_i_nxv1i32(i32 %0) #0 {
+entry:
+  %a = call &lt;vscale x 1 x i32&gt; @llvm.riscv.vmv.v.x.nxv1i32.i32(&lt;vscale x 1 x i32&gt; poison, i32 9, i32 %0)
+  %B = urem i64 4294967296, 0
+  store i64 %B, ptr @G.2, align 4
+  ret &lt;vscale x 1 x i32&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x i32&gt; @llvm.riscv.vmv.v.x.nxv1i32.i32(&lt;vscale x 1 x i32&gt;, i32, i32) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %1:vrb(&lt;vscale x 1 x s32&gt;) = G_INTRINSIC intrinsic(@llvm.riscv.vmv.v.x), %2:vrb(&lt;vscale x 1 x s32&gt;), %3:gprb(s32), %0:gprb(s32) (in function: intrinsic_vmv.v.x_i_nxv1i32)
+warning: Instruction selection used fallback path for intrinsic_vmv.v.x_i_nxv1i32</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vfmv.s.f.9506b33f00.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfmv.s.f.ll">vfmv.s.f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfmv.s.f_f_nxv2f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l">vfmv.s.f.9506b33f00.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfmv.s.f.ll">vfmv.s.f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfmv.s.f_f_nxv4f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l">vmv.s.x.e9e0947e88.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vmv.s.x.ll">vmv.s.x.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmv.s.x_x_nxv2i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmv.s.x.e9e0947e88.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vmv.s.x.ll">vmv.s.x.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmv.s.x_x_nxv4i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmv.v.x.1124f25c7e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vmv.v.x.ll">vmv.v.x.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmv.v.x_i_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmv.v.x.6ce291234e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vmv.v.x.ll">vmv.v.x.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmv.v.x_x_nxv2i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

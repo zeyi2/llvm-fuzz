@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: lshr &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: lshr &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: lshr &lt;N x i64&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">dso_local_equivalent.72b44352be.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/dso_local_equivalent.ll">dso_local_equivalent.ll</a><span class="dim">)</span> @f2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;2 x i1&gt;
+
+define dso_local void @f2() {
+  %B = lshr &lt;2 x i64&gt; splat (i64 -9223372036854775808), splat (i64 1)
+  store &lt;2 x i64&gt; %B, ptr poison, align 16
+  %C = icmp sgt &lt;2 x i64&gt; %B, zeroinitializer
+  store &lt;2 x i1&gt; %C, ptr @G.1, align 1
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: lshr: &#x27;  %B = lshr &lt;2 x i64&gt; splat (i64 -9223372036854775808), splat (i64 1)&#x27; (in function: f2)
+warning: Instruction selection used fallback path for f2</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-fcmp.1650c0abda.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-fcmp.ll">double-fcmp.ll</a><span class="dim">)</span></td><td class="l">fcmp_ueq</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O2</code></td></tr><tr><td class="l">dso_local_equivalent.72b44352be.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/dso_local_equivalent.ll">dso_local_equivalent.ll</a><span class="dim">)</span></td><td class="l">f2</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">prefetch.a8d9a4bd6e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/prefetch.ll">prefetch.ll</a><span class="dim">)</span></td><td class="l">test_prefetch_offsetable_1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicbop,+zihintntl,+zicsr,+zhinx -O0</code></td></tr><tr><td class="l">srem-lkk.ad6f07b352.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/srem-lkk.ll">srem-lkk.ll</a><span class="dim">)</span></td><td class="l">fold_srem_negative_odd</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O1</code></td></tr><tr><td class="l">urem-vector-lkk.593e924355.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/urem-vector-lkk.ll">urem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">fold_urem_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zfinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

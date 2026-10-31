@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 654 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">shadow-stack-frame-opts.b2b3f78208.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/shadow-stack-frame-opts.ll">shadow-stack-frame-opts.ll</a><span class="dim">)</span> @caller_hw_clobber_s11 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zimop -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i32&gt;
+
+declare i32 @callee(i32)
+
+define i32 @caller_hw_clobber_s11(i32 %x) #0 {
+  %LGV = load &lt;4 x i32&gt;, ptr @G, align 16
+  %sub = sub nsw i32 0, %x
+  %call = tail call i32 @callee(i32 %sub)
+  %add = add nsw i32 %call, 1
+  %I = insertelement &lt;4 x i32&gt; %LGV, i32 %x, i32 %x
+  call void asm sideeffect &quot;nop&quot;, &quot;~{x27}&quot;()
+  store &lt;4 x i32&gt; %I, ptr poison, align 16
+  ret i32 %add
+}
+
+attributes #0 = { &quot;hw-shadow-stack&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zimop -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zimop -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %8:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %1:_, %0:_(s32), %0:_(s32) (in function: caller_hw_clobber_s11)
+warning: Instruction selection used fallback path for caller_hw_clobber_s11</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">shadow-stack-frame-opts.b2b3f78208.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/shadow-stack-frame-opts.ll">shadow-stack-frame-opts.ll</a><span class="dim">)</span></td><td class="l">caller_hw_clobber_s11</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zimop -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">short-forward-branch-opt-load.448f3a8a82.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/short-forward-branch-opt-load.ll">short-forward-branch-opt-load.ll</a><span class="dim">)</span></td><td class="l">test_i16_z_1</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+a,+short-forward-branch-ialu -O0 -code-model=small</code></td></tr><tr><td class="l">vector-deinterleave-fixed.2e3e122ff9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_v4i32_vv8i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh,+zvfbfmin -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-fixed.51aecb0f52.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave4_v2i32_v8i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh,+zvfbfmin,+zvbb -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vpaire.b53d284abe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpaire.ll">vpaire.ll</a><span class="dim">)</span></td><td class="l">test_vpaire_mask_i32m8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+experimental-zvzip -O3 -code-model=medium</code></td></tr><tr><td class="l">vpairo.baa3acb813.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpairo.ll">vpairo.ll</a><span class="dim">)</span></td><td class="l">test_vpairo_i32m1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+experimental-zvzip,+zve64d,+zbb -O2</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.89bb8ac9e9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_16bytes</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

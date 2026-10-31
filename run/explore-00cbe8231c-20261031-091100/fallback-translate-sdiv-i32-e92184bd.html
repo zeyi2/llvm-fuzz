@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 8 test files, 79 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zbb-logic-neg-imm.a46ec6acd2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zbb-logic-neg-imm.ll">zbb-logic-neg-imm.ll</a><span class="dim">)</span> @andlow16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zbs,+zfinx,+zicond -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i32
+
+define i32 @andlow16(i32 %x) {
+  %B = sdiv i32 %x, 0
+  %and = and i32 %x, 65535
+  store i32 %B, ptr @G.3, align 4
+  ret i32 %and
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zbs,+zfinx,+zicond -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zbs,+zfinx,+zicond -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv i32 %x, 0&#x27; (in function: andlow16)
+warning: Instruction selection used fallback path for andlow16</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bswap-bitreverse.a6c73e7c6b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bswap_bitreverse_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zicond,+zfinx -O2</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.23cd17d2.15efdc9ecd.ll <span class="dim">(mutant of</span> calling-conv-ilp32-ilp32f-ilp32d-common.23cd17d2.ll<span class="dim">)</span></td><td class="l">caller_large_scalars_exhausted_regs</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zvkb -O2</code></td></tr><tr><td class="l">float-intrinsics.f256285c3b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">ldexp_float</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O2</code></td></tr><tr><td class="l">fpenv-xlen.4be1125240.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/fpenv-xlen.ll">fpenv-xlen.ll</a><span class="dim">)</span></td><td class="l">func_set_fpenv</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">half-convert-strict.aeb13ebced.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_wu</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation -mattr=+zdinx,+zhinx -O1 -code-model=small</code></td></tr><tr><td class="l">rv32zbb-zbkb.7d811b08.a8a5afe55f.ll <span class="dim">(mutant of</span> rv32zbb-zbkb.7d811b08.ll<span class="dim">)</span></td><td class="l">disjoint_or_xnor_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zfinx,+zvbb,+xtheadba -O1</code></td></tr><tr><td class="l">rv64zbb.7cace7f8f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">sextb_extract_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zdinx,+zfinx -O2</code></td></tr><tr><td class="l">zbb-logic-neg-imm.a46ec6acd2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zbb-logic-neg-imm.ll">zbb-logic-neg-imm.ll</a><span class="dim">)</span></td><td class="l">andlow16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zbs,+zfinx,+zicond -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

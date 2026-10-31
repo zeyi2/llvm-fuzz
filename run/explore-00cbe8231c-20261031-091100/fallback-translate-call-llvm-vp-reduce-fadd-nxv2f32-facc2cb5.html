@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.reduce.fadd.nxv2f32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.reduce.fadd.nxv2f32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.reduce.fadd.nxv2f32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vreductions-fp-vp.e8bf8b2b0c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vreductions-fp-vp.ll">vreductions-fp-vp.ll</a><span class="dim">)</span> @vpreduce_ord_fadd_nxv2f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicsr,+c -O3 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+define float @vpreduce_ord_fadd_nxv2f32(float %s, &lt;vscale x 2 x float&gt; %v, &lt;vscale x 2 x i1&gt; %m, i32 zeroext %evl) {
+  %C = fcmp true float 1.000000e+00, %s
+  %r = call float @llvm.vp.reduce.fadd.nxv2f32(float %s, &lt;vscale x 2 x float&gt; %v, &lt;vscale x 2 x i1&gt; %m, i32 %evl)
+  store i1 %C, ptr @G.2, align 1
+  ret float %r
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare float @llvm.vp.reduce.fadd.nxv2f32(float, &lt;vscale x 2 x float&gt;, &lt;vscale x 2 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicsr,+c -O3 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicsr,+c -O3 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.reduce.fadd.nxv2f32: &#x27;  %r = call float @llvm.vp.reduce.fadd.nxv2f32(float %s, &lt;vscale x 2 x float&gt; %v, &lt;vscale x 2 x i1&gt; %m, i32 %evl)&#x27; (in function: vpreduce_ord_fadd_nxv2f32)
+warning: Instruction selection used fallback path for vpreduce_ord_fadd_nxv2f32</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vreductions-fp-vp.3f82234912.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vreductions-fp-vp.ll">vreductions-fp-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_ord_fadd_nxv2f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zcb,+zbkb -O2</code></td></tr><tr><td class="l">vreductions-fp-vp.7a4d2dafd9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vreductions-fp-vp.ll">vreductions-fp-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_ord_fadd_nxv2f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v -O2</code></td></tr><tr><td class="l">vreductions-fp-vp.c4a249c2fe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vreductions-fp-vp.ll">vreductions-fp-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_ord_fadd_nxv2f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v -O1</code></td></tr><tr><td class="l">vreductions-fp-vp.e8bf8b2b0c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vreductions-fp-vp.ll">vreductions-fp-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_ord_fadd_nxv2f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicsr,+c -O3 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">13 in 11 configs, 6 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-isnan.021a74762d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-isnan.ll">half-isnan.ll</a><span class="dim">)</span> @half_is_nan via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;8 x i1&gt;
+
+; Function Attrs: nounwind
+define zeroext i1 @half_is_nan(half %a) #0 {
+  %C = icmp eq &lt;8 x i8&gt; splat (i8 16), splat (i8 16)
+  %C1 = icmp ugt i128 170141183460469231731687303715884105727, 1
+  %1 = fcmp uno half %a, 0.000000e+00
+  store &lt;8 x i1&gt; %C, ptr @G.1, align 1
+  store i1 %C1, ptr poison, align 1
+  ret i1 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp eq &lt;8 x i8&gt; splat (i8 16), splat (i8 16)&#x27; (in function: half_is_nan)
+warning: Instruction selection used fallback path for half_is_nan</pre>
+<h4>Occurrences (13):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-isnan.0b56491de5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-isnan.ll">double-isnan.ll</a><span class="dim">)</span></td><td class="l">double_is_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -target-abi lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">double-isnan.d01592e4b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-isnan.ll">double-isnan.ll</a><span class="dim">)</span></td><td class="l">double_is_nan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -target-abi ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">double-previous-failure.8c438b38be.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-previous-failure.ll">double-previous-failure.ll</a><span class="dim">)</span></td><td class="l">test</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -target-abi=ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">float-isnan.97b12f13cc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-isnan.ll">float-isnan.ll</a><span class="dim">)</span></td><td class="l">float_is_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -target-abi lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">float-isnan.b3deb743eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-isnan.ll">float-isnan.ll</a><span class="dim">)</span></td><td class="l">float_is_nan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -target-abi ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">half-isnan.021a74762d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-isnan.ll">half-isnan.ll</a><span class="dim">)</span></td><td class="l">half_is_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">half-isnan.0b3944f0a4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-isnan.ll">half-isnan.ll</a><span class="dim">)</span></td><td class="l">half_is_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">half-isnan.0d373df2de.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-isnan.ll">half-isnan.ll</a><span class="dim">)</span></td><td class="l">half_is_nan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinxmin -verify-machineinstrs -target-abi ilp32</code></td></tr><tr><td class="l">half-isnan.e20d086199.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-isnan.ll">half-isnan.ll</a><span class="dim">)</span></td><td class="l">half_is_nan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -verify-machineinstrs -target-abi ilp32</code></td></tr><tr><td class="l">rv64zfh-half-intrinsics.01f68bc744.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64zfh-half-intrinsics.ll">rv64zfh-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">llrint_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">rv64zfh-half-intrinsics.8be394fdb7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64zfh-half-intrinsics.ll">rv64zfh-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">llrint_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -mattr=+zhinx -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">rv64zfhmin-half-intrinsics.98cd8c59eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64zfhmin-half-intrinsics.ll">rv64zfhmin-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">llrint_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">rv64zfhmin-half-intrinsics.a30453e872.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64zfhmin-half-intrinsics.ll">rv64zfhmin-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">llrint_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

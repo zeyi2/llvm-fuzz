@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast i256~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast i256~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast i256~ <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">idiv_large.b7d885f1.f8d66f4b66.ll <span class="dim">(mutant of</span> idiv_large.b7d885f1.ll<span class="dim">)</span> @udiv_i129 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zicsr -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.1 = external global i129
+
+; Function Attrs: nounwind
+define i129 @udiv_i129(i129 %x, i129 %y) #0 {
+  %LGV = load i129, ptr @G.1, align 4
+  %C2 = fcmp ule double 1.000000e+00, 4.200000e+01
+  %res = udiv exact i129 %x, %y
+  store i1 %C2, ptr @G, align 1
+  %B1 = srem i129 %res, %LGV
+  ret i129 %B1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zicsr -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zicsr -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %const = bitcast i129 128 to i129&#x27; (in function: udiv_i129)
+warning: Instruction selection used fallback path for udiv_i129</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-shuffle-exact-vlen.09ae6fc841.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-exact-vlen.ll">fixed-vectors-shuffle-exact-vlen.ll</a><span class="dim">)</span></td><td class="l">shuffle_i256_ldst</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">idiv_large.b7d885f1.197bb671f9.ll <span class="dim">(mutant of</span> idiv_large.b7d885f1.ll<span class="dim">)</span></td><td class="l">udiv_i129</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zicsr -O3 -code-model=small</code></td></tr><tr><td class="l">idiv_large.b7d885f1.f8d66f4b66.ll <span class="dim">(mutant of</span> idiv_large.b7d885f1.ll<span class="dim">)</span></td><td class="l">udiv_i129</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zicsr -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.llrint.v2i64.v2bf16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.llrint.v2i64.v2bf16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.llrint.v2i64.v2bf16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-llrint.d70be298e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-llrint.ll">fixed-vectors-llrint.ll</a><span class="dim">)</span> @llrint_v2i64_v2bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zfhmin,+zbb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i64&gt; @llrint_v2i64_v2bf16(&lt;2 x bfloat&gt; %x) {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %C = icmp slt i32 1, 2147483647
+  %a = call &lt;2 x i64&gt; @llvm.llrint.v2i64.v2bf16(&lt;2 x bfloat&gt; %x)
+  store i1 %C, ptr %A, align 1
+  ret &lt;2 x i64&gt; %a
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i64&gt; @llvm.llrint.v2i64.v2bf16(&lt;2 x bfloat&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zfhmin,+zbb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zfhmin,+zbb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.llrint.v2i64.v2bf16: &#x27;  %a = call &lt;2 x i64&gt; @llvm.llrint.v2i64.v2bf16(&lt;2 x bfloat&gt; %x)&#x27; (in function: llrint_v2i64_v2bf16)
+warning: Instruction selection used fallback path for llrint_v2i64_v2bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-llrint.2e3b0adb8c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-llrint.ll">fixed-vectors-llrint.ll</a><span class="dim">)</span></td><td class="l">llrint_v2i64_v2bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin -O2</code></td></tr><tr><td class="l">fixed-vectors-llrint.d70be298e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-llrint.ll">fixed-vectors-llrint.ll</a><span class="dim">)</span></td><td class="l">llrint_v2i64_v2bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zfhmin,+zbb -O0</code></td></tr><tr><td class="l">fixed-vectors-llrint.d8cb8ff04b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-llrint.ll">fixed-vectors-llrint.ll</a><span class="dim">)</span></td><td class="l">llrint_v2i64_v2bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

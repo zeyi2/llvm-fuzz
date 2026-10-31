@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.umin.nxv2i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.umin.nxv2i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.umin.nxv2i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vminu-vp.00bb9ad017.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vminu-vp.ll">vminu-vp.ll</a><span class="dim">)</span> @vminu_vx_nxv2i32_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 2 x i32&gt; @vminu_vx_nxv2i32_unmasked(&lt;vscale x 2 x i32&gt; %va, i32 %b, i32 zeroext %evl) {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %C = icmp slt i32 %b, %evl
+  %elt.head = insertelement &lt;vscale x 2 x i32&gt; poison, i32 %b, i32 0
+  %vb = shufflevector &lt;vscale x 2 x i32&gt; %elt.head, &lt;vscale x 2 x i32&gt; poison, &lt;vscale x 2 x i32&gt; zeroinitializer
+  %v = call &lt;vscale x 2 x i32&gt; @llvm.umin.nxv2i32(&lt;vscale x 2 x i32&gt; %va, &lt;vscale x 2 x i32&gt; %vb)
+  store i1 %C, ptr %A, align 1
+  ret &lt;vscale x 2 x i32&gt; %v
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 2 x i32&gt; @llvm.umin.nxv2i32(&lt;vscale x 2 x i32&gt;, &lt;vscale x 2 x i32&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.umin.nxv2i32: &#x27;  %v = call &lt;vscale x 2 x i32&gt; @llvm.umin.nxv2i32(&lt;vscale x 2 x i32&gt; %va, &lt;vscale x 2 x i32&gt; %vb)&#x27; (in function: vminu_vx_nxv2i32_unmasked)
+warning: Instruction selection used fallback path for vminu_vx_nxv2i32_unmasked</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vminu-vp.00bb9ad017.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vminu-vp.ll">vminu-vp.ll</a><span class="dim">)</span></td><td class="l">vminu_vx_nxv2i32_unmasked</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vminu-vp.a39cac3697.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vminu-vp.ll">vminu-vp.ll</a><span class="dim">)</span></td><td class="l">vminu_vx_nxv2i32_unmasked</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

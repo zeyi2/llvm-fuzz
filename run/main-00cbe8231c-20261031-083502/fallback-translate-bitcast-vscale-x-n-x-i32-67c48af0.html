@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast &lt;vscale x N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast &lt;vscale x N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast &lt;vscale x N x i32&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">24 in 4 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a> @partial_reduce_vdot4a_vx_operand1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 4 x i32&gt; @partial_reduce_vdot4a_vx_operand1(&lt;vscale x 4 x i32&gt; %acc, &lt;vscale x 16 x i8&gt; %a, i32 %x) {
+  %h = insertelement &lt;vscale x 4 x i32&gt; poison, i32 %x, i32 0
+  %s = shufflevector &lt;vscale x 4 x i32&gt; %h, &lt;vscale x 4 x i32&gt; poison, &lt;vscale x 4 x i32&gt; zeroinitializer
+  %b = bitcast &lt;vscale x 4 x i32&gt; %s to &lt;vscale x 16 x i8&gt;
+  %a.sext = sext &lt;vscale x 16 x i8&gt; %a to &lt;vscale x 16 x i32&gt;
+  %b.sext = sext &lt;vscale x 16 x i8&gt; %b to &lt;vscale x 16 x i32&gt;
+  %mul = mul &lt;vscale x 16 x i32&gt; %a.sext, %b.sext
+  %res = call &lt;vscale x 4 x i32&gt; @llvm.vector.partial.reduce.add.nxv4i32.nxv16i32(&lt;vscale x 4 x i32&gt; %acc, &lt;vscale x 16 x i32&gt; %mul)
+  ret &lt;vscale x 4 x i32&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 4 x i32&gt; @llvm.vector.partial.reduce.add.nxv4i32.nxv16i32(&lt;vscale x 4 x i32&gt;, &lt;vscale x 16 x i32&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %b = bitcast &lt;vscale x 4 x i32&gt; %s to &lt;vscale x 16 x i8&gt;&#x27; (in function: partial_reduce_vdot4a_vx_operand1)
+warning: Instruction selection used fallback path for partial_reduce_vdot4a_vx_operand1</pre>
+<h4>Occurrences (24) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4a_vx_operand1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4a_vx_operand0</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4au_vx_operand1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4au_vx_operand0</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4asu_vx</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4aus_vx</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4a_vx_operand1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvdot4a8i -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4a_vx_operand0</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvdot4a8i -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4au_vx_operand1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvdot4a8i -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4au_vx_operand0</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvdot4a8i -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4asu_vx</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvdot4a8i -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4aus_vx</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvdot4a8i -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4a_vx_operand1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4a_vx_operand0</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a></td><td class="l">partial_reduce_vdot4au_vx_operand1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.load.ff.nxv1f32.p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.load.ff.nxv1f32.p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.load.ff.nxv1f32.p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vploadff.2ecde128b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span> @vploadff_nxv1f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zbkb -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+define { &lt;vscale x 1 x float&gt;, i32 } @vploadff_nxv1f32(ptr %ptr, &lt;vscale x 1 x i1&gt; %m, i32 zeroext %evl) {
+  %load = call { &lt;vscale x 1 x float&gt;, i32 } @llvm.vp.load.ff.nxv1f32.p0(ptr %ptr, &lt;vscale x 1 x i1&gt; %m, i32 %evl)
+  %B = shl i32 %evl, 1
+  store i32 %B, ptr @G, align 4
+  ret { &lt;vscale x 1 x float&gt;, i32 } %load
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare { &lt;vscale x 1 x float&gt;, i32 } @llvm.vp.load.ff.nxv1f32.p0(ptr captures(none), &lt;vscale x 1 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zbkb -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zbkb -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.load.ff.nxv1f32.p0: &#x27;  %load = call { &lt;vscale x 1 x float&gt;, i32 } @llvm.vp.load.ff.nxv1f32.p0(ptr %ptr, &lt;vscale x 1 x i1&gt; %m, i32 %evl)&#x27; (in function: vploadff_nxv1f32)
+warning: Instruction selection used fallback path for vploadff_nxv1f32</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vploadff.2ecde128b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span></td><td class="l">vploadff_nxv1f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zbkb -O2</code></td></tr><tr><td class="l">vploadff.3c55441dac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span></td><td class="l">vploadff_nxv1f32_allones_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v -O1</code></td></tr><tr><td class="l">vploadff.5464896928.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span></td><td class="l">vploadff_nxv1f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v -O2</code></td></tr><tr><td class="l">vploadff.9592dd7435.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span></td><td class="l">vploadff_nxv1f32_allones_mask</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zve64d -O3</code></td></tr><tr><td class="l">vploadff.9d9d1b1e1e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span></td><td class="l">vploadff_nxv1f32_allones_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zvkb,+c -O0</code></td></tr><tr><td class="l">vploadff.a4c754d923.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span></td><td class="l">vploadff_nxv1f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zicsr,+xtheadba -O1</code></td></tr><tr><td class="l">vploadff.bc483ba450.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vploadff.ll">vploadff.ll</a><span class="dim">)</span></td><td class="l">vploadff_nxv1f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zihintpause -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

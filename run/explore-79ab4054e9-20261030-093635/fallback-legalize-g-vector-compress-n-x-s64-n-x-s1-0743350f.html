@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_VECTOR_COMPRESS &lt;N x s64&gt;,&lt;N x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_VECTOR_COMPRESS &lt;N x s64&gt;,&lt;N x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_VECTOR_COMPRESS &lt;N x s64&gt;,&lt;N x s1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 4 configs, 2 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-compress-int.e8f2a03b4f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-int.ll">fixed-vectors-compress-int.ll</a><span class="dim">)</span> @vector_compress_v4i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global &lt;4 x i64&gt;
+
+define &lt;4 x i64&gt; @vector_compress_v4i64(&lt;4 x i64&gt; %v, &lt;4 x i1&gt; %mask) {
+  %B = shl &lt;4 x i64&gt; %v, splat (i64 4294967296)
+  %ret = call &lt;4 x i64&gt; @llvm.experimental.vector.compress.v4i64(&lt;4 x i64&gt; %v, &lt;4 x i1&gt; %mask, &lt;4 x i64&gt; poison)
+  store &lt;4 x i64&gt; %B, ptr @G.3, align 32
+  ret &lt;4 x i64&gt; %ret
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;4 x i64&gt; @llvm.experimental.vector.compress.v4i64(&lt;4 x i64&gt;, &lt;4 x i1&gt;, &lt;4 x i64&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(&lt;4 x s64&gt;) = G_VECTOR_COMPRESS %0:_, %1:_(&lt;4 x s1&gt;), %8:_ (in function: vector_compress_v4i64)
+warning: Instruction selection used fallback path for vector_compress_v4i64</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-compress-fp.380d5b326c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-fp.ll">fixed-vectors-compress-fp.ll</a><span class="dim">)</span></td><td class="l">vector_compress_v8f64</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+m,+f,+d,+zvfh,+zvfbfmin -O2</code></td></tr><tr><td class="l">fixed-vectors-compress-int.118850c27a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-int.ll">fixed-vectors-compress-int.ll</a><span class="dim">)</span></td><td class="l">vector_compress_v4i64_passthru</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O3</code></td></tr><tr><td class="l">fixed-vectors-compress-int.2738f7b29c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-int.ll">fixed-vectors-compress-int.ll</a><span class="dim">)</span></td><td class="l">vector_compress_v4i64_passthru</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O0</code></td></tr><tr><td class="l">fixed-vectors-compress-int.2738f7b29c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-int.ll">fixed-vectors-compress-int.ll</a><span class="dim">)</span></td><td class="l">vector_compress_v8i64_passthru</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O0</code></td></tr><tr><td class="l">fixed-vectors-compress-int.e8f2a03b4f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-int.ll">fixed-vectors-compress-int.ll</a><span class="dim">)</span></td><td class="l">vector_compress_v4i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

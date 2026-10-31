@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTOUI &lt;N x s32&gt;,&lt;N x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTOUI &lt;N x s32&gt;,&lt;N x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTOUI &lt;N x s32&gt;,&lt;N x s16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fptoui-vp.92c0358755.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span> @vfptoui_v4i32_v4f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh,+zfa -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+
+define &lt;4 x i32&gt; @vfptoui_v4i32_v4f16(&lt;4 x half&gt; %va, &lt;4 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load i64, ptr @G, align 4
+  %v = fptoui &lt;4 x half&gt; %va to &lt;4 x i32&gt;
+  %B = xor i64 9223372036854775807, %LGV
+  store i64 %B, ptr poison, align 4
+  ret &lt;4 x i32&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+zvfh,+zfa -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+zvfh,+zfa -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;4 x s32&gt;) = G_FPTOUI %0:_(&lt;4 x s16&gt;) (in function: vfptoui_v4i32_v4f16)
+warning: Instruction selection used fallback path for vfptoui_v4i32_v4f16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fptoui-vp.77c22f9450.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i32_v4f16_unmasked</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfhmin,+d -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.8d4213bd77.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i32_v4f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.92c0358755.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i32_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh,+zfa -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

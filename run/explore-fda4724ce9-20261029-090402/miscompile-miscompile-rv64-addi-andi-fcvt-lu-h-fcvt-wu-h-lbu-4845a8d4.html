@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,fcvt.lu.h,fcvt.wu.h,lbu,lui</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,fcvt.lu.h,fcvt.wu.h,lbu,lui</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,fcvt.lu.h,fcvt.wu.h,lbu,lui <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zfh-half-convert.7b7dd735.5738fe456d.ll <span class="dim">(mutant of</span> rv64zfh-half-convert.7b7dd735.ll<span class="dim">)</span> @zext_fptoui via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicsr -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.3 = external global i1
+
+; Function Attrs: nounwind
+define zeroext i32 @zext_fptoui(half %a) #0 {
+  %C = fcmp uno half %a, %a
+  %LGV = load i1, ptr @G, align 1
+  %B = or i1 %LGV, false
+  %1 = fptoui half %a to i32
+  store i1 %B, ptr @G, align 1
+  store i1 %C, ptr @G.3, align 1
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicsr -O0&#x27; --funcs zext_fptoui snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #12)
+SelectionDAG hash 5bef58d3690d6076, GlobalISel hash b0327560e339d2be
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicsr -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicsr -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicsr -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64zfh-half-convert.7b7dd735.5738fe456d.ll <span class="dim">(mutant of</span> rv64zfh-half-convert.7b7dd735.ll<span class="dim">)</span></td><td class="l">zext_fptoui</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicsr -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

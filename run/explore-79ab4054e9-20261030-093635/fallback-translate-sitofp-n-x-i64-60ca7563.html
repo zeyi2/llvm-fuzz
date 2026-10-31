@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sitofp &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sitofp &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sitofp &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 1 test files, 31 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-i2fp.d4a1a14c6b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span> @si2fp_v2i64_v2bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+experimental-zvfbfa,+f,+d,+zcb -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @si2fp_v2i64_v2bf16(ptr %x, ptr %y) {
+  %G = getelementptr i16, ptr %x, i16 42
+  %a = load &lt;2 x i64&gt;, ptr %G, align 16
+  %d = sitofp &lt;2 x i64&gt; %a to &lt;2 x bfloat&gt;
+  store &lt;2 x bfloat&gt; %d, ptr %y, align 4
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+experimental-zvfbfa,+f,+d,+zcb -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+experimental-zvfbfa,+f,+d,+zcb -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sitofp: &#x27;  %d = sitofp &lt;2 x i64&gt; %a to &lt;2 x bfloat&gt;&#x27; (in function: si2fp_v2i64_v2bf16)
+warning: Instruction selection used fallback path for si2fp_v2i64_v2bf16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-i2fp.2417eb1dbf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v8i64_v8bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f -O2</code></td></tr><tr><td class="l">fixed-vectors-i2fp.481a098ebd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v8i64_v8bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O3</code></td></tr><tr><td class="l">fixed-vectors-i2fp.9e53734a7f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v2i64_v2bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+experimental-zvfbfa,+f -O0</code></td></tr><tr><td class="l">fixed-vectors-i2fp.c9f1367ce2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v2i64_v2bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d,+zicond -O0 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-i2fp.d4a1a14c6b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v2i64_v2bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+experimental-zvfbfa,+f,+d,+zcb -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

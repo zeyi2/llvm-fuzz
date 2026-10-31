@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vector.reverse.nxv16f32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vector.reverse.nxv16f32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vector.reverse.nxv16f32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">named-vector-shuffle-reverse.8e0fa85c24.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span> @reverse_nxv16f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+define &lt;vscale x 16 x float&gt; @reverse_nxv16f32(&lt;vscale x 16 x float&gt; %a) {
+  %C = fcmp une double +qnan, 4.200000e+01
+  %res = call &lt;vscale x 16 x float&gt; @llvm.vector.reverse.nxv16f32(&lt;vscale x 16 x float&gt; %a)
+  store i1 %C, ptr @G.1, align 1
+  ret &lt;vscale x 16 x float&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 16 x float&gt; @llvm.vector.reverse.nxv16f32(&lt;vscale x 16 x float&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vector.reverse.nxv16f32: &#x27;  %res = call &lt;vscale x 16 x float&gt; @llvm.vector.reverse.nxv16f32(&lt;vscale x 16 x float&gt; %a)&#x27; (in function: reverse_nxv16f32)
+warning: Instruction selection used fallback path for reverse_nxv16f32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">named-vector-shuffle-reverse.8d8318f627.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span></td><td class="l">reverse_nxv16f32</td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin,+zihintpause -O2</code></td></tr><tr><td class="l">named-vector-shuffle-reverse.8e0fa85c24.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span></td><td class="l">reverse_nxv16f32</td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small</code></td></tr><tr><td class="l">named-vector-shuffle-reverse.a7918728cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span></td><td class="l">reverse_nxv16f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

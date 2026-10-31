@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vsplats-zfa.e4b03f7ff2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vsplats-zfa.ll">vsplats-zfa.ll</a><span class="dim">)</span> @vsplat_f32_0p75 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32d -verify-machineinstrs -mattr=+zfh,+zfa,+zvfh -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 8 x float&gt; @vsplat_f32_0p75() {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %C = fcmp uge half 4.200000e+01, 1.000000e+00
+  store i1 %C, ptr %A, align 1
+  ret &lt;vscale x 8 x float&gt; splat (float 7.500000e-01)
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32d -verify-machineinstrs -mattr=+zfh,+zfa,+zvfh -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32d -verify-machineinstrs -mattr=+zfh,+zfa,+zvfh -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">note: hard-float &#x27;d&#x27; ABI can&#x27;t be used for a target that doesn&#x27;t support the D instruction set extension (ignoring target-abi)
+llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVRegisterBankInfo.cpp:569: virtual const RegisterBankInfo::InstructionMapping &amp;llvm::RISCVRegisterBankInfo::getInstrMapping(const MachineInstr &amp;) const: Assertion `MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -target-abi ilp32d -verify-machineinstrs -mattr=+zfh,+zfa,+zvfh -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RegBankSelect&#x27; on function &#x27;@vsplat_f32_0p75&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055fb1934370b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055fb193405b1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055fb1934418b
+3  libc.so.6 0x00007fd65fa45330
+4  libc.so.6 0x00007fd65fa9ec0c pthread_kill + 284
+5  libc.so.6 0x00007fd65fa4527e gsignal + 30
+6  libc.so.6 0x00007fd65fa288ff abort + 223
+7  libc.so.6 0x00007fd65fa2881b
+8  libc.so.6 0x00007fd65fa3b517
+9  llc       0x000055fb1a5bc1ab
+10 llc       0x000055fb1b4fbf97
+11 llc       0x000055fb1b4fb3b5 llvm::RegBankSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 197
+12 llc       0x000055fb1991360d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+13 llc       0x000055fb1969d7f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x000055fb196a5d12 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x000055fb1969e5a0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x000055fb1934adc7 llcMain + 12151
+17 llc       0x000055fb19286eaf main + 63
+18 libc.so.6 0x00007fd65fa2a1ca
+19 libc.so.6 0x00007fd65fa2a28b __libc_start_main + 139
+20 llc       0x000055fb19286da5 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vsplats-zfa.e4b03f7ff2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vsplats-zfa.ll">vsplats-zfa.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32d -verify-machineinstrs -mattr=+zfh,+zfa,+zvfh -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

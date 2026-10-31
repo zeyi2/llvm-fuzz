@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.fma.v4bf16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.fma.v4bf16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.fma.v4bf16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vfmadd-constrained-sdnode.79a376d220.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmadd-constrained-sdnode.ll">fixed-vectors-vfmadd-constrained-sdnode.ll</a><span class="dim">)</span> @vfmadd_vv_v4bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x i1&gt;
+
+; Function Attrs: strictfp
+define &lt;4 x bfloat&gt; @vfmadd_vv_v4bf16(&lt;4 x bfloat&gt; %va, &lt;4 x bfloat&gt; %vb, &lt;4 x bfloat&gt; %vc) #0 {
+  %vd = call &lt;4 x bfloat&gt; @llvm.experimental.constrained.fma.v4bf16(&lt;4 x bfloat&gt; %vb, &lt;4 x bfloat&gt; %va, &lt;4 x bfloat&gt; %vc, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.strict&quot;)
+  %C = fcmp olt &lt;4 x bfloat&gt; %va, splat (bfloat 1.000000e+00)
+  store &lt;4 x i1&gt; %C, ptr @G.1, align 1
+  ret &lt;4 x bfloat&gt; %vd
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;4 x bfloat&gt; @llvm.experimental.constrained.fma.v4bf16(&lt;4 x bfloat&gt;, &lt;4 x bfloat&gt;, &lt;4 x bfloat&gt;, metadata, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.fma.v4bf16: &#x27;  %vd = call &lt;4 x bfloat&gt; @llvm.experimental.constrained.fma.v4bf16(&lt;4 x bfloat&gt; %vb, &lt;4 x bfloat&gt; %va, &lt;4 x bfloat&gt; %vc, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: vfmadd_vv_v4bf16)
+warning: Instruction selection used fallback path for vfmadd_vv_v4bf16</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfmadd-constrained-sdnode.79a376d220.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmadd-constrained-sdnode.ll">fixed-vectors-vfmadd-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfmadd_vv_v4bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vfmadd-constrained-sdnode.909b1349b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmadd-constrained-sdnode.ll">fixed-vectors-vfmadd-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfmadd_vv_v4bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfhmin,+zvfhmin,+experimental-zvfbfa,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vfmadd-constrained-sdnode.a2a256f682.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmadd-constrained-sdnode.ll">fixed-vectors-vfmadd-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfmadd_vv_v4bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zfhmin,+zvfhmin,+experimental-zvfbfa,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vfmadd-constrained-sdnode.ec5770b543.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmadd-constrained-sdnode.ll">fixed-vectors-vfmadd-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfmadd_vv_v4bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

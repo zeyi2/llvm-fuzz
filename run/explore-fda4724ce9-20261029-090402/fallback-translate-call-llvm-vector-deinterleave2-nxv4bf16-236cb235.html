@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vector.deinterleave2.nxv4bf16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vector.deinterleave2.nxv4bf16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vector.deinterleave2.nxv4bf16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-deinterleave.62e6668673.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave.ll">vector-deinterleave.ll</a><span class="dim">)</span> @vector_deinterleave_nxv2bf16_nxv4bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin,+zve32x -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global half
+@G.1 = external global i1
+
+define { &lt;vscale x 2 x bfloat&gt;, &lt;vscale x 2 x bfloat&gt; } @vector_deinterleave_nxv2bf16_nxv4bf16(&lt;vscale x 4 x bfloat&gt; %vec) {
+  %LGV = load half, ptr @G, align 2
+  %C = fcmp one half %LGV, 1.000000e+00
+  %retval = call { &lt;vscale x 2 x bfloat&gt;, &lt;vscale x 2 x bfloat&gt; } @llvm.vector.deinterleave2.nxv4bf16(&lt;vscale x 4 x bfloat&gt; %vec)
+  store i1 %C, ptr @G.1, align 1
+  ret { &lt;vscale x 2 x bfloat&gt;, &lt;vscale x 2 x bfloat&gt; } %retval
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare { &lt;vscale x 2 x bfloat&gt;, &lt;vscale x 2 x bfloat&gt; } @llvm.vector.deinterleave2.nxv4bf16(&lt;vscale x 4 x bfloat&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin,+zve32x -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin,+zve32x -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vector.deinterleave2.nxv4bf16: &#x27;  %retval = call { &lt;vscale x 2 x bfloat&gt;, &lt;vscale x 2 x bfloat&gt; } @llvm.vector.deinterleave2.nxv4bf16(&lt;vscale x 4 x bfloat&gt; %vec)&#x27; (in function: vector_deinterleave_nxv2bf16_nxv4bf16)
+warning: Instruction selection used fallback path for vector_deinterleave_nxv2bf16_nxv4bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vector-deinterleave-load.67e6fb53a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-load.ll">vector-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_nxv2bf16_nxv4bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin,+m,+zvfh,+zcb -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-load.e102bb95df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-load.ll">vector-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_nxv2bf16_nxv4bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh,+zvfbfmin,+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave.62e6668673.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave.ll">vector-deinterleave.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_nxv2bf16_nxv4bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin,+zve32x -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

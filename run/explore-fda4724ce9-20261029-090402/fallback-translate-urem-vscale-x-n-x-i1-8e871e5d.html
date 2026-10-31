@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 8 test files, 71 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">wide-scalar-shift-by-byte-multiple-legalization.5b58583698.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span> @lshr_16bytes_wordOff via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+m -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i16
+@G.3 = external global i1
+
+; Function Attrs: nounwind
+define void @lshr_16bytes_wordOff(ptr %src.ptr, ptr %wordOff.ptr, ptr %dst) #0 {
+  %LGV = load i16, ptr @G.2, align 2
+  %C = icmp uge i16 256, %LGV
+  %B = urem &lt;vscale x 4 x i1&gt; splat (i1 true), splat (i1 true)
+  %src = load i128, ptr %src.ptr, align 1
+  %wordOff = load i128, ptr %wordOff.ptr, align 1
+  %bitOff = shl i128 %wordOff, 5
+  %res = lshr i128 %src, %bitOff
+  store i128 %res, ptr %dst, align 1
+  store &lt;vscale x 4 x i1&gt; %B, ptr poison, align 1
+  store i1 %C, ptr @G.3, align 1
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+m -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+m -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %B = urem &lt;vscale x 4 x i1&gt; splat (i1 true), splat (i1 true)&#x27; (in function: lshr_16bytes_wordOff)
+warning: Instruction selection used fallback path for lshr_16bytes_wordOff</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cttz-elts.f7d65e85f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/cttz-elts.ll">cttz-elts.ll</a><span class="dim">)</span></td><td class="l">ctz_nxv16i1_poison</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+a -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vfmerge-bf.e4d01c92e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vfmerge-bf.ll">vfmerge-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfmerge_vzm_nxv32bf16_nxv32bf16_bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa,+zbkb -O2</code></td></tr><tr><td class="l">vfncvt-rod-bf-f.975df107b7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vfncvt-rod-bf-f.ll">vfncvt-rod-bf-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvt_mask_rod.f.f.w_nxv2bf16_nxv2f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa,+d -O3</code></td></tr><tr><td class="l">vfncvt-x-bf.d2e30e4135.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vfncvt-x-bf.ll">vfncvt-x-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvt_x.f.w_nxv8i8_nxv8bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa -O0</code></td></tr><tr><td class="l">vfwcvt-bf-xu.a4917bb396.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vfwcvt-bf-xu.ll">vfwcvt-bf-xu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwcvt_mask_f.xu.v_nxv8bf16_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa,+c -O3</code></td></tr><tr><td class="l">vmadc.carry.in.130b7b2ec0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmadc.carry.in.ll">vmadc.carry.in.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmadc.carry.in_vvm_nxv16i1_nxv16i8_nxv16i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3</code></td></tr><tr><td class="l">vmfeq.64012c318f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmfeq.ll">vmfeq.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmfeq_mask_vf_nxv1f64_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvkb -O1</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.5b58583698.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_16bytes_wordOff</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+m -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 43 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 43 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 43 machine code errors. <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-gprs.c5c065b8.d7b67688.bed084c73e.ll <span class="dim">(mutant of</span> callee-saved-gprs.c5c065b8.d7b67688.ll<span class="dim">)</span> @caller via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var = external global [32 x i32]
+@G = external global i32
+@G.3 = external global i1
+@G.4 = external global float
+
+declare void @callee()
+
+define void @caller() {
+  %LGV = load float, ptr @G.4, align 4
+  %val = load [32 x i32], ptr @var, align 4
+  call void @callee()
+  %C3 = fcmp une float 1.000000e+00, %LGV
+  store volatile [32 x i32] %val, ptr @var, align 4
+  %E = extractvalue [32 x i32] %val, 16
+  store i32 %E, ptr poison, align 4
+  %LGV1 = load i32, ptr @G, align 4
+  %I = insertvalue [32 x i32] %val, i32 %LGV1, 25
+  store [32 x i32] %I, ptr poison, align 4
+  store [32 x i32] %val, ptr poison, align 4
+  %B = lshr i32 %LGV1, 1
+  store i1 %C3, ptr @G.3, align 1
+  store i32 %B, ptr poison, align 4
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After RISC-V Load / Store Optimizer
+# Machine code for function caller: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+Frame Objects:
+  fi#0: size=4, align=4, at location [SP-16]
+  fi#1: size=4, align=4, at location [SP-20]
+  fi#2: size=4, align=4, at location [SP-24]
+  fi#3: size=4, align=4, at location [SP-28]
+  fi#4: size=4, align=4, at location [SP-32]
+  fi#5: size=4, align=4, at location [SP-36]
+  fi#6: size=4, align=4, at location [SP-40]
+  fi#7: size=4, align=4, at location [SP-44]
+  fi#8: size=4, align=4, at location [SP-48]
+  fi#9: size=4, align=4, at location [SP-52]
+  fi#10: size=4, align=4, at location [SP-56]
+  fi#11: size=4, align=4, at location [SP-60]
+  fi#12: size=4, align=4, at location [SP-64]
+  fi#13: size=4, align=4, at location [SP-68]
+  fi#14: size=4, align=4, at location [SP-72]
+  fi#15: size=4, align=4, at location [SP-76]
+  fi#16: size=4, align=4, at location [SP-80]
+  fi#17: size=4, align=4, at location [SP-84]
+  fi#18: size=4, align=4, at location [SP-88]
+  fi#19: size=4, align=4, at location [SP-92]
+  fi#20: size=4, align=4, at location [SP-96]
+  fi#21: size=4, align=4, at location [SP-100]
+  fi#22: size=4, align=4, at location [SP-104]
+  fi#23: size=4, align=4, at location [SP-108]
+  fi#24: size=4, align=4, at location [SP-112]
+  fi#25: size=4, align=4, at location [SP-116]
+  fi#26: size=4, align=4, at location [SP-120]
+  fi#27: size=4, align=4, at location [SP-124]
+  fi#28: size=4, align=4, at location [SP-128]
+  fi#29: size=4, align=4, at location [SP-132]
+  fi#30: size=4, align=4, at location [SP-136]
+  fi#31: size=4, align=4, at location [SP-140]
+  fi#32: size=4, align=4, at location [SP-144]
+  fi#33: dead
+  fi#34: dead
+  fi#35: size=4, align=4, at location [SP-4]
+  fi#36: size=8, align=4, at location [SP-12]
+save/restore points:
+save points are empty
+restore points are empty
+bb.0 (%ir-block.0):
+  liveins: $x1, $x8_x9
+  $x2 = frame-setup ADDI $x2, -144
+  frame-setup CFI_INSTRUCTION def_cfa_offset 144
+  frame-setup SW killed $x1, $x2, 140 :: (store (s32) into %stack.35)
+  frame-setup SD_RV32 killed $x8_x9, $x2, 132 :: (store (s64) into %stack.36, align 4)
+  frame-setup CFI_INSTRUCTION offset $x1, -4
+  frame-setup CFI_INSTRUCTION offset $x8, -12
+  frame-setup CFI_INSTRUCTION offset $x9, -8
+  renamable $x10 = LUI target-flags(riscv-hi) @G.4
+  renamable $x9 = LUI target-flags(riscv-hi) @var
+  renamable $x9 = ADDI killed renamable $x9, target-flags(riscv-lo) @var
+  renamable $x10 = LW killed renamable $x10, target-flags(riscv-lo) @G.4 :: (dereferenceable load (s32) from @G.4)
+  SW killed renamable $x10, $x2, 108 :: (store (s32) into %stack.5)
+  $x11 = LW $x9, 0 :: (dereferenceable load (s32) from @var), (dereferenceable load (s32) from @var + 4)
+  $x10 = LW $x9, 4 :: (dereferenceable load (s32) from @var), (dereferenceable load (s32) from @var + 4)
+  SW killed renamable $x11, $x2, 0 :: (store (s32) into %stack.32)
+  SW killed renamable $x10, $x2, 4 :: (store (s32) into %stack.31)
+  $x11 = LW $x9, 8 :: (dereferenceable load (s32) from @var + 8), (dereferenceable load (s32) from @var + 12)
+  $x10 = LW $x9, 12 :: (dereferenceable load (s32) from @var + 8), (dereferenceable load (s32) from @var + 12)
+  SW killed renamable $x11, $x2, 120 :: (store (s32) into %stack.2)
+  SW killed renamable $x10, $x2, 124 :: (store (s32) into %stack.1)
+  $x8 = LW $x9, 16 :: (dereferenceable load (s32) from @var + 16), (dereferenceable load (s32) from @var + 20)
+  $x10 = LW $x9, 20 :: (dereferenceable load (s32) from @var + 16), (dereferenceable load (s32) from @var + 20)
+  SW killed renamable $x10, $x2, 8 :: (store (s32) into %stack.30)
+  SW renamable $x8, $x2, 104 :: (store (s32) into %stack.6)
+  $x10_x11 = LD_RV32 $x9, 24 :: (dereferenceable load (s32) from @var + 24), (dereferenceable load (s32) from @var + 28)
+  SW killed renamable $x11, $x2, 112 :: (store (s32) into %stack.4)
+  SW killed renamable $x10, $x2, 116 :: (store (s32) into %stack.3)
+  $x11 =</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-gprs.c5c065b8.d7b67688.032d4919.3c922f89c1.ll <span class="dim">(mutant of</span> callee-saved-gprs.c5c065b8.d7b67688.032d4919.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond,+m -O3</code></td></tr><tr><td class="l">callee-saved-gprs.c5c065b8.d7b67688.bed084c73e.ll <span class="dim">(mutant of</span> callee-saved-gprs.c5c065b8.d7b67688.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

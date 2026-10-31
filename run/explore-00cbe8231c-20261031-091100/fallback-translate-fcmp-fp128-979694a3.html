@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fcmp fp128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fcmp fp128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fcmp fp128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 9 configs, 6 test files, 33 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fp128.c5316fe8e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span> @fptosi_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zdinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+; Function Attrs: nounwind
+define i8 @fptosi_i8(fp128 %x) #0 {
+  %C = fcmp ole fp128 %x, f0x7FFEFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+  %a = fptosi fp128 %x to i8
+  store i1 %C, ptr @G.2, align 1
+  ret i8 %a
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xtheadba,+zdinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xtheadba,+zdinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fcmp: &#x27;  %C = fcmp ole fp128 %x, f0x7FFEFFFFFFFFFFFFFFFFFFFFFFFFFFFF&#x27; (in function: fptosi_i8)
+warning: Instruction selection used fallback path for fptosi_i8</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp128.7c781804aa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fptosi_fp128_to_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">fp128.829b6e3d.938ecbc1fe.ll <span class="dim">(mutant of</span> fp128.829b6e3d.ll<span class="dim">)</span></td><td class="l">atan2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zdinx,+zve32x,+zcb -O1</code></td></tr><tr><td class="l">fp128.9688ac9efa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fmul</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.9688ac9efa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">test_facos</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.a8a9419c.79a6aa5128.ll <span class="dim">(mutant of</span> fp128.a8a9419c.ll<span class="dim">)</span></td><td class="l">powi</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">fp128.a8a9419c.9ca67348d2.ll <span class="dim">(mutant of</span> fp128.a8a9419c.ll<span class="dim">)</span></td><td class="l">test_fexp2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">fp128.a9de5748.6156f2b9d7.ll <span class="dim">(mutant of</span> fp128.a9de5748.ll<span class="dim">)</span></td><td class="l">pow</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+a -O1 -code-model=small</code></td></tr><tr><td class="l">fp128.aa6c59100d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fptoui_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbkb,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.c5316fe8e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fptosi_i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.c5316fe8e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">ceil</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.e9bd45d078.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_nine_indirect_swap_first_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbs,+zhinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

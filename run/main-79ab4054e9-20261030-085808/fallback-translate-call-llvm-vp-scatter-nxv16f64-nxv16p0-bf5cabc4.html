@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.scatter.nxv16f64.nxv16p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.scatter.nxv16f64.nxv16p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.scatter.nxv16f64.nxv16p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vpscatter-sdnode.164ef3b98d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span> @vpscatter_nxv16f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+zvfbfmin,+v,+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @vpscatter_nxv16f64(&lt;vscale x 16 x double&gt; %val, &lt;vscale x 16 x ptr&gt; %ptrs, &lt;vscale x 16 x i1&gt; %m, i32 zeroext %evl) {
+  %C = icmp sge &lt;2 x i64&gt; splat (i64 1), splat (i64 42)
+  call void @llvm.vp.scatter.nxv16f64.nxv16p0(&lt;vscale x 16 x double&gt; %val, &lt;vscale x 16 x ptr&gt; %ptrs, &lt;vscale x 16 x i1&gt; %m, i32 %evl)
+  store &lt;2 x i1&gt; %C, ptr poison, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare void @llvm.vp.scatter.nxv16f64.nxv16p0(&lt;vscale x 16 x double&gt;, &lt;vscale x 16 x ptr&gt;, &lt;vscale x 16 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+d,+zvfh,+zvfbfmin,+v,+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+d,+zvfh,+zvfbfmin,+v,+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.scatter.nxv16f64.nxv16p0: &#x27;  call void @llvm.vp.scatter.nxv16f64.nxv16p0(&lt;vscale x 16 x double&gt; %val, &lt;vscale x 16 x ptr&gt; %ptrs, &lt;vscale x 16 x i1&gt; %m, i32 %evl)&#x27; (in function: vpscatter_nxv16f64)
+warning: Instruction selection used fallback path for vpscatter_nxv16f64</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vpscatter-sdnode.164ef3b98d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv16f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+zvfbfmin,+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l">vpscatter-sdnode.188eedc1c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv16f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfhmin,+zvfbfmin,+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l">vpscatter-sdnode.392f1d9037.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv16f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+zvfbfmin,+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l">vpscatter-sdnode.83b434a7fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv16f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfhmin,+zvfbfmin,+v,+m,+zvbb -verify-machineinstrs</code></td></tr><tr><td class="l">vpscatter-sdnode.983ad4868f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv16f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zfh,+zvfhmin,+zvfbfmin,+v,+m,+zvbb -verify-machineinstrs</code></td></tr><tr><td class="l">vpscatter-sdnode.a35e9e9b61.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv16f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfhmin,+zvfbfmin,+v,+m -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

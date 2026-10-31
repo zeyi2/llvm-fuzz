@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">18 in 14 configs, 10 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-frem.1aa4c2d4e8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-frem.ll">half-frem.ll</a><span class="dim">)</span> @frem_f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define half @frem_f16(half %a, half %b) #0 {
+  %A = alloca i32, align 4
+  store i32 poison, ptr %A, align 4
+  %C = fcmp olt half %b, 0.000000e+00
+  %1 = frem half %a, %b
+  %B = and i32 -2147483648, 0
+  store i1 %C, ptr @G, align 1
+  store i32 %B, ptr %A, align 4
+  ret half %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca i32, align 4&#x27; (in function: frem_f16)
+warning: Instruction selection used fallback path for frem_f16</pre>
+<h4>Occurrences (18) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert-strict.23b051ba9e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">double-convert-strict.54e810ef94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">double-frem.788038b041.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-frem.ll">double-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs</code></td></tr><tr><td class="l">double-frem.9816caab18.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-frem.ll">double-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs</code></td></tr><tr><td class="l">double-intrinsics.b63ea93fd7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">lrint_f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-convert.d5379f007a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-convert.ll">float-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_wu_s_sat_zext</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-convert.ef490e8daf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-convert.ll">float-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_wu_s_sat_zext</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">float-frem.186bc6560c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-frem.ll">float-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">float-frem.4fb6514e8b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-frem.ll">float-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">float-intrinsics.bcf995d27c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">isposinf_fpclass</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-intrinsics.e44a5af226.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">isposinf_fpclass</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">half-frem.1aa4c2d4e8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-frem.ll">half-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">half-frem.2102d7d53e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-frem.ll">half-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinxmin -verify-machineinstrs -target-abi ilp32</code></td></tr><tr><td class="l">half-frem.56c44761b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-frem.ll">half-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">half-frem.e0c293521b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-frem.ll">half-frem.ll</a><span class="dim">)</span></td><td class="l">frem_f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -verify-machineinstrs -target-abi ilp32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

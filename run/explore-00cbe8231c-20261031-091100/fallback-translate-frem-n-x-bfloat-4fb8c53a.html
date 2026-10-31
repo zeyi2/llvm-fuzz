@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem &lt;N x bfloat&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem &lt;N x bfloat&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem &lt;N x bfloat&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 5 test files, 58 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fmaximumnum.450da99b68.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fmaximumnum.ll">fixed-vectors-fmaximumnum.ll</a><span class="dim">)</span> @max_v9bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+experimental-zvfbfa,+v -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global &lt;9 x bfloat&gt;
+
+define &lt;9 x bfloat&gt; @max_v9bf16(&lt;9 x bfloat&gt; %a, &lt;9 x bfloat&gt; %b) {
+entry:
+  %LGV1 = load &lt;9 x bfloat&gt;, ptr @G.3, align 32
+  %B = frem &lt;9 x bfloat&gt; %b, %LGV1
+  ret &lt;9 x bfloat&gt; %B
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+experimental-zvfbfa,+v -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+experimental-zvfbfa,+v -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem &lt;9 x bfloat&gt; %b, %LGV1&#x27; (in function: max_v9bf16)
+warning: Instruction selection used fallback path for max_v9bf16</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fmaximumnum.450da99b68.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fmaximumnum.ll">fixed-vectors-fmaximumnum.ll</a><span class="dim">)</span></td><td class="l">max_v9bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+experimental-zvfbfa,+v -O1</code></td></tr><tr><td class="l">fixed-vectors-fmaximumnum.9746d866d3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fmaximumnum.ll">fixed-vectors-fmaximumnum.ll</a><span class="dim">)</span></td><td class="l">max_v2bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+experimental-zvfbfa,+v -O0</code></td></tr><tr><td class="l">fixed-vectors-vfadd-sdnode.9c00db3f44.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfadd-sdnode.ll">fixed-vectors-vfadd-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfadd_vv_v2bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-zvfbfa,+v -O2</code></td></tr><tr><td class="l">fixed-vectors-vfmadd-constrained-sdnode.6423f7305b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmadd-constrained-sdnode.ll">fixed-vectors-vfmadd-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfmadd_vv_v16bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v -O1</code></td></tr><tr><td class="l">fixed-vectors-vfptoi-constrained-sdnode.2bf12af195.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v2bf16_v2i8</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa,+v -O3</code></td></tr><tr><td class="l">fixed-vectors-vfsub-constrained-sdnode.7d1e4b56c9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfsub-constrained-sdnode.ll">fixed-vectors-vfsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfsub_vv_v2bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfhmin,+zvfhmin,+experimental-zvfbfa,+v -O3 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

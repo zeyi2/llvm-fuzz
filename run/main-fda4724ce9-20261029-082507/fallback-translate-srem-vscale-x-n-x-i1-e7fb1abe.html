@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">28 in 2 configs, 14 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vmclr.7eb1d6cc53.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmclr.ll">vmclr.ll</a><span class="dim">)</span> @intrinsic_vmclr_m_pseudo_nxv32i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/x4bfac1Ka">https://godbolt.org/z/x4bfac1Ka</a> (llc-assertions-trunk, checked 2026-10-25 18:43 UTC): <a href="https://godbolt.org/z/x4bfac1Ka">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global double
+
+; Function Attrs: nounwind
+define &lt;vscale x 32 x i1&gt; @intrinsic_vmclr_m_pseudo_nxv32i1(i64 %0) #0 {
+entry:
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load double, ptr @G.2, align 8
+  %C = fcmp ule double %LGV, f0x7FEFFFFFFFFFFFFF
+  %a = call &lt;vscale x 32 x i1&gt; @llvm.riscv.vmclr.nxv32i1.i64(i64 %0)
+  %B = srem &lt;vscale x 32 x i1&gt; %a, zeroinitializer
+  store &lt;vscale x 32 x i1&gt; %B, ptr poison, align 4
+  store i1 %C, ptr %A, align 1
+  ret &lt;vscale x 32 x i1&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 32 x i1&gt; @llvm.riscv.vmclr.nxv32i1.i64(i64) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>15</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem &lt;vscale x 32 x i1&gt; %a, zeroinitializer&#x27; (in function: intrinsic_vmclr_m_pseudo_nxv32i1)<br>warning: Instruction selection used fallback path for intrinsic_vmclr_m_pseudo_nxv32i1</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>15</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem &lt;vscale x 32 x i1&gt; %a, zeroinitializer&#x27; (in function: intrinsic_vmclr_m_pseudo_nxv32i1)
+warning: Instruction selection used fallback path for intrinsic_vmclr_m_pseudo_nxv32i1</pre>
+<h4>Occurrences (28) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">marith-vp.247b39fce3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/marith-vp.ll">marith-vp.ll</a><span class="dim">)</span></td><td class="l">and_nxv4i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">marith-vp.44aa0fe9e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/marith-vp.ll">marith-vp.ll</a><span class="dim">)</span></td><td class="l">and_nxv4i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">masked-load-int-e64.9a428826a9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/masked-load-int-e64.ll">masked-load-int-e64.ll</a><span class="dim">)</span></td><td class="l">masked_load_nxv4i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">masked-load-int-e64.f609bcc16d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/masked-load-int-e64.ll">masked-load-int-e64.ll</a><span class="dim">)</span></td><td class="l">masked_load_nxv4i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vlm.1e2ad974a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vlm.ll">vlm.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vlm_v_nxv32i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vlm.b9c1576490.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vlm.ll">vlm.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vlm_v_nxv32i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vlm.d381b9d78a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vlm.ll">vlm.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vlm_v_nxv32i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vlm.ea5cb60bb9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vlm.ll">vlm.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vlm_v_nxv32i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmand.306d09d508.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmand.ll">vmand.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmand_mm_nxv32i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmand.d80b0a84ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmand.ll">vmand.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmand_mm_nxv32i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmandn.38022ccfc9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmandn.ll">vmandn.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmandn_mm_nxv32i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmandn.70d68c14e2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmandn.ll">vmandn.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmandn_mm_nxv32i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmclr.7eb1d6cc53.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmclr.ll">vmclr.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmclr_m_pseudo_nxv32i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmclr.a13a1a9a78.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmclr.ll">vmclr.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmclr_m_pseudo_nxv32i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l">vmnand.a388ddaeb3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmnand.ll">vmnand.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmnand_mm_nxv32i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

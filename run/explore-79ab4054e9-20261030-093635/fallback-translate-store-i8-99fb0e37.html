@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: store i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: store i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: store i8 <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">hoist-global-addr-base.14fca8ee8b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span> @store_addi_addi_neg via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zba,+zicond,+zfinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@bar = external global [0 x i8], align 1
+
+define void @store_addi_addi_neg() {
+  store i8 10, ptr getelementptr inbounds ([0 x i8], ptr @bar, i32 0, i64 -4000), align 1
+  %C = fcmp ogt float 1.401300e-45, 4.200000e+01
+  store i1 %C, ptr poison, align 1
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zba,+zicond,+zfinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zba,+zicond,+zfinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: store: &#x27;  store i8 10, ptr getelementptr inbounds ([0 x i8], ptr @bar, i32 0, i64 -4000), align 1&#x27; (in function: store_addi_addi_neg)
+warning: Instruction selection used fallback path for store_addi_addi_neg</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">hoist-global-addr-base.14fca8ee8b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">store_addi_addi_neg</td><td class="l"><code>-mtriple=riscv32 -mattr=+zba,+zicond,+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">unaligned-load-store.1b245adacf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/unaligned-load-store.ll">unaligned-load-store.ll</a><span class="dim">)</span></td><td class="l">merge_stores_i8_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+a,+zhinx -O0</code></td></tr><tr><td class="l">unaligned-load-store.2f2043de94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/unaligned-load-store.ll">unaligned-load-store.ll</a><span class="dim">)</span></td><td class="l">merge_stores_i8_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbb -O3</code></td></tr><tr><td class="l">unaligned-load-store.f221393cbd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/unaligned-load-store.ll">unaligned-load-store.ll</a><span class="dim">)</span></td><td class="l">merge_stores_i8_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+zhinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

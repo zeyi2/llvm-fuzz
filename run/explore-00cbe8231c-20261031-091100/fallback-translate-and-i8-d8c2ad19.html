@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: and i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: and i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: and i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 7 test files, 40 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">cmov-branch-opt.cf00878856.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/cmov-branch-opt.ll">cmov-branch-opt.ll</a><span class="dim">)</span> @select_or_b via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zfinx,+zcb -O2 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+
+define i32 @select_or_b(i32 %A, i32 %B, i8 %cond) {
+entry:
+  %and = and i8 %cond, 1
+  %B1 = ashr i8 %and, %cond
+  %cmp10 = icmp ne i8 %and, 1
+  %0 = or i32 %B, %A
+  %1 = select i1 %cmp10, i32 %A, i32 %0
+  store i8 %B1, ptr @G, align 1
+  ret i32 %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zfinx,+zcb -O2 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zfinx,+zcb -O2 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: and: &#x27;  %and = and i8 %cond, 1&#x27; (in function: select_or_b)
+warning: Instruction selection used fallback path for select_or_b</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">avgfloors.ea71d470ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/avgfloors.ll">avgfloors.ll</a><span class="dim">)</span></td><td class="l">test_fixed_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">clmul.86d0909698.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zvbc,+zhinx,+zvkb -O2</code></td></tr><tr><td class="l">clmulh.718170b589.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx -O3</code></td></tr><tr><td class="l">cmov-branch-opt.484e1976b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/cmov-branch-opt.ll">cmov-branch-opt.ll</a><span class="dim">)</span></td><td class="l">select_or</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+short-forward-branch-ialu,+c,+zdinx -O2</code></td></tr><tr><td class="l">cmov-branch-opt.cf00878856.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/cmov-branch-opt.ll">cmov-branch-opt.ll</a><span class="dim">)</span></td><td class="l">select_or_b</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zfinx,+zcb -O2 -code-model=medium</code></td></tr><tr><td class="l">idiv_large.b7d885f1.6940558dc0.ll <span class="dim">(mutant of</span> idiv_large.b7d885f1.ll<span class="dim">)</span></td><td class="l">udiv_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zicsr,+zba -O1 -code-model=medium</code></td></tr><tr><td class="l">srem-vector-lkk.fd55f919f8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/srem-vector-lkk.ll">srem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_srem_power_of_two</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O2</code></td></tr><tr><td class="l">unfold-masked-merge-scalar-variablemask.cefc06cb1b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/unfold-masked-merge-scalar-variablemask.ll">unfold-masked-merge-scalar-variablemask.ll</a><span class="dim">)</span></td><td class="l">out8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zhinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

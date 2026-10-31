@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>About</title>
+<link rel="stylesheet" href="style.css" />
+<nav>
+<a href="index.html">Index</a> |
+<a href="about.html">About</a>
+</nav>
+<hr />
+<h3>About:</h3>
+<p>Differential testing of the two RISC-V instruction selectors. For every <code>llc</code> RUN line in
+<code>llvm/test/CodeGen/RISCV/*.ll</code>, the input is compiled with <code>-global-isel=0</code> and with
+<code>-global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code>. Mutants come from
+<code>ir-mutate</code>, a standalone driver for <code>llvm/lib/FuzzMutate</code>.</p>
+<p>Function statuses: <b>identical</b> (same asm after label normalization), <b>different</b> (same instruction
+count), <b>better</b>/<b>worse</b> (GlobalISel emits fewer/more instructions), <b>fallback</b> (GlobalISel gave
+up and SelectionDAG was used). <b>crash</b> counts configurations where GlobalISel llc failed but SelectionDAG
+succeeded.</p>
+<p><b>miscompile</b> means the generated code computes something else. Functions whose assembly differs are
+sanitized (<code>ir-mutate -sanitize</code> replaces undef/poison, drops poison-generating and fast-math
+flags, and guards divisors and shift amounts), linked into a freestanding harness
+(<code>ir-mutate -harness</code>) that calls them on 64 pseudo-random argument tuples and hashes the return
+value and a memory arena, and run under qemu-user. The function is reported only when two SelectionDAG builds
+at different <code>-O</code> levels agree and GlobalISel differs, which filters out results that still depend
+on undefined behaviour or on the frame layout. Compiler Explorer compiles RISC-V but cannot run it, so
+miscompiles have no remote verdict.</p>
+<p>Fallback categories are normalized: vector element counts become <code>N</code> (<code>&lt;4 x s32&gt;</code>
+and <code>&lt;8 x s32&gt;</code> are the same gap) and non-standard scalar widths are bucketed to the next
+standard width with a trailing <code>~</code>. <b>NEW</b> marks a category no earlier run reported;
+<b>M</b> marks one that only mutants reach. The explore pass keeps only a few occurrences per category and
+counts the rest, which is what a <code>*</code> on a count means.</p>
+<p>Snippets are the smallest candidate that reproduces the finding with the local llc: the single function
+extracted with <code>llvm-extract</code> (for crashes, the first function that reproduces), optionally
+reduced with <code>llvm-reduce</code>. Compiler Explorer links are created only after compiling the snippet
+remotely on every pane in the link; the verdict compares the remote result with the local one.
+"reproduces" means the same category on trunk; anything else usually means trunk moved on.</p>
+<p>Within a run, findings are ordered miscompile, crash, fallback (categories only mutants reach first),
+regression, and the leading <code>--detail-limit</code> of them get a snippet and a page; the rest are
+listed in the run's table only. Older runs keep only their summary and findings table; snippets and
+occurrences are kept for the most recent runs of each label. Source: <a href="https://github.com/zeyi2/llvm-fuzz">zeyi2/llvm-fuzz</a>.</p>
+<pre>python3 isel_diff.py --mutate 5 --exec --exec-originals-only
+python3 isel_diff.py --explore --time-budget 60 --exec --exec-rate 0.1 --out out-explore
+python3 fuzz_site.py [--label NAME] [--reduce] [--no-godbolt]</pre>
+
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

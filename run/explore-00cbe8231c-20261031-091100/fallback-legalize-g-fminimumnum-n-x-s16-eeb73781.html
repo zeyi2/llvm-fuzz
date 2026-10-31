@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FMINIMUMNUM &lt;N x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FMINIMUMNUM &lt;N x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FMINIMUMNUM &lt;N x s16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fminimumnum.00ed0e5500.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fminimumnum.ll">fixed-vectors-fminimumnum.ll</a><span class="dim">)</span> @min_v9f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+xtheadba -O1 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;9 x half&gt; @min_v9f16(&lt;9 x half&gt; %a, &lt;9 x half&gt; %b) {
+entry:
+  %A = alloca half, align 2
+  store half poison, ptr %A, align 2
+  %B = fdiv half 6.550400e+04, +inf
+  %c = call &lt;9 x half&gt; @llvm.minimumnum.v9f16(&lt;9 x half&gt; %a, &lt;9 x half&gt; %b)
+  store half %B, ptr %A, align 2
+  ret &lt;9 x half&gt; %c
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;9 x half&gt; @llvm.minimumnum.v9f16(&lt;9 x half&gt;, &lt;9 x half&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+xtheadba -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+xtheadba -O1 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(&lt;9 x s16&gt;) = G_FMINIMUMNUM %0:_, %1:_ (in function: min_v9f16)
+warning: Instruction selection used fallback path for min_v9f16</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fminimumnum.00ed0e5500.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fminimumnum.ll">fixed-vectors-fminimumnum.ll</a><span class="dim">)</span></td><td class="l">min_v9f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+xtheadba -O1 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-fminimumnum.155a9a33a6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fminimumnum.ll">fixed-vectors-fminimumnum.ll</a><span class="dim">)</span></td><td class="l">min_v16f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+zicsr -O3</code></td></tr><tr><td class="l">fixed-vectors-fminimumnum.4a5972bc9e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fminimumnum.ll">fixed-vectors-fminimumnum.ll</a><span class="dim">)</span></td><td class="l">min_v8f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+c -O3</code></td></tr><tr><td class="l">fixed-vectors-fminimumnum.7417bd1fc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fminimumnum.ll">fixed-vectors-fminimumnum.ll</a><span class="dim">)</span></td><td class="l">min_v8f16</td><td class="l"><code>--mtriple=riscv64-linux-gnu -mattr=+v,+zvfbfmin,+zve32x -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

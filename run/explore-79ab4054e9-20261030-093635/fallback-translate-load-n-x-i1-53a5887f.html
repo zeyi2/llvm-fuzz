@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load &lt;N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load &lt;N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load &lt;N x i1&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 6 test files, 23 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-setcc-int-vp-mask.67bfd6af4c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-setcc-int-vp-mask.ll">fixed-vectors-setcc-int-vp-mask.ll</a><span class="dim">)</span> @icmp_uge_vv_v2i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;2 x i1&gt;
+
+define &lt;2 x i1&gt; @icmp_uge_vv_v2i1(&lt;2 x i1&gt; %va, &lt;2 x i1&gt; %vb, &lt;2 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load &lt;2 x i1&gt;, ptr @G.1, align 1
+  %C = icmp ne &lt;2 x i1&gt; %m, %LGV
+  %v = icmp uge &lt;2 x i1&gt; %va, %vb
+  store &lt;2 x i1&gt; %C, ptr @G.1, align 1
+  ret &lt;2 x i1&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV = load &lt;2 x i1&gt;, ptr @G.1, align 1&#x27; (in function: icmp_uge_vv_v2i1)
+warning: Instruction selection used fallback path for icmp_uge_vv_v2i1</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cttz-elts-scalarize.ce7ab077ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/cttz-elts-scalarize.ll">cttz-elts-scalarize.ll</a><span class="dim">)</span></td><td class="l">v4i1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-setcc-int-vp-mask.67bfd6af4c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-setcc-int-vp-mask.ll">fixed-vectors-setcc-int-vp-mask.ll</a><span class="dim">)</span></td><td class="l">icmp_uge_vv_v2i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.61d2a06b3c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_smax_v2i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vsra-vp.24fd9d863b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vsra-vp.ll">fixed-vectors-vsra-vp.ll</a><span class="dim">)</span></td><td class="l">vsra_vi_v16i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">fp-fcanonicalize.37b8dccb92.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16_nnan</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">rvp-mul-parts-acc-fold.d5a1fcdf2b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvp-mul-parts-acc-fold.ll">rvp-mul-parts-acc-fold.ll</a><span class="dim">)</span></td><td class="l">maccu_w01</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zfinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

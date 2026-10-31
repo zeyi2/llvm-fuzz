@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fsub bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fsub bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fsub bfloat <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 10 configs, 10 test files, 1013 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-fence.f655069af3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span> @fence_singlethread_release via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zvkb -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global bfloat
+
+; Function Attrs: nounwind
+define void @fence_singlethread_release() #0 {
+  %A = alloca bfloat, align 2
+  store bfloat poison, ptr %A, align 2
+  %G = getelementptr &lt;4 x i32&gt;, ptr %A, i128 0
+  %LGV = load bfloat, ptr @G.1, align 2
+  %B = fsub bfloat %LGV, 3.389530e+38
+  fence syncscope(&quot;singlethread&quot;) release
+  store bfloat %B, ptr %G, align 2
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zvkb -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zvkb -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fsub: &#x27;  %B = fsub bfloat %LGV, 3.389530e+38&#x27; (in function: fence_singlethread_release)
+warning: Instruction selection used fallback path for fence_singlethread_release</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-fence.f655069af3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span></td><td class="l">fence_singlethread_release</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zvkb -O2</code></td></tr><tr><td class="l">attributes-qc.3f47e9c33d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/attributes-qc.ll">attributes-qc.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcicli -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fround-constrained-sdnode.cea75f3984.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fround-constrained-sdnode.ll">fixed-vectors-fround-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">round_v4f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v -O2</code></td></tr><tr><td class="l">half-convert.c31a495fec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_ui_h_sat</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvkb -O3 -code-model=small</code></td></tr><tr><td class="l">lround-sdnode.abd10d7f94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/lround-sdnode.ll">lround-sdnode.ll</a><span class="dim">)</span></td><td class="l">lround_nxv2f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zvbb -O1</code></td></tr><tr><td class="l">vfncvtbf16-f-f.ddeabe46ad.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vfncvtbf16-f-f.ll">vfncvtbf16-f-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvtbf16_f.f.w_nxv1bf16_nxv1f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfbfmin -O2</code></td></tr><tr><td class="l">vminu-vp.c89c7285f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vminu-vp.ll">vminu-vp.ll</a><span class="dim">)</span></td><td class="l">vminu_vx_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zfhmin -O2</code></td></tr><tr><td class="l">vp-vector-interleaved-access.2005ed2791.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-vector-interleaved-access.ll">vp-vector-interleaved-access.ll</a><span class="dim">)</span></td><td class="l">store_factor2_v2</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.2cf6d6b0a8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv2f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zicond,+zve64d -O0</code></td></tr><tr><td class="l">vpstore.05f0139539.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv1bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

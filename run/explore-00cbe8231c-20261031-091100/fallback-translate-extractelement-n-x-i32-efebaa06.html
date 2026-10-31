@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: extractelement &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: extractelement &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: extractelement &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 20 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">reduction-formation.46e9ab5c9d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a><span class="dim">)</span> @reduce_sum_4xi32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x i1&gt;
+
+define i32 @reduce_sum_4xi32(&lt;4 x i32&gt; %v) {
+  %e0 = extractelement &lt;4 x i32&gt; %v, i32 0
+  %e1 = extractelement &lt;4 x i32&gt; %v, i32 1
+  %e2 = extractelement &lt;4 x i32&gt; %v, i32 2
+  %e3 = extractelement &lt;4 x i32&gt; %v, i32 3
+  %add0 = add i32 %e0, %e1
+  %add1 = add i32 %add0, %e2
+  %add2 = add i32 %add1, %e3
+  %C = icmp ugt &lt;4 x i32&gt; %v, splat (i32 2147483647)
+  store &lt;4 x i1&gt; %C, ptr @G.1, align 1
+  ret i32 %add2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: extractelement: &#x27;  %e0 = extractelement &lt;4 x i32&gt; %v, i32 0&#x27; (in function: reduce_sum_4xi32)
+warning: Instruction selection used fallback path for reduce_sum_4xi32</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp128.a9de5748.561232cfb4.ll <span class="dim">(mutant of</span> fp128.a9de5748.ll<span class="dim">)</span></td><td class="l">asin</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">memcpy.7a0f4af3.39d01372f8.ll <span class="dim">(mutant of</span> memcpy.7a0f4af3.ll<span class="dim">)</span></td><td class="l">unaligned_memcpy31</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">reduction-formation.46e9ab5c9d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a><span class="dim">)</span></td><td class="l">reduce_sum_4xi32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr><tr><td class="l">rv64zimop-intrinsic.866daeca.5551c9c4fa.ll <span class="dim">(mutant of</span> rv64zimop-intrinsic.866daeca.ll<span class="dim">)</span></td><td class="l">moprr0_32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zimop,+zhinx,+zfinx -O3 -code-model=small</code></td></tr><tr><td class="l">umulh.4c61dc43.b46cd808b4.ll <span class="dim">(mutant of</span> umulh.4c61dc43.ll<span class="dim">)</span></td><td class="l">umulh_v4i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx,+zicsr -O2</code></td></tr><tr><td class="l">umulh.5d5caa00.cbc43bd168.ll <span class="dim">(mutant of</span> umulh.5d5caa00.ll<span class="dim">)</span></td><td class="l">umulh_v16i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zihintpause,+m -O1 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vslideup.9a0ed36d1a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vslideup.ll">vslideup.ll</a><span class="dim">)</span> @intrinsic_vslideup_mask_vx_nxv2i64_nxv2i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+xtheadba -O1 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Ko95h46MW">https://godbolt.org/z/Ko95h46MW</a> (llc-assertions-trunk, checked 2026-10-31 12:54 UTC): <a href="https://godbolt.org/z/Ko95h46MW">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 2 x i64&gt; @intrinsic_vslideup_mask_vx_nxv2i64_nxv2i64(&lt;vscale x 2 x i64&gt; %0, &lt;vscale x 2 x i64&gt; %1, i64 %2, &lt;vscale x 2 x i1&gt; %3, i64 %4) #0 {
+entry:
+  %B = urem i64 %4, -1
+  %a = call &lt;vscale x 2 x i64&gt; @llvm.riscv.vslideup.mask.nxv2i64.i64(&lt;vscale x 2 x i64&gt; %0, &lt;vscale x 2 x i64&gt; %1, i64 %B, &lt;vscale x 2 x i1&gt; %3, i64 %4, i64 0)
+  ret &lt;vscale x 2 x i64&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 2 x i64&gt; @llvm.riscv.vslideup.mask.nxv2i64.i64(&lt;vscale x 2 x i64&gt;, &lt;vscale x 2 x i64&gt;, i64, &lt;vscale x 2 x i1&gt;, i64, i64 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+xtheadba -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+xtheadba -O1 -code-model=small -global-isel=0</code></td><td>0</td><td>7</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+xtheadba -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+xtheadba -O1 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+xtheadba -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISC-V Assembly Printer&#x27; on function &#x27;@intrinsic_vslideup_mask_vx_nxv2i64_nxv2i64&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000556fd5f97c0b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000556fd5f94ab1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000556fd5f9868b
+3  libc.so.6 0x00007f401f445330
+4  libc.so.6 0x00007f401f49ec0c pthread_kill + 284
+5  libc.so.6 0x00007f401f44527e gsignal + 30
+6  libc.so.6 0x00007f401f4288ff abort + 223
+7  llc       0x0000556fd5edb94d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x0000556fd5edb796
+9  llc       0x0000556fd6d327fe
+10 llc       0x0000556fd726cccb
+11 llc       0x0000556fd727e007 llvm::AsmPrinter::emitFunctionBody() + 4855
+12 llc       0x0000556fd726a8c7
+13 llc       0x0000556fd6568c7d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+14 llc       0x0000556fd62f20b7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x0000556fd62fa5d2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x0000556fd62f2e60 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x0000556fd5f9f2c7 llcMain + 12151
+18 llc       0x0000556fd5edb3af main + 63
+19 libc.so.6 0x00007f401f42a1ca
+20 libc.so.6 0x00007f401f42a28b __libc_start_main + 139
+21 llc       0x0000556fd5edb2a5 _start + 37</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vnsra.2d16b6179c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vnsra.ll">vnsra.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xtheadba -O3</code></td></tr><tr><td class="l">vslideup.9a0ed36d1a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vslideup.ll">vslideup.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+xtheadba -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

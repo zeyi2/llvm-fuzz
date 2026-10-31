@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: getelementptr float</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: getelementptr float</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: getelementptr float </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">40 in 15 configs, 5 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-asm-constraint.ll">zdinx-asm-constraint.ll</a> @zfinx_asm via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinx</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define dso_local void @zfinx_asm(ptr noundef writeonly captures(none) %a, float noundef %b, float noundef %c) #0 {
+entry:
+  %arrayidx = getelementptr inbounds float, ptr %a, i32 1
+  %0 = tail call float asm &quot;fsgnjx.s $0, $1, $2&quot;, &quot;=r,r,r&quot;(float %b, float %c)
+  store float %0, ptr %arrayidx, align 8
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinx -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinx -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: getelementptr: &#x27;  %arrayidx = getelementptr inbounds float, ptr %a, i32 1&#x27; (in function: zfinx_asm)
+warning: Instruction selection used fallback path for zfinx_asm</pre>
+<h4>Occurrences (40) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i8_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i16_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i8_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfhmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i16_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfhmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfhmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i8_nxv8f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i16_nxv8f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i8_nxv8f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zvfhmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8i16_nxv8f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zvfhmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mgather-sdnode.ll">mgather-sdnode.ll</a></td><td class="l">mgather_baseidx_nxv8f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zvfhmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mscatter-sdnode.ll">mscatter-sdnode.ll</a></td><td class="l">mscatter_baseidx_nxv8i8_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mscatter-sdnode.ll">mscatter-sdnode.ll</a></td><td class="l">mscatter_baseidx_nxv8i16_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/mscatter-sdnode.ll">mscatter-sdnode.ll</a></td><td class="l">mscatter_baseidx_nxv8f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

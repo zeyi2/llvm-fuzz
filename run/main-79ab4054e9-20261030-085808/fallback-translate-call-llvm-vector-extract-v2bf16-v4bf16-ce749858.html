@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vector.extract.v2bf16.v4bf16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vector.extract.v2bf16.v4bf16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vector.extract.v2bf16.v4bf16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-extract-subvector.13b7dcde13.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span> @extract_v2bf16_v4bf16_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;2 x i64&gt;
+@G.3 = external global &lt;2 x i1&gt;
+
+define void @extract_v2bf16_v4bf16_2(ptr %x, ptr %y) {
+  %LGV = load &lt;2 x i64&gt;, ptr @G.2, align 16
+  %C = icmp ult &lt;2 x i64&gt; splat (i64 42), %LGV
+  %a = load &lt;4 x bfloat&gt;, ptr %x, align 8
+  %c = call &lt;2 x bfloat&gt; @llvm.vector.extract.v2bf16.v4bf16(&lt;4 x bfloat&gt; %a, i64 2)
+  store &lt;2 x bfloat&gt; %c, ptr %y, align 4
+  store &lt;2 x i1&gt; %C, ptr @G.3, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x bfloat&gt; @llvm.vector.extract.v2bf16.v4bf16(&lt;4 x bfloat&gt;, i64 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vector.extract.v2bf16.v4bf16: &#x27;  %c = call &lt;2 x bfloat&gt; @llvm.vector.extract.v2bf16.v4bf16(&lt;4 x bfloat&gt; %a, i64 2)&#x27; (in function: extract_v2bf16_v4bf16_2)
+warning: Instruction selection used fallback path for extract_v2bf16_v4bf16_2</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-extract-subvector.13b7dcde13.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-extract-subvector.7882929941.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-extract-subvector.79f31f7c4c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-extract-subvector.7be8f095cc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-extract-subvector.869dac019b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-extract-subvector.9081e8d472.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfh,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-extract-subvector.963b0a295c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfh,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-extract-subvector.efb7e0b04f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2bf16_v4bf16_2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

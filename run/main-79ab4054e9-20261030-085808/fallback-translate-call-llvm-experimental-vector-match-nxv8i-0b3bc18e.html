@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.vector.match.nxv8i16.v8i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.vector.match.nxv8i16.v8i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.vector.match.nxv8i16.v8i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">intrinsic-vector-match.2502e19861.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/intrinsic-vector-match.ll">intrinsic-vector-match.ll</a><span class="dim">)</span> @match_nxv8i16_v8i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 8 x i1&gt; @match_nxv8i16_v8i16(&lt;vscale x 8 x i16&gt; %op1, &lt;8 x i16&gt; %op2, &lt;vscale x 8 x i1&gt; %mask) {
+  %A = alloca &lt;vscale x 8 x i1&gt;, align 1
+  store &lt;vscale x 8 x i1&gt; poison, ptr %A, align 1
+  %r = tail call &lt;vscale x 8 x i1&gt; @llvm.experimental.vector.match.nxv8i16.v8i16(&lt;vscale x 8 x i16&gt; %op1, &lt;8 x i16&gt; %op2, &lt;vscale x 8 x i1&gt; %mask)
+  %C = icmp sle &lt;vscale x 8 x i1&gt; %mask, %r
+  store &lt;vscale x 8 x i1&gt; %C, ptr %A, align 1
+  ret &lt;vscale x 8 x i1&gt; %r
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 8 x i1&gt; @llvm.experimental.vector.match.nxv8i16.v8i16(&lt;vscale x 8 x i16&gt;, &lt;8 x i16&gt;, &lt;vscale x 8 x i1&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.vector.match.nxv8i16.v8i16: &#x27;  %r = tail call &lt;vscale x 8 x i1&gt; @llvm.experimental.vector.match.nxv8i16.v8i16(&lt;vscale x 8 x i16&gt; %op1, &lt;8 x i16&gt; %op2, &lt;vscale x 8 x i1&gt; %mask)&#x27; (in function: match_nxv8i16_v8i16)
+warning: Instruction selection used fallback path for match_nxv8i16_v8i16</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">intrinsic-vector-match.2502e19861.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/intrinsic-vector-match.ll">intrinsic-vector-match.ll</a><span class="dim">)</span></td><td class="l">match_nxv8i16_v8i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l">intrinsic-vector-match.ba258da737.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/intrinsic-vector-match.ll">intrinsic-vector-match.ll</a><span class="dim">)</span></td><td class="l">match_nxv8i16_v8i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

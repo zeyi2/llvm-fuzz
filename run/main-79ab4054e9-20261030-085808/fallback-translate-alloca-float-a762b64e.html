@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca float</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca float</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca float <span class="new" title="never reported by any earlier run">NEW</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">19 in 9 configs, 9 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-mem.ll">float-mem.ll</a> @flw_stack via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare void @notdead(ptr)
+
+; Function Attrs: nounwind
+define dso_local float @flw_stack(float %a) #0 {
+  %1 = alloca float, align 4
+  call void @notdead(ptr %1)
+  %2 = load float, ptr %1, align 4
+  %3 = fadd float %2, %a
+  ret float %3
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %1 = alloca float, align 4&#x27; (in function: flw_stack)
+warning: Instruction selection used fallback path for flw_stack</pre>
+<h4>Occurrences (19) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-mem.ll">float-mem.ll</a></td><td class="l">flw_stack</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-mem.ll">float-mem.ll</a></td><td class="l">flw_stack</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-arith-strict.f4e4db7c5d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-arith-strict.ll">double-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fmin_d</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">double-arith-strict.ff18c88537.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-arith-strict.ll">double-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fmin_d</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">float-fcmp-strict.24f2d623ba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-fcmp-strict.ll">float-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_one</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">float-fcmp-strict.9fd9e85eff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-fcmp-strict.ll">float-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_one</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">float-isnan.066a5d7cc6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-isnan.ll">float-isnan.ll</a><span class="dim">)</span></td><td class="l">float_is_nan</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -target-abi ilp32 -verify-machineinstrs</code></td></tr><tr><td class="l">float-isnan.36964a7812.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-isnan.ll">float-isnan.ll</a><span class="dim">)</span></td><td class="l">float_is_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -target-abi lp64 -verify-machineinstrs</code></td></tr><tr><td class="l">float-maximum-minimum.2d413157f2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-maximum-minimum.ll">float-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_op_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-maximum-minimum.632f2db982.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-maximum-minimum.ll">float-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-maximum-minimum.92e40c5a04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-maximum-minimum.ll">float-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">float-maximum-minimum.b500d28661.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-maximum-minimum.ll">float-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_op_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">float-round-conv-sat.23bbda5300.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-round-conv-sat.ll">float-round-conv-sat.ll</a><span class="dim">)</span></td><td class="l">test_rint_si32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">float-round-conv-sat.c007e521ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-round-conv-sat.ll">float-round-conv-sat.ll</a><span class="dim">)</span></td><td class="l">test_rint_si32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-round-conv.3779185b59.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-round-conv.ll">float-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_round_ui64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

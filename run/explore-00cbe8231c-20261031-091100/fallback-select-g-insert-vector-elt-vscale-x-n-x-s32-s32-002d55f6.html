@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_INSERT_VECTOR_ELT &lt;vscale x N x s32&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 76 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">insertelt-fp.25366f42b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/insertelt-fp.ll">insertelt-fp.ll</a><span class="dim">)</span> @insertelt_nxv8f32_imm via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zfbfmin,+zvfh,+zvfbfmin,+v,+zve64d -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 8 x float&gt; @insertelt_nxv8f32_imm(&lt;vscale x 8 x float&gt; %v, float %elt) {
+  %B = fdiv float %elt, f0x7F7FFFFF
+  %r = insertelement &lt;vscale x 8 x float&gt; %v, float %elt, i32 3
+  store float %B, ptr poison, align 4
+  ret &lt;vscale x 8 x float&gt; %r
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zfbfmin,+zvfh,+zvfbfmin,+v,+zve64d -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zfbfmin,+zvfh,+zvfbfmin,+v,+zve64d -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %4:vrb(&lt;vscale x 8 x s32&gt;) = G_INSERT_VECTOR_ELT %0:vrb, %7:gprb(s32), %5:gprb(s32) (in function: insertelt_nxv8f32_imm)
+warning: Instruction selection used fallback path for insertelt_nxv8f32_imm</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">insertelt-fp.25366f42b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/insertelt-fp.ll">insertelt-fp.ll</a><span class="dim">)</span></td><td class="l">insertelt_nxv8f32_imm</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zfbfmin,+zvfh,+zvfbfmin,+v,+zve64d -O1</code></td></tr><tr><td class="l">vfmul-sdnode.82b984fe0a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfmul-sdnode.ll">vfmul-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfmul_vv_nxv1f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -O0</code></td></tr><tr><td class="l">vl-opt.166a9a1983.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vl-opt.ll">vl-opt.ll</a><span class="dim">)</span></td><td class="l">vlmax_and_imm_vl_with_ta</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zve32x -O0</code></td></tr><tr><td class="l">vmv.v.v-peephole.5e55db7190.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vmv.v.v-peephole.ll">vmv.v.v-peephole.ll</a><span class="dim">)</span></td><td class="l">vadd_same_passthru</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zbkb -O2</code></td></tr><tr><td class="l">vunzipo.c3410f85a3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vunzipo.ll">vunzipo.ll</a><span class="dim">)</span></td><td class="l">test_vunzipo_mask_i32mf2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+experimental-zvzip -O0 -code-model=small</code></td></tr><tr><td class="l">xandesvdot-vd4dots.528ebc90c3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/xandesvdot-vd4dots.ll">xandesvdot-vd4dots.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vd4dots_vv_nxv4i32_nxv16i8_nxv16i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zve64x,+xandesvdot,+zve32x -O2 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

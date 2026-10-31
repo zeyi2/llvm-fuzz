@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (DstTy.isScalar() &amp;&amp; SrcTy.isScalar() &amp;&amp; &quot;invalid extend/trunc&quot;), function validateTruncExt, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (DstTy.isScalar() &amp;&amp; SrcTy.isScalar() &amp;&amp; &quot;invalid extend/trunc&quot;), function validateTruncExt, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (DstTy.isScalar() &amp;&amp; SrcTy.isScalar() &amp;&amp; &quot;invalid extend/trunc&quot;), function validateTruncExt, file MachineIRBuilder.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">cheri-global-cap-init.a0fcad85a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/cheri-global-cap-init.ll">cheri-global-cap-init.ll</a><span class="dim">)</span> @f via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=l64pc128 -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;8 x i8&gt;
+@G.1 = external global &lt;4 x float&gt;
+@G.2 = external global half
+
+define i64 @f(&lt;4 x float&gt; %0, i1 %1, i1 %2) {
+BB:
+  %LGV4 = load half, ptr @G.2, align 2
+  %LGV1 = load &lt;4 x float&gt;, ptr @G.1, align 16
+  %B3 = add i128 18446744073709551616, -1
+  %LGV = load &lt;8 x i8&gt;, ptr @G, align 8
+  %RP = alloca i64, align 8
+  %B = xor &lt;8 x i8&gt; splat (i8 1), %LGV
+  %3 = load i64, ptr %RP, align 4
+  store &lt;8 x i8&gt; %B, ptr @G, align 8
+  %C5 = fcmp une half +qnan, %LGV4
+  %C2 = fcmp ueq &lt;4 x float&gt; %0, %LGV1
+  store i1 %C5, ptr %RP, align 1
+  store &lt;4 x i1&gt; %C2, ptr poison, align 1
+  store i128 %B3, ptr %RP, align 4
+  ret i64 %3
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=l64pc128 -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=l64pc128 -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">note: &#x27;l64pc128&#x27; ABI is only supported for RVY targets (ignoring target-abi)
+llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1275: void llvm::MachineIRBuilder::validateTruncExt(const LLT, const LLT, bool): Assertion `DstTy.isScalar() &amp;&amp; SrcTy.isScalar() &amp;&amp; &quot;invalid extend/trunc&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -target-abi=l64pc128 -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@f&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055ae77dc80cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055ae77dc4f71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055ae77dc8b4b
+3  libc.so.6 0x00007f252dc45330
+4  libc.so.6 0x00007f252dc9ec0c pthread_kill + 284
+5  libc.so.6 0x00007f252dc4527e gsignal + 30
+6  libc.so.6 0x00007f252dc288ff abort + 223
+7  libc.so.6 0x00007f252dc2881b
+8  libc.so.6 0x00007f252dc3b517
+9  llc       0x000055ae79f74a0a llvm::MachineIRBuilder::validateTruncExt(llvm::LLT, llvm::LLT, bool) + 874
+10 llc       0x000055ae79f758d2 llvm::MachineIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 3314
+11 llc       0x000055ae79e8912f llvm::CSEMIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 2991
+12 llc       0x000055ae79f73351 llvm::MachineIRBuilder::buildTrunc(llvm::DstOp const&amp;, llvm::SrcOp const&amp;, std::optional&lt;unsigned int&gt;) + 33
+13 llc       0x000055ae79e824e3 llvm::CallLowering::IncomingValueHandler::assignValueToReg(llvm::Register, llvm::Register, llvm::CCValAssign const&amp;, llvm::ISD::ArgFlagsTy) + 899
+14 llc       0x000055ae79e7f462 llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 2866
+15 llc       0x000055ae79002e9c
+16 llc       0x000055ae79eefd13 llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 3507
+17 llc       0x000055ae79ef0fad llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+18 llc       0x000055ae783918cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+19 llc       0x000055ae78121f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+20 llc       0x000055ae7812a452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+21 llc       0x000055ae78122ce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+22 llc       0x000055ae77dcf787 llcMain + 12151
+23 llc       0x000055ae77d0bb6f main + 63
+24 libc.so.6 0x00007f252dc2a1ca
+25 libc.so.6 0x00007f252dc2a28b __libc_start_main + 139
+26 llc       0x000055ae77d0ba65 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cheri-global-cap-init.789d4b1386.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/cheri-global-cap-init.ll">cheri-global-cap-init.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=l64pc128 -mattr=+f -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">cheri-global-cap-init.a0fcad85a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/cheri-global-cap-init.ll">cheri-global-cap-init.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=l64pc128 -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">cheri-global-cap-init.f21778db0e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/cheri-global-cap-init.ll">cheri-global-cap-init.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=l64pc128 -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

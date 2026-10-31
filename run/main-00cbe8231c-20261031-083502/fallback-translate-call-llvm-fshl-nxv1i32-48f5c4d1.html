@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.fshl.nxv1i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.fshl.nxv1i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.fshl.nxv1i32 </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">20 in 4 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vror-sdnode.ll">vror-sdnode.ll</a> @vror_vi_rotl_nxv1i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 1 x i32&gt; @vror_vi_rotl_nxv1i32(&lt;vscale x 1 x i32&gt; %a) {
+  %x = call &lt;vscale x 1 x i32&gt; @llvm.fshl.nxv1i32(&lt;vscale x 1 x i32&gt; %a, &lt;vscale x 1 x i32&gt; %a, &lt;vscale x 1 x i32&gt; splat (i32 1))
+  ret &lt;vscale x 1 x i32&gt; %x
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 1 x i32&gt; @llvm.fshl.nxv1i32(&lt;vscale x 1 x i32&gt;, &lt;vscale x 1 x i32&gt;, &lt;vscale x 1 x i32&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.fshl.nxv1i32: &#x27;  %x = call &lt;vscale x 1 x i32&gt; @llvm.fshl.nxv1i32(&lt;vscale x 1 x i32&gt; %a, &lt;vscale x 1 x i32&gt; %a, &lt;vscale x 1 x i32&gt; splat (i32 1))&#x27; (in function: vror_vi_rotl_nxv1i32)
+warning: Instruction selection used fallback path for vror_vi_rotl_nxv1i32</pre>
+<h4>Occurrences (20) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fshr-fshl.ll">fshr-fshl.ll</a></td><td class="l">fshl</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fshr-fshl.ll">fshr-fshl.ll</a></td><td class="l">fshl</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vv_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vx_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vv_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvkb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vx_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvkb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vv_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vx_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vv_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvkb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vrol-sdnode.ll">vrol-sdnode.ll</a></td><td class="l">vrol_vx_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvkb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vror-sdnode.ll">vror-sdnode.ll</a></td><td class="l">vror_vi_rotl_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vror-sdnode.ll">vror-sdnode.ll</a></td><td class="l">vror_vi_rotl_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvkb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vror-sdnode.ll">vror-sdnode.ll</a></td><td class="l">vror_vi_rotl_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vror-sdnode.ll">vror-sdnode.ll</a></td><td class="l">vror_vi_rotl_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvkb -verify-machineinstrs</code></td></tr><tr><td class="l">fshr-fshl.0034dd1356.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fshr-fshl.ll">fshr-fshl.ll</a><span class="dim">)</span></td><td class="l">fshl</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

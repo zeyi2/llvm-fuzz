@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca bfloat <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 120 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-widening-add-acc.0e8f5ae3c1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvp-widening-add-acc.ll">rvp-widening-add-acc.ll</a><span class="dim">)</span> @test_pwaddau_v2i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbs,+zdinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i32&gt; @test_pwaddau_v2i16(&lt;2 x i32&gt; %rd, &lt;2 x i16&gt; %a, &lt;2 x i16&gt; %b) {
+  %A = alloca bfloat, align 2
+  store bfloat poison, ptr %A, align 2
+  %ext.a = zext &lt;2 x i16&gt; %a to &lt;2 x i32&gt;
+  %ext.b = zext &lt;2 x i16&gt; %b to &lt;2 x i32&gt;
+  %C = icmp eq &lt;2 x i32&gt; %ext.b, %ext.a
+  %sum.a = add &lt;2 x i32&gt; %rd, %ext.a
+  %sum.b = add &lt;2 x i32&gt; %sum.a, %ext.b
+  %B = fsub bfloat 0.000000e+00, +qnan
+  store bfloat %B, ptr %A, align 2
+  store &lt;2 x i1&gt; %C, ptr poison, align 1
+  ret &lt;2 x i32&gt; %sum.b
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbs,+zdinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbs,+zdinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca bfloat, align 2&#x27; (in function: test_pwaddau_v2i16)
+warning: Instruction selection used fallback path for test_pwaddau_v2i16</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.b38dfcd5c0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O1 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.d921f6c6.6ec841c855.ll <span class="dim">(mutant of</span> fastcc-without-f-reg.d921f6c6.ll<span class="dim">)</span></td><td class="l">f</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">float-arith.1e7e72c9df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-arith.ll">float-arith.ll</a><span class="dim">)</span></td><td class="l">fmadd_s_contract</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O0</code></td></tr><tr><td class="l">fp128.7c781804aa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">test_load_and_cmp</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">prefetch.d688094f51.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/prefetch.ll">prefetch.ll</a><span class="dim">)</span></td><td class="l">test_prefetch_instruction_locality_1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zicbop,+zihintntl,+zhinx,+zicsr -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-widening-add-acc.0e8f5ae3c1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvp-widening-add-acc.ll">rvp-widening-add-acc.ll</a><span class="dim">)</span></td><td class="l">test_pwaddau_v2i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbs,+zdinx -O2</code></td></tr><tr><td class="l">xaluo.0bc5e4f7.a7e21e134e.ll <span class="dim">(mutant of</span> xaluo.0bc5e4f7.ll<span class="dim">)</span></td><td class="l">smulo.not.i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zba,+zfinx,+a -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

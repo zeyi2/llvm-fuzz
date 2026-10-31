@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.ptrmask.p0.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.ptrmask.p0.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.ptrmask.p0.i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 4 configs, 3 test files, 31 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomicrmw-max-min-umax-umin.e6d6a5e548.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-max-min-umax-umin.ll">atomicrmw-max-min-umax-umin.ll</a><span class="dim">)</span> @atomicrmw_min_i16_acquire via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+zdinx -O1 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+
+; Function Attrs: nounwind
+define i16 @atomicrmw_min_i16_acquire(ptr %ptr, i16 %val) #0 {
+  %res = atomicrmw min ptr %ptr, i16 %val acquire, align 2
+  %B = sdiv i8 0, 0
+  store i8 %B, ptr @G, align 1
+  ret i16 %res
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+a,+zdinx -O1 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+a,+zdinx -O1 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.ptrmask.p0.i64: &#x27;  %AlignedAddr = call ptr @llvm.ptrmask.p0.i64(ptr %ptr, i64 -4)&#x27; (in function: atomicrmw_min_i16_acquire)
+warning: Instruction selection used fallback path for atomicrmw_min_i16_acquire</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-cmpxchg.414aa03026.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i16_acq_rel_monotonic</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+zacas,+zfinx,+zbb -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">atomic-cmpxchg.596889490b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i8_seq_cst_acquire</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zacas,+zhinx -O2 -code-model=small</code></td></tr><tr><td class="l">atomic-cmpxchg.596889490b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i16_seq_cst_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zacas,+zhinx -O2 -code-model=small</code></td></tr><tr><td class="l">atomic-cmpxchg.ea886b3bd6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i16_seq_cst_monotonic</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zacas,+zvbb,+zdinx -O1</code></td></tr><tr><td class="l">atomicrmw-max-min-umax-umin.e6d6a5e548.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-max-min-umax-umin.ll">atomicrmw-max-min-umax-umin.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_min_i16_acquire</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+zdinx -O1 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.fabs.v16bf16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.fabs.v16bf16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.fabs.v16bf16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 2 test files, 42 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vfabs-sdnode.4ad06853e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-sdnode.ll">fixed-vectors-vfabs-sdnode.ll</a><span class="dim">)</span> @v16bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin -O2 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;16 x bfloat&gt;
+
+define &lt;16 x bfloat&gt; @v16bf16(&lt;16 x bfloat&gt; %v) {
+  %r = call &lt;16 x bfloat&gt; @llvm.fabs.v16bf16(&lt;16 x bfloat&gt; %v)
+  %B = fadd &lt;16 x bfloat&gt; %v, %r
+  store &lt;16 x bfloat&gt; %B, ptr @G.2, align 32
+  ret &lt;16 x bfloat&gt; %r
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;16 x bfloat&gt; @llvm.fabs.v16bf16(&lt;16 x bfloat&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin -O2 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin -O2 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.fabs.v16bf16: &#x27;  %r = call &lt;16 x bfloat&gt; @llvm.fabs.v16bf16(&lt;16 x bfloat&gt; %v)&#x27; (in function: v16bf16)
+warning: Instruction selection used fallback path for v16bf16</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfabs-sdnode.0414fe73ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-sdnode.ll">fixed-vectors-vfabs-sdnode.ll</a><span class="dim">)</span></td><td class="l">v16bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+zba,+zihintpause -O1</code></td></tr><tr><td class="l">fixed-vectors-vfabs-sdnode.051a50574c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-sdnode.ll">fixed-vectors-vfabs-sdnode.ll</a><span class="dim">)</span></td><td class="l">v16bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfhmin,+experimental-zvfbfa -O0</code></td></tr><tr><td class="l">fixed-vectors-vfabs-sdnode.4ad06853e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-sdnode.ll">fixed-vectors-vfabs-sdnode.ll</a><span class="dim">)</span></td><td class="l">v16bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin -O2 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-vfabs-sdnode.5fdaf6f1ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-sdnode.ll">fixed-vectors-vfabs-sdnode.ll</a><span class="dim">)</span></td><td class="l">v16bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfhmin -O2</code></td></tr><tr><td class="l">fixed-vectors-vfabs-sdnode.d3f8fe7ab1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-sdnode.ll">fixed-vectors-vfabs-sdnode.ll</a><span class="dim">)</span></td><td class="l">v16bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+zbb -O3</code></td></tr><tr><td class="l">fixed-vectors-vfabs-vp.3f8e7c7771.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-vp.ll">fixed-vectors-vfabs-vp.ll</a><span class="dim">)</span></td><td class="l">vfabs_vv_v16bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+v -O0</code></td></tr><tr><td class="l">fixed-vectors-vfabs-vp.a68ccac5dd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfabs-vp.ll">fixed-vectors-vfabs-vp.ll</a><span class="dim">)</span></td><td class="l">vfabs_vv_v16bf16_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfbfmin,+v -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

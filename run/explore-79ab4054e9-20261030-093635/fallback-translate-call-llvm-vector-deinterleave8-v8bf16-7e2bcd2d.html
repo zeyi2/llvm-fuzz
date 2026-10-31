@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vector.deinterleave8.v8bf16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vector.deinterleave8.v8bf16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vector.deinterleave8.v8bf16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-deinterleave-fixed.0115c24450.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span> @vector_deinterleave8_v8bf16_v1bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh,+zvfbfmin -O1 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define { &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt; } @vector_deinterleave8_v8bf16_v1bf16(&lt;8 x bfloat&gt; %v) {
+  %C = icmp sle i64 0, 9223372036854775807
+  %res = call { &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt; } @llvm.vector.deinterleave8.v8bf16(&lt;8 x bfloat&gt; %v)
+  store i1 %C, ptr poison, align 1
+  ret { &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt; } %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare { &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt; } @llvm.vector.deinterleave8.v8bf16(&lt;8 x bfloat&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+zvfh,+zvfbfmin -O1 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+zvfh,+zvfbfmin -O1 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vector.deinterleave8.v8bf16: &#x27;  %res = call { &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt;, &lt;1 x bfloat&gt; } @llvm.vector.deinterleave8.v8bf16(&lt;8 x bfloat&gt; %v)&#x27; (in function: vector_deinterleave8_v8bf16_v1bf16)
+warning: Instruction selection used fallback path for vector_deinterleave8_v8bf16_v1bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vector-deinterleave-fixed.0115c24450.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave8_v8bf16_v1bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh,+zvfbfmin -O1 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-fixed.5322dfbe55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave8_v8bf16_v1bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m,+zvfh,+zvfbfmin,+experimental-zvzip -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-fixed.5cb3ff4c4d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave8_v8bf16_v1bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m,+zvfh,+zvfbfmin -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

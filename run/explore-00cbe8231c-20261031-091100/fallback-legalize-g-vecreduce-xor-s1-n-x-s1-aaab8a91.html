@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_VECREDUCE_XOR s1,&lt;N x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_VECREDUCE_XOR s1,&lt;N x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_VECREDUCE_XOR s1,&lt;N x s1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 7 configs, 2 test files, 23 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-mask-vp.5f07eda763.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span> @vpreduce_xor_v4i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define zeroext i1 @vpreduce_xor_v4i1(i1 zeroext %s, &lt;4 x i1&gt; %v, &lt;4 x i1&gt; %m, i32 zeroext %evl) {
+  %r = call i1 @llvm.vp.reduce.xor.v4i1(i1 %s, &lt;4 x i1&gt; %v, &lt;4 x i1&gt; %m, i32 %evl)
+  %B = sub i1 %r, true
+  store i1 %B, ptr poison, align 1
+  ret i1 %r
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i1 @llvm.vp.reduce.xor.v4i1(i1, &lt;4 x i1&gt;, &lt;4 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %21:_(s1) = G_VECREDUCE_XOR %18:_(&lt;4 x s1&gt;) (in function: vpreduce_xor_v4i1)
+warning: Instruction selection used fallback path for vpreduce_xor_v4i1</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.5f07eda763.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_v4i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.d21628cfa4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_v2i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb -O2</code></td></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.d21628cfa4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_v16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb -O2</code></td></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.f3ec68c8fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_v8i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.1560a25f57.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_xor_v1024i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v -O3 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.39d46b6386.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_xor_v64i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zba -O3 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.6662a0c973.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_xor_v16i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zvfh -O1</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.efdfad349b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_xor_v64i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zvbb -O3</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.ffda17a41d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_xor_v256i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

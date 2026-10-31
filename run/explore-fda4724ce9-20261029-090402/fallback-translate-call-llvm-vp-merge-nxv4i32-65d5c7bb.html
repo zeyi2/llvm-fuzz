@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.merge.nxv4i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.merge.nxv4i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.merge.nxv4i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 1 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vpmerge-sdnode.4a42dbbd8c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span> @vpmerge_vv_nxv4i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m,+zbs -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 4 x i32&gt; @vpmerge_vv_nxv4i32(&lt;vscale x 4 x i32&gt; %va, &lt;vscale x 4 x i32&gt; %vb, &lt;vscale x 4 x i1&gt; %m, i32 zeroext %evl) {
+  %v = call &lt;vscale x 4 x i32&gt; @llvm.vp.merge.nxv4i32(&lt;vscale x 4 x i1&gt; %m, &lt;vscale x 4 x i32&gt; %va, &lt;vscale x 4 x i32&gt; %vb, i32 %evl)
+  %B = and &lt;vscale x 4 x i32&gt; %va, %vb
+  store &lt;vscale x 4 x i32&gt; %B, ptr poison, align 16
+  ret &lt;vscale x 4 x i32&gt; %v
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 4 x i32&gt; @llvm.vp.merge.nxv4i32(&lt;vscale x 4 x i1&gt;, &lt;vscale x 4 x i32&gt;, &lt;vscale x 4 x i32&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m,+zbs -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.merge.nxv4i32: &#x27;  %v = call &lt;vscale x 4 x i32&gt; @llvm.vp.merge.nxv4i32(&lt;vscale x 4 x i1&gt; %m, &lt;vscale x 4 x i32&gt; %va, &lt;vscale x 4 x i32&gt; %vb, i32 %evl)&#x27; (in function: vpmerge_vv_nxv4i32)
+warning: Instruction selection used fallback path for vpmerge_vv_nxv4i32</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vpmerge-sdnode.0dbea2fe4f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vv_nxv4i32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+v,+m -O0</code></td></tr><tr><td class="l">vpmerge-sdnode.40171ab394.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vi_nxv4i32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+v,+m,+zve32x -O1</code></td></tr><tr><td class="l">vpmerge-sdnode.4a42dbbd8c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vv_nxv4i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m,+zbs -O2</code></td></tr><tr><td class="l">vpmerge-sdnode.53d599c5fe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vx_nxv4i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+v,+m,+zicond -O3</code></td></tr><tr><td class="l">vpmerge-sdnode.782b7077a3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vi_nxv4i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m,+zihintpause,+zcb -O2</code></td></tr><tr><td class="l">vpmerge-sdnode.9548c71dce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vi_nxv4i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m -O3</code></td></tr><tr><td class="l">vpmerge-sdnode.961fa6a562.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vv_nxv4i32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m,+a -O2</code></td></tr><tr><td class="l">vpmerge-sdnode.9d30f634a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vi_nxv4i32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfhmin,+v -O2</code></td></tr><tr><td class="l">vpmerge-sdnode.d2f8431ec7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vv_nxv4i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+v,+m,+zihintpause -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

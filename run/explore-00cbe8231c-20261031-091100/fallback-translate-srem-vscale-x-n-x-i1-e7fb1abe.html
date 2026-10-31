@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 7 test files, 71 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">forced-atomics.d64cd00b22.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/forced-atomics.ll">forced-atomics.ll</a><span class="dim">)</span> @cmpxchg32_monotonic via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+forced-atomics,+no-trailing-seq-cst-fence,+zve64d -O0 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @cmpxchg32_monotonic(ptr %p) #0 {
+  %res = cmpxchg ptr %p, i32 0, i32 1 monotonic monotonic, align 4
+  %B = srem &lt;vscale x 4 x i1&gt; splat (i1 true), splat (i1 true)
+  %res.0 = extractvalue { i32, i1 } %res, 0
+  store &lt;vscale x 4 x i1&gt; %B, ptr poison, align 1
+  ret i32 %res.0
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+forced-atomics,+no-trailing-seq-cst-fence,+zve64d -O0 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+forced-atomics,+no-trailing-seq-cst-fence,+zve64d -O0 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem &lt;vscale x 4 x i1&gt; splat (i1 true), splat (i1 true)&#x27; (in function: cmpxchg32_monotonic)
+warning: Instruction selection used fallback path for cmpxchg32_monotonic</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-extract-subvector.95a4f03aa8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">extract_v2i1_nxv2i1_2</td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=128 -verify-machineinstrs -mattr=+m,+v,+zvfhmin,+zvfbfmin,+zve32x -O1</code></td></tr><tr><td class="l">fixed-vectors-shuffle-fp.a6e106f463.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-fp.ll">fixed-vectors-shuffle-fp.ll</a><span class="dim">)</span></td><td class="l">shuffle_v8f16_to_vslidedown_3</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v -O2 -code-model=medium</code></td></tr><tr><td class="l">forced-atomics.d64cd00b22.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/forced-atomics.ll">forced-atomics.ll</a><span class="dim">)</span></td><td class="l">cmpxchg32_monotonic</td><td class="l"><code>-mtriple=riscv32 -mattr=+forced-atomics,+no-trailing-seq-cst-fence,+zve64d -O0 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">strided-vpstore.90e2e8ba56.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv8f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin -O2</code></td></tr><tr><td class="l">vfncvt-f-f.95206090bc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfncvt-f-f.ll">vfncvt-f-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvt_mask_f.f.w_nxv8f32_nxv8f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfhmin,+zvfbfmin,+experimental-zvfofp8min,+zba -O2</code></td></tr><tr><td class="l">vfwcvt-bf-x.0d589d7081.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfwcvt-bf-x.ll">vfwcvt-bf-x.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwcvt_mask_f.x.v_nxv32bf16_nxv32i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa,+zvkb -O1</code></td></tr><tr><td class="l">vfwcvt-bf-x.fb6b334c51.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfwcvt-bf-x.ll">vfwcvt-bf-x.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwcvt_mask_f.x.v_nxv16bf16_nxv16i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa,+d,+zicsr -O2</code></td></tr><tr><td class="l">vfwcvt-f-f.19210e6300.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfwcvt-f-f.ll">vfwcvt-f-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwcvt_mask_f.f.v_nxv2f64_nxv2f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+zvfbfmin,+experimental-zvfofp8min,+zvkb -O0</code></td></tr><tr><td class="l">vfwcvt-f-f.246440828c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfwcvt-f-f.ll">vfwcvt-f-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwcvt_mask_f.f.v_nxv1f32_nxv1f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+zvfbfmin,+experimental-zvfofp8min,+m,+zbkb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

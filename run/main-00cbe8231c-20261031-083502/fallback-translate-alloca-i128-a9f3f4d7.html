@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">18 in 14 configs, 8 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fpenv-xlen.07bb48876d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/fpenv-xlen.ll">fpenv-xlen.ll</a><span class="dim">)</span> @func_reset_fpmode via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i128
+
+define void @func_reset_fpmode() {
+entry:
+  %A = alloca i128, align 8
+  store i128 poison, ptr %A, align 4
+  %LGV1 = load i128, ptr @G.2, align 4
+  %B = or i128 1, %LGV1
+  call void @llvm.reset.fpmode()
+  store i128 %B, ptr %A, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+declare void @llvm.reset.fpmode() #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca i128, align 8&#x27; (in function: func_reset_fpmode)
+warning: Instruction selection used fallback path for func_reset_fpmode</pre>
+<h4>Occurrences (18) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-fcmp-strict.83639f0599.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-fcmp-strict.ll">double-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">double-fcmp-strict.de8feaedca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-fcmp-strict.ll">double-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">float-br-fcmp.bb620779ad.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-br-fcmp.ll">float-br-fcmp.ll</a><span class="dim">)</span></td><td class="l">br_fcmp_une</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">float-br-fcmp.f3f0d091f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-br-fcmp.ll">float-br-fcmp.ll</a><span class="dim">)</span></td><td class="l">br_fcmp_une</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-fcmp-strict.4b314eed4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-fcmp-strict.ll">float-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">float-fcmp-strict.d34a5e08d2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-fcmp-strict.ll">float-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">fpenv-xlen.07bb48876d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/fpenv-xlen.ll">fpenv-xlen.ll</a><span class="dim">)</span></td><td class="l">func_reset_fpmode</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">fpenv-xlen.efa00aff57.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/fpenv-xlen.ll">fpenv-xlen.ll</a><span class="dim">)</span></td><td class="l">func_reset_fpmode</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs</code></td></tr><tr><td class="l">half-fcmp-strict.233ee60686.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-fcmp-strict.ll">half-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation</code></td></tr><tr><td class="l">half-fcmp-strict.25fd3a3a79.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-fcmp-strict.ll">half-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinxmin -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation</code></td></tr><tr><td class="l">half-fcmp-strict.636821617b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-fcmp-strict.ll">half-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation</code></td></tr><tr><td class="l">half-fcmp-strict.f8ca993a94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-fcmp-strict.ll">half-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_oge</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation</code></td></tr><tr><td class="l">rv64-double-convert-strict.6dac32f304.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64-double-convert-strict.ll">rv64-double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64 -disable-strictnode-mutation</code></td></tr><tr><td class="l">rv64-double-convert-strict.bce64e6604.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64-double-convert-strict.ll">rv64-double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64 -disable-strictnode-mutation</code></td></tr><tr><td class="l">rv64-float-convert-strict.2d8b111afe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rv64-float-convert-strict.ll">rv64-float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -target-abi=lp64 -verify-machineinstrs -disable-strictnode-mutation</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

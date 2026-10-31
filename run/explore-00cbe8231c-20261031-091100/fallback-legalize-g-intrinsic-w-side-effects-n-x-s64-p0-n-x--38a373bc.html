@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s64&gt;,p0,&lt;N x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s64&gt;,p0,&lt;N x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s64&gt;,p0,&lt;N x s1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 4 test files, 70 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-compressstore-int.617acdcf46.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compressstore-int.ll">fixed-vectors-compressstore-int.ll</a><span class="dim">)</span> @compressstore_v8i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @compressstore_v8i64(ptr %base, &lt;8 x i64&gt; %v, &lt;8 x i1&gt; %mask) {
+  %G = getelementptr ptr, ptr %base, i128 18446744073709551616
+  call void @llvm.masked.compressstore.v8i64.p0(&lt;8 x i64&gt; %v, ptr align 8 %base, &lt;8 x i1&gt; %mask)
+  store ptr %G, ptr poison, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.masked.compressstore.v8i64.p0(&lt;8 x i64&gt;, ptr captures(none), &lt;8 x i1&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.masked.compressstore), %1:_(&lt;8 x s64&gt;), %0:_(p0), %2:_(&lt;8 x s1&gt;) (in function: compressstore_v8i64)
+warning: Instruction selection used fallback path for compressstore_v8i64</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">compressstore.42f96473e9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v2i64</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v,+d,+m,+zbb,+zvbb -O1</code></td></tr><tr><td class="l">compressstore.a92d062b67.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v2i64</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v,+m,+zbb -O1</code></td></tr><tr><td class="l">compressstore.f4584f6837.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v16i64</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v,+d,+m,+zbb -O3</code></td></tr><tr><td class="l">fixed-vectors-compressstore-fp.930e75a524.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compressstore-fp.ll">fixed-vectors-compressstore-fp.ll</a><span class="dim">)</span></td><td class="l">compressstore_v4f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh -O2</code></td></tr><tr><td class="l">fixed-vectors-compressstore-int.617acdcf46.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compressstore-int.ll">fixed-vectors-compressstore-int.ll</a><span class="dim">)</span></td><td class="l">compressstore_v8i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v -O0</code></td></tr><tr><td class="l">fixed-vectors-masked-store-fp.aa14362ccb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-store-fp.ll">fixed-vectors-masked-store-fp.ll</a><span class="dim">)</span></td><td class="l">masked_store_v2f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+zbb -O2</code></td></tr><tr><td class="l">fixed-vectors-masked-store-fp.d7f8b6a68c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-store-fp.ll">fixed-vectors-masked-store-fp.ll</a><span class="dim">)</span></td><td class="l">masked_store_v16f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+zfa -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.load.nxv8i8.p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.load.nxv8i8.p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.load.nxv8i8.p0 </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">14 in 5 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/codegenprepare-widening-mul.ll">codegenprepare-widening-mul.ll</a> @spam via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @spam(ptr %arg, ptr %arg1, ptr %arg2, i64 %arg3, i32 %arg4, i32 %arg5) {
+bb:
+  %and6 = and i32 %arg5, 7
+  %sub7 = sub nuw nsw i32 8, %and6
+  %and = and i32 %arg4, 7
+  %sub = sub nuw nsw i32 8, %and
+  %mul = mul nuw nsw i32 %sub, %and6
+  %mul8 = mul nuw nsw i32 %and, %and6
+  %mul9 = mul nuw nsw i32 %sub, %sub7
+  %mul10 = mul nuw nsw i32 %and, %sub7
+  %trunc = trunc i32 %mul9 to i16
+  %insertelement = insertelement &lt;vscale x 8 x i16&gt; poison, i16 %trunc, i64 0
+  %shufflevector = shufflevector &lt;vscale x 8 x i16&gt; %insertelement, &lt;vscale x 8 x i16&gt; poison, &lt;vscale x 8 x i32&gt; zeroinitializer
+  %trunc11 = trunc i32 %mul10 to i16
+  %insertelement12 = insertelement &lt;vscale x 8 x i16&gt; poison, i16 %trunc11, i64 0
+  %shufflevector13 = shufflevector &lt;vscale x 8 x i16&gt; %insertelement12, &lt;vscale x 8 x i16&gt; poison, &lt;vscale x 8 x i32&gt; zeroinitializer
+  %trunc14 = trunc i32 %mul to i16
+  %insertelement15 = insertelement &lt;vscale x 8 x i16&gt; poison, i16 %trunc14, i64 0
+  %shufflevector16 = shufflevector &lt;vscale x 8 x i16&gt; %insertelement15, &lt;vscale x 8 x i16&gt; poison, &lt;vscale x 8 x i32&gt; zeroinitializer
+  %trunc17 = trunc i32 %mul8 to i16
+  %insertelement18 = insertelement &lt;vscale x 8 x i16&gt; poison, i16 %trunc17, i64 0
+  %shufflevector19 = shufflevector &lt;vscale x 8 x i16&gt; %insertelement18, &lt;vscale x 8 x i16&gt; poison, &lt;vscale x 8 x i32&gt; zeroinitializer
+  br label %bb20
+
+bb20:                                             ; preds = %bb20, %bb
+  %phi = phi i64 [ %add45, %bb20 ], [ 0, %bb ]
+  %sub21 = sub i64 %arg3, %phi
+  %call = tail call i32 @llvm.experimental.get.vector.length.i64(i64 %sub21, i32 8, i1 true)
+  %getelementptr = getelementptr inbounds i8, ptr %arg1, i64 %phi
+  %call23 = tail call &lt;vscale x 8 x i8&gt; @llvm.vp.load.nxv8i8.p0(ptr align 1 %getelementptr, &lt;vscale x 8 x i1&gt; splat (i1 true), i32 %call)
+  %call24 = zext &lt;vscale x 8 x i8&gt; %call23 to &lt;vscale x 8 x i16&gt;
+  %call25 = mul &lt;vscale x 8 x i16&gt; %shufflevector, %call24
+  %add = add nuw nsw i64 %phi, 1
+  %getelementptr26 = getelementptr inbounds i8, ptr %arg1, i64 %add
+  %call27 = tail call &lt;vscale x 8 x i8&gt; @llvm.vp.load.nxv8i8.p0(ptr nonnull align 1 %getelementptr26, &lt;vscale x 8 x i1&gt; splat (i1 true), i32 %call)
+  %call28 = zext &lt;vscale x 8 x i8&gt; %call27 to &lt;vscale x 8 x i16&gt;
+  %call29 = mul &lt;vscale x 8 x i16&gt; %shufflevector13, %call28
+  %getelementptr30 = getelementptr inbounds i8, ptr %arg, i64 %phi
+  %call31 = tail call &lt;vscale x 8 x i8&gt; @llvm.vp.load.nxv8i8.p0(ptr align 1 %getelementptr30, &lt;vscale x 8 x i1&gt; splat (i1 true), i32 %call)
+  %call32 = zext &lt;vscale x 8 x i8&gt; %call31 to &lt;vscale x 8 x i16&gt;
+  %call33 = mul &lt;vscale x 8 x i16&gt; %shufflevector16, %call32
+  %getelementptr34 = getelementptr inbounds i8, ptr %arg, i64 %add
+  %call35 = tail call &lt;vscale x 8 x i8&gt; @llvm.vp.load.nxv8i8.p0(ptr nonnull align 1 %getelementptr34, &lt;vscale x 8 x i1&gt; splat (i1 true), i32 %call)
+  %call36 = zext &lt;vscale x 8 x i8&gt; %call35 to &lt;vscale x 8 x i16&gt;
+  %call37 = mul &lt;vscale x 8 x i16&gt; %shufflevector19, %call36
+  %call38 = add &lt;vscale x 8 x i16&gt; %call37, %call33
+  %call39 = add &lt;vscale x 8 x i16&gt; %call29, %call25
+  %call40 = add &lt;vscale x 8 x i16&gt; %call39, splat (i16 32)
+  %call41 = add &lt;vscale x 8 x i16&gt; %call40, %call38
+  %call42 = lshr &lt;vscale x 8 x i16&gt; %call41, splat (i16 6)
+  %call43 = trunc &lt;vscale x 8 x i16&gt; %call42 to &lt;vscale x 8 x i8&gt;
+  %getelementptr44 = getelementptr inbounds i8, ptr %arg2, i64 %phi
+  tail call void @llvm.vp.store.nxv8i8.p0(&lt;vscale x 8 x i8&gt; %call43, ptr align 1 %getelementptr44, &lt;vscale x 8 x i1&gt; splat (i1 true), i32 %call)
+  %zext = zext i32 %call to i64
+  %add45 = add i64 %phi, %zext
+  %icmp = icmp eq i64 %add45, %arg3
+  br i1 %icmp, label %bb46, label %bb20
+
+bb46:                                             ; preds = %bb20
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.experimental.get.vector.length.i64(i64, i32 immarg, i1 immarg) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;vscale x 8 x i8&gt; @llvm.vp.load.nxv8i8.p0(ptr captures(none), &lt;vscale x 8 x i1&gt;, i32) #1
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.vp.store.nxv8i8.p0(&lt;vscale x 8 x i8&gt;, ptr captures(none), &lt;vscale x 8 x i1&gt;, i32) #2
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+attributes #2 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.load.nxv8i8.p0: &#x27;  %call23 = tail call &lt;vscale x 8 x i8&gt; @llvm.vp.load.nxv8i8.p0(ptr align 1 %getelementptr, &lt;vscale x 8 x i1&gt; splat (i1 true), i32 %call)&#x27; (in function: spam)
+warning: Instruction selection used fallback path for spam</pre>
+<h4>Occurrences (14):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/codegenprepare-widening-mul.ll">codegenprepare-widening-mul.ll</a></td><td class="l">spam</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands</code></td></tr><tr><td class="l">codegenprepare-widening-mul.25df46d236.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/codegenprepare-widening-mul.ll">codegenprepare-widening-mul.ll</a><span class="dim">)</span></td><td class="l">spam</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands</code></td></tr><tr><td class="l">codegenprepare-widening-mul.7cc33f68c0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/codegenprepare-widening-mul.ll">codegenprepare-widening-mul.ll</a><span class="dim">)</span></td><td class="l">spam</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands</code></td></tr><tr><td class="l">codegenprepare-widening-mul.af70ee8c35.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/codegenprepare-widening-mul.ll">codegenprepare-widening-mul.ll</a><span class="dim">)</span></td><td class="l">spam</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands</code></td></tr><tr><td class="l">codegenprepare-widening-mul.bfa7301a0c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/codegenprepare-widening-mul.ll">codegenprepare-widening-mul.ll</a><span class="dim">)</span></td><td class="l">spam</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands</code></td></tr><tr><td class="l">codegenprepare-widening-mul.ceacfbb181.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/codegenprepare-widening-mul.ll">codegenprepare-widening-mul.ll</a><span class="dim">)</span></td><td class="l">spam</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+no-sink-splat-operands</code></td></tr><tr><td class="l">vpload.34a36fb304.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfhmin,+zvfbfmin,+v -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.34a36fb304.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8_allones_mask</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfhmin,+zvfbfmin,+v -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.723248dd34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+zvfbfmin,+v -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.723248dd34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8_allones_mask</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zvfh,+zvfbfmin,+v -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.73a9a9beca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+zvfbfmin,+v -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.73a9a9beca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8_allones_mask</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfh,+zvfbfmin,+v -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.cc650f3ab1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfhmin,+zvfbfmin,+v -verify-machineinstrs</code></td></tr><tr><td class="l">vpload.cc650f3ab1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv8i8_allones_mask</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zvfhmin,+zvfbfmin,+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

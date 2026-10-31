@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: phi &lt;vscale x N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: phi &lt;vscale x N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: phi &lt;vscale x N x i8&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">29 in 3 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a> @test5 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 1 x i8&gt; @test5(&lt;vscale x 1 x i8&gt; %0, &lt;vscale x 1 x i8&gt; %1, &lt;vscale x 1 x i8&gt; %2, i32 %3, i1 %cond) #0 {
+entry:
+  %a = call &lt;vscale x 1 x i8&gt; @llvm.riscv.vaadd.nxv1i8.nxv1i8.i32(&lt;vscale x 1 x i8&gt; poison, &lt;vscale x 1 x i8&gt; %0, &lt;vscale x 1 x i8&gt; %1, i32 0, i32 %3)
+  br i1 %cond, label %condblock, label %mergeblock
+
+condblock:                                        ; preds = %entry
+  %b = call &lt;vscale x 1 x i8&gt; @llvm.riscv.vaadd.nxv1i8.nxv1i8.i32(&lt;vscale x 1 x i8&gt; poison, &lt;vscale x 1 x i8&gt; %a, &lt;vscale x 1 x i8&gt; %2, i32 0, i32 %3)
+  br label %mergeblock
+
+mergeblock:                                       ; preds = %condblock, %entry
+  %c = phi &lt;vscale x 1 x i8&gt; [ %a, %entry ], [ %b, %condblock ]
+  ret &lt;vscale x 1 x i8&gt; %c
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x i8&gt; @llvm.riscv.vaadd.nxv1i8.nxv1i8.i32(&lt;vscale x 1 x i8&gt;, &lt;vscale x 1 x i8&gt;, &lt;vscale x 1 x i8&gt;, i32 immarg, i32) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: phi: &#x27;  %c = phi &lt;vscale x 1 x i8&gt; [ %a, %entry ], [ %b, %condblock ]&#x27; (in function: test5)
+warning: Instruction selection used fallback path for test5</pre>
+<h4>Occurrences (29) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">widen_anyof_rdx</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a></td><td class="l">widen_anyof_rdx_use_in_loop</td><td class="l"><code>-mtriple=riscv64 -mattr=+v</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test5</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test6</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test7</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test8</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test9</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test12</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test13</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test5</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test6</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test7</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test8</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test9</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vxrm-insert.ll">vxrm-insert.ll</a></td><td class="l">test12</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

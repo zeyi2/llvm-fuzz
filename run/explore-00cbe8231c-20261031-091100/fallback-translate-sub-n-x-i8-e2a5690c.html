@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 4 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-avgsub.5b084203f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvp-avgsub.ll">rvp-avgsub.ll</a><span class="dim">)</span> @sub_nuw_lshr_v8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+zbs,+zhinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i8&gt; @sub_nuw_lshr_v8i8(&lt;8 x i8&gt; %a, &lt;8 x i8&gt; %b) {
+  %d = sub nuw &lt;8 x i8&gt; %a, %b
+  %B = urem &lt;8 x i8&gt; %d, splat (i8 16)
+  %r = lshr &lt;8 x i8&gt; %d, %B
+  ret &lt;8 x i8&gt; %r
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+experimental-p,+zbs,+zhinx -O3 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+experimental-p,+zbs,+zhinx -O3 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %d = sub nuw &lt;8 x i8&gt; %a, %b&#x27; (in function: sub_nuw_lshr_v8i8)
+warning: Instruction selection used fallback path for sub_nuw_lshr_v8i8</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-marith-vp.f0a5ab623f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-marith-vp.ll">fixed-vectors-marith-vp.ll</a><span class="dim">)</span></td><td class="l">and_v1i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">rvp-avgsub.5b084203f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvp-avgsub.ll">rvp-avgsub.ll</a><span class="dim">)</span></td><td class="l">sub_nuw_lshr_v8i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+zbs,+zhinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-avgsub.5b084203f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvp-avgsub.ll">rvp-avgsub.ll</a><span class="dim">)</span></td><td class="l">sub_nsw_ashr2_v8i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+zbs,+zhinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-avgsub.a4cf989f86.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvp-avgsub.ll">rvp-avgsub.ll</a><span class="dim">)</span></td><td class="l">sub_ashr_v8i8_noflags</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">scmp.c6b257ff.0fd75fd9f4.ll <span class="dim">(mutant of</span> scmp.c6b257ff.ll<span class="dim">)</span></td><td class="l">scmp.8.128</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">xqcilsm-memset.80bc50bbc5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l">test11</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvbb,+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,s64,&lt;N x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,s64,&lt;N x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,s64,&lt;N x s1&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">nontemporal-vp.b06b27be77.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span> @test_nontemporal_vp_strided.store_v8i16_DEFAULT via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+zfh,+v,+zicond -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test_nontemporal_vp_strided.store_v8i16_DEFAULT(&lt;8 x i16&gt; %val, ptr %p, i64 %stride, i32 zeroext %vl) {
+  %B = sdiv &lt;8 x i16&gt; %val, %val
+  call void @llvm.experimental.vp.strided.store.v8i16.p0.i64(&lt;8 x i16&gt; %B, ptr %p, i64 %stride, &lt;8 x i1&gt; splat (i1 true), i32 %vl), !nontemporal !0
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.experimental.vp.strided.store.v8i16.p0.i64(&lt;8 x i16&gt;, ptr captures(none), i64, &lt;8 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+
+!0 = !{i32 1}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+f,+d,+zfh,+v,+zicond -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+f,+d,+zfh,+v,+zicond -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.experimental.vp.strided.store), %7:_(&lt;8 x s16&gt;), %1:_(p0), %2:_(s64), %8:_(&lt;8 x s1&gt;), %3:_(s32) (in function: test_nontemporal_vp_strided.store_v8i16_DEFAULT)
+warning: Instruction selection used fallback path for test_nontemporal_vp_strided.store_v8i16_DEFAULT</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nontemporal-vp.870182d8a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_v8i16_P1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+c -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp.902696c21c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_v8i16_P1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v,+c,+zbb -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp.b06b27be77.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_v8i16_DEFAULT</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+zfh,+v,+zicond -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

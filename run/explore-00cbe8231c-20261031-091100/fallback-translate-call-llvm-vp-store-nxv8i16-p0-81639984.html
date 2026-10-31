@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.store.nxv8i16.p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.store.nxv8i16.p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.store.nxv8i16.p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 2 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vpstore.304f2025ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span> @vpstore_nxv8i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zba,+zbkb -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @vpstore_nxv8i16(&lt;vscale x 8 x i16&gt; %val, ptr %ptr, &lt;vscale x 8 x i1&gt; %m, i32 zeroext %evl) {
+  %B = srem i64 0, 42
+  call void @llvm.vp.store.nxv8i16.p0(&lt;vscale x 8 x i16&gt; %val, ptr %ptr, &lt;vscale x 8 x i1&gt; %m, i32 %evl)
+  store i64 %B, ptr poison, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.vp.store.nxv8i16.p0(&lt;vscale x 8 x i16&gt;, ptr captures(none), &lt;vscale x 8 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zba,+zbkb -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zba,+zbkb -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.store.nxv8i16.p0: &#x27;  call void @llvm.vp.store.nxv8i16.p0(&lt;vscale x 8 x i16&gt; %val, ptr %ptr, &lt;vscale x 8 x i1&gt; %m, i32 %evl)&#x27; (in function: vpstore_nxv8i16)
+warning: Instruction selection used fallback path for vpstore_nxv8i16</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nontemporal-vp-scalable.4da638b44f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_store_nxv8i16_DEFAULT</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+c,+zve32x -O0 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.5dd4d9131e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_store_nxv8i16_ALL</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+c -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.db4b195977.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_store_nxv8i16_DEFAULT</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+zve64d -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.fb1c103815.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_store_nxv8i16_S1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v,+c,+m -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vpstore.18c697a43a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv8i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zbb,+f -O1</code></td></tr><tr><td class="l">vpstore.304f2025ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv8i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zba,+zbkb -O3</code></td></tr><tr><td class="l">vpstore.6e26e2aa78.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv8i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zbb,+zvbb -O3</code></td></tr><tr><td class="l">vpstore.761a75d6e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v -O3</code></td></tr><tr><td class="l">vpstore.a137f09ecf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+xtheadba -O1 -code-model=small</code></td></tr><tr><td class="l">vpstore.b6921a653e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v -O2</code></td></tr><tr><td class="l">vpstore.d443b93fa0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfhmin,+zvfbfmin,+v,+zihintpause -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

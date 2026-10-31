@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.load.nxv2f32.p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.load.nxv2f32.p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.load.nxv2f32.p0 </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">40 in 6 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a> @test_reverse_load_combiner via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 2 x float&gt; @test_reverse_load_combiner(ptr %ptr, i32 zeroext %evl) {
+  %load = call &lt;vscale x 2 x float&gt; @llvm.vp.load.nxv2f32.p0(ptr %ptr, &lt;vscale x 2 x i1&gt; splat (i1 true), i32 %evl)
+  %rev = call &lt;vscale x 2 x float&gt; @llvm.experimental.vp.reverse.nxv2f32(&lt;vscale x 2 x float&gt; %load, &lt;vscale x 2 x i1&gt; splat (i1 true), i32 %evl)
+  ret &lt;vscale x 2 x float&gt; %rev
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 2 x float&gt; @llvm.experimental.vp.reverse.nxv2f32(&lt;vscale x 2 x float&gt;, &lt;vscale x 2 x i1&gt;, i32) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;vscale x 2 x float&gt; @llvm.vp.load.nxv2f32.p0(ptr captures(none), &lt;vscale x 2 x i1&gt;, i32) #1
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.load.nxv2f32.p0: &#x27;  %load = call &lt;vscale x 2 x float&gt; @llvm.vp.load.nxv2f32.p0(ptr %ptr, &lt;vscale x 2 x i1&gt; splat (i1 true), i32 %evl)&#x27; (in function: test_reverse_load_combiner)
+warning: Instruction selection used fallback path for test_reverse_load_combiner</pre>
+<h4>Occurrences (40) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">test_reverse_load_combiner</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">test_load_mask_not_all_one</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">test_load_reverse_mask_not_all_one</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">test_reverse_load_combiner_splice</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">test_different_evl_splice</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop_2uses_1user</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop_chain</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop_nested</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop_2loads</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop_nonsplat</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop_multiuse</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">binop_shared_splat</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">test_reverse_load_combiner</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vp-combine-reverse-load.ll">vp-combine-reverse-load.ll</a></td><td class="l">test_load_mask_not_all_one</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

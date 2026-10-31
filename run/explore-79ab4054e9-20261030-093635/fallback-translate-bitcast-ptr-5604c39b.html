@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast ptr <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 9 configs, 8 test files, 105 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-load-zext.4f4cc8d2d5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/atomic-load-zext.ll">atomic-load-zext.ll</a><span class="dim">)</span> @atomic_load_i16_monotonic via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zhinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define zeroext i16 @atomic_load_i16_monotonic(ptr %a) #0 {
+  %G = getelementptr ptr, ptr %a, i8 0
+  %1 = load atomic i16, ptr %G monotonic, align 2
+  ret i16 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zhinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %G1 = bitcast ptr %a to ptr&#x27; (in function: atomic_load_i16_monotonic)
+warning: Instruction selection used fallback path for atomic_load_i16_monotonic</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-zext.4f4cc8d2d5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/atomic-load-zext.ll">atomic-load-zext.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i16_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zhinx -O2</code></td></tr><tr><td class="l">atomic-rmw.a9482549f2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/atomic-rmw.ll">atomic-rmw.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_min_i16_acq_rel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zabha,+zhinx -O3</code></td></tr><tr><td class="l">attributes.62c4e9103d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-ssijt,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy-inline.2e07953871.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy-inline.2e07953871.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.a5834db63c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O1 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">memset-inline.1c6fa7a948.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">memset_zero_8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem,+unaligned-vector-mem,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memset-inline.1e38b63870.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">memset_zero_16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+unaligned-scalar-mem,+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.1814fc29f2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">ashr_16bytes</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.c99c94f576.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_8bytes</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zve32x -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

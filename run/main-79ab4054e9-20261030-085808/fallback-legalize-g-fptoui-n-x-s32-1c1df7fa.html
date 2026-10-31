@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTOUI &lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTOUI &lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTOUI &lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fp2i.2ea6c1e2ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span> @fp2ui_v3f32_v3i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @fp2ui_v3f32_v3i32(ptr %x, ptr %y) {
+  %a = load &lt;3 x float&gt;, ptr %x, align 16
+  %d = fptoui &lt;3 x float&gt; %a to &lt;3 x i32&gt;
+  store &lt;3 x i32&gt; %d, ptr %y, align 16
+  %B = or i128 18446744073709551616, 42
+  store i128 %B, ptr poison, align 4
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %3:_(&lt;3 x s32&gt;) = G_FPTOUI %2:_(&lt;3 x s32&gt;) (in function: fp2ui_v3f32_v3i32)
+warning: Instruction selection used fallback path for fp2ui_v3f32_v3i32</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fp2i.2ea6c1e2ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v3f32_v3i32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fp2i.3cc720da20.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v3f32_v3i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fp2i.9ebf448d03.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v3f32_v3i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin,+f,+d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fp2i.a31b212715.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v3f32_v3i32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -mattr=+v,+zvfh,+zvfbfmin,+f,+d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fp2i.cb2a50547a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v3f32_v3i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+experimental-zvfbfa,+f,+d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fp2i.f09974c237.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v3f32_v3i32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -mattr=+v,+zvfh,+experimental-zvfbfa,+f,+d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

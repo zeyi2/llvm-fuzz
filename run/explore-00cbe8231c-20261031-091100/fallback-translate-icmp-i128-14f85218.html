@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp i128~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp i128~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp i128~ <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">smulh.ca306fc8.52a85cd1df.ll <span class="dim">(mutant of</span> smulh.ca306fc8.ll<span class="dim">)</span> @smulh_i96 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i96
+@G.2 = external global i96
+
+; Function Attrs: nounwind
+define i96 @smulh_i96(i96 %x, i96 %y) #0 {
+  %C = icmp sle i96 %x, %x
+  %LGV = load i96, ptr @G.1, align 4
+  %r = call i96 @llvm.smulh.i96(i96 %x, i96 %y)
+  %B = udiv i96 %r, %LGV
+  store i96 %B, ptr @G.2, align 4
+  store i1 %C, ptr poison, align 1
+  ret i96 %r
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i96 @llvm.smulh.i96(i96, i96) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp sle i96 %x, %x&#x27; (in function: smulh_i96)
+warning: Instruction selection used fallback path for smulh_i96</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">smulh.ca306fc8.0bc9c94fdd.ll <span class="dim">(mutant of</span> smulh.ca306fc8.ll<span class="dim">)</span></td><td class="l">smulh_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zicsr -O0</code></td></tr><tr><td class="l">smulh.ca306fc8.52a85cd1df.ll <span class="dim">(mutant of</span> smulh.ca306fc8.ll<span class="dim">)</span></td><td class="l">smulh_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">smulh.ca306fc8.b503787360.ll <span class="dim">(mutant of</span> smulh.ca306fc8.ll<span class="dim">)</span></td><td class="l">smulh_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zicsr -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

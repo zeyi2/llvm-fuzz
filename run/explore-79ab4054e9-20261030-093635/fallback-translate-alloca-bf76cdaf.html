@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">ipra.57eb21d607.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/ipra.ll">ipra.ll</a><span class="dim">)</span> @foobar via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -enable-ipra -mattr=+zfinx -O2 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">%struct.bitmap_iterator = type { ptr, ptr, i32, i64 }
+
+; Function Attrs: norecurse nounwind
+define hidden void @foobar(ptr %live_throughout.0.val) #0 {
+entry:
+  %rsi = alloca %struct.bitmap_iterator, align 8
+  %regno = alloca i32, i32 0, align 4
+  call void @bmp_iter_set_init(ptr %rsi, ptr %live_throughout.0.val, ptr %regno)
+  br label %BB
+
+BB:                                               ; preds = %entry
+  ret void
+}
+
+declare void @bmp_iter_set_init(ptr, ptr, ptr)
+
+attributes #0 = { norecurse nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -enable-ipra -mattr=+zfinx -O2 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -enable-ipra -mattr=+zfinx -O2 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %rsi = alloca %struct.bitmap_iterator, align 8&#x27; (in function: foobar)
+warning: Instruction selection used fallback path for foobar</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-ilp32e.95899dd2ac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span></td><td class="l">caller_large_struct</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+save-restore,+zfinx,+a -O1 -code-model=small</code></td></tr><tr><td class="l">calling-conv-lp64-lp64f-lp64d-common.c2700361b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/calling-conv-lp64-lp64f-lp64d-common.ll">calling-conv-lp64-lp64f-lp64d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_struct_ret</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zba -O2 -code-model=medium</code></td></tr><tr><td class="l">ipra.57eb21d607.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/ipra.ll">ipra.ll</a><span class="dim">)</span></td><td class="l">foobar</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -enable-ipra -mattr=+zfinx -O2 -code-model=small</code></td></tr><tr><td class="l">mem64.4d9ae29c87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/mem64.ll">mem64.ll</a><span class="dim">)</span></td><td class="l">addi_fold_crash</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zvbb -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

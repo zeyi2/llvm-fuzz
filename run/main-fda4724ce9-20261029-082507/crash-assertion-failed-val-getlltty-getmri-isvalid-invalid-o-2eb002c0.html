@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;), function buildStore, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;), function buildStore, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;), function buildStore, file MachineIRBuilder.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vlsegff-rv32-dead.ee8c12cf2d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vlsegff-rv32-dead.ll">vlsegff-rv32-dead.ll</a><span class="dim">)</span> @test_vlseg2ff_dead_all via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zve64x -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/G6doqjqE1">https://godbolt.org/z/G6doqjqE1</a> (llc-assertions-trunk, checked 2026-10-25 18:43 UTC): <a href="https://godbolt.org/z/G6doqjqE1">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test_vlseg2ff_dead_all(ptr %base, i32 %vl) {
+entry:
+  %A = alloca target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2), align 64
+  store target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2) poison, ptr %A, align 64
+  %0 = tail call { target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2), i32 } @llvm.riscv.vlseg2ff.triscv.vector.tuple_nxv32i8_2t.i32.p0(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2) poison, ptr %base, i32 %vl, i32 4)
+  %E = extractvalue { target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2), i32 } %0, 0
+  store target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2) %E, ptr %A, align 64
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare { target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2), i32 } @llvm.riscv.vlseg2ff.triscv.vector.tuple_nxv32i8_2t.i32.p0(target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 32 x i8&gt;, 2), ptr captures(none), i32, i32 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+zve64x -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:520: llvm::MachineInstrBuilder llvm::MachineIRBuilder::buildStore(const llvm::SrcOp&amp;, const llvm::SrcOp&amp;, llvm::MachineMemOperand&amp;): Assertion `Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+zve64x -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>21</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zve64x -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zve64x -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:520: MachineInstrBuilder llvm::MachineIRBuilder::buildStore(const SrcOp &amp;, const SrcOp &amp;, MachineMemOperand &amp;): Assertion `Val.getLLTTy(*getMRI()).isValid() &amp;&amp; &quot;invalid operand type&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+zve64x -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@test_vlseg2ff_dead_all&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000564133f2e0cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000564133f2af71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000564133f2eb4b
+3  libc.so.6 0x00007f4005a45330
+4  libc.so.6 0x00007f4005a9ec0c pthread_kill + 284
+5  libc.so.6 0x00007f4005a4527e gsignal + 30
+6  libc.so.6 0x00007f4005a288ff abort + 223
+7  libc.so.6 0x00007f4005a2881b
+8  libc.so.6 0x00007f4005a3b517
+9  llc       0x00005641360d56c9 llvm::MachineIRBuilder::buildStore(llvm::SrcOp const&amp;, llvm::SrcOp const&amp;, llvm::MachineMemOperand&amp;) + 265
+10 llc       0x0000564136044c77 llvm::IRTranslatorImpl::translateStore(llvm::User const&amp;, llvm::MachineIRBuilder&amp;) + 1239
+11 llc       0x0000564136053413 llvm::IRTranslatorImpl::translate(llvm::Instruction const&amp;) + 611
+12 llc       0x0000564136055fbd llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 4189
+13 llc       0x0000564136056fad llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+14 llc       0x00005641344f78cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x0000564134287f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x0000564134290452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x0000564134288ce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x0000564133f35787 llcMain + 12151
+19 llc       0x0000564133e71b6f main + 63
+20 libc.so.6 0x00007f4005a2a1ca
+21 libc.so.6 0x00007f4005a2a28b __libc_start_main + 139
+22 llc       0x0000564133e71a65 _start + 37</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vlseg-rv32.034e00dc8d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vlseg-rv32.ll">vlseg-rv32.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">vlseg-rv64.5e5fcbae0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vlseg-rv64.ll">vlseg-rv64.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">vlsegff-rv32-dead.ee8c12cf2d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vlsegff-rv32-dead.ll">vlsegff-rv32-dead.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zve64x -verify-machineinstrs</code></td></tr><tr><td class="l">vlsegff-rv64-dead.145e02e533.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vlsegff-rv64-dead.ll">vlsegff-rv64-dead.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+zve64x -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

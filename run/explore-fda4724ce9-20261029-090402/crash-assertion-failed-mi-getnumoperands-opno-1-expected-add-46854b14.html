@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MI-&gt;getNumOperands() &gt; OpNo + 1 &amp;&amp; &quot;Expected additional operand&quot;), function bool, file RISCVAsmPrinter.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MI-&gt;getNumOperands() &gt; OpNo + 1 &amp;&amp; &quot;Expected additional operand&quot;), function bool, file RISCVAsmPrinter.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MI-&gt;getNumOperands() &gt; OpNo + 1 &amp;&amp; &quot;Expected additional operand&quot;), function bool, file RISCVAsmPrinter.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">14 in 10 configs, 2 test files, 618 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a> @constraint_m_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Pb8GMW3Kj">https://godbolt.org/z/Pb8GMW3Kj</a> (llc-assertions-trunk, checked 2026-10-26 12:20 UTC): <a href="https://godbolt.org/z/Pb8GMW3Kj">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @constraint_m_2(ptr %a) #0 {
+  %1 = tail call i32 asm &quot;lw $0, $1&quot;, &quot;=r,*m&quot;(ptr elementtype(i32) %a)
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/RISCVAsmPrinter.cpp:514: virtual bool {anonymous}::RISCVAsmPrinter::PrintAsmMemoryOperand(const llvm::MachineInstr*, unsigned int, const char*, llvm::raw_ostream&amp;): Assertion `MI-&gt;getNumOperands() &gt; OpNo + 1 &amp;&amp; &quot;Expected additional operand&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -code-model=medium -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>2</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVAsmPrinter.cpp:514: virtual bool (anonymous namespace)::RISCVAsmPrinter::PrintAsmMemoryOperand(const MachineInstr *, unsigned int, const char *, raw_ostream &amp;): Assertion `MI-&gt;getNumOperands() &gt; OpNo + 1 &amp;&amp; &quot;Expected additional operand&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISC-V Assembly Printer&#x27; on function &#x27;@constraint_m_2&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055b2ee0650cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055b2ee061f71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055b2ee065b4b
+3  libc.so.6 0x00007f070a245330
+4  libc.so.6 0x00007f070a29ec0c pthread_kill + 284
+5  libc.so.6 0x00007f070a24527e gsignal + 30
+6  libc.so.6 0x00007f070a2288ff abort + 223
+7  libc.so.6 0x00007f070a22881b
+8  libc.so.6 0x00007f070a23b517
+9  llc       0x000055b2ef33cf41
+10 llc       0x000055b2ef40e4e1 llvm::AsmPrinter::emitInlineAsm(llvm::MachineInstr const*) + 2193
+11 llc       0x000055b2ef34a667 llvm::AsmPrinter::emitFunctionBody() + 4535
+12 llc       0x000055b2ef3371c7
+13 llc       0x000055b2ee62e8cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+14 llc       0x000055b2ee3bef37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x000055b2ee3c7452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x000055b2ee3bfce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x000055b2ee06c787 llcMain + 12151
+18 llc       0x000055b2edfa8b6f main + 63
+19 libc.so.6 0x00007f070a22a1ca
+20 libc.so.6 0x00007f070a22a28b __libc_start_main + 139
+21 llc       0x000055b2edfa8a65 _start + 37</pre>
+<h4>Occurrences (14):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint-2.ll">inline-asm-mem-constraint-2.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -code-model=medium -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint-2.ll">inline-asm-mem-constraint-2.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint-2.ll">inline-asm-mem-constraint-2.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -code-model=medium -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint-2.ll">inline-asm-mem-constraint-2.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -code-model=medium -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -code-model=large -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -code-model=large -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -code-model=medium -verify-machineinstrs -no-integrated-as</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -no-integrated-as</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

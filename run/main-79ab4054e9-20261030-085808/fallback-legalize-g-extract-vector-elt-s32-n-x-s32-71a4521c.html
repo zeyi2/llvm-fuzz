@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT s32,&lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT s32,&lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT s32,&lt;N x s32&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">78 in 9 configs, 9 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a> @reduce_sum_4xi32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @reduce_sum_4xi32(&lt;4 x i32&gt; %v) {
+  %e0 = extractelement &lt;4 x i32&gt; %v, i32 0
+  %e1 = extractelement &lt;4 x i32&gt; %v, i32 1
+  %e2 = extractelement &lt;4 x i32&gt; %v, i32 2
+  %e3 = extractelement &lt;4 x i32&gt; %v, i32 3
+  %add0 = add i32 %e0, %e1
+  %add1 = add i32 %add0, %e2
+  %add2 = add i32 %add1, %e3
+  ret i32 %add2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %8:_(s32) = G_EXTRACT_VECTOR_ELT %0:_(&lt;4 x s32&gt;), %9:_(s32) (in function: reduce_sum_4xi32)
+warning: Instruction selection used fallback path for reduce_sum_4xi32</pre>
+<h4>Occurrences (78) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a></td><td class="l">fmul_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a></td><td class="l">mul_i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a></td><td class="l">reduce_sum_4xi32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a></td><td class="l">reduce_xor_4xi32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a></td><td class="l">reduce_or_4xi32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-explodevector.ll">fixed-vectors-int-explodevector.ll</a></td><td class="l">explode_2xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-explodevector.ll">fixed-vectors-int-explodevector.ll</a></td><td class="l">explode_4xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-explodevector.ll">fixed-vectors-int-explodevector.ll</a></td><td class="l">explode_8xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-explodevector.ll">fixed-vectors-int-explodevector.ll</a></td><td class="l">explode_16xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-explodevector.ll">fixed-vectors-int-explodevector.ll</a></td><td class="l">explode_16xi32_exact_vlen</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_sum_2xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_sum_4xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_sum_8xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_sum_16xi32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_sum_16xi32_prefix2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

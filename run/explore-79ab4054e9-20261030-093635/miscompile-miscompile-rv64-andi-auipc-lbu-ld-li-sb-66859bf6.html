@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: andi,auipc,lbu,ld,li,sb</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: andi,auipc,lbu,ld,li,sb</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: andi,auipc,lbu,ld,li,sb <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">tagged-globals.17d1a21d8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span> @global_addr via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 --relocation-model=static -mattr=+zba,+zvbb -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@global_ext = external global i32
+@G = external global i1
+@G.1 = external global i1
+
+define ptr @global_addr(i1 %B, ptr %G.1) {
+  %LGV = load i1, ptr %G.1, align 1
+  %B1 = ashr i1 false, %B
+  store i1 %B, ptr %G.1, align 1
+  ret ptr @global_ext
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 --relocation-model=static -mattr=+zba,+zvbb -O0 -verify-machineinstrs&#x27; --funcs global_addr snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash c2d973d32d6edfcd, GlobalISel hash 352ce32cab7b535f
+b0: llc -mtriple=riscv64 --relocation-model=static -mattr=+zba,+zvbb -verify-machineinstrs -O0 -global-isel=0
+b1: llc -mtriple=riscv64 --relocation-model=static -mattr=+zba,+zvbb -verify-machineinstrs -O2 -global-isel=0
+b2: llc -mtriple=riscv64 --relocation-model=static -mattr=+zba,+zvbb -verify-machineinstrs -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">tagged-globals.17d1a21d8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span></td><td class="l">global_addr</td><td class="l"><code>-mtriple=riscv64 --relocation-model=static -mattr=+zba,+zvbb -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">sadd_sat.9624a716.ff1c2d2e5e.ll <span class="dim">(mutant of</span> sadd_sat.9624a716.ll<span class="dim">)</span> @func3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbb,+zfinx,+zicsr -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define signext i4 @func3(i4 signext %x, i4 signext %y) #0 {
+  %B2 = or &lt;2 x i64&gt; splat (i64 42), splat (i64 -1)
+  %tmp = call i4 @llvm.sadd.sat.i4(i4 %x, i4 %y)
+  %B = and i4 %y, %tmp
+  store &lt;2 x i64&gt; %B2, ptr @G.6, align 16
+  ret i4 %B
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i4 @llvm.sadd.sat.i4(i4, i4) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbb,+zfinx,+zicsr -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbb,+zfinx,+zicsr -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B2 = or &lt;2 x i64&gt; splat (i64 42), splat (i64 -1)&#x27; (in function: func3)
+warning: Instruction selection used fallback path for func3</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-previous-failure.c542aac000.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-previous-failure.ll">double-previous-failure.ll</a><span class="dim">)</span></td><td class="l">main</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">half-convert-strict.f81d4324d9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_si_signext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation -mattr=+zfinx -O1</code></td></tr><tr><td class="l">sadd_sat.9624a716.ff1c2d2e5e.ll <span class="dim">(mutant of</span> sadd_sat.9624a716.ll<span class="dim">)</span></td><td class="l">func3</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbb,+zfinx,+zicsr -O0</code></td></tr><tr><td class="l">umulh.31cf591c.3bf65c8512.ll <span class="dim">(mutant of</span> umulh.31cf591c.ll<span class="dim">)</span></td><td class="l">umulh_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx,+zbb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

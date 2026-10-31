@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x s8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x s8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x s8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 57 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-br-fcmp.95cc5388.a1226150.3732b88b.fbb79aa881.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.a1226150.3732b88b.ll<span class="dim">)</span> @br_fcmp_true via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfa,+xtheadba,+zbs -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.2 = external global float
+@G.7 = external global &lt;4 x i32&gt;
+@G.13 = external global &lt;8 x i8&gt;
+
+declare void @abort()
+
+; Function Attrs: nounwind
+define void @br_fcmp_true(float %a, float %b) #0 {
+  %1 = fcmp true float %a, %b
+  %B = or i1 %1, true
+  %C1 = icmp ult i8 0, 0
+  %B1 = sub &lt;4 x i32&gt; splat (i32 2147483647), splat (i32 1)
+  store &lt;4 x i32&gt; %B1, ptr @G.7, align 16
+  store i1 %C1, ptr poison, align 1
+  %B2 = fadd float %a, %b
+  store float %B2, ptr @G.2, align 4
+  br i1 %B, label %if.then, label %if.else
+
+if.else:                                          ; preds = %0
+  %2 = phi &lt;8 x i8&gt; [ splat (i8 1), %0 ]
+  store &lt;8 x i8&gt; %2, ptr @G.13, align 8
+  ret void
+
+if.then:                                          ; preds = %0
+  %C = fcmp false float %b, +inf
+  tail call void @abort()
+  store i1 %C, ptr @G, align 1
+  unreachable
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfa,+xtheadba,+zbs -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfa,+xtheadba,+zbs -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %18:_(&lt;8 x s8&gt;) = G_PHI %24:_(&lt;8 x s8&gt;), %bb.4 (in function: br_fcmp_true)
+warning: Instruction selection used fallback path for br_fcmp_true</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">dwarf-eh.db4b1d46fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/dwarf-eh.ll">dwarf-eh.ll</a><span class="dim">)</span></td><td class="l">test1</td><td class="l"><code>-mtriple=riscv64 --code-model=medium -relocation-model=pic -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-deinterleave-load.161fc198c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-deinterleave-load.ll">fixed-vectors-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_factor3_no_extract</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfhmin,+zvfbfmin,+zicond -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">float-br-fcmp.95cc5388.a1226150.3732b88b.fbb79aa881.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.a1226150.3732b88b.ll<span class="dim">)</span></td><td class="l">br_fcmp_true</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfa,+xtheadba,+zbs -O0</code></td></tr><tr><td class="l">unroll-loop-cse.22db964300.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/unroll-loop-cse.ll">unroll-loop-cse.ll</a><span class="dim">)</span></td><td class="l">unroll_loop_cse</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve32x -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast &lt;vscale x N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast &lt;vscale x N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast &lt;vscale x N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 2 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vmv.v.v-peephole.386f74e4ee.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vmv.v.v-peephole.ll">vmv.v.v-peephole.ll</a><span class="dim">)</span> @unfoldable_mismatched_sew via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+define &lt;vscale x 2 x i32&gt; @unfoldable_mismatched_sew(&lt;vscale x 2 x i32&gt; %passthru, &lt;vscale x 1 x i64&gt; %x, &lt;vscale x 1 x i64&gt; %y, i32 %avl) {
+  %C = fcmp ord float 4.200000e+01, 1.000000e+00
+  %a = call &lt;vscale x 1 x i64&gt; @llvm.riscv.vadd.nxv1i64.nxv1i64.i32(&lt;vscale x 1 x i64&gt; poison, &lt;vscale x 1 x i64&gt; %x, &lt;vscale x 1 x i64&gt; %y, i32 %avl)
+  %a.bitcast = bitcast &lt;vscale x 1 x i64&gt; %a to &lt;vscale x 2 x i32&gt;
+  %b = call &lt;vscale x 2 x i32&gt; @llvm.riscv.vmv.v.v.nxv2i32.i32(&lt;vscale x 2 x i32&gt; %passthru, &lt;vscale x 2 x i32&gt; %a.bitcast, i32 %avl)
+  store i1 %C, ptr @G.3, align 1
+  ret &lt;vscale x 2 x i32&gt; %b
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x i64&gt; @llvm.riscv.vadd.nxv1i64.nxv1i64.i32(&lt;vscale x 1 x i64&gt;, &lt;vscale x 1 x i64&gt;, &lt;vscale x 1 x i64&gt;, i32) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 2 x i32&gt; @llvm.riscv.vmv.v.v.nxv2i32.i32(&lt;vscale x 2 x i32&gt;, &lt;vscale x 2 x i32&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %a.bitcast = bitcast &lt;vscale x 1 x i64&gt; %a to &lt;vscale x 2 x i32&gt;&#x27; (in function: unfoldable_mismatched_sew)
+warning: Instruction selection used fallback path for unfoldable_mismatched_sew</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rvv-peephole-vmerge-vops.08fde5ef0f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/rvv-peephole-vmerge-vops.ll">rvv-peephole-vmerge-vops.ll</a><span class="dim">)</span></td><td class="l">unfoldable_mismatched_sew</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">vmv.v.v-peephole.386f74e4ee.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vmv.v.v-peephole.ll">vmv.v.v-peephole.ll</a><span class="dim">)</span></td><td class="l">unfoldable_mismatched_sew</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1</code></td></tr><tr><td class="l">vmv.v.v-peephole.afc68a0fe7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vmv.v.v-peephole.ll">vmv.v.v-peephole.ll</a><span class="dim">)</span></td><td class="l">unfoldable_mismatched_sew</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

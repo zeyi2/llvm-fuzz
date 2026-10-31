@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 39 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 39 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 39 machine code errors. <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-gprs.c5c065b8.d7b67688.032d4919.58d63effea.ll <span class="dim">(mutant of</span> callee-saved-gprs.c5c065b8.d7b67688.032d4919.ll<span class="dim">)</span> @caller via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond,+zfhmin -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var = external global [32 x i32]
+@G = external global i32
+@G.3 = external global i1
+@G.5 = external global i64
+@G.6 = external global i1
+
+declare void @callee()
+
+define void @caller() {
+  %A8 = alloca float, align 4
+  store float poison, ptr %A8, align 4
+  %LGV2 = load i1, ptr @G.6, align 1
+  %A = alloca i1, align 1
+  %L6 = load float, ptr %A, align 4
+  %L5 = load float, ptr %A, align 4
+  store i1 false, ptr %A, align 1
+  %L = load i1, ptr %A, align 1
+  %B = mul i1 %L, %LGV2
+  %B7 = fmul float %L5, %L6
+  store float %B7, ptr %A8, align 4
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %T
+  %LGV3 = load i64, ptr @G.5, align 4
+  %val = load [32 x i32], ptr @var, align 4
+  call void @callee()
+  store volatile [32 x i32] %val, ptr @var, align 4
+  %E = extractvalue [32 x i32] %val, 16
+  store i32 %E, ptr poison, align 4
+  %C = icmp ult i64 0, %LGV3
+  %LGV1 = load i32, ptr @G, align 4
+  %I = insertvalue [32 x i32] %val, i32 %LGV1, 25
+  store [32 x i32] %I, ptr poison, align 4
+  store [32 x i32] %val, ptr poison, align 4
+  store i1 %B, ptr @G.3, align 1
+  store i1 %C, ptr @G.3, align 1
+  ret void
+
+T:                                                ; preds = %0
+  %B4 = sub &lt;4 x i32&gt; splat (i32 1), splat (i32 2147483647)
+  store &lt;4 x i32&gt; %B4, ptr %A, align 16
+  br label %BB
+
+F:                                                ; preds = %0
+  %B3 = lshr i1 %B, %L
+  store i1 %B3, ptr %A, align 1
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond,+zfhmin -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond,+zfhmin -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After RISC-V Load / Store Optimizer
+# Machine code for function caller: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+Frame Objects:
+  fi#0: size=4, align=4, at location [SP-16]
+  fi#1: size=1, align=1, at location [SP-17]
+  fi#2: size=4, align=4, at location [SP-24]
+  fi#3: size=4, align=4, at location [SP-28]
+  fi#4: size=4, align=4, at location [SP-32]
+  fi#5: size=4, align=4, at location [SP-36]
+  fi#6: size=4, align=4, at location [SP-40]
+  fi#7: size=4, align=4, at location [SP-44]
+  fi#8: size=4, align=4, at location [SP-48]
+  fi#9: size=4, align=4, at location [SP-52]
+  fi#10: size=4, align=4, at location [SP-56]
+  fi#11: size=4, align=4, at location [SP-60]
+  fi#12: size=4, align=4, at location [SP-64]
+  fi#13: size=4, align=4, at location [SP-68]
+  fi#14: size=4, align=4, at location [SP-72]
+  fi#15: size=4, align=4, at location [SP-76]
+  fi#16: size=4, align=4, at location [SP-80]
+  fi#17: size=4, align=4, at location [SP-84]
+  fi#18: size=4, align=4, at location [SP-88]
+  fi#19: size=4, align=4, at location [SP-92]
+  fi#20: size=4, align=4, at location [SP-96]
+  fi#21: size=4, align=4, at location [SP-100]
+  fi#22: size=4, align=4, at location [SP-104]
+  fi#23: size=4, align=4, at location [SP-108]
+  fi#24: size=4, align=4, at location [SP-112]
+  fi#25: size=4, align=4, at location [SP-116]
+  fi#26: size=4, align=4, at location [SP-120]
+  fi#27: size=4, align=4, at location [SP-124]
+  fi#28: size=4, align=4, at location [SP-128]
+  fi#29: size=4, align=4, at location [SP-132]
+  fi#30: size=4, align=4, at location [SP-136]
+  fi#31: size=4, align=4, at location [SP-140]
+  fi#32: size=4, align=4, at location [SP-144]
+  fi#33: size=4, align=4, at location [SP-148]
+  fi#34: size=4, align=4, at location [SP-152]
+  fi#35: size=4, align=4, at location [SP-156]
+  fi#36: size=4, align=4, at location [SP-160]
+  fi#37: dead
+  fi#38: dead
+  fi#39: size=4, align=4, at location [SP-4]
+  fi#40: size=8, align=4, at location [SP-12]
+save/restore points:
+save points are empty
+restore points are empty
+bb.0 (%ir-block.0):
+  successors: %bb.1(0x40000000), %bb.4(0x40000000); %bb.1(50.00%), %bb.4(50.00%)
+  liveins: $x1, $x8_x9
+  $x2 = frame-setup ADDI $x2, -160
+  frame-setup CFI_INSTRUCTION def_cfa_offset 160
+  frame-setup SW killed $x1, $x2, 156 :: (store (s32) into %stack.39)
+  frame-setup SD_RV32 killed $x8_x9, $x2, 148 :: (store (s64) into %stack.40, align 4)
+  frame-setup CFI_INSTRUCTION offset $x1, -4
+  frame-setup CFI_INSTRUCTION offset $x8, -12
+  frame-setup CFI_INSTRUCTION offset $x9, -8
+  renamable $x10 = LUI target-flags(riscv-hi) @G.6
+  renamable $f15_f = FLW $x2, 143 :: (load (s32) from %ir.A)
+  FSW killed renamable $f15_f, $x2, 136 :: (store (s32) into %stack.2)
+  renamable $f15_f = FLW $x2, 143 :: (load (s32) from %ir.A)
+  FSW killed renamable $f15_f, $x2, 132 :: (store (s32) into %stack.3)
+  SB $x0, $x2, 143 :: (store (s8) into %ir.A)
+  renamable $x11 = LBU killed renamable $x10, target-flags(riscv-lo) @G.6 :: (dereferenceable load (s8) from @G.6)
+  renamable $x9 = LBU $x2, 143 :: (dereferenceable load (s8) from %ir.A)
+  $x10 = ADDI renamable $x9, 0
+  PseudoCALL target-flags(riscv-call) &amp;__mulsi3, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x0_h $x1_h $x8_h $x9_h $x0_w $x1_w $x8_w $x9_w $x0_y $x8_x9&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit-def $x10
+  renamable $f15_f = FLW $x2, 136 :: (load (s32) from %stack.2)
+  renamable $f14_f = FLW $x2, 132 :: (load (s32) from %stack.3)
+  renamable $f15_f = nofpexcept FMUL_S killed renamable $f14_f, killed renamable $f15_f, 7
+  renamable $x9 = ANDI killed renamable $x9, 1
+  FSW killed renamable $f15_f, $x2, 144 :: (store (s32) into %ir.A8)
+  BEQ renamable $x9, $x0, %bb.4
+bb.1.T:
+; predecessors: %bb.0
+  successors: %bb.3(0x40000000), %bb.2(0x40000000); %bb.3(50.00%), %bb.2(50.00%)
+  liveins: $x10
+  SW killed renamable $x10, $x2, 96 :: (store (s32) into %stack.12)
+  renamable $x10 = LUI target-flags(riscv-hi) @</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-gprs.c5c065b8.80b4f224.204225f1.dc3261b9.65bf2bc862.ll <span class="dim">(mutant of</span> callee-saved-gprs.c5c065b8.80b4f224.204225f1.dc3261b9.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+m -O3</code></td></tr><tr><td class="l">callee-saved-gprs.c5c065b8.d7b67688.032d4919.58d63effea.ll <span class="dim">(mutant of</span> callee-saved-gprs.c5c065b8.d7b67688.032d4919.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zicond,+zfhmin -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

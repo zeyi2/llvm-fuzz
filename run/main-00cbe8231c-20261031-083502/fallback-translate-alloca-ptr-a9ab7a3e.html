@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca ptr </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">46 in 15 configs, 5 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a> @foo4 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@d = external global double, align 8
+
+; Function Attrs: nounwind
+define void @foo4(ptr %p) #0 {
+entry:
+  %p.addr = alloca ptr, align 8
+  store ptr %p, ptr %p.addr, align 8
+  %0 = load ptr, ptr %p.addr, align 8
+  %add.ptr = getelementptr inbounds i8, ptr %0, i64 2044
+  %1 = load double, ptr %add.ptr, align 8
+  store double %1, ptr @d, align 8
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %p.addr = alloca ptr, align 8&#x27; (in function: foo4)
+warning: Instruction selection used fallback path for foo4</pre>
+<h4>Occurrences (46) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a></td><td class="l">lower_blockaddress_displ</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zhinx -target-abi=ilp32 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a></td><td class="l">lower_blockaddress_displ</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zhinx -target-abi=ilp32 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a></td><td class="l">lower_blockaddress_displ</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zhinx -target-abi=ilp32 -code-model=small -verify-machineinstrs -mattr=+xqcili</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a></td><td class="l">lower_blockaddress_displ</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zhinx -target-abi=lp64 -code-model=large -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a></td><td class="l">lower_blockaddress_displ</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zhinx -target-abi=lp64 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a></td><td class="l">lower_blockaddress_displ</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zhinx -target-abi=lp64 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo4</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo10</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo4</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx,+unaligned-scalar-mem -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx,+unaligned-scalar-mem -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo10</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx,+unaligned-scalar-mem -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo4</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a></td><td class="l">foo10</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

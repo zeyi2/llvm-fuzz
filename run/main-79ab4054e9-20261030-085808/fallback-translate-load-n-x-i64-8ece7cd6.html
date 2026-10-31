@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load &lt;N x i64&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">47 in 32 configs, 15 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-mem.12f5b01784.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-mem.ll">double-mem.ll</a><span class="dim">)</span> @fld_fsd_global via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx,+zilsd -verify-machineinstrs -target-abi=ilp32</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/7z5bszMqb">https://godbolt.org/z/7z5bszMqb</a> (llc-assertions-trunk, checked 2026-10-30 09:36 UTC): <a href="https://godbolt.org/z/7z5bszMqb">G</a> <span class="fp">falls back differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external dso_local global double
+@G.1 = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define dso_local double @fld_fsd_global(double %a, double %b) #0 {
+  %LGV = load &lt;2 x i64&gt;, ptr @G.1, align 16
+  %1 = fadd double %a, %b
+  %2 = load volatile double, ptr @G, align 8
+  store double %1, ptr @G, align 8
+  %3 = getelementptr double, ptr @G, i32 9
+  %4 = load volatile double, ptr %3, align 8
+  store double %1, ptr %3, align 8
+  %B = xor &lt;2 x i64&gt; %LGV, splat (i64 9223372036854775807)
+  store &lt;2 x i64&gt; %B, ptr @G.1, align 16
+  ret double %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx,+zilsd -verify-machineinstrs -target-abi=ilp32 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>19</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %16:_(&lt;2 x s64&gt;) = G_XOR %6:_, %14:_ (in function: fld_fsd_global)<br>warning: Instruction selection used fallback path for fld_fsd_global</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx,+zilsd -verify-machineinstrs -target-abi=ilp32 -global-isel=0</code></td><td>0</td><td>19</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx,+zilsd -verify-machineinstrs -target-abi=ilp32 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx,+zilsd -verify-machineinstrs -target-abi=ilp32 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV = load &lt;2 x i64&gt;, ptr @G.1, align 16&#x27; (in function: fld_fsd_global)
+warning: Instruction selection used fallback path for fld_fsd_global</pre>
+<h4>Occurrences (47) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-fcmp-strict.83639f0599.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-fcmp-strict.ll">double-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmps_uno</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">double-fcmp-strict.de8feaedca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-fcmp-strict.ll">double-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmps_uno</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">double-intrinsics.40ad1615ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">cosh_f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-intrinsics.fc94bd055c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">cosh_f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-mem.12f5b01784.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-mem.ll">double-mem.ll</a><span class="dim">)</span></td><td class="l">fld_fsd_global</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx,+zilsd -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-mem.23c5ce1137.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-mem.ll">double-mem.ll</a><span class="dim">)</span></td><td class="l">fld_fsd_global</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">double-mem.fb3bf86141.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-mem.ll">double-mem.ll</a><span class="dim">)</span></td><td class="l">fld_fsd_global</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-round-conv.25e8759e52.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-round-conv.ll">double-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_ceil_double</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">double-round-conv.cfcf1fb709.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-round-conv.ll">double-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_ceil_double</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">float-fcmp-strict.4b314eed4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-fcmp-strict.ll">float-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmps_uno</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32</code></td></tr><tr><td class="l">float-fcmp-strict.d34a5e08d2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-fcmp-strict.ll">float-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmps_uno</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64</code></td></tr><tr><td class="l">float-intrinsics.9691511fae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">exp10_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr><tr><td class="l">float-intrinsics.97fb560fe5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">exp10_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-round-conv.14f89dbd99.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-round-conv.ll">float-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_ceil_float</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs -target-abi=ilp32</code></td></tr><tr><td class="l">float-round-conv.94458aeb42.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/float-round-conv.ll">float-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_ceil_float</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs -target-abi=lp64</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

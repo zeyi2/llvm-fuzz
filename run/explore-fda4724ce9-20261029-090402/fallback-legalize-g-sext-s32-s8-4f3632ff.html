@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SEXT s32,s8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SEXT s32,s8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SEXT s32,s8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 2 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vmv.x.s.854b0598ea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmv.x.s.ll">vmv.x.s.ll</a><span class="dim">)</span> @intrinsic_vmv.x.s_s_nxv8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+@G.1 = external global i1
+
+; Function Attrs: nounwind
+define signext i8 @intrinsic_vmv.x.s_s_nxv8i8(&lt;vscale x 8 x i8&gt; %0) #0 {
+entry:
+  %LGV = load i8, ptr @G, align 1
+  %a = call i8 @llvm.riscv.vmv.x.s.nxv8i8(&lt;vscale x 8 x i8&gt; %0)
+  %C = icmp ule i8 %a, %LGV
+  store i1 %C, ptr @G.1, align 1
+  ret i8 %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare i8 @llvm.riscv.vmv.x.s.nxv8i8(&lt;vscale x 8 x i8&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(s32) = G_SEXT %3:_(s8) (in function: intrinsic_vmv.x.s_s_nxv8i8)
+warning: Instruction selection used fallback path for intrinsic_vmv.x.s_s_nxv8i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vmv.x.s.042aa2c51f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmv.x.s.ll">vmv.x.s.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmv.x.s_s_nxv16i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3 -code-model=small</code></td></tr><tr><td class="l">vmv.x.s.2c44d81b20.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmv.x.s.ll">vmv.x.s.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmv.x.s_s_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+m,+zba -O1</code></td></tr><tr><td class="l">vmv.x.s.854b0598ea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vmv.x.s.ll">vmv.x.s.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmv.x.s_s_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

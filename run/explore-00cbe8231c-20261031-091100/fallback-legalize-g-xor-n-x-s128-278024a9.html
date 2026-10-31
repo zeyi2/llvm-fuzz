@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_XOR &lt;N x s128&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_XOR &lt;N x s128&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_XOR &lt;N x s128&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">umulh.1a4214f173.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span> @umulh_v2i128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;2 x i128&gt; @umulh_v2i128(&lt;2 x i128&gt; %x, &lt;2 x i128&gt; %y) #0 {
+  %r = call &lt;2 x i128&gt; @llvm.umulh.v2i128(&lt;2 x i128&gt; %x, &lt;2 x i128&gt; %y)
+  %B = xor &lt;2 x i128&gt; %r, zeroinitializer
+  ret &lt;2 x i128&gt; %B
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i128&gt; @llvm.umulh.v2i128(&lt;2 x i128&gt;, &lt;2 x i128&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %8:_(&lt;2 x s128&gt;) = G_XOR %5:_, %6:_ (in function: umulh_v2i128)
+warning: Instruction selection used fallback path for umulh_v2i128</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-abd.4f9816fd3f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span></td><td class="l">sabd_2d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O2</code></td></tr><tr><td class="l">fixed-vectors-abd.523d4fb0e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span></td><td class="l">uabd_2d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0</code></td></tr><tr><td class="l">fixed-vectors-abd.b59c4f5aea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span></td><td class="l">uabd_2d</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+experimental-zvabd,+zvkb -O2</code></td></tr><tr><td class="l">umulh.1a4214f173.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_v2i128</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

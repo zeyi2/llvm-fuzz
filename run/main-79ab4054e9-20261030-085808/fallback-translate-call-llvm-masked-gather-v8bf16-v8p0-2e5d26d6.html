@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.masked.gather.v8bf16.v8p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.masked.gather.v8bf16.v8p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.masked.gather.v8bf16.v8p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-masked-gather.6ccb9f9b94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span> @mgather_baseidx_v8bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+@G.99 = external global i1
+
+define &lt;8 x bfloat&gt; @mgather_baseidx_v8bf16(ptr %base, &lt;8 x i16&gt; %idxs, &lt;8 x i1&gt; %m, &lt;8 x bfloat&gt; %passthru) {
+  %LGV = load i32, ptr @G, align 4
+  %C = icmp ugt i32 %LGV, -1
+  %ptrs = getelementptr inbounds bfloat, ptr %base, &lt;8 x i16&gt; %idxs
+  %v = call &lt;8 x bfloat&gt; @llvm.masked.gather.v8bf16.v8p0(&lt;8 x ptr&gt; align 2 %ptrs, &lt;8 x i1&gt; %m, &lt;8 x bfloat&gt; %passthru)
+  store i1 %C, ptr @G.99, align 1
+  ret &lt;8 x bfloat&gt; %v
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;8 x bfloat&gt; @llvm.masked.gather.v8bf16.v8p0(&lt;8 x ptr&gt;, &lt;8 x i1&gt;, &lt;8 x bfloat&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.masked.gather.v8bf16.v8p0: &#x27;  %v = call &lt;8 x bfloat&gt; @llvm.masked.gather.v8bf16.v8p0(&lt;8 x ptr&gt; align 2 %ptrs, &lt;8 x i1&gt; %m, &lt;8 x bfloat&gt; %passthru)&#x27; (in function: mgather_baseidx_v8bf16)
+warning: Instruction selection used fallback path for mgather_baseidx_v8bf16</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-masked-gather.6ccb9f9b94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_baseidx_v8bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-masked-gather.860c5f2ca5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_baseidx_v8bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-masked-gather.a3dee63f91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_baseidx_v8bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-masked-gather.cc47703367.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_baseidx_v8bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-masked-gather.d32bde74c9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_baseidx_v8bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+v -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-masked-gather.e28a02c85b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_baseidx_v8bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -target-abi=ilp32d -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

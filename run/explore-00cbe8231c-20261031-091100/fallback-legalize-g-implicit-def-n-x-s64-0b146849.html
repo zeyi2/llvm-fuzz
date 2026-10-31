@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_IMPLICIT_DEF &lt;N x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_IMPLICIT_DEF &lt;N x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_IMPLICIT_DEF &lt;N x s64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 187 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-select-fcmp.76bd9c4847.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-select-fcmp.ll">float-select-fcmp.ll</a><span class="dim">)</span> @select_fcmp_oeq_1_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @select_fcmp_oeq_1_2(float %a, float %b) {
+  %A = alloca &lt;2 x i64&gt;, align 16
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %1 = fcmp fast oeq float %a, %b
+  %2 = select i1 %1, i32 1, i32 2
+  %B = or &lt;2 x i64&gt; zeroinitializer, zeroinitializer
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  ret i32 %2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %3:_(&lt;2 x s64&gt;) = G_IMPLICIT_DEF (in function: select_fcmp_oeq_1_2)
+warning: Instruction selection used fallback path for select_fcmp_oeq_1_2</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes-sifive.3fb477beaa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/attributes-sifive.ll">attributes-sifive.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv32 -mattr=+xsfmm128t,+zbb -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">double-arith.ef9db54a6d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-arith.ll">double-arith.ll</a><span class="dim">)</span></td><td class="l">fadd_d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d -O0 -code-model=medium</code></td></tr><tr><td class="l">float-bit-preserving-dagcombines.ae3f754660.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-bit-preserving-dagcombines.ll">float-bit-preserving-dagcombines.ll</a><span class="dim">)</span></td><td class="l">bitcast_double_xor</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+f,+d,+zicond -O0</code></td></tr><tr><td class="l">float-select-fcmp.76bd9c4847.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/float-select-fcmp.ll">float-select-fcmp.ll</a><span class="dim">)</span></td><td class="l">select_fcmp_oeq_1_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f -O0 -code-model=small</code></td></tr><tr><td class="l">vzip.05b1d28362.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vzip.ll">vzip.ll</a><span class="dim">)</span></td><td class="l">test_vzip_vv_mask_i32m8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+experimental-zvzip,+zve32x,+zve64d -O0</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.e6a2cd5fc0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">ashr_16bytes</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

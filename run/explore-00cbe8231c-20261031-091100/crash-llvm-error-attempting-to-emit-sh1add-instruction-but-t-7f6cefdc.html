@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Attempting to emit SH1ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Attempting to emit SH1ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Attempting to emit SH1ADD instruction but the Feature_HasStdExtZba predicate(s) are not met <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vwmacc.9a3db342ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vwmacc.ll">vwmacc.ll</a><span class="dim">)</span> @intrinsic_vwmacc_vx_nxv4i32_i16_nxv4i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+xtheadba -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/fr9ehj8E4">https://godbolt.org/z/fr9ehj8E4</a> (llc-assertions-trunk, checked 2026-10-31 12:53 UTC): <a href="https://godbolt.org/z/fr9ehj8E4">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 4 x i32&gt; @intrinsic_vwmacc_vx_nxv4i32_i16_nxv4i16(&lt;vscale x 4 x i32&gt; %0, i16 %1, &lt;vscale x 4 x i16&gt; %2, i32 %3) #0 {
+entry:
+  %B = mul i32 %3, 2147483647
+  %a = call &lt;vscale x 4 x i32&gt; @llvm.riscv.vwmacc.nxv4i32.i16.nxv4i16.i32(&lt;vscale x 4 x i32&gt; %0, i16 %1, &lt;vscale x 4 x i16&gt; %2, i32 %3, i32 0)
+  store i32 %B, ptr poison, align 4
+  ret &lt;vscale x 4 x i32&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 4 x i32&gt; @llvm.riscv.vwmacc.nxv4i32.i16.nxv4i16.i32(&lt;vscale x 4 x i32&gt;, i16, &lt;vscale x 4 x i16&gt;, i32, i32 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+xtheadba -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">LLVM ERROR: Attempting to emit SH1ADD instruction but the Feature_HasStdExtZba predicate(s) are not met<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+xtheadba -O1 -global-isel=0</code></td><td>0</td><td>6</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+xtheadba -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+xtheadba -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: Attempting to emit SH1ADD instruction but the Feature_HasStdExtZba predicate(s) are not met
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+xtheadba -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISC-V Assembly Printer&#x27; on function &#x27;@intrinsic_vwmacc_vx_nxv4i32_i16_nxv4i16&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000056336c107c0b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000056336c104ab1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000056336c10868b
+3  libc.so.6 0x00007f8e72245330
+4  libc.so.6 0x00007f8e7229ec0c pthread_kill + 284
+5  libc.so.6 0x00007f8e7224527e gsignal + 30
+6  libc.so.6 0x00007f8e722288ff abort + 223
+7  llc       0x000056336c04b94d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x000056336c04b796
+9  llc       0x000056336cea27fe
+10 llc       0x000056336d3dcccb
+11 llc       0x000056336d3ee007 llvm::AsmPrinter::emitFunctionBody() + 4855
+12 llc       0x000056336d3da8c7
+13 llc       0x000056336c6d8c7d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+14 llc       0x000056336c4620b7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x000056336c46a5d2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x000056336c462e60 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x000056336c10f2c7 llcMain + 12151
+18 llc       0x000056336c04b3af main + 63
+19 libc.so.6 0x00007f8e7222a1ca
+20 libc.so.6 0x00007f8e7222a28b __libc_start_main + 139
+21 llc       0x000056336c04b2a5 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vfncvt-rtz-xu-f.7117827539.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vfncvt-rtz-xu-f.ll">vfncvt-rtz-xu-f.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfh,+xtheadba -O0</code></td></tr><tr><td class="l">vnsra.e99a486de2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vnsra.ll">vnsra.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+xtheadba,+zbs -O0</code></td></tr><tr><td class="l">vwmacc.9a3db342ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vwmacc.ll">vwmacc.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+xtheadba -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

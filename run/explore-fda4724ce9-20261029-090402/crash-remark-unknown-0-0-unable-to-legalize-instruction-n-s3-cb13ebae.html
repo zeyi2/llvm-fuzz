@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: remark: &lt;unknown&gt;:0:0: unable to legalize instruction: N:_(s32) = G_CTLZ N:_(s128)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: remark: &lt;unknown&gt;:0:0: unable to legalize instruction: N:_(s32) = G_CTLZ N:_(s128)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: N:_(s32) = G_CTLZ N:_(s128) <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-br-fcmp.95cc5388.7fd5f785.8eeb472d.610494a697.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.7fd5f785.8eeb472d.ll<span class="dim">)</span> via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+xtheadba,+v,+zbb -O3 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@G = global i1 false
+@G.1 = global i1 false
+@G.2 = global float 1.000000e+00
+@G.3 = global &lt;4 x i32&gt; splat (i32 65536)
+@G.4 = global &lt;4 x i1&gt; zeroinitializer
+@G.5 = global i8 -1
+@G.6 = global float 0.000000e+00
+@G.7 = global i1 true
+@G.8 = global i8 -128
+@G.9 = global i128 42
+@G.10 = global i32 0
+@G.11 = global i1 false
+
+declare void @abort()
+
+declare void @exit(i32)
+
+declare float @dummy(float)
+
+; Function Attrs: nounwind
+declare void @br_fcmp_false(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_oeq(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_oeq_alt(float, float) #0
+
+; Function Attrs: nounwind
+define void @br_fcmp_ogt(float %a, float %b) #0 {
+  %A2 = alloca i1, align 1
+  store i1 false, ptr %A2, align 1
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %1 = fcmp ogt float %a, %b
+  br i1 %1, label %if.then, label %if.else
+
+if.else:                                          ; preds = %0
+  %B = sub i1 %1, %1
+  %L = load i1, ptr %A2, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %T
+  %2 = phi i32 [ 2147483647, %T ]
+  %LGV3 = load i128, ptr @G.9, align 4
+  store i1 %B, ptr %A, align 1
+  %C = icmp sgt i1 %B, %1
+  store i1 %C, ptr @G.1, align 1
+  %B4 = sdiv i128 0, %LGV3
+  store i128 %B4, ptr poison, align 4
+  store i32 %2, ptr @G.10, align 4
+  ret void
+
+if.then:                                          ; preds = %0
+  %LGV = load float, ptr @G.6, align 4
+  tail call void @abort()
+  %C1 = fcmp false float %a, %LGV
+  store i1 %C1, ptr %A, align 1
+  unreachable
+
+T:                                                ; preds = %if.else
+  br label %BB
+
+F:                                                ; preds = %if.else
+  %LGV1 = load i1, ptr @G.11, align 1
+  %C2 = icmp ult i1 %LGV1, false
+  store i1 %C2, ptr %A2, align 1
+  ret void
+}
+
+; Function Attrs: nounwind
+declare void @br_fcmp_oge(float, float) #0
+
+; Function Attrs: nounwind
+define void @br_fcmp_olt(float %a, float %b) #0 {
+  %A10 = alloca i1, align 1
+  store i1 true, ptr %A10, align 1
+  %A = alloca i32, align 4
+  store i32 0, ptr %A, align 4
+  %1 = fcmp ueq float %a, %b
+  br i1 %1, label %if.then, label %if.else
+
+if.else:                                          ; preds = %0
+  %G = getelementptr float, ptr %A, i1 %1
+  %LGV = load i1, ptr @G, align 1
+  %B = sub i1 %1, %LGV
+  store i1 %B, ptr %G, align 1
+  ret void
+
+if.then:                                          ; preds = %0
+  tail call void @abort()
+  %L = load i32, ptr %A, align 4
+  switch i32 %L, label %SW_D [
+    i32 -1473524538, label %SW_C
+    i32 -1844659496, label %SW_C1
+    i32 1208426187, label %SW_C2
+    i32 1675481104, label %SW_C3
+    i32 431866511, label %SW_C4
+    i32 -1360757087, label %SW_C5
+    i32 696628625, label %SW_C6
+    i32 -481522830, label %SW_C7
+  ]
+
+BB:                                               ; preds = %SW_C7, %SW_C6, %SW_C4, %SW_C3, %SW_C, %SW_D
+  unreachable
+
+SW_D:                                             ; preds = %SW_D, %if.then
+  %LGV8 = load i1, ptr @G.7, align 1
+  br i1 %LGV8, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %SW_C, %if.then
+  %L11 = load i1, ptr %A10, align 1
+  br i1 %L11, label %SW_C, label %BB
+
+SW_C1:                                            ; preds = %if.then
+  ret void
+
+SW_C2:                                            ; preds = %if.then
+  ret void
+
+SW_C3:                                            ; preds = %if.then
+  br label %BB
+
+SW_C4:                                            ; preds = %SW_C4, %if.then
+  br i1 %1, label %SW_C4, label %BB
+
+SW_C5:                                            ; preds = %if.then
+  ret void
+
+SW_C6:                                            ; preds = %if.then
+  br label %BB
+
+SW_C7:                                            ; preds = %SW_C7, %if.then
+  br i1 %1, label %SW_C7, label %BB
+}
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ole(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_one(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ord(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ueq(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ugt(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_uge(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ult(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ule(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_une(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_uno(float, float) #0
+
+; Function Attrs: nounwind
+define void @br_fcmp_true(float %a, float %b) #0 {
+  %C = fcmp one float %b, 1.401300e-45
+  %LGV1 = load i8, ptr @G.5, align 1
+  %1 = fcmp true float %a, %b
+  %B = or i1 %1, true
+  %A5 = alloca i1, align 1
+  store i1 poison, ptr %A5, align 1
+  %B2 = mul i8 -128, %LGV1
+  %A = alloca i1, align 1
+  store i8 %B2, ptr @G.5, align 1
+  store i1 %C, ptr %A, align 1
+  store i1 poison, ptr %A, align 1
+  br i1 %B, label %if.then, label %if.else
+
+if.else:                                          ; preds = %0
+  ret void
+
+if.then:                                          ; preds = %0
+  %B3 = xor &lt;vscale x 1 x i64&gt; zeroinitializer, splat (i64 42)
+  tail call void @abort()
+  %B1 = or i8 %B2, -1
+  store i8 %B1, ptr @G.8, align 1
+  %C4 = fcmp ord float %b, %a
+  store &lt;vscale x 1 x i64&gt; %B3, ptr %A, align 8
+  store i1 %C4, ptr %A5, align 1
+  unreachable
+}
+
+; Function Attrs: nounwind
+declare i32 @br_fcmp_store_load_stack_slot(float, float) #0
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+xtheadba,+v,+zbb -O3 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+xtheadba,+v,+zbb -O3 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %805:_(s32) = G_CTLZ %27:_(s128) (in function: br_fcmp_ogt)
+warning: Instruction selection used fallback path for br_fcmp_ogt
+Unhandled predicate
+UNREACHABLE executed at /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVInstructionSelector.cpp:2296!
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+xtheadba,+v,+zbb -O3 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;InstructionSelect&#x27; on function &#x27;@br_fcmp_true&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x00005603a92700cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x00005603a926cf71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x00005603a9270b4b
+3  libc.so.6 0x00007fcfc8845330
+4  libc.so.6 0x00007fcfc889ec0c pthread_kill + 284
+5  libc.so.6 0x00007fcfc884527e gsignal + 30
+6  libc.so.6 0x00007fcfc88288ff abort + 223
+7  llc       0x00005603a91b45cf
+8  llc       0x00005603aa4bb10e
+9  llc       0x00005603aa4b009e
+10 llc       0x00005603ab3a1387 llvm::InstructionSelectImpl::selectMachineFunction(llvm::MachineFunction&amp;) + 1255
+11 llc       0x00005603ab3a2b21 llvm::InstructionSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 417
+12 llc       0x00005603a98398cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+13 llc       0x00005603a95c9f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x00005603a95d2452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x00005603a95cace0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x00005603a9277787 llcMain + 12151
+17 llc       0x00005603a91b3b6f main + 63
+18 libc.so.6 0x00007fcfc882a1ca
+19 libc.so.6 0x00007fcfc882a28b __libc_start_main + 139
+20 llc       0x00005603a91b3a65 _start + 37</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-br-fcmp.95cc5388.7fd5f785.8eeb472d.454cd66f58.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.7fd5f785.8eeb472d.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+xtheadba,+zfh,+zbb -O1</code></td></tr><tr><td class="l">float-br-fcmp.95cc5388.7fd5f785.8eeb472d.610494a697.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.7fd5f785.8eeb472d.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+xtheadba,+v,+zbb -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

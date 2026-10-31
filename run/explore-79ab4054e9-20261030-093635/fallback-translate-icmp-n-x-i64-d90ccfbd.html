@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;N x i64&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 68 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">attributes.dea838d27f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span> @atomic_load_i8_seq_cst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i1&gt;
+
+; Function Attrs: nounwind
+define i8 @atomic_load_i8_seq_cst(ptr %a) #0 {
+  %C = icmp ule &lt;2 x i64&gt; splat (i64 4294967296), splat (i64 42)
+  %1 = load atomic i8, ptr %a seq_cst, align 1
+  store &lt;2 x i1&gt; %C, ptr @G, align 1
+  ret i8 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp ule &lt;2 x i64&gt; splat (i64 4294967296), splat (i64 42)&#x27; (in function: atomic_load_i8_seq_cst)
+warning: Instruction selection used fallback path for atomic_load_i8_seq_cst</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.dea838d27f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">elf-preemption.5f465ceee4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/elf-preemption.ll">elf-preemption.ll</a><span class="dim">)</span></td><td class="l">call_dsolocal_func</td><td class="l"><code>-mtriple=riscv32 -relocation-model=static -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-compress-int.01068a921d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-int.ll">fixed-vectors-compress-int.ll</a><span class="dim">)</span></td><td class="l">vector_compress_v8i32_passthru</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O1</code></td></tr><tr><td class="l">rv32zbb.6ec44e61a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a><span class="dim">)</span></td><td class="l">ctpop_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+c,+zfinx -O0</code></td></tr><tr><td class="l">rv64-stackmap.73a5be11c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv64-stackmap.ll">rv64-stackmap.ll</a><span class="dim">)</span></td><td class="l">propertyRead</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">shadowcallstack.984bbdbad5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/shadowcallstack.ll">shadowcallstack.ll</a><span class="dim">)</span></td><td class="l">f5_hw</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zimop,+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

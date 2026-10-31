@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: ((TypeSize::ScalarTy)SrcOps.size() * SrcOps[0].getLLTTy(*getMRI()).getSizeInBits() == DstOps[0].getLLTTy(*getMRI()).getSizeInBits() &amp;&amp; &quot;input vectors do not exactly cover the output vector register&quot;), function buildInstr, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: ((TypeSize::ScalarTy)SrcOps.size() * SrcOps[0].getLLTTy(*getMRI()).getSizeInBits() == DstOps[0].getLLTTy(*getMRI()).getSizeInBits() &amp;&amp; &quot;input vectors do not exactly cover the output vector register&quot;), function buildInstr, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: ((TypeSize::ScalarTy)SrcOps.size() * SrcOps[0].getLLTTy(*getMRI()).getSizeInBits() == DstOps[0].getLLTTy(*getMRI()).getSizeInBits() &amp;&amp; &quot;input vectors do not exactly cover the output vector register&quot;), function buildInstr, file MachineIRBuilder.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vtrunc-vp.ll">vtrunc-vp.ll</a> @vtrunc_nxv15i16_nxv15i64 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Wbeh17fhn">https://godbolt.org/z/Wbeh17fhn</a> (llc-assertions-trunk, checked 2026-10-30 09:35 UTC): <a href="https://godbolt.org/z/Wbeh17fhn">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 15 x i64&gt; @vtrunc_nxv15i16_nxv15i64(&lt;vscale x 15 x i64&gt; %a) {
+  ret &lt;vscale x 15 x i64&gt; %a
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1578: virtual llvm::MachineInstrBuilder llvm::MachineIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;): Assertion `(TypeSize::ScalarTy)SrcOps.size() * SrcOps[0].getLLTTy(*getMRI()).getSizeInBits() == DstOps[0].getLLTTy(*getMRI()).getSizeInBits() &amp;&amp; &quot;input vectors do not exactly cover the output vector register&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>1</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1581: virtual MachineInstrBuilder llvm::MachineIRBuilder::buildInstr(unsigned int, ArrayRef&lt;DstOp&gt;, ArrayRef&lt;SrcOp&gt;, std::optional&lt;unsigned int&gt;): Assertion `(TypeSize::ScalarTy)SrcOps.size() * SrcOps[0].getLLTTy(*getMRI()).getSizeInBits() == DstOps[0].getLLTTy(*getMRI()).getSizeInBits() &amp;&amp; &quot;input vectors do not exactly cover the output vector register&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@vtrunc_nxv15i16_nxv15i64&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055cac9b79c0b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055cac9b76ab1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055cac9b7a68b
+3  libc.so.6 0x00007f6eaee45330
+4  libc.so.6 0x00007f6eaee9ec0c pthread_kill + 284
+5  libc.so.6 0x00007f6eaee4527e gsignal + 30
+6  libc.so.6 0x00007f6eaee288ff abort + 223
+7  libc.so.6 0x00007f6eaee2881b
+8  libc.so.6 0x00007f6eaee3b517
+9  llc       0x000055cacbd3b661 llvm::MachineIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 9761
+10 llc       0x000055cacbc4d39f llvm::CSEMIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 2991
+11 llc       0x000055cacbd31e08 llvm::MachineIRBuilder::buildMergeLikeInstr(llvm::DstOp const&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) + 360
+12 llc       0x000055cacbc40deb
+13 llc       0x000055cacbc3f1a2 llvm::CallLowering::buildCopyFromRegs(llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;, llvm::ArrayRef&lt;llvm::Register&gt;, llvm::LLT, llvm::LLT, llvm::ISD::ArgFlagsTy) + 2306
+14 llc       0x000055cacbc4402d llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 5261
+15 llc       0x000055cacadb56cc
+16 llc       0x000055cacbcb3f83 llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 3507
+17 llc       0x000055cacbcb521d llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+18 llc       0x000055caca14ac7d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+19 llc       0x000055cac9ed40b7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+20 llc       0x000055cac9edc5d2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+21 llc       0x000055cac9ed4e60 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+22 llc       0x000055cac9b812c7 llcMain + 12151
+23 llc       0x000055cac9abd3af main + 63
+24 libc.so.6 0x00007f6eaee2a1ca
+25 libc.so.6 0x00007f6eaee2a28b __libc_start_main + 139
+26 llc       0x000055cac9abd2a5 _start + 37</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vtrunc-vp.ll">vtrunc-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vtrunc-vp.ll">vtrunc-vp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave.a60c7731f1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave.ll">vector-deinterleave.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin</code></td></tr><tr><td class="l">vector-deinterleave.c30c17d86d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave.ll">vector-deinterleave.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin,+experimental-zvzip</code></td></tr><tr><td class="l">vector-deinterleave.f429dfe938.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave.ll">vector-deinterleave.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

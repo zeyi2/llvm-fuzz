@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CTLZ s32,s128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CTLZ s32,s128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CTLZ s32,s128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 42 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32xtheadbb.9f0f66a6a9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv32xtheadbb.ll">rv32xtheadbb.ll</a><span class="dim">)</span> @sexti1_i32_setcc_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+b -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+@G.1 = external global i128
+
+define i32 @sexti1_i32_setcc_2(i32 %a, i32 %b) {
+  %LGV1 = load i128, ptr @G.1, align 4
+  %LGV = load i128, ptr @G, align 4
+  %icmp = icmp eq i32 %a, %b
+  %sext = sext i1 %icmp to i32
+  %B = udiv i128 %LGV, %LGV1
+  store i128 %B, ptr @G.1, align 4
+  ret i32 %sext
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+b -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+b -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %1034:_(s32) = G_CTLZ %9:_(s128) (in function: sexti1_i32_setcc_2)
+warning: Instruction selection used fallback path for sexti1_i32_setcc_2</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.f5ac1d75f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_minmax_i128</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32xtheadbb.9f0f66a6a9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv32xtheadbb.ll">rv32xtheadbb.ll</a><span class="dim">)</span></td><td class="l">sexti1_i32_setcc_2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+b -O1</code></td></tr><tr><td class="l">uadd_sat_plus.5ead99ab9c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/uadd_sat_plus.ll">uadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zicond,+zcb -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

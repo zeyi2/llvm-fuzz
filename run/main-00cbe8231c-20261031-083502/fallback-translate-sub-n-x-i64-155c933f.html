@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-intrinsics.14c659d236.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span> @fma_f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define half @fma_f16(half %a, half %b, half %c) #0 {
+  %B = sub &lt;2 x i64&gt; zeroinitializer, zeroinitializer
+  %1 = call half @llvm.fma.f16(half %a, half %b, half %c)
+  store &lt;2 x i64&gt; %B, ptr @G, align 16
+  ret half %1
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare half @llvm.fma.f16(half, half, half) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %B = sub &lt;2 x i64&gt; zeroinitializer, zeroinitializer&#x27; (in function: fma_f16)
+warning: Instruction selection used fallback path for fma_f16</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-intrinsics.14c659d236.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">half-intrinsics.30f2155e9e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -mattr=+zhinx -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">half-intrinsics.6262f24fbb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -mattr=+zhinx -verify-machineinstrs -target-abi ilp32</code></td></tr><tr><td class="l">half-intrinsics.6f29e3f457.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinxmin -verify-machineinstrs -target-abi ilp32</code></td></tr><tr><td class="l">half-intrinsics.6ff9406dea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -mattr=+zhinxmin -verify-machineinstrs -target-abi ilp32</code></td></tr><tr><td class="l">half-intrinsics.7abedf203a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -verify-machineinstrs -target-abi ilp32</code></td></tr><tr><td class="l">half-intrinsics.cd46026d2d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -verify-machineinstrs -target-abi lp64</code></td></tr><tr><td class="l">half-intrinsics.cf935a8589.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fma_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinxmin -verify-machineinstrs -target-abi lp64</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

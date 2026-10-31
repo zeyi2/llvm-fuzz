@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: &lt;inline asm&gt;:1:2: error: invalid instruction, any one of the following would fix this:</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: &lt;inline asm&gt;:1:2: error: invalid instruction, any one of the following would fix this:</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">&lt;inline asm&gt;:1:2: error: invalid instruction, any one of the following would fix this: <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">inline-asm-zdinx-constraint-r.5182a986.9301b266b4.ll <span class="dim">(mutant of</span> inline-asm-zdinx-constraint-r.5182a986.ll<span class="dim">)</span> @constraint_double_abi_name via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+v -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@gd = external global double
+@G = external global i1
+@G.1 = external global &lt;4 x i32&gt;
+@G.2 = external global i16
+
+; Function Attrs: nounwind
+define double @constraint_double_abi_name(double %a) #0 {
+  %LGV4 = load i16, ptr @G.2, align 2
+  %LGV = load &lt;4 x i32&gt;, ptr @G.1, align 16
+  %B = srem &lt;4 x i32&gt; %LGV, splat (i32 1)
+  %A = alloca i1, align 1
+  %L = load i16, ptr %A, align 2
+  store i1 poison, ptr %A, align 1
+  %C = fcmp ord double %a, %a
+  %1 = load double, ptr @gd, align 8
+  %2 = tail call double asm &quot;fadd.d $0, $1, $2&quot;, &quot;={t1},{a0},{s0}&quot;(double %a, double %1)
+  %B5 = add i16 %L, %LGV4
+  %C1 = fcmp ule double %a, %1
+  %B3 = sdiv i1 %C1, %C
+  store i1 %C1, ptr %A, align 1
+  store i1 %B3, ptr @G, align 1
+  store &lt;4 x i32&gt; %B, ptr %A, align 16
+  store i16 %B5, ptr @G.2, align 2
+  ret double %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+v -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+v -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">&lt;inline asm&gt;:1:2: error: invalid instruction, any one of the following would fix this:
+        fadd.d t1, a0, s0
+        ^
+&lt;inline asm&gt;:1:9: note: register must be a FPR
+        fadd.d t1, a0, s0
+               ^
+&lt;inline asm&gt;:1:2: note: instruction requires the following: &#x27;Zdinx&#x27; (Double in Integer)
+        fadd.d t1, a0, s0
+        ^
+&lt;inline asm&gt;:1:2: note: instruction requires the following: &#x27;Zdinx&#x27; (Double in Integer), RV32I Base Instruction Set
+        fadd.d t1, a0, s0
+        ^</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">inline-asm-zdinx-constraint-r.5182a986.8429475501.ll <span class="dim">(mutant of</span> inline-asm-zdinx-constraint-r.5182a986.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfh -O0</code></td></tr><tr><td class="l">inline-asm-zdinx-constraint-r.5182a986.9301b266b4.ll <span class="dim">(mutant of</span> inline-asm-zdinx-constraint-r.5182a986.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+v -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

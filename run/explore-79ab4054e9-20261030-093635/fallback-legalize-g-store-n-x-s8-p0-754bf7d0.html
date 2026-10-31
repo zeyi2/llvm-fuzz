@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE &lt;N x s8~&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE &lt;N x s8~&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE &lt;N x s8~&gt;,p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 5 test files, 26 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fptoui-vp.9b8109ed7f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span> @vfptoui_v4i7_v4f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.7 = external global &lt;4 x i32&gt;
+
+define &lt;4 x i7&gt; @vfptoui_v4i7_v4f16(&lt;4 x half&gt; %va, &lt;4 x i1&gt; %m, i32 zeroext %evl) {
+  %v = fptoui &lt;4 x half&gt; %va to &lt;4 x i7&gt;
+  %B = xor &lt;4 x i32&gt; splat (i32 -2147483648), splat (i32 2147483647)
+  store &lt;4 x i32&gt; %B, ptr @G.7, align 16
+  ret &lt;4 x i7&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %6:_(&lt;4 x s7&gt;), %3:_(p0) :: (store (&lt;4 x s7&gt;)) (in function: vfptoui_v4i7_v4f16)
+warning: Instruction selection used fallback path for vfptoui_v4i7_v4f16</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fptosi-vp.66cfb4f5d2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptosi-vp.ll">fixed-vectors-fptosi-vp.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfhmin -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptosi-vp.6ae5c684e6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptosi-vp.ll">fixed-vectors-fptosi-vp.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.9012215f74.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.9b8109ed7f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vmul-vp.ce3e3bb4fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmul-vp.ll">fixed-vectors-vmul-vp.ll</a><span class="dim">)</span></td><td class="l">vmul_vv_v8i7</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-vssub-vp.4ccaef7807.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vssub-vp.ll">fixed-vectors-vssub-vp.ll</a><span class="dim">)</span></td><td class="l">vssub_vv_v8i7</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb -O1</code></td></tr><tr><td class="l">fixed-vectors-vxor-vp.6454a8ec0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vxor-vp.ll">fixed-vectors-vxor-vp.ll</a><span class="dim">)</span></td><td class="l">vxor_vv_v8i7</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

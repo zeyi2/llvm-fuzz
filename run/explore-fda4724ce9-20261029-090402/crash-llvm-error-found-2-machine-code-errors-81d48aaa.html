@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 2 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 2 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 2 machine code errors. </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 126 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert-O0.ll">vsetvli-insert-O0.ll</a> @intrinsic_same_vlmax via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/5heqPxzYK">https://godbolt.org/z/5heqPxzYK</a> (llc-assertions-trunk, checked 2026-10-26 12:20 UTC): <a href="https://godbolt.org/z/5heqPxzYK">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 1 x double&gt; @intrinsic_same_vlmax(&lt;vscale x 1 x double&gt; %a, &lt;vscale x 1 x double&gt; %b) #0 {
+entry:
+  %0 = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 7)
+  %1 = tail call &lt;vscale x 1 x double&gt; @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt; poison, &lt;vscale x 1 x double&gt; %a, &lt;vscale x 1 x double&gt; %b, i64 7, i64 %0)
+  %2 = tail call &lt;vscale x 1 x double&gt; @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt; poison, &lt;vscale x 1 x double&gt; %1, &lt;vscale x 1 x double&gt; %b, i64 7, i64 %0)
+  ret &lt;vscale x 1 x double&gt; %2
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x double&gt; @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, i64 immarg, i64) #1
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare i64 @llvm.riscv.vsetvlimax.i64(i64 immarg, i64 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After InstructionSelect<br># Machine code for function intrinsic_same_vlmax: IsSSA, TracksLiveness, Legalized, RegBankSelected, Selected</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O0 -global-isel=0</code></td><td>0</td><td>7</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After InstructionSelect
+# Machine code for function intrinsic_same_vlmax: IsSSA, TracksLiveness, Legalized, RegBankSelected, Selected
+Function Live Ins: $v8, $v9
+bb.1.entry:
+  liveins: $v8, $v9
+  %0:vr = COPY $v8
+  %1:vr = COPY $v9
+  %4:vr = IMPLICIT_DEF
+  %2:gprnox0 = PseudoVSETVLIX0 $x0, 215, implicit-def $vl, implicit-def $vtype
+  %3:vr = nofpexcept PseudoVFADD_VV_M1_E64 %4:vr(tied-def 0), %0:vr, %1:vr, 7, %2:gprnox0, 6, 0
+  %5:vr = nofpexcept PseudoVFADD_VV_M1_E64 %4:vr(tied-def 0), %3:vr, %1:vr, 7, %2:gprnox0, 6, 0
+  $v8 = COPY %5:vr
+  PseudoRET implicit $v8
+# End machine code for function intrinsic_same_vlmax.
+*** Bad machine code: dynamic rounding mode should read FRM ***
+- function:    intrinsic_same_vlmax
+- basic block: %bb.1 entry (0x5652215db130)
+- instruction: %3:vr = nofpexcept PseudoVFADD_VV_M1_E64 %4:vr(tied-def 0), %0:vr, %1:vr, 7, %2:gprnox0, 6, 0
+*** Bad machine code: dynamic rounding mode should read FRM ***
+- function:    intrinsic_same_vlmax
+- basic block: %bb.1 entry (0x5652215db130)
+- instruction: %5:vr = nofpexcept PseudoVFADD_VV_M1_E64 %4:vr(tied-def 0), %3:vr, %1:vr, 7, %2:gprnox0, 6, 0
+LLVM ERROR: Found 2 machine code errors.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Verify generated machine code&#x27; on function &#x27;@intrinsic_same_vlmax&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x00005651e48980cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x00005651e4894f71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x00005651e4898b4b
+3  libc.so.6 0x00007f35e6645330
+4  libc.so.6 0x00007f35e669ec0c pthread_kill + 284
+5  libc.so.6 0x00007f35e664527e gsignal + 30
+6  libc.so.6 0x00007f35e66288ff abort + 223
+7  llc       0x00005651e47dc10d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x00005651e4eff493
+9  llc       0x00005651e4f00623
+10 llc       0x00005651e4e618cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+11 llc       0x00005651e4bf1f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+12 llc       0x00005651e4bfa452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+13 llc       0x00005651e4bf2ce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+14 llc       0x00005651e489f787 llcMain + 12151
+15 llc       0x00005651e47dbb6f main + 63
+16 libc.so.6 0x00007f35e662a1ca
+17 libc.so.6 0x00007f35e662a28b __libc_start_main + 139
+18 llc       0x00005651e47dba65 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert-O0.ll">vsetvli-insert-O0.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert-crossbb.ll">vsetvli-insert-crossbb.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+v -target-abi=lp64d -verify-machineinstrs -O2</code></td></tr><tr><td class="l">rv64-spill-vector-csr.d14da265b5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/rv64-spill-vector-csr.ll">rv64-spill-vector-csr.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+d,+zvkb -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

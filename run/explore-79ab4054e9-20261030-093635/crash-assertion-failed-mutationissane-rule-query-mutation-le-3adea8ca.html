@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (mutationIsSane(Rule, Query, Mutation) &amp;&amp; &quot;legality mutation invalid for match&quot;), function apply, file LegalizerInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (mutationIsSane(Rule, Query, Mutation) &amp;&amp; &quot;legality mutation invalid for match&quot;), function apply, file LegalizerInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (mutationIsSane(Rule, Query, Mutation) &amp;&amp; &quot;legality mutation invalid for match&quot;), function apply, file LegalizerInfo.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">24 in 14 configs, 5 test files, 728 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctpop.ll">fixed-vectors-ctpop.ll</a> @ctpop_v16i8 via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/s9aP1avs1">https://godbolt.org/z/s9aP1avs1</a> (llc-assertions-trunk, checked 2026-10-25 18:43 UTC): <a href="https://godbolt.org/z/s9aP1avs1">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @ctpop_v16i8(&lt;16 x i8&gt; %a) {
+  %c = call &lt;16 x i8&gt; @llvm.ctpop.v16i8(&lt;16 x i8&gt; %a)
+  store &lt;16 x i8&gt; %c, ptr null, align 16
+  ret void
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;16 x i8&gt; @llvm.ctpop.v16i8(&lt;16 x i8&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/LegalizerInfo.cpp:203: llvm::LegalizeActionStep llvm::LegalizeRuleSet::apply(const llvm::LegalityQuery&amp;) const: Assertion `mutationIsSane(Rule, Query, Mutation) &amp;&amp; &quot;legality mutation invalid for match&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>15</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/LegalizerInfo.cpp:204: LegalizeActionStep llvm::LegalizeRuleSet::apply(const LegalityQuery &amp;) const: Assertion `mutationIsSane(Rule, Query, Mutation) &amp;&amp; &quot;legality mutation invalid for match&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Legalizer&#x27; on function &#x27;@ctpop_v16i8&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055b6bfef370b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055b6bfef05b1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055b6bfef418b
+3  libc.so.6 0x00007fca87845330
+4  libc.so.6 0x00007fca8789ec0c pthread_kill + 284
+5  libc.so.6 0x00007fca8784527e gsignal + 30
+6  libc.so.6 0x00007fca878288ff abort + 223
+7  libc.so.6 0x00007fca8782881b
+8  libc.so.6 0x00007fca8783b517
+9  llc       0x000055b6c2090346 llvm::LegalizeRuleSet::apply(llvm::LegalityQuery const&amp;) const + 2374
+10 llc       0x000055b6c2091372 llvm::LegalizerInfo::getAction(llvm::MachineInstr const&amp;, llvm::MachineRegisterInfo const&amp;) const + 1138
+11 llc       0x000055b6c203f2f1 llvm::LegalizerHelper::legalizeInstrStep(llvm::MachineInstr&amp;, llvm::LostDebugLocObserver&amp;) + 257
+12 llc       0x000055b6c2033839 llvm::legalizeMachineFunction(llvm::MachineFunction&amp;, llvm::LegalizerInfo const&amp;, llvm::ArrayRef&lt;llvm::GISelChangeObserver*&gt;, llvm::LostDebugLocObserver&amp;, llvm::MachineIRBuilder&amp;, llvm::LibcallLoweringInfo const*, llvm::GISelValueTracking*) + 1753
+13 llc       0x000055b6c2035580
+14 llc       0x000055b6c20351a2 llvm::LegalizerLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 242
+15 llc       0x000055b6c04c360d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+16 llc       0x000055b6c024d7f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+17 llc       0x000055b6c0255d12 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+18 llc       0x000055b6c024e5a0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+19 llc       0x000055b6bfefadc7 llcMain + 12151
+20 llc       0x000055b6bfe36eaf main + 63
+21 libc.so.6 0x00007fca8782a1ca
+22 libc.so.6 0x00007fca8782a28b __libc_start_main + 139
+23 llc       0x000055b6bfe36da5 _start + 37</pre>
+<h4>Occurrences (24) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zve64f,+zvl128b,+f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zve64x,+zvl128b -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zve64f,+zvl128b,+f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zve64x,+zvl128b -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctpop.ll">fixed-vectors-ctpop.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctpop.ll">fixed-vectors-ctpop.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctpop.ll">fixed-vectors-ctpop.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

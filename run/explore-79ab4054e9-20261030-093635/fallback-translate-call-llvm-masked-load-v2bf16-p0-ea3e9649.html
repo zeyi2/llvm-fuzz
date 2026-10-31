@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.masked.load.v2bf16.p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.masked.load.v2bf16.p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.masked.load.v2bf16.p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-masked-load-fp.19a8daf863.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-fp.ll">fixed-vectors-masked-load-fp.ll</a><span class="dim">)</span> @masked_load_v2bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x bfloat&gt; @masked_load_v2bf16(ptr %a, &lt;2 x i1&gt; %mask) {
+  %load = call &lt;2 x bfloat&gt; @llvm.masked.load.v2bf16.p0(ptr align 8 %a, &lt;2 x i1&gt; %mask, &lt;2 x bfloat&gt; poison)
+  %B = frem &lt;2 x bfloat&gt; %load, splat (bfloat 1.000000e+00)
+  ret &lt;2 x bfloat&gt; %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;2 x bfloat&gt; @llvm.masked.load.v2bf16.p0(ptr captures(none), &lt;2 x i1&gt;, &lt;2 x bfloat&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.masked.load.v2bf16.p0: &#x27;  %load = call &lt;2 x bfloat&gt; @llvm.masked.load.v2bf16.p0(ptr align 8 %a, &lt;2 x i1&gt; %mask, &lt;2 x bfloat&gt; poison)&#x27; (in function: masked_load_v2bf16)
+warning: Instruction selection used fallback path for masked_load_v2bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-masked-load-fp.19a8daf863.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-fp.ll">fixed-vectors-masked-load-fp.ll</a><span class="dim">)</span></td><td class="l">masked_load_v2bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin -O3</code></td></tr><tr><td class="l">fixed-vectors-masked-load-fp.ae9353ff0c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-fp.ll">fixed-vectors-masked-load-fp.ll</a><span class="dim">)</span></td><td class="l">masked_load_v2bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+zvfh -O2</code></td></tr><tr><td class="l">fixed-vectors-masked-load-fp.c3f5fa7f8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-fp.ll">fixed-vectors-masked-load-fp.ll</a><span class="dim">)</span></td><td class="l">masked_load_v2bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

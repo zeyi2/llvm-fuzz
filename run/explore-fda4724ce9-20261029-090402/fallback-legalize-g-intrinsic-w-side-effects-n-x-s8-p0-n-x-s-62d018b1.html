@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 57 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vandn-vp.993caa3094.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vandn-vp.ll">vandn-vp.ll</a><span class="dim">)</span> @vandn_vv_vp_swapped_nxv8i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;8 x i8&gt;
+@G.1 = external global &lt;8 x i8&gt;
+
+define &lt;vscale x 8 x i32&gt; @vandn_vv_vp_swapped_nxv8i32(&lt;vscale x 8 x i32&gt; %a, &lt;vscale x 8 x i32&gt; %b, &lt;vscale x 8 x i1&gt; %mask, i32 zeroext %evl) {
+  %LGV1 = load &lt;8 x i8&gt;, ptr @G.1, align 8
+  %LGV = load &lt;8 x i8&gt;, ptr @G, align 8
+  %not.a = xor &lt;vscale x 8 x i32&gt; %a, splat (i32 -1)
+  %x = and &lt;vscale x 8 x i32&gt; %b, %not.a
+  %S = shufflevector &lt;8 x i8&gt; %LGV, &lt;8 x i8&gt; %LGV1, &lt;8 x i32&gt; poison
+  store &lt;8 x i8&gt; %S, ptr poison, align 8
+  ret &lt;vscale x 8 x i32&gt; %x
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %16:_(&lt;4 x s8&gt;), %17:_(&lt;4 x s8&gt;), %18:_(p0), %19:_(&lt;4 x s1&gt;), %21:_(s32) :: (store (s8) into `ptr poison`) (in function: vandn_vv_vp_swapped_nxv8i32)
+warning: Instruction selection used fallback path for vandn_vv_vp_swapped_nxv8i32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vpstore.81c0a66009.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpstore.ll">fixed-vectors-vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_v8f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+v,+zvkb,+c -O1</code></td></tr><tr><td class="l">vandn-vp.993caa3094.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vandn-vp.ll">vandn-vp.ll</a><span class="dim">)</span></td><td class="l">vandn_vv_vp_swapped_nxv8i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1</code></td></tr><tr><td class="l">vnclipu.78c55338bc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vnclipu.ll">vnclipu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vnclipu_vx_nxv16i8_nxv16i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

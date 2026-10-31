@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CTLZ s32,s128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CTLZ s32,s128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CTLZ s32,s128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 67 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">idiv_large.60138fa2ea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span> @udiv_i128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zihintpause -O0 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global double
+@G.3 = external global double
+
+; Function Attrs: nounwind
+define i128 @udiv_i128(i128 %x, i128 %y) #0 {
+  %LGV = load double, ptr @G.2, align 8
+  %B = frem double 0.000000e+00, %LGV
+  %res = udiv i128 %x, %y
+  store double %B, ptr @G.3, align 8
+  ret i128 %res
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zbb,+zihintpause -O0 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zbb,+zihintpause -O0 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %1047:_(s32) = G_CTLZ %10:_(s128) (in function: udiv_i128)
+warning: Instruction selection used fallback path for udiv_i128</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.82e8384cc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zvkb,+zvbb -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">attributes.a5bc911b0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-rvm23u32 -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">combine-ctpop-to-vcpop.3dc8372f59.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/combine-ctpop-to-vcpop.ll">combine-ctpop-to-vcpop.ll</a><span class="dim">)</span></td><td class="l">test_trunc_v128i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zbb,+zcb,+zfa -O1 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">idiv_large.60138fa2ea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span></td><td class="l">udiv_i128</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zihintpause -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">rv32p.a7d7ae64b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/GlobalISel/rv32p.ll">rv32p.ll</a><span class="dim">)</span></td><td class="l">cls_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+a -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

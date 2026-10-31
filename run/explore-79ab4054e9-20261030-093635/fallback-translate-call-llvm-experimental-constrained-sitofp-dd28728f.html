@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.sitofp.v2f16.v2i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.sitofp.v2f16.v2i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.sitofp.v2f16.v2i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vitofp-constrained-sdnode.ea706040c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vitofp-constrained-sdnode.ll">fixed-vectors-vitofp-constrained-sdnode.ll</a><span class="dim">)</span> @vsitofp_v2i8_v2f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+experimental-zvfbfa,+v,+zihintpause -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: strictfp
+define &lt;2 x half&gt; @vsitofp_v2i8_v2f16(&lt;2 x i8&gt; %va) #0 {
+  %B = udiv &lt;2 x i8&gt; %va, %va
+  %evec = call &lt;2 x half&gt; @llvm.experimental.constrained.sitofp.v2f16.v2i8(&lt;2 x i8&gt; %va, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.strict&quot;)
+  store &lt;2 x i8&gt; %B, ptr poison, align 2
+  ret &lt;2 x half&gt; %evec
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;2 x half&gt; @llvm.experimental.constrained.sitofp.v2f16.v2i8(&lt;2 x i8&gt;, metadata, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+experimental-zvfbfa,+v,+zihintpause -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+experimental-zvfbfa,+v,+zihintpause -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.sitofp.v2f16.v2i8: &#x27;  %evec = call &lt;2 x half&gt; @llvm.experimental.constrained.sitofp.v2f16.v2i8(&lt;2 x i8&gt; %va, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: vsitofp_v2i8_v2f16)
+warning: Instruction selection used fallback path for vsitofp_v2i8_v2f16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vitofp-constrained-sdnode.178460fac5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vitofp-constrained-sdnode.ll">fixed-vectors-vitofp-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v2i8_v2f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa -O2</code></td></tr><tr><td class="l">fixed-vectors-vitofp-constrained-sdnode.7e3a281403.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vitofp-constrained-sdnode.ll">fixed-vectors-vitofp-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v2i8_v2f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa,+v,+a -O0</code></td></tr><tr><td class="l">fixed-vectors-vitofp-constrained-sdnode.cf17b998e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vitofp-constrained-sdnode.ll">fixed-vectors-vitofp-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v2i8_v2f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+experimental-zvfbfa,+v -O2</code></td></tr><tr><td class="l">fixed-vectors-vitofp-constrained-sdnode.d1c58f9707.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vitofp-constrained-sdnode.ll">fixed-vectors-vitofp-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v2i8_v2f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa -O0</code></td></tr><tr><td class="l">fixed-vectors-vitofp-constrained-sdnode.ea706040c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vitofp-constrained-sdnode.ll">fixed-vectors-vitofp-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v2i8_v2f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+experimental-zvfbfa,+v,+zihintpause -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

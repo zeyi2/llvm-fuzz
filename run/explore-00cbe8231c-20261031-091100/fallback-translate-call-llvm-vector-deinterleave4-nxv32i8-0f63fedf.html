@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vector.deinterleave4.nxv32i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vector.deinterleave4.nxv32i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vector.deinterleave4.nxv32i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 1 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-deinterleave-load.1e2fcafd05.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-load.ll">vector-deinterleave-load.ll</a><span class="dim">)</span> @vector_deinterleave_load_factor4 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin,+m -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i16
+@G.1 = external global ptr
+
+define { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } @vector_deinterleave_load_factor4(ptr %p) {
+  %LGV = load i16, ptr @G, align 2
+  %vec = load &lt;vscale x 32 x i8&gt;, ptr %p, align 32
+  %G = getelementptr bfloat, ptr %p, i16 %LGV
+  %d0 = call { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } @llvm.vector.deinterleave4.nxv32i8(&lt;vscale x 32 x i8&gt; %vec)
+  %t0 = extractvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %d0, 0
+  %t1 = extractvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %d0, 1
+  %t2 = extractvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %d0, 2
+  %t3 = extractvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %d0, 3
+  %res0 = insertvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } poison, &lt;vscale x 8 x i8&gt; %t0, 0
+  %res1 = insertvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %res0, &lt;vscale x 8 x i8&gt; %t1, 1
+  %res2 = insertvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %res1, &lt;vscale x 8 x i8&gt; %t2, 2
+  %res3 = insertvalue { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %res2, &lt;vscale x 8 x i8&gt; %t3, 3
+  store ptr %G, ptr @G.1, align 8
+  ret { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } %res3
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } @llvm.vector.deinterleave4.nxv32i8(&lt;vscale x 32 x i8&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin,+m -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin,+m -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vector.deinterleave4.nxv32i8: &#x27;  %d0 = call { &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt;, &lt;vscale x 8 x i8&gt; } @llvm.vector.deinterleave4.nxv32i8(&lt;vscale x 32 x i8&gt; %vec)&#x27; (in function: vector_deinterleave_load_factor4)
+warning: Instruction selection used fallback path for vector_deinterleave_load_factor4</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vector-deinterleave-load.1e2fcafd05.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-load.ll">vector-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_factor4</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin,+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-load.1e2fcafd05.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-load.ll">vector-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_factor4_oneactive2</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin,+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-load.ccccbb75ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-load.ll">vector-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_factor4</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin,+m,+zihintpause -O1 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;vscale x N x s64&gt;,s64,&lt;vscale x N x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;vscale x N x s64&gt;,s64,&lt;vscale x N x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;vscale x N x s64&gt;,s64,&lt;vscale x N x s1&gt;,s32 </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">211 in 7 configs, 41 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vabs.ll">vabs.ll</a> @vabs_v_mask_i64m1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvabd -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 1 x i64&gt; @vabs_v_mask_i64m1(&lt;vscale x 1 x i64&gt; %passthru, &lt;vscale x 1 x i64&gt; %v, &lt;vscale x 1 x i1&gt; %mask, i32 %vl) {
+  %res = call &lt;vscale x 1 x i64&gt; @llvm.riscv.vabd.mask.nxv1i64.i64.i32(&lt;vscale x 1 x i64&gt; %passthru, &lt;vscale x 1 x i64&gt; %v, i64 0, &lt;vscale x 1 x i1&gt; %mask, i32 %vl, i32 1)
+  ret &lt;vscale x 1 x i64&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x i64&gt; @llvm.riscv.vabd.mask.nxv1i64.i64.i32(&lt;vscale x 1 x i64&gt;, &lt;vscale x 1 x i64&gt;, i64, &lt;vscale x 1 x i1&gt;, i32, i32 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+experimental-zvabd -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+experimental-zvabd -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;vscale x 1 x s64&gt;) = G_INTRINSIC intrinsic(@llvm.riscv.vabd.mask), %0:_(&lt;vscale x 1 x s64&gt;), %1:_(&lt;vscale x 1 x s64&gt;), %5:_(s64), %2:_(&lt;vscale x 1 x s1&gt;), %3:_(s32), 1 (in function: vabs_v_mask_i64m1)
+warning: Instruction selection used fallback path for vabs_v_mask_i64m1</pre>
+<h4>Occurrences (211) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/masked-vslide1down-rv32.ll">masked-vslide1down-rv32.ll</a></td><td class="l">intrinsic_vslide1down_mask_tumu_vx_nxv1i64_nxv1i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/masked-vslide1down-rv32.ll">masked-vslide1down-rv32.ll</a></td><td class="l">intrinsic_vslide1down_mask_tamu_vx_nxv1i64_nxv1i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/masked-vslide1down-rv32.ll">masked-vslide1down-rv32.ll</a></td><td class="l">intrinsic_vslide1down_mask_tuma_vx_nxv1i64_nxv1i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/masked-vslide1down-rv32.ll">masked-vslide1down-rv32.ll</a></td><td class="l">intrinsic_vslide1down_mask_tama_vx_nxv1i64_nxv1i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/masked-vslide1down-rv32.ll">masked-vslide1down-rv32.ll</a></td><td class="l">intrinsic_vslide1down_mask_tama_undef_mask_vx_nxv1i64_nxv1i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+f -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaadd.ll">vaadd.ll</a></td><td class="l">intrinsic_vaadd_mask_vx_nxv1i64_nxv1i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaadd.ll">vaadd.ll</a></td><td class="l">intrinsic_vaadd_mask_vx_nxv2i64_nxv2i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaadd.ll">vaadd.ll</a></td><td class="l">intrinsic_vaadd_mask_vx_nxv4i64_nxv4i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaadd.ll">vaadd.ll</a></td><td class="l">intrinsic_vaadd_mask_vx_nxv8i64_nxv8i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaaddu.ll">vaaddu.ll</a></td><td class="l">intrinsic_vaaddu_mask_vx_nxv1i64_nxv1i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaaddu.ll">vaaddu.ll</a></td><td class="l">intrinsic_vaaddu_mask_vx_nxv2i64_nxv2i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaaddu.ll">vaaddu.ll</a></td><td class="l">intrinsic_vaaddu_mask_vx_nxv4i64_nxv4i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vaaddu.ll">vaaddu.ll</a></td><td class="l">intrinsic_vaaddu_mask_vx_nxv8i64_nxv8i64_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vabs.ll">vabs.ll</a></td><td class="l">vabs_v_mask_i64m1</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvabd -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vabs.ll">vabs.ll</a></td><td class="l">vabs_v_mask_i64m2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvabd -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

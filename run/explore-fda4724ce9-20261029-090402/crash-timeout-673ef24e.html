@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: timeout</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: timeout</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">timeout <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-strided-load-store-asm.ebb48bb13b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a><span class="dim">)</span> @gather_unroll via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b -O3 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.28 = external global i64
+
+define void @gather_unroll(ptr noalias captures(none) %A, ptr noalias readonly captures(none) %B) {
+entry:
+  %A1 = alloca ptr, align 8
+  store ptr poison, ptr %A1, align 8
+  br label %vector.body
+
+vector.body:                                      ; preds = %vector.body, %entry
+  %index = phi i64 [ 0, %entry ], [ %index.next, %vector.body ]
+  %vec.ind = phi &lt;8 x i64&gt; [ &lt;i64 0, i64 4, i64 8, i64 12, i64 16, i64 20, i64 24, i64 28&gt;, %entry ], [ %vec.ind.next, %vector.body ]
+  %i = shl nuw nsw &lt;8 x i64&gt; %vec.ind, splat (i64 2)
+  %i1 = getelementptr inbounds i32, ptr %B, &lt;8 x i64&gt; %i
+  %wide.masked.gather = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i1, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i2 = getelementptr inbounds i32, ptr %A, &lt;8 x i64&gt; %vec.ind
+  %wide.masked.gather52 = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i2, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i3 = add nsw &lt;8 x i32&gt; %wide.masked.gather52, %wide.masked.gather
+  call void @llvm.masked.scatter.v8i32.v8p0(&lt;8 x i32&gt; %i3, &lt;8 x ptr&gt; align 4 %i2, &lt;8 x i1&gt; splat (i1 true))
+  %i4 = or disjoint &lt;8 x i64&gt; %vec.ind, splat (i64 1)
+  %i5 = shl nsw &lt;8 x i64&gt; %i4, splat (i64 2)
+  %i6 = getelementptr inbounds i32, ptr %B, &lt;8 x i64&gt; %i5
+  %wide.masked.gather53 = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i6, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i7 = getelementptr inbounds i32, ptr %A, &lt;8 x i64&gt; %i4
+  %wide.masked.gather54 = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i7, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i8 = add nsw &lt;8 x i32&gt; %wide.masked.gather54, %wide.masked.gather53
+  call void @llvm.masked.scatter.v8i32.v8p0(&lt;8 x i32&gt; %i8, &lt;8 x ptr&gt; align 4 %i7, &lt;8 x i1&gt; splat (i1 true))
+  %i9 = or disjoint &lt;8 x i64&gt; %vec.ind, splat (i64 2)
+  %i10 = shl nsw &lt;8 x i64&gt; %i9, splat (i64 2)
+  %i11 = getelementptr inbounds i32, ptr %B, &lt;8 x i64&gt; %i10
+  %wide.masked.gather55 = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i11, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i12 = getelementptr inbounds i32, ptr %A, &lt;8 x i64&gt; %i9
+  %wide.masked.gather56 = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i12, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i13 = add nsw &lt;8 x i32&gt; %wide.masked.gather56, %wide.masked.gather55
+  call void @llvm.masked.scatter.v8i32.v8p0(&lt;8 x i32&gt; %i13, &lt;8 x ptr&gt; align 4 %i12, &lt;8 x i1&gt; splat (i1 true))
+  %i14 = or disjoint &lt;8 x i64&gt; %vec.ind, splat (i64 3)
+  %i15 = shl nsw &lt;8 x i64&gt; %i14, splat (i64 2)
+  %i16 = getelementptr inbounds i32, ptr %B, &lt;8 x i64&gt; %i15
+  %wide.masked.gather57 = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i16, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i17 = getelementptr inbounds i32, ptr %A, &lt;8 x i64&gt; %i14
+  %wide.masked.gather58 = call &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt; align 4 %i17, &lt;8 x i1&gt; splat (i1 true), &lt;8 x i32&gt; poison)
+  %i18 = add nsw &lt;8 x i32&gt; %wide.masked.gather58, %wide.masked.gather57
+  call void @llvm.masked.scatter.v8i32.v8p0(&lt;8 x i32&gt; %i18, &lt;8 x ptr&gt; align 4 %i17, &lt;8 x i1&gt; splat (i1 true))
+  %index.next = add nuw i64 %index, 8
+  %vec.ind.next = add &lt;8 x i64&gt; %vec.ind, splat (i64 32)
+  %i19 = icmp eq i64 %index.next, 256
+  br i1 %i19, label %for.cond.cleanup, label %vector.body
+
+for.cond.cleanup:                                 ; preds = %vector.body
+  %LGV = load i64, ptr @G.28, align 4
+  %E = extractelement &lt;8 x ptr&gt; %i16, i64 %LGV
+  store ptr %E, ptr %A1, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;8 x i32&gt; @llvm.masked.gather.v8i32.v8p0(&lt;8 x ptr&gt;, &lt;8 x i1&gt;, &lt;8 x i32&gt;) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(write)
+declare void @llvm.masked.scatter.v8i32.v8p0(&lt;8 x i32&gt;, &lt;8 x ptr&gt;, &lt;8 x i1&gt;) #1
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b -O3 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b -O3 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">timeout</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-strided-load-store-asm.ebb48bb13b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+f,+zve32f,+optimized-zero-stride-load,+zvl256b -O3 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FMA &lt;N x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FMA &lt;N x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FMA &lt;N x s16&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">58 in 4 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a> @fma_v8f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @fma_v8f16(ptr %x, ptr %y, ptr %z) {
+  %a = load &lt;8 x half&gt;, ptr %x, align 16
+  %b = load &lt;8 x half&gt;, ptr %y, align 16
+  %c = load &lt;8 x half&gt;, ptr %z, align 16
+  %d = call &lt;8 x half&gt; @llvm.fma.v8f16(&lt;8 x half&gt; %a, &lt;8 x half&gt; %b, &lt;8 x half&gt; %c)
+  store &lt;8 x half&gt; %d, ptr %x, align 16
+  ret void
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;8 x half&gt; @llvm.fma.v8f16(&lt;8 x half&gt;, &lt;8 x half&gt;, &lt;8 x half&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(&lt;8 x s16&gt;) = G_FMA %3:_, %4:_, %5:_ (in function: fma_v8f16)
+warning: Instruction selection used fallback path for fma_v8f16</pre>
+<h4>Occurrences (58) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fma_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fma_v6f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmsub_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmsub_v6f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fma_v16f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fma_vf_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fma_vf_v6f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fma_fv_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fma_fv_v6f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmsub_vf_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmsub_vf_v6f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmuladd_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmuladd_v6f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmsub_fmuladd_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp.ll">fixed-vectors-fp.ll</a></td><td class="l">fmsub_fmuladd_v6f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

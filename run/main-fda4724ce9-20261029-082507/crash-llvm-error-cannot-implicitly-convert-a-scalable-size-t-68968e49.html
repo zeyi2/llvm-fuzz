@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()` </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">91 in 39 configs, 33 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vscale-add-fold-multi-use.ll">vscale-add-fold-multi-use.ll</a> @load_nxv48i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f,+d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/svvTznjn8">https://godbolt.org/z/svvTznjn8</a> (llc-assertions-trunk, checked 2026-10-25 18:43 UTC): <a href="https://godbolt.org/z/svvTznjn8">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @load_nxv48i32(ptr %x) {
+  %v = load volatile &lt;vscale x 48 x i32&gt;, ptr %x, align 256
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f,+d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f,+d -global-isel=0</code></td><td>0</td><td>8</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+v,+f,+d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+v,+f,+d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: cannot implicitly convert a scalable size to a fixed-width size in `TypeSize::operator ScalarTy()`
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -mattr=+m,+v,+f,+d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Legalizer&#x27; on function &#x27;@load_nxv48i32&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x00005600703dc0cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x00005600703d8f71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x00005600703dcb4b
+3  libc.so.6 0x00007f23e8e45330
+4  libc.so.6 0x00007f23e8e9ec0c pthread_kill + 284
+5  libc.so.6 0x00007f23e8e4527e gsignal + 30
+6  libc.so.6 0x00007f23e8e288ff abort + 223
+7  llc       0x000056007032010d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x000056007031ff56
+9  llc       0x000056007032025b
+10 llc       0x0000560072543d19
+11 llc       0x0000560072514e49 llvm::legalizeMachineFunction(llvm::MachineFunction&amp;, llvm::LegalizerInfo const&amp;, llvm::ArrayRef&lt;llvm::GISelChangeObserver*&gt;, llvm::LostDebugLocObserver&amp;, llvm::MachineIRBuilder&amp;, llvm::LibcallLoweringInfo const*, llvm::GISelValueTracking*) + 1753
+12 llc       0x0000560072516b90
+13 llc       0x00005600725167b2 llvm::LegalizerLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 242
+14 llc       0x00005600709a58cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x0000560070735f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000056007073e452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x0000560070736ce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x00005600703e3787 llcMain + 12151
+19 llc       0x000056007031fb6f main + 63
+20 libc.so.6 0x00007f23e8e2a1ca
+21 libc.so.6 0x00007f23e8e2a28b __libc_start_main + 139
+22 llc       0x000056007031fa65 _start + 37</pre>
+<h4>Occurrences (91) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/allocate-lmul-2-4-8.ll">allocate-lmul-2-4-8.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/allocate-lmul-2-4-8.ll">allocate-lmul-2-4-8.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+prefer-vsetvli-over-read-vlenb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/allocate-lmul-2-4-8.ll">allocate-lmul-2-4-8.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zba -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/allocate-lmul-2-4-8.ll">allocate-lmul-2-4-8.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zba,+prefer-vsetvli-over-read-vlenb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/allocate-lmul-2-4-8.ll">allocate-lmul-2-4-8.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/allocate-lmul-2-4-8.ll">allocate-lmul-2-4-8.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+prefer-vsetvli-over-read-vlenb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/calling-conv-fastcc.ll">calling-conv-fastcc.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/calling-conv-fastcc.ll">calling-conv-fastcc.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/legalize-load-sdnode.ll">legalize-load-sdnode.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfh,+f,+d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/legalize-load-sdnode.ll">legalize-load-sdnode.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfh,+f,+d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/vscale-add-fold-multi-use.ll">vscale-add-fold-multi-use.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/zve32-types.ll">zve32-types.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zve32f,+f,+zvl64b -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/zve32-types.ll">zve32-types.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+zve32f,+f,+zvl64b -verify-machineinstrs</code></td></tr><tr><td class="l">access-fixed-objects-by-rvv.79ba29cae7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/access-fixed-objects-by-rvv.ll">access-fixed-objects-by-rvv.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v -O2</code></td></tr><tr><td class="l">calling-conv-fastcc.82f658e2c2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/calling-conv-fastcc.ll">calling-conv-fastcc.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

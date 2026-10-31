@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x s16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 77 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-unaligned.47a5406ee5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-unaligned.ll">fixed-vectors-unaligned.ll</a><span class="dim">)</span> @mgather_v2i16_align1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+unaligned-vector-mem,+zba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i16&gt; @mgather_v2i16_align1(&lt;2 x ptr&gt; %ptrs, &lt;2 x i1&gt; %m, &lt;2 x i16&gt; %passthru) {
+  %B = and &lt;2 x i1&gt; %m, %m
+  %C = icmp eq &lt;2 x i1&gt; %B, %m
+  %v = call &lt;2 x i16&gt; @llvm.masked.gather.v2i16.v2p0(&lt;2 x ptr&gt; align 1 %ptrs, &lt;2 x i1&gt; %C, &lt;2 x i16&gt; %passthru)
+  ret &lt;2 x i16&gt; %v
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;2 x i16&gt; @llvm.masked.gather.v2i16.v2p0(&lt;2 x ptr&gt;, &lt;2 x i1&gt;, &lt;2 x i16&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+unaligned-vector-mem,+zba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+unaligned-vector-mem,+zba -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %30:_(&lt;2 x s16&gt;) = G_PHI %29:_(&lt;2 x s16&gt;), %bb.4, %22:_(&lt;2 x s16&gt;), %bb.3 (in function: mgather_v2i16_align1)
+warning: Instruction selection used fallback path for mgather_v2i16_align1</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-expandload-int.06fa2737b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-expandload-int.ll">fixed-vectors-expandload-int.ll</a><span class="dim">)</span></td><td class="l">expandload_v8i16</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+m -O1</code></td></tr><tr><td class="l">fixed-vectors-unaligned.47a5406ee5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-unaligned.ll">fixed-vectors-unaligned.ll</a><span class="dim">)</span></td><td class="l">mgather_v2i16_align1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+unaligned-vector-mem,+zba -O0</code></td></tr><tr><td class="l">fixed-vectors-unaligned.efbe3254f3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-unaligned.ll">fixed-vectors-unaligned.ll</a><span class="dim">)</span></td><td class="l">mgather_v2i16_align1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+unaligned-vector-mem,+zfa -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

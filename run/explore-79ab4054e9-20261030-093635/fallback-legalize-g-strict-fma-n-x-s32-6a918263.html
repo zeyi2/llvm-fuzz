@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STRICT_FMA &lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STRICT_FMA &lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STRICT_FMA &lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vfnmsub-constrained-sdnode.640ae968e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfnmsub-constrained-sdnode.ll">fixed-vectors-vfnmsub-constrained-sdnode.ll</a><span class="dim">)</span> @vfnmsub_vv_v8f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zfh -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global float
+
+; Function Attrs: strictfp
+define &lt;8 x float&gt; @vfnmsub_vv_v8f32(&lt;8 x float&gt; %va, &lt;8 x float&gt; %vb, &lt;8 x float&gt; %vc) #0 {
+  %neg = fneg &lt;8 x float&gt; %vc
+  %B = fadd float 1.401300e-45, +qnan
+  %vd = call &lt;8 x float&gt; @llvm.experimental.constrained.fma.v8f32(&lt;8 x float&gt; %vb, &lt;8 x float&gt; %neg, &lt;8 x float&gt; %va, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.strict&quot;)
+  store float %B, ptr @G.1, align 4
+  ret &lt;8 x float&gt; %vd
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;8 x float&gt; @llvm.experimental.constrained.fma.v8f32(&lt;8 x float&gt;, &lt;8 x float&gt;, &lt;8 x float&gt;, metadata, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zfh -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zfh -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %41:_(&lt;8 x s32&gt;) = G_STRICT_FMA %1:_, %37:_, %0:_ (in function: vfnmsub_vv_v8f32)
+warning: Instruction selection used fallback path for vfnmsub_vv_v8f32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfmsub-constrained-sdnode.02f39e3bea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmsub-constrained-sdnode.ll">fixed-vectors-vfmsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfmsub_vf_v2f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zfh -O3</code></td></tr><tr><td class="l">fixed-vectors-vfnmsub-constrained-sdnode.640ae968e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfnmsub-constrained-sdnode.ll">fixed-vectors-vfnmsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfnmsub_vv_v8f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zfh -O0</code></td></tr><tr><td class="l">fixed-vectors-vfnmsub-constrained-sdnode.f778742ab1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfnmsub-constrained-sdnode.ll">fixed-vectors-vfnmsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfnmsub_vf_v4f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zicsr -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vmfne.a571de298f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vmfne.ll">vmfne.ll</a><span class="dim">)</span> @intrinsic_vmfne_mask_vf_nxv4f64_f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+xtheadba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+@G.1 = external global i1
+
+; Function Attrs: nounwind
+define &lt;vscale x 4 x i1&gt; @intrinsic_vmfne_mask_vf_nxv4f64_f64(&lt;vscale x 4 x i1&gt; %0, &lt;vscale x 4 x double&gt; %1, double %2, &lt;vscale x 4 x i1&gt; %3, i64 %4) #0 {
+entry:
+  %LGV = load i64, ptr @G, align 4
+  %C = icmp uge i64 %LGV, %4
+  %a = call &lt;vscale x 4 x i1&gt; @llvm.riscv.vmfne.mask.nxv4f64.f64.i64(&lt;vscale x 4 x i1&gt; %0, &lt;vscale x 4 x double&gt; %1, double %2, &lt;vscale x 4 x i1&gt; %3, i64 %4)
+  store i1 %C, ptr @G.1, align 1
+  ret &lt;vscale x 4 x i1&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 4 x i1&gt; @llvm.riscv.vmfne.mask.nxv4f64.f64.i64(&lt;vscale x 4 x i1&gt;, &lt;vscale x 4 x double&gt;, double, &lt;vscale x 4 x i1&gt;, i64) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+xtheadba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+xtheadba -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: Attempting to emit SH2ADD instruction but the Feature_HasStdExtZba predicate(s) are not met
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+xtheadba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISC-V Assembly Printer&#x27; on function &#x27;@intrinsic_vmfne_mask_vf_nxv4f64_f64&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x00005622d2a3870b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x00005622d2a355b1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x00005622d2a3918b
+3  libc.so.6 0x00007f8bd7c45330
+4  libc.so.6 0x00007f8bd7c9ec0c pthread_kill + 284
+5  libc.so.6 0x00007f8bd7c4527e gsignal + 30
+6  libc.so.6 0x00007f8bd7c288ff abort + 223
+7  llc       0x00005622d297c44d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x00005622d297c296
+9  llc       0x00005622d37d4dbe
+10 llc       0x00005622d3d0ebbb
+11 llc       0x00005622d3d1fd97 llvm::AsmPrinter::emitFunctionBody() + 4855
+12 llc       0x00005622d3d0c7b7
+13 llc       0x00005622d300860d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+14 llc       0x00005622d2d927f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x00005622d2d9ad12 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x00005622d2d935a0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x00005622d2a3fdc7 llcMain + 12151
+18 llc       0x00005622d297beaf main + 63
+19 libc.so.6 0x00007f8bd7c2a1ca
+20 libc.so.6 0x00007f8bd7c2a28b __libc_start_main + 139
+21 llc       0x00005622d297bda5 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vmfne.a571de298f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vmfne.ll">vmfne.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+xtheadba -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shl i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shl i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shl i8 <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">andn-zext-lowmask.42e4564742.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/andn-zext-lowmask.ll">andn-zext-lowmask.ll</a><span class="dim">)</span> @andn_zext_lowmask_i32_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @andn_zext_lowmask_i32_i8(i32 %x, i8 %n) #0 {
+  %notmask = shl i8 -1, %n
+  %mask = xor i8 %notmask, -1
+  %zmask = zext i8 %mask to i32
+  %r = and i32 %x, %zmask
+  %C = icmp ugt i32 %x, %x
+  store i1 %C, ptr poison, align 1
+  ret i32 %r
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shl: &#x27;  %notmask = shl i8 -1, %n&#x27; (in function: andn_zext_lowmask_i32_i8)
+warning: Instruction selection used fallback path for andn_zext_lowmask_i32_i8</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">andn-zext-lowmask.42e4564742.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/andn-zext-lowmask.ll">andn-zext-lowmask.ll</a><span class="dim">)</span></td><td class="l">andn_zext_lowmask_i32_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=medium</code></td></tr><tr><td class="l">calls-cf-branch.90c82275c8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/calls-cf-branch.ll">calls-cf-branch.ll</a><span class="dim">)</span></td><td class="l">test_call_indirect</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zihintpause -O3</code></td></tr><tr><td class="l">double-round-conv-sat.0217b06019.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/double-round-conv-sat.ll">double-round-conv-sat.ll</a><span class="dim">)</span></td><td class="l">test_roundeven_si64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O0</code></td></tr><tr><td class="l">memset.30b69c5103.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/memset.ll">memset.ll</a><span class="dim">)</span></td><td class="l">memset_i32_2147483648</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">pei-crash.3e824f2b8b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/pei-crash.ll">pei-crash.ll</a><span class="dim">)</span></td><td class="l">a</td><td class="l"><code>--frame-pointer=none -mtriple=riscv32 -verify-machineinstrs -mattr=+zcmp,+zfinx -O3</code></td></tr><tr><td class="l">rv64zbb.1767ac3e69.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">func0000000000000001</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

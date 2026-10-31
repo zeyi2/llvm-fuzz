@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: phi &lt;vscale x N x double&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: phi &lt;vscale x N x double&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: phi &lt;vscale x N x double&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 1 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vsetvli-insert-crossbb.ae0450f322.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert-crossbb.ll">vsetvli-insert-crossbb.ll</a><span class="dim">)</span> @test2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+f,+d,+v -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+; Function Attrs: nounwind
+define &lt;vscale x 1 x double&gt; @test2(i64 %avl, i8 zeroext %cond, &lt;vscale x 1 x double&gt; %a, &lt;vscale x 1 x double&gt; %b) #0 {
+entry:
+  %0 = tail call i64 @llvm.riscv.vsetvli.i64(i64 %avl, i64 3, i64 0)
+  %tobool = icmp eq i8 %cond, 0
+  br i1 %tobool, label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %1 = tail call &lt;vscale x 1 x double&gt; @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt; poison, &lt;vscale x 1 x double&gt; %a, &lt;vscale x 1 x double&gt; %b, i64 7, i64 %0)
+  br label %if.end
+
+if.else:                                          ; preds = %entry
+  %2 = tail call &lt;vscale x 1 x double&gt; @llvm.riscv.vfsub.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt; poison, &lt;vscale x 1 x double&gt; %a, &lt;vscale x 1 x double&gt; %b, i64 7, i64 %0)
+  %C = fcmp ueq float 1.000000e+00, +qnan
+  store i1 %C, ptr @G.3, align 1
+  br label %if.end
+
+if.end:                                           ; preds = %if.else, %if.then
+  %c.0 = phi &lt;vscale x 1 x double&gt; [ %1, %if.then ], [ %2, %if.else ]
+  %3 = tail call &lt;vscale x 1 x double&gt; @llvm.riscv.vfmul.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt; poison, &lt;vscale x 1 x double&gt; %c.0, &lt;vscale x 1 x double&gt; %a, i64 7, i64 %0)
+  ret &lt;vscale x 1 x double&gt; %3
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x double&gt; @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, i64 immarg, i64) #1
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x double&gt; @llvm.riscv.vfmul.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, i64 immarg, i64) #1
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x double&gt; @llvm.riscv.vfsub.nxv1f64.nxv1f64.i64(&lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, &lt;vscale x 1 x double&gt;, i64 immarg, i64) #1
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare i64 @llvm.riscv.vsetvli.i64(i64, i64 immarg, i64 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+f,+d,+v -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+f,+d,+v -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: phi: &#x27;  %c.0 = phi &lt;vscale x 1 x double&gt; [ %1, %if.then ], [ %2, %if.else ]&#x27; (in function: test2)
+warning: Instruction selection used fallback path for test2</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vsetvli-insert-crossbb.26d70bcf22.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert-crossbb.ll">vsetvli-insert-crossbb.ll</a><span class="dim">)</span></td><td class="l">test2</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+a,+c,+v -O3</code></td></tr><tr><td class="l">vsetvli-insert-crossbb.ae0450f322.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert-crossbb.ll">vsetvli-insert-crossbb.ll</a><span class="dim">)</span></td><td class="l">test2</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+f,+d,+v -O1</code></td></tr><tr><td class="l">vsetvli-insert-crossbb.ae0450f322.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert-crossbb.ll">vsetvli-insert-crossbb.ll</a><span class="dim">)</span></td><td class="l">test6</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+f,+d,+v -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

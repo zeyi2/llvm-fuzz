@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SELECT &lt;N x s128&gt;,&lt;N x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SELECT &lt;N x s128&gt;,&lt;N x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-00cbe8231c-20261031-083502.html">main-00cbe8231c-20261031-083502</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SELECT &lt;N x s128&gt;,&lt;N x s1&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">18 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a> @stest_f64i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i64&gt; @stest_f64i64(&lt;2 x double&gt; %x) {
+entry:
+  %conv = fptosi &lt;2 x double&gt; %x to &lt;2 x i128&gt;
+  %0 = icmp slt &lt;2 x i128&gt; %conv, splat (i128 9223372036854775807)
+  %spec.store.select = select &lt;2 x i1&gt; %0, &lt;2 x i128&gt; %conv, &lt;2 x i128&gt; splat (i128 9223372036854775807)
+  %1 = icmp sgt &lt;2 x i128&gt; %spec.store.select, splat (i128 -9223372036854775808)
+  %spec.store.select7 = select &lt;2 x i1&gt; %1, &lt;2 x i128&gt; %spec.store.select, &lt;2 x i128&gt; splat (i128 -9223372036854775808)
+  %conv6 = trunc &lt;2 x i128&gt; %spec.store.select7 to &lt;2 x i64&gt;
+  ret &lt;2 x i64&gt; %conv6
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;2 x s128&gt;) = G_SELECT %15:_(&lt;2 x s1&gt;), %7:_, %8:_ (in function: stest_f64i64)
+warning: Instruction selection used fallback path for stest_f64i64</pre>
+<h4>Occurrences (18) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">stest_f64i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">utest_f64i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">ustest_f64i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">stest_f32i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">utest_f32i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">ustest_f32i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">stest_f16i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">utest_f16i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">ustest_f16i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">stest_f64i64_mm</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">utest_f64i64_mm</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">ustest_f64i64_mm</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">stest_f32i64_mm</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">utest_f32i64_mm</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fpclamptosat_vec.ll">fpclamptosat_vec.ll</a></td><td class="l">ustest_f32i64_mm</td><td class="l"><code>-mtriple=riscv64 -mattr=+f,+d,+v -verify-machineinstrs -target-abi=lp64d -riscv-v-vector-bits-min=0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

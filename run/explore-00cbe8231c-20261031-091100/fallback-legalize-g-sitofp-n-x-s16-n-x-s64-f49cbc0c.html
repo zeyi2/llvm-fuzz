@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SITOFP &lt;N x s16&gt;,&lt;N x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SITOFP &lt;N x s16&gt;,&lt;N x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SITOFP &lt;N x s16&gt;,&lt;N x s64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 6 configs, 2 test files, 40 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-sitofp-vp.3dc1730168.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-sitofp-vp.ll">fixed-vectors-sitofp-vp.ll</a><span class="dim">)</span> @vsitofp_v4f16_v4i64_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin,+d -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x i64&gt;
+
+define &lt;4 x half&gt; @vsitofp_v4f16_v4i64_unmasked(&lt;4 x i64&gt; %va, i32 zeroext %evl) {
+  %LGV = load &lt;4 x i64&gt;, ptr @G.1, align 32
+  %B = srem &lt;4 x i64&gt; %va, %LGV
+  %v = sitofp &lt;4 x i64&gt; %B to &lt;4 x half&gt;
+  ret &lt;4 x half&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+zvfhmin,+d -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+zvfhmin,+d -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(&lt;4 x s16&gt;) = G_SITOFP %6:_(&lt;4 x s64&gt;) (in function: vsitofp_v4f16_v4i64_unmasked)
+warning: Instruction selection used fallback path for vsitofp_v4f16_v4i64_unmasked</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-i2fp.23e564a0a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v8i64_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O1 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-i2fp.383b7e7e36.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v2i64_v2f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+experimental-zvfbfa,+f,+d -O0</code></td></tr><tr><td class="l">fixed-vectors-i2fp.64248791e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v8i64_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -O2</code></td></tr><tr><td class="l">fixed-vectors-i2fp.892666eb3f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v8i64_v8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -O2</code></td></tr><tr><td class="l">fixed-vectors-i2fp.8ab862bfc6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">si2fp_v2i64_v2f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O2</code></td></tr><tr><td class="l">fixed-vectors-sitofp-vp.3dc1730168.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-sitofp-vp.ll">fixed-vectors-sitofp-vp.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v4f16_v4i64_unmasked</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin,+d -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-sitofp-vp.d8962506f2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-sitofp-vp.ll">fixed-vectors-sitofp-vp.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v4f16_v4i64_unmasked</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub i64 <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 7 test files, 54 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zcb-regalloc-hints.99793e79a8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/zcb-regalloc-hints.ll">zcb-regalloc-hints.ll</a><span class="dim">)</span> @c_not via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zba,+zbb,+zcb,+a,+zdinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+define i64 @c_not(i64 %x, i64 %y, i64 %z) {
+  %B = sub i64 %x, %y
+  %a = xor i64 %y, -1
+  %b = mul i64 %a, 1234
+  store i64 %B, ptr @G.1, align 4
+  ret i64 %b
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+zba,+zbb,+zcb,+a,+zdinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+zba,+zbb,+zcb,+a,+zdinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %B = sub i64 %x, %y&#x27; (in function: c_not)
+warning: Instruction selection used fallback path for c_not</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">combine-neg-abs.98e9e47966.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/GlobalISel/combine-neg-abs.ll">combine-neg-abs.ll</a><span class="dim">)</span></td><td class="l">expanded_neg_abs64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zdinx -O3</code></td></tr><tr><td class="l">pr84200.ab725bc1d8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/pr84200.ll">pr84200.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -mattr=+zicond,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">rotl-rotr.e3d8c3febf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotl_64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+zfinx -O2</code></td></tr><tr><td class="l">rotl-rotr.e75e4617d2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotl_64_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+m,+zhinx -O1</code></td></tr><tr><td class="l">rv64zbb-zbkb.5ecdee97fa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">rol_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">ssub_sat_plus.7ac757de69.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/ssub_sat_plus.ll">ssub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func64</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vslide1up-constant-vl-rv32.546fda7d65.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vslide1up-constant-vl-rv32.ll">vslide1up-constant-vl-rv32.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vslide1up_vx_nxv1i64_nxv1i64_i64_vl2</td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=64 -verify-machineinstrs -mattr=+zve64x,+zvl64b,+zfinx -O0</code></td></tr><tr><td class="l">zcb-regalloc-hints.99793e79a8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/zcb-regalloc-hints.ll">zcb-regalloc-hints.ll</a><span class="dim">)</span></td><td class="l">c_not</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zba,+zbb,+zcb,+a,+zdinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

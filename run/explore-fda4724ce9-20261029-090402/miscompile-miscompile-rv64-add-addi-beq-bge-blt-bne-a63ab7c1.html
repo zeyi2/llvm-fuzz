@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,beq,bge,blt,bne</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,beq,bge,blt,bne</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,beq,bge,blt,bne <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr66603.f1b6f73c.89ff14eea6.ll <span class="dim">(mutant of</span> pr66603.f1b6f73c.ll<span class="dim">)</span> @PR66603 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-- -verify-machineinstrs -mattr=+d,+zbb -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+@G.2 = external global i32
+@G.3 = external global i1
+@G.4 = external global double
+@G.5 = external global i8
+@G.6 = external global i1
+@G.7 = external global double
+
+; Function Attrs: nounwind
+define i32 @PR66603(double %x) #0 {
+  %A = alloca i1, align 1
+  %G6 = getelementptr &lt;4 x i32&gt;, ptr %A, i1 false
+  store i1 poison, ptr %A, align 1
+  %LGV = load i32, ptr @G, align 4
+  %as_i8 = fptosi double %x to i8
+  %frozen_i8 = freeze i8 %as_i8
+  %ext = sext i8 %frozen_i8 to i32
+  %G = getelementptr i8, ptr %G6, i32 %ext
+  switch i32 %LGV, label %SW_D [
+    i32 -886082364, label %SW_C
+    i32 70652440, label %SW_C1
+    i32 -1168379991, label %SW_C2
+    i32 1565453244, label %SW_C3
+    i32 -1834967819, label %SW_C4
+    i32 -950167214, label %SW_C5
+  ]
+
+BB:                                               ; preds = %SW_C5, %SW_C3, %SW_C, %SW_D
+  %LGV12 = load double, ptr @G.4, align 8
+  %C13 = fcmp ogt double %x, %LGV12
+  store i1 %C13, ptr %A, align 1
+  ret i32 %ext
+
+SW_D:                                             ; preds = %0
+  %C3 = fcmp ueq double %x, %x
+  store i1 %C3, ptr %A, align 1
+  %C8 = fcmp une double %x, 4.200000e+01
+  store i1 %C8, ptr @G.3, align 1
+  br label %BB
+
+SW_C:                                             ; preds = %0
+  %C11 = fcmp ule double %x, +inf
+  store i1 %C11, ptr %A, align 1
+  br label %BB
+
+SW_C1:                                            ; preds = %0
+  ret i32 %LGV
+
+SW_C2:                                            ; preds = %0
+  %LGV14 = load i8, ptr @G.5, align 1
+  %C15 = icmp ule i8 %as_i8, %LGV14
+  store i1 %C15, ptr %G, align 1
+  ret i32 42
+
+SW_C3:                                            ; preds = %SW_C3, %0
+  %LGV9 = load i32, ptr @G.2, align 4
+  %C = icmp ne i32 %ext, %LGV9
+  br i1 %C, label %SW_C3, label %BB
+
+SW_C4:                                            ; preds = %0
+  ret i32 %LGV
+
+SW_C5:                                            ; preds = %0
+  %LGV13 = load double, ptr @G.7, align 8
+  %C14 = fcmp ule double %x, %LGV13
+  %C10 = fcmp one double %x, %x
+  store i1 %C10, ptr @G.3, align 1
+  %C18 = fcmp one double %x, %x
+  store i1 %C18, ptr @G.6, align 1
+  store i1 %C14, ptr poison, align 1
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64-- -verify-machineinstrs -mattr=+d,+zbb -O2&#x27; --funcs PR66603 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">3 of 64 inputs differ (first: #12)
+SelectionDAG hash a0c2d26326127464, GlobalISel hash b0327560e339d2be
+b0: llc -mtriple=riscv64-- -verify-machineinstrs -mattr=+d,+zbb -O2 -global-isel=0
+b1: llc -mtriple=riscv64-- -verify-machineinstrs -mattr=+d,+zbb -O0 -global-isel=0
+b2: llc -mtriple=riscv64-- -verify-machineinstrs -mattr=+d,+zbb -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr66603.f1b6f73c.89ff14eea6.ll <span class="dim">(mutant of</span> pr66603.f1b6f73c.ll<span class="dim">)</span></td><td class="l">PR66603</td><td class="l"><code>-mtriple=riscv64-- -verify-machineinstrs -mattr=+d,+zbb -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (VA.getLocVT() == MVT::i32 &amp;&amp; VAHi.getLocVT() == MVT::i32 &amp;&amp; VA.getValVT() == MVT::f64 &amp;&amp; VAHi.getValVT() == MVT::f64 &amp;&amp; &quot;unexpected custom value&quot;), function int, file RISCVCallLowering.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (VA.getLocVT() == MVT::i32 &amp;&amp; VAHi.getLocVT() == MVT::i32 &amp;&amp; VA.getValVT() == MVT::f64 &amp;&amp; VAHi.getValVT() == MVT::f64 &amp;&amp; &quot;unexpected custom value&quot;), function int, file RISCVCallLowering.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (VA.getLocVT() == MVT::i32 &amp;&amp; VAHi.getLocVT() == MVT::i32 &amp;&amp; VA.getValVT() == MVT::f64 &amp;&amp; VAHi.getValVT() == MVT::f64 &amp;&amp; &quot;unexpected custom value&quot;), function int, file RISCVCallLowering.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">17 in 4 configs, 17 test files, 803 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-reverse.ll">rvp-reverse.ll</a> @test_prev_v2i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/W1vh55ozE">https://godbolt.org/z/W1vh55ozE</a> (llc-assertions-trunk, checked 2026-10-26 12:20 UTC): <a href="https://godbolt.org/z/W1vh55ozE">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i32&gt; @test_prev_v2i32(&lt;2 x i32&gt; %a) {
+  %r = shufflevector &lt;2 x i32&gt; %a, &lt;2 x i32&gt; poison, &lt;2 x i32&gt; &lt;i32 1, i32 0&gt;
+  ret &lt;2 x i32&gt; %r
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVCallLowering.cpp:234: virtual unsigned int {anonymous}::RISCVIncomingValueHandler::assignCustomValue(llvm::CallLowering::ArgInfo&amp;, llvm::ArrayRef&lt;llvm::CCValAssign&gt;, std::function&lt;void()&gt;*): Assertion `VA.getLocVT() == MVT::i32 &amp;&amp; VAHi.getLocVT() == MVT::i32 &amp;&amp; VA.getValVT() == MVT::f64 &amp;&amp; VAHi.getValVT() == MVT::f64 &amp;&amp; &quot;unexpected custom value&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>4</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVCallLowering.cpp:236: virtual unsigned int (anonymous namespace)::RISCVIncomingValueHandler::assignCustomValue(CallLowering::ArgInfo &amp;, ArrayRef&lt;CCValAssign&gt;, std::function&lt;void ()&gt; *): Assertion `VA.getLocVT() == MVT::i32 &amp;&amp; VAHi.getLocVT() == MVT::i32 &amp;&amp; VA.getValVT() == MVT::f64 &amp;&amp; VAHi.getValVT() == MVT::f64 &amp;&amp; &quot;unexpected custom value&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@test_prev_v2i32&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000056214d57f0cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000056214d57bf71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000056214d57fb4b
+3  libc.so.6 0x00007fd95be45330
+4  libc.so.6 0x00007fd95be9ec0c pthread_kill + 284
+5  libc.so.6 0x00007fd95be4527e gsignal + 30
+6  libc.so.6 0x00007fd95be288ff abort + 223
+7  libc.so.6 0x00007fd95be2881b
+8  libc.so.6 0x00007fd95be3b517
+9  llc       0x000056214e7bcf5a
+10 llc       0x000056214f635cd0 llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 928
+11 llc       0x000056214e7b9e9c
+12 llc       0x000056214f6a6d13 llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 3507
+13 llc       0x000056214f6a7fad llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+14 llc       0x000056214db488cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+15 llc       0x000056214d8d8f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000056214d8e1452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x000056214d8d9ce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x000056214d586787 llcMain + 12151
+19 llc       0x000056214d4c2b6f main + 63
+20 libc.so.6 0x00007fd95be2a1ca
+21 libc.so.6 0x00007fd95be2a28b __libc_start_main + 139
+22 llc       0x000056214d4c2a65 _start + 37</pre>
+<h4>Occurrences (17) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/calling-conv-p-ext-vector.ll">calling-conv-p-ext-vector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-avgsub.ll">rvp-avgsub.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-bitreverse-zbkb.ll">rvp-bitreverse-zbkb.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb,+zbkb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-byte-horizontal-acc.ll">rvp-byte-horizontal-acc.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-insert-subvector.ll">rvp-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-mul-parts-acc-fold.ll">rvp-mul-parts-acc-fold.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-narrowing-clip.ll">rvp-narrowing-clip.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-narrowing-shift.ll">rvp-narrowing-shift.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-narrowing-zip.ll">rvp-narrowing-zip.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-reverse.ll">rvp-reverse.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-simd-64.ll">rvp-simd-64.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-widening-add-acc.ll">rvp-widening-add-acc.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-widening-convert.ll">rvp-widening-convert.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

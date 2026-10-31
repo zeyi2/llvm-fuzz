@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Attempting to emit SH3ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Attempting to emit SH3ADD instruction but the Feature_HasStdExtZba predicate(s) are not met</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Attempting to emit SH3ADD instruction but the Feature_HasStdExtZba predicate(s) are not met </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vwsub.w.b030c70f.5637205b3a.ll <span class="dim">(mutant of</span> vwsub.w.b030c70f.ll<span class="dim">)</span> @intrinsic_vwsub.w_mask_wx_nxv16i32_nxv16i32_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xtheadba,+zvkb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 16 x i32&gt; @intrinsic_vwsub.w_mask_wx_nxv16i32_nxv16i32_i16(&lt;vscale x 16 x i32&gt; %0, &lt;vscale x 16 x i32&gt; %1, i16 %2, &lt;vscale x 16 x i1&gt; %3, i32 %4) #0 {
+entry:
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %C = icmp sge i16 %2, 256
+  %B = urem i16 %2, 0
+  %a = call &lt;vscale x 16 x i32&gt; @llvm.riscv.vwsub.w.mask.nxv16i32.i16.i32(&lt;vscale x 16 x i32&gt; %0, &lt;vscale x 16 x i32&gt; %1, i16 %B, &lt;vscale x 16 x i1&gt; %3, i32 %4, i32 1)
+  store i1 %C, ptr %A, align 1
+  ret &lt;vscale x 16 x i32&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 16 x i32&gt; @llvm.riscv.vwsub.w.mask.nxv16i32.i16.i32(&lt;vscale x 16 x i32&gt;, &lt;vscale x 16 x i32&gt;, i16, &lt;vscale x 16 x i1&gt;, i32, i32 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xtheadba,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xtheadba,+zvkb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: Attempting to emit SH3ADD instruction but the Feature_HasStdExtZba predicate(s) are not met
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xtheadba,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISC-V Assembly Printer&#x27; on function &#x27;@intrinsic_vwsub.w_mask_wx_nxv16i32_nxv16i32_i16&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000561a842ef0cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000561a842ebf71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000561a842efb4b
+3  libc.so.6 0x00007fc7c2445330
+4  libc.so.6 0x00007fc7c249ec0c pthread_kill + 284
+5  libc.so.6 0x00007fc7c244527e gsignal + 30
+6  libc.so.6 0x00007fc7c24288ff abort + 223
+7  llc       0x0000561a8423310d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x0000561a84232f56
+9  llc       0x0000561a8508a44e
+10 llc       0x0000561a855c35cb
+11 llc       0x0000561a855d47a7 llvm::AsmPrinter::emitFunctionBody() + 4855
+12 llc       0x0000561a855c11c7
+13 llc       0x0000561a848b88cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+14 llc       0x0000561a84648f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x0000561a84651452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x0000561a84649ce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x0000561a842f6787 llcMain + 12151
+18 llc       0x0000561a84232b6f main + 63
+19 libc.so.6 0x00007fc7c242a1ca
+20 libc.so.6 0x00007fc7c242a28b __libc_start_main + 139
+21 llc       0x0000561a84232a65 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vwsub.w.b030c70f.5637205b3a.ll <span class="dim">(mutant of</span> vwsub.w.b030c70f.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xtheadba,+zvkb -O1</code></td></tr><tr><td class="l">vwsub.w.b030c70f.ac2bbf4812.ll <span class="dim">(mutant of</span> vwsub.w.b030c70f.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadba,+zvkb -O2</code></td></tr><tr><td class="l">vwsub.w.b030c70f.ll</td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xtheadba,+zvkb -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

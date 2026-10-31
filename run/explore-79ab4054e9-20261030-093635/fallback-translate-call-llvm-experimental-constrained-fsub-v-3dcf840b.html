@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.fsub.v32bf16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.fsub.v32bf16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.fsub.v32bf16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 13 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vfsub-constrained-sdnode.a0c06f7346.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfsub-constrained-sdnode.ll">fixed-vectors-vfsub-constrained-sdnode.ll</a><span class="dim">)</span> @vfsub_vv_v32bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v,+zfh -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: strictfp
+define &lt;32 x bfloat&gt; @vfsub_vv_v32bf16(&lt;32 x bfloat&gt; %va, &lt;32 x bfloat&gt; %vb) #0 {
+entry:
+  %C = icmp sle i64 -1, -9223372036854775808
+  %vc = call &lt;32 x bfloat&gt; @llvm.experimental.constrained.fsub.v32bf16(&lt;32 x bfloat&gt; %va, &lt;32 x bfloat&gt; %vb, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.ignore&quot;)
+  store i1 %C, ptr @G, align 1
+  ret &lt;32 x bfloat&gt; %vc
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;32 x bfloat&gt; @llvm.experimental.constrained.fsub.v32bf16(&lt;32 x bfloat&gt;, &lt;32 x bfloat&gt;, metadata, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v,+zfh -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v,+zfh -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.fsub.v32bf16: &#x27;  %vc = call &lt;32 x bfloat&gt; @llvm.experimental.constrained.fsub.v32bf16(&lt;32 x bfloat&gt; %va, &lt;32 x bfloat&gt; %vb, metadata !&quot;round.dynamic&quot;, metadata !&quot;fpexcept.ignore&quot;)&#x27; (in function: vfsub_vv_v32bf16)
+warning: Instruction selection used fallback path for vfsub_vv_v32bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfsub-constrained-sdnode.39f58ad55b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfsub-constrained-sdnode.ll">fixed-vectors-vfsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfsub_vv_v32bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfhmin,+zvfhmin,+experimental-zvfbfa,+v -O2</code></td></tr><tr><td class="l">fixed-vectors-vfsub-constrained-sdnode.979bf41c1a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfsub-constrained-sdnode.ll">fixed-vectors-vfsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfsub_vv_v32bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfhmin,+zvfhmin,+experimental-zvfbfa,+v,+zve32x -O1</code></td></tr><tr><td class="l">fixed-vectors-vfsub-constrained-sdnode.a0c06f7346.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfsub-constrained-sdnode.ll">fixed-vectors-vfsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfsub_vv_v32bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin,+v,+zfh -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

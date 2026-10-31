@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: getelementptr &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: getelementptr &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: getelementptr &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 25 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">short-forward-branch-opt-load-atomic-acquire-seq_cst.29ecf8c55d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/short-forward-branch-opt-load-atomic-acquire-seq_cst.ll">short-forward-branch-opt-load-atomic-acquire-seq_cst.ll</a><span class="dim">)</span> @test_i16_z_3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+a,+short-forward-branch-iload,+zfinx,+zbkb -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @test_i16_z_3(ptr %base, i1 zeroext %x, i32 %b) #0 {
+entry:
+  %G = getelementptr &lt;2 x i64&gt;, ptr %base, i32 %b
+  %val = load atomic i16, ptr %G acquire, align 2
+  %ext = zext i16 %val to i32
+  %res = select i1 %x, i32 %ext, i32 %b
+  ret i32 %res
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv64 -mattr=+a,+short-forward-branch-iload,+zfinx,+zbkb -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv64 -mattr=+a,+short-forward-branch-iload,+zfinx,+zbkb -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: getelementptr: &#x27;  %G = getelementptr &lt;2 x i64&gt;, ptr %base, i32 %b&#x27; (in function: test_i16_z_3)
+warning: Instruction selection used fallback path for test_i16_z_3</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memcpy.699f0899.93f60d297b.ll <span class="dim">(mutant of</span> memcpy.699f0899.ll<span class="dim">)</span></td><td class="l">memcpy16_align4</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zfinx -O0</code></td></tr><tr><td class="l">short-forward-branch-opt-load-atomic-acquire-seq_cst.29ecf8c55d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/short-forward-branch-opt-load-atomic-acquire-seq_cst.ll">short-forward-branch-opt-load-atomic-acquire-seq_cst.ll</a><span class="dim">)</span></td><td class="l">test_i16_z_3</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+a,+short-forward-branch-iload,+zfinx,+zbkb -O3</code></td></tr><tr><td class="l">xaluo.4c395444fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">saddo2.i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zicond,+zhinx -O0</code></td></tr><tr><td class="l">zdinx-boundary-check.e5748519b4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a><span class="dim">)</span></td><td class="l">foo9</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+unaligned-scalar-mem,+zbkb -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

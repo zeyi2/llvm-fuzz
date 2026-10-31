@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: and,andi,auipc,fcvt.l.s,fcvt.w.s,fdiv.s</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: and,andi,auipc,fcvt.l.s,fcvt.w.s,fdiv.s</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: and,andi,auipc,fcvt.l.s,fcvt.w.s,fdiv.s <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.3edff58d.122d6ac3.919aef68.64fb81600a.ll <span class="dim">(mutant of</span> float-convert.3edff58d.122d6ac3.919aef68.ll<span class="dim">)</span> @fcvt_w_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zfh,+zve64d,+a -O2 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global float
+@G.2 = external global i1
+@G.4 = external global i1
+
+; Function Attrs: nounwind
+define signext i8 @fcvt_w_s_i8(float %a) #0 {
+  %1 = fptosi float %a to i8
+  %B4 = ashr i8 %1, 0
+  %B = urem i8 %B4, 16
+  %C3 = fcmp oge float %a, %a
+  store i1 %C3, ptr @G.2, align 1
+  %C1 = fcmp ord float %a, 1.401300e-45
+  %B5 = fdiv float %a, f0x7F7FFFFF
+  store i1 %C1, ptr @G.4, align 1
+  %C2 = fcmp ord float %a, f0x7F7FFFFF
+  store i1 %C2, ptr @G.4, align 1
+  store float %B5, ptr @G.1, align 4
+  ret i8 %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zfh,+zve64d,+a -O2 -code-model=medium&#x27; --funcs fcvt_w_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">3 of 64 inputs differ (first: #12)
+SelectionDAG hash a0c2d26326127464, GlobalISel hash 0d3f297203e99e84
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zfh,+zve64d,+a -code-model=medium -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zfh,+zve64d,+a -code-model=medium -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zfh,+zve64d,+a -code-model=medium -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.3edff58d.122d6ac3.919aef68.64fb81600a.ll <span class="dim">(mutant of</span> float-convert.3edff58d.122d6ac3.919aef68.ll<span class="dim">)</span></td><td class="l">fcvt_w_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zfh,+zve64d,+a -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 1 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 1 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-79ab4054e9-20261030-085808.html">main-79ab4054e9-20261030-085808</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 1 machine code errors. </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">86 in 25 configs, 20 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-stepvector.ll">fixed-vectors-stepvector.ll</a> @stepvector_v2i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/jMYe3Y4T9">https://godbolt.org/z/jMYe3Y4T9</a> (llc-assertions-trunk, checked 2026-10-25 18:43 UTC): <a href="https://godbolt.org/z/jMYe3Y4T9">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i8&gt; @stepvector_v2i8() {
+  %v = call &lt;2 x i8&gt; @llvm.stepvector.v2i8()
+  ret &lt;2 x i8&gt; %v
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;2 x i8&gt; @llvm.stepvector.v2i8() #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After IRTranslator<br># Machine code for function stepvector_v2i8: IsSSA, TracksLiveness</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>3</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After IRTranslator
+# Machine code for function stepvector_v2i8: IsSSA, TracksLiveness
+bb.1 (%ir-block.0):
+  %0:_(&lt;2 x s8&gt;) = G_STEP_VECTOR i8 1
+  %1:_(&lt;vscale x 1 x s8&gt;) = G_IMPLICIT_DEF
+  %2:_(&lt;vscale x 1 x s8&gt;) = G_INSERT_SUBVECTOR %1:_, %0:_(&lt;2 x s8&gt;), 0
+  $v8 = COPY %2:_(&lt;vscale x 1 x s8&gt;)
+  PseudoRET implicit $v8
+# End machine code for function stepvector_v2i8.
+*** Bad machine code: Destination type must be a scalable vector ***
+- function:    stepvector_v2i8
+- basic block: %bb.1  (0x558d5d8464b0)
+- instruction: %0:_(&lt;2 x s8&gt;) = G_STEP_VECTOR i8 1
+LLVM ERROR: Found 1 machine code errors.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Verify generated machine code&#x27; on function &#x27;@stepvector_v2i8&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000558d4c2fb70b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000558d4c2f85b1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000558d4c2fc18b
+3  libc.so.6 0x00007fa44ca45330
+4  libc.so.6 0x00007fa44ca9ec0c pthread_kill + 284
+5  libc.so.6 0x00007fa44ca4527e gsignal + 30
+6  libc.so.6 0x00007fa44ca288ff abort + 223
+7  llc       0x0000558d4c23f44d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x0000558d4c9691d3
+9  llc       0x0000558d4c96a363
+10 llc       0x0000558d4c8cb60d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+11 llc       0x0000558d4c6557f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+12 llc       0x0000558d4c65dd12 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+13 llc       0x0000558d4c6565a0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+14 llc       0x0000558d4c302dc7 llcMain + 12151
+15 llc       0x0000558d4c23eeaf main + 63
+16 libc.so.6 0x00007fa44ca2a1ca
+17 libc.so.6 0x00007fa44ca2a28b __libc_start_main + 139
+18 llc       0x0000558d4c23eda5 _start + 37</pre>
+<h4>Occurrences (86) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfh,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfh,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract-subvector.ll">fixed-vectors-extract-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-subvector.ll">fixed-vectors-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfh,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-subvector.ll">fixed-vectors-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-subvector.ll">fixed-vectors-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-subvector.ll">fixed-vectors-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-subvector.ll">fixed-vectors-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfh,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-subvector.ll">fixed-vectors-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-subvector.ll">fixed-vectors-insert-subvector.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvfhmin,+zvfbfmin -riscv-v-vector-bits-max=128 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

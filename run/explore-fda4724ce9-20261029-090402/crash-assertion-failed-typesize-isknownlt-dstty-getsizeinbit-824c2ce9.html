@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (TypeSize::isKnownLT(DstTy.getSizeInBits(), SrcTy.getSizeInBits()) &amp;&amp; &quot;invalid widening trunc&quot;), function validateTruncExt, file MachineIRBuilder.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (TypeSize::isKnownLT(DstTy.getSizeInBits(), SrcTy.getSizeInBits()) &amp;&amp; &quot;invalid widening trunc&quot;), function validateTruncExt, file MachineIRBuilder.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (TypeSize::isKnownLT(DstTy.getSizeInBits(), SrcTy.getSizeInBits()) &amp;&amp; &quot;invalid widening trunc&quot;), function validateTruncExt, file MachineIRBuilder.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 70 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-round-vp.fe0dbb15af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-round-vp.ll">fixed-vectors-round-vp.ll</a><span class="dim">)</span> @vp_round_v15f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/j33c4Mn7e">https://godbolt.org/z/j33c4Mn7e</a> (llc-assertions-trunk, checked 2026-10-29 13:00 UTC): <a href="https://godbolt.org/z/j33c4Mn7e">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global double
+
+define &lt;15 x double&gt; @vp_round_v15f64(&lt;15 x double&gt; %va, &lt;15 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load double, ptr @G.1, align 8
+  %C = fcmp false double %LGV, f0x7FEFFFFFFFFFFFFF
+  %v = call &lt;15 x double&gt; @llvm.round.v15f64(&lt;15 x double&gt; %va)
+  store i1 %C, ptr poison, align 1
+  ret &lt;15 x double&gt; %v
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;15 x double&gt; @llvm.round.v15f64(&lt;15 x double&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1281: void llvm::MachineIRBuilder::validateTruncExt(llvm::LLT, llvm::LLT, bool): Assertion `TypeSize::isKnownLT(DstTy.getSizeInBits(), SrcTy.getSizeInBits()) &amp;&amp; &quot;invalid widening trunc&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O0 -global-isel=0</code></td><td>0</td><td>127</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/MachineIRBuilder.cpp:1282: void llvm::MachineIRBuilder::validateTruncExt(const LLT, const LLT, bool): Assertion `TypeSize::isKnownLT(DstTy.getSizeInBits(), SrcTy.getSizeInBits()) &amp;&amp; &quot;invalid widening trunc&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;IRTranslator&#x27; on function &#x27;@vp_round_v15f64&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055af7e09b0cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055af7e097f71 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055af7e09bb4b
+3  libc.so.6 0x00007fb2b4045330
+4  libc.so.6 0x00007fb2b409ec0c pthread_kill + 284
+5  libc.so.6 0x00007fb2b404527e gsignal + 30
+6  libc.so.6 0x00007fb2b40288ff abort + 223
+7  libc.so.6 0x00007fb2b402881b
+8  libc.so.6 0x00007fb2b403b517
+9  llc       0x000055af80247a67
+10 llc       0x000055af802488d2 llvm::MachineIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 3314
+11 llc       0x000055af8015c12f llvm::CSEMIRBuilder::buildInstr(unsigned int, llvm::ArrayRef&lt;llvm::DstOp&gt;, llvm::ArrayRef&lt;llvm::SrcOp&gt;, std::optional&lt;unsigned int&gt;) + 2991
+12 llc       0x000055af80246351 llvm::MachineIRBuilder::buildTrunc(llvm::DstOp const&amp;, llvm::SrcOp const&amp;, std::optional&lt;unsigned int&gt;) + 33
+13 llc       0x000055af801554e3 llvm::CallLowering::IncomingValueHandler::assignValueToReg(llvm::Register, llvm::Register, llvm::CCValAssign const&amp;, llvm::ISD::ArgFlagsTy) + 899
+14 llc       0x000055af80152462 llvm::CallLowering::handleAssignments(llvm::CallLowering::ValueHandler&amp;, llvm::SmallVectorImpl&lt;llvm::CallLowering::ArgInfo&gt;&amp;, llvm::CCState&amp;, llvm::SmallVectorImpl&lt;llvm::CCValAssign&gt;&amp;, llvm::MachineIRBuilder&amp;, llvm::ArrayRef&lt;llvm::Register&gt;) const + 2866
+15 llc       0x000055af7f2d5e9c
+16 llc       0x000055af801c2d13 llvm::IRTranslatorImpl::runOnMachineFunction(llvm::MachineFunction&amp;, llvm::function_ref&lt;llvm::GISelCSEInfo* ()&gt;, bool, llvm::function_ref&lt;llvm::AAResults* ()&gt;, llvm::function_ref&lt;llvm::BranchProbabilityInfo* ()&gt;, llvm::function_ref&lt;llvm::AssumptionCache* ()&gt;, llvm::TargetLibraryInfo*, llvm::LibcallLoweringInfo const*, llvm::SSPLayoutInfo*) + 3507
+17 llc       0x000055af801c3fad llvm::IRTranslatorLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 733
+18 llc       0x000055af7e6648cd llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+19 llc       0x000055af7e3f4f37 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+20 llc       0x000055af7e3fd452 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+21 llc       0x000055af7e3f5ce0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+22 llc       0x000055af7e0a2787 llcMain + 12151
+23 llc       0x000055af7dfdeb6f main + 63
+24 libc.so.6 0x00007fb2b402a1ca
+25 libc.so.6 0x00007fb2b402a28b __libc_start_main + 139
+26 llc       0x000055af7dfdea65 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-round-vp.fe0dbb15af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-round-vp.ll">fixed-vectors-round-vp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O0</code></td></tr><tr><td class="l">fixed-vectors-vfmin-vp.b51226469f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin-vp.ll">fixed-vectors-vfmin-vp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfhmin,+zvbb -O0</code></td></tr><tr><td class="l">fixed-vectors-vfnmacc-vp.5108925c19.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfnmacc-vp.ll">fixed-vectors-vfnmacc-vp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+m -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

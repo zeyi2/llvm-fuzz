@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 3 configs, 3 test files, 51 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-interleave-store.33f928b3d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span> @vector_interleave_store_factor5 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfhmin,+zvfbfmin -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+
+define void @vector_interleave_store_factor5(&lt;4 x i32&gt; %a, &lt;4 x i32&gt; %b, &lt;4 x i32&gt; %c, &lt;4 x i32&gt; %d, &lt;4 x i32&gt; %e, ptr %p) {
+  %LGV = load i128, ptr @G.1, align 4
+  %C = icmp sge i128 %LGV, 0
+  %C3 = icmp eq i128 0, %LGV
+  %v = call &lt;20 x i32&gt; @llvm.vector.interleave5.v20i32(&lt;4 x i32&gt; %a, &lt;4 x i32&gt; %b, &lt;4 x i32&gt; %c, &lt;4 x i32&gt; %d, &lt;4 x i32&gt; %e)
+  store &lt;20 x i32&gt; %v, ptr %p, align 128
+  store i1 %C, ptr poison, align 1
+  store i1 %C3, ptr poison, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;20 x i32&gt; @llvm.vector.interleave5.v20i32(&lt;4 x i32&gt;, &lt;4 x i32&gt;, &lt;4 x i32&gt;, &lt;4 x i32&gt;, &lt;4 x i32&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zvfhmin,+zvfbfmin -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zvfhmin,+zvfbfmin -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %16:_(&lt;20 x s32&gt;) = G_INTRINSIC intrinsic(@llvm.vector.interleave5), %0:_(&lt;4 x s32&gt;), %1:_(&lt;4 x s32&gt;), %2:_(&lt;4 x s32&gt;), %3:_(&lt;4 x s32&gt;), %4:_(&lt;4 x s32&gt;) (in function: vector_interleave_store_factor5)
+warning: Instruction selection used fallback path for vector_interleave_store_factor5</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-interleave-store.33f928b3d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_factor5</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfhmin,+zvfbfmin -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.1fec0012b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">vdot4a_vv_partial_reduce_v16i32_v64i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zbs -O2</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.1fec0012b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">partial_of_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zbs -O2</code></td></tr><tr><td class="l">vector-interleave-fixed.7232241a12.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_interleave3_v6f32_v2f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvbb,+zvfh,+zvfbfmin,+experimental-zvzip -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

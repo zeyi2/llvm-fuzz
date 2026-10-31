@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,s16,&lt;N x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,s16,&lt;N x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,s16,&lt;N x s1&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-strided-vpstore.11381a56ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span> @strided_vpstore_v2i8_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+zve32x -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @strided_vpstore_v2i8_i16(&lt;2 x i8&gt; %val, ptr %ptr, i16 signext %stride, &lt;2 x i1&gt; %m, i32 zeroext %evl) {
+  %A = alloca ptr, align 8
+  store ptr poison, ptr %A, align 8
+  call void @llvm.experimental.vp.strided.store.v2i8.p0.i16(&lt;2 x i8&gt; %val, ptr %ptr, i16 %stride, &lt;2 x i1&gt; %m, i32 %evl)
+  %G = getelementptr &lt;2 x i8&gt;, ptr %ptr, i16 %stride
+  store ptr %G, ptr %A, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.experimental.vp.strided.store.v2i8.p0.i16(&lt;2 x i8&gt;, ptr captures(none), i16, &lt;2 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+zve32x -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+zve32x -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.experimental.vp.strided.store), %0:_(&lt;2 x s8&gt;), %1:_(p0), %2:_(s16), %3:_(&lt;2 x s1&gt;), %4:_(s32) (in function: strided_vpstore_v2i8_i16)
+warning: Instruction selection used fallback path for strided_vpstore_v2i8_i16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-strided-vpstore.11381a56ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v2i8_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+zve32x -O1</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.5375970508.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v2i8_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfbfmin,+zicsr -O2 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.5c6f7407e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v2i8_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

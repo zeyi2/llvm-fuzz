@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 7 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 7 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 7 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-froundeven.2cbfab979a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-froundeven.ll">fixed-vectors-froundeven.ll</a><span class="dim">)</span> @roundeven_v16f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zbs -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;16 x half&gt; @roundeven_v16f16(&lt;16 x half&gt; %x) {
+  %A = alloca &lt;16 x i1&gt;, align 2
+  %L = load i64, ptr %A, align 4
+  %G = getelementptr &lt;16 x half&gt;, ptr %A, i64 %L
+  store &lt;16 x i1&gt; poison, ptr %A, align 2
+  %C = fcmp ugt &lt;16 x half&gt; %x, %x
+  %a = call &lt;16 x half&gt; %G(&lt;16 x half&gt; %x)
+  store &lt;16 x i1&gt; %C, ptr %A, align 2
+  ret &lt;16 x half&gt; %a
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zbs -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After IRTranslator
+# Machine code for function roundeven_v16f16: IsSSA, TracksLiveness
+Frame Objects:
+  fi#-1: size=2, align=16, fixed, at location [SP]
+  fi#0: size=2, align=2, at location [SP]
+  fi#1: size=32, align=32, at location [SP]
+save/restore points:
+save points are empty
+restore points are empty
+Function Live Ins: $x10, $f10_h, $f11_h, $f12_h, $f13_h, $f14_h, $f15_h, $f16_h, $f17_h, $x11, $x12, $x13, $x14, $x15, $x16, $x17
+bb.1 (%ir-block.0):
+  liveins: $x10, $x11, $x12, $x13, $x14, $x15, $x16, $x17, $f10_h, $f11_h, $f12_h, $f13_h, $f14_h, $f15_h, $f16_h, $f17_h
+  %1:_(p0) = COPY $x10
+  %2:_(s16) = COPY $f10_h
+  %3:_(s16) = COPY $f11_h
+  %4:_(s16) = COPY $f12_h
+  %5:_(s16) = COPY $f13_h
+  %6:_(s16) = COPY $f14_h
+  %7:_(s16) = COPY $f15_h
+  %8:_(s16) = COPY $f16_h
+  %9:_(s16) = COPY $f17_h
+  %18:_(s64) = COPY $x11
+  %10:_(s16) = G_TRUNC %18:_(s64)
+  %19:_(s64) = COPY $x12
+  %11:_(s16) = G_TRUNC %19:_(s64)
+  %20:_(s64) = COPY $x13
+  %12:_(s16) = G_TRUNC %20:_(s64)
+  %21:_(s64) = COPY $x14
+  %13:_(s16) = G_TRUNC %21:_(s64)
+  %22:_(s64) = COPY $x15
+  %14:_(s16) = G_TRUNC %22:_(s64)
+  %23:_(s64) = COPY $x16
+  %15:_(s16) = G_TRUNC %23:_(s64)
+  %24:_(s64) = COPY $x17
+  %16:_(s16) = G_TRUNC %24:_(s64)
+  %25:_(p0) = G_FRAME_INDEX %fixed-stack.0
+  %17:_(s16) = G_LOAD %25:_(p0) :: (load (s16) from %fixed-stack.0, align 16)
+  %0:_(&lt;16 x s16&gt;) = G_BUILD_VECTOR %2:_(s16), %3:_(s16), %4:_(s16), %5:_(s16), %6:_(s16), %7:_(s16), %8:_(s16), %9:_(s16), %10:_(s16), %11:_(s16), %12:_(s16), %13:_(s16), %14:_(s16), %15:_(s16), %16:_(s16), %17:_(s16)
+  %31:_(&lt;16 x s1&gt;) = G_IMPLICIT_DEF
+  %26:_(p0) = G_FRAME_INDEX %stack.0.A
+  %27:_(s64) = G_LOAD %26:_(p0) :: (load (s64) from %ir.A, align 4)
+  %28:_(s64) = G_CONSTANT i64 32
+  %29:_(s64) = G_MUL %27:_, %28:_
+  %30:gprjalrnonx7(p0) = G_PTR_ADD %26:_, %29:_(s64)
+  G_STORE %31:_(&lt;16 x s1&gt;), %26:_(p0) :: (store (&lt;16 x s1&gt;) into %ir.A)
+  %32:_(&lt;16 x s1&gt;) = G_FCMP floatpred(ugt), %0:_(&lt;16 x s16&gt;), %0:_
+  %34:_(p0) = G_FRAME_INDEX %stack.1
+  ADJCALLSTACKDOWN 8, 0, implicit-def $x2, implicit $x2
+  %35:_(s16), %36:_(s16), %37:_(s16), %38:_(s16), %39:_(s16), %40:_(s16), %41:_(s16), %42:_(s16), %43:_(s16), %44:_(s16), %45:_(s16), %46:_(s16), %47:_(s16), %48:_(s16), %49:_(s16), %50:_(s16) = G_UNMERGE_VALUES %0:_(&lt;16 x s16&gt;)
+  %51:_(p0) = COPY $x2
+  %52:_(s64) = G_CONSTANT i64 0
+  %53:_(p0) = G_PTR_ADD %51:_, %52:_(s64)
+  G_STORE %50:_(s16), %53:_(p0) :: (store (s16) into stack, align 16)
+  $x10 = COPY %34:_(p0)
+  $f10_h = COPY %35:_(s16)
+  $f11_h = COPY %36:_(s16)
+  $f12_h = COPY %37:_(s16)
+  $f13_h = COPY %38:_(s16)
+  $f14_h = COPY %39:_(s16)
+  $f15_h = COPY %40:_(s16)
+  $f16_h = COPY %41:_(s16)
+  $f17_h = COPY %42:_(s16)
+  $x11 = COPY %43:_(s16)
+  $x12 = COPY %44:_(s16)
+  $x13 = COPY %45:_(s16)
+  $x14 = COPY %46:_(s16)
+  $x15 = COPY %47:_(s16)
+  $x16 = COPY %48:_(s16)
+  $x17 = COPY %49:_(s16)
+  PseudoCALLIndirect %30:gprjalrnonx7(p0), &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_d $f9_d $f18_d $f19_d $f20_d $f21_d $f22_d $f23_d $f24_d $f25_d $f26_d $f27_d $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f and 53 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $f10_h, implicit $f11_h, implicit $f12_h, implicit $f13_h, implicit $f14_h, implicit $f15_h, implicit $f16_h, implicit $f17_h, implicit $x11, implicit $x12, implicit $x13, implicit $x14, implicit $x15, implicit $x16, implicit $x17
+  ADJCALLSTACKUP 8, 0, implicit-def $x2, implicit $x2
+  %33:_(&lt;16 x s16&gt;) = G_LOAD %34:_(p0) :: (load (&lt;16 x s16&gt;) from %stack.1)
+  G_STORE %32:_(&lt;16 x s1&gt;), %26:_(p0) :: (store (&lt;16 x s1&gt;) into %ir.A)
+  G_STORE %33:_(&lt;16 x s16&gt;), %1:_(p0) :: (store (&lt;16 x s16&gt;))
+  PseudoRET
+# End machine code for function roundeven_v16f16.
+*** Bad machine code: Copy Instruction is illegal with mismatching sizes ***
+- function:    roundeven_v16f16
+- basic block: %bb.1  (0x55f2a652bf30)
+- instruction: $x11 = COPY %43:_(s16)
+Def Size = 64, Src Size = 16
+*** Bad machine code: Copy Instruction is ille</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-froundeven.2cbfab979a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/79ab4054e9d463741777e10c92a8ec279c1f1216/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-froundeven.ll">fixed-vectors-froundeven.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zbs -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

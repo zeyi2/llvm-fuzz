@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: remark: &lt;unknown&gt;:0:0: unable to legalize instruction: N:_(&lt;2 x s64&gt;) = G_LOAD N:_(p0) :: (dereferenceable load (&lt;2 x s64&gt;) from @G.7)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: remark: &lt;unknown&gt;:0:0: unable to legalize instruction: N:_(&lt;2 x s64&gt;) = G_LOAD N:_(p0) :: (dereferenceable load (&lt;2 x s64&gt;) from @G.7)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-79ab4054e9-20261030-093635.html">explore-79ab4054e9-20261030-093635</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: N:_(&lt;2 x s64&gt;) = G_LOAD N:_(p0) :: (dereferenceable load (&lt;2 x s64&gt;) from @G.7) </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-br-fcmp.95cc5388.2019826e.063fb743.7b0617b2e8.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.2019826e.063fb743.ll<span class="dim">)</span> via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x,+zvkb,+zvfh -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 79ab4054e9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/6a8xPMxYE">https://godbolt.org/z/6a8xPMxYE</a> (llc-assertions-trunk, checked 2026-10-30 12:59 UTC): <a href="https://godbolt.org/z/6a8xPMxYE">G</a> <span class="fp">crashes differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@G = global i1 false
+@G.1 = global i1 false
+@G.2 = global float 1.000000e+00
+@G.3 = global &lt;4 x i32&gt; splat (i32 65536)
+@G.4 = global i128 18446744073709551616
+@G.5 = global i128 170141183460469231731687303715884105727
+@G.6 = global i1 false
+@G.7 = global &lt;2 x i64&gt; splat (i64 9223372036854775807)
+@G.8 = global i8 -1
+
+declare void @abort()
+
+declare void @exit(i32)
+
+declare float @dummy(float)
+
+; Function Attrs: nounwind
+declare void @br_fcmp_false(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_oeq(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_oeq_alt(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ogt(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_oge(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_olt(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ole(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_one(float, float) #0
+
+; Function Attrs: nounwind
+define void @br_fcmp_ord(float %a, float %b) #0 {
+  %LGV2 = load i1, ptr @G.1, align 1
+  %LGV1 = load &lt;2 x i64&gt;, ptr @G.7, align 16
+  %LGV = load i128, ptr @G.4, align 4
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %1 = fcmp ord float %a, %b
+  %C1 = icmp uge i128 0, %LGV
+  br i1 %1, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  br i1 %1, label %if.then, label %if.else
+
+if.else:                                          ; preds = %BB
+  ret void
+
+if.then:                                          ; preds = %BB
+  %2 = phi &lt;2 x i64&gt; [ %LGV1, %BB ]
+  tail call void @abort()
+  store i1 %C1, ptr %A, align 1
+  store &lt;2 x i64&gt; %2, ptr poison, align 16
+  unreachable
+
+T:                                                ; preds = %0
+  br label %BB
+
+F:                                                ; preds = %F, %0
+  %C = fcmp ole float %b, +inf
+  store i1 %C, ptr poison, align 1
+  br i1 %LGV2, label %BB, label %F
+}
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ueq(float, float) #0
+
+; Function Attrs: nounwind
+define void @br_fcmp_ugt(float %a, float %b) #0 {
+  %A2 = alloca ptr, align 8
+  store ptr poison, ptr %A2, align 8
+  %A = alloca float, align 4
+  %L = load i128, ptr %A, align 4
+  %G = getelementptr ptr, ptr %A, i128 %L
+  store float poison, ptr %A, align 4
+  %LGV = load float, ptr @G.2, align 4
+  %B = fsub float %a, %LGV
+  %1 = fcmp ugt float %a, %b
+  store float %B, ptr %A, align 4
+  %C = fcmp ole float %b, +qnan
+  store i1 %C, ptr poison, align 1
+  store ptr %G, ptr %A2, align 8
+  br i1 %1, label %if.then, label %if.else
+
+if.else:                                          ; preds = %0
+  %G6 = getelementptr float, ptr %A2, i32 1
+  br i1 %1, label %T, label %F
+
+BB:                                               ; preds = %F
+  %LGV2 = load i8, ptr @G.8, align 1
+  store ptr %G6, ptr %A2, align 8
+  %C4 = icmp ugt i8 %LGV2, 16
+  store i1 %C4, ptr @G, align 1
+  ret void
+
+if.then:                                          ; preds = %0
+  %C3 = fcmp une float %a, %B
+  tail call void @abort()
+  store i1 %C3, ptr @G.1, align 1
+  %B5 = shl i1 %C3, %1
+  store i1 %B5, ptr poison, align 1
+  unreachable
+
+T:                                                ; preds = %if.else
+  ret void
+
+F:                                                ; preds = %if.else
+  br label %BB
+}
+
+; Function Attrs: nounwind
+declare void @br_fcmp_uge(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ult(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_ule(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_une(float, float) #0
+
+; Function Attrs: nounwind
+declare void @br_fcmp_uno(float, float) #0
+
+; Function Attrs: nounwind
+define void @br_fcmp_true(float %a, float %b) #0 {
+  %1 = fcmp true float %a, %b
+  %B = or i1 %1, true
+  %C2 = icmp uge i1 %1, %1
+  store i1 %C2, ptr @G.1, align 1
+  br i1 %B, label %if.then, label %if.else
+
+if.else:                                          ; preds = %0
+  %C1 = icmp ne i1 %1, false
+  %B5 = shl &lt;2 x i64&gt; splat (i64 -1), splat (i64 1)
+  store i1 %C1, ptr @G, align 1
+  store &lt;2 x i64&gt; %B5, ptr @G.7, align 16
+  ret void
+
+if.then:                                          ; preds = %0
+  %LGV = load i128, ptr @G.5, align 4
+  tail call void @abort()
+  %C = icmp slt i128 1, %LGV
+  store i1 %C, ptr @G.6, align 1
+  %C3 = icmp slt i128 %LGV, %LGV
+  store i1 %C3, ptr @G.1, align 1
+  unreachable
+}
+
+; Function Attrs: nounwind
+declare i32 @br_fcmp_store_load_stack_slot(float, float) #0
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x,+zvkb,+zvfh -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;2 x s64&gt;) = G_LOAD %5:_(p0) :: (dereferenceable load (&lt;2 x s64&gt;) from @G.7) (in function: br_fcmp_ord)<br>warning: Instruction selection used fallback path for br_fcmp_ord<br>Unhandled predicate</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x,+zvkb,+zvfh -O2 -global-isel=0</code></td><td>0</td><td>125</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x,+zvkb,+zvfh -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x,+zvkb,+zvfh -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;2 x s64&gt;) = G_LOAD %5:_(p0) :: (dereferenceable load (&lt;2 x s64&gt;) from @G.7) (in function: br_fcmp_ord)
+warning: Instruction selection used fallback path for br_fcmp_ord
+Unhandled predicate
+UNREACHABLE executed at /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVInstructionSelector.cpp:2296!
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x,+zvkb,+zvfh -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;InstructionSelect&#x27; on function &#x27;@br_fcmp_true&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055745a92b70b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055745a9285b1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055745a92c18b
+3  libc.so.6 0x00007f8a70245330
+4  libc.so.6 0x00007f8a7029ec0c pthread_kill + 284
+5  libc.so.6 0x00007f8a7024527e gsignal + 30
+6  libc.so.6 0x00007f8a702288ff abort + 223
+7  llc       0x000055745a86f90f
+8  llc       0x000055745bb7870e
+9  llc       0x000055745bb6d69e
+10 llc       0x000055745ca63d77 llvm::InstructionSelectImpl::selectMachineFunction(llvm::MachineFunction&amp;) + 1255
+11 llc       0x000055745ca65511 llvm::InstructionSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 417
+12 llc       0x000055745aefb60d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+13 llc       0x000055745ac857f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x000055745ac8dd12 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x000055745ac865a0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x000055745a932dc7 llcMain + 12151
+17 llc       0x000055745a86eeaf main + 63
+18 libc.so.6 0x00007f8a7022a1ca
+19 libc.so.6 0x00007f8a7022a28b __libc_start_main + 139
+20 llc       0x000055745a86eda5 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-br-fcmp.95cc5388.2019826e.063fb743.7b0617b2e8.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.2019826e.063fb743.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x,+zvkb,+zvfh -O2</code></td></tr><tr><td class="l">float-br-fcmp.95cc5388.2019826e.063fb743.d00dacd8f1.ll <span class="dim">(mutant of</span> float-br-fcmp.95cc5388.2019826e.063fb743.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x -O1</code></td></tr><tr><td class="l">float-br-fcmp.95cc5388.2019826e.063fb743.ll</td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+zve32x -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

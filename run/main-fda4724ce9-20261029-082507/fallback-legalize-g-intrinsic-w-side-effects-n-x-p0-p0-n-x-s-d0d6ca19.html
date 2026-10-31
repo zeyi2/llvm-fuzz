@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x p0&gt;,p0,&lt;N x s1&gt;,s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x p0&gt;,p0,&lt;N x s1&gt;,s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x p0&gt;,p0,&lt;N x s1&gt;,s64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-strided-load-store-asm.2fecc584d1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a><span class="dim">)</span> @gather_no_scalar_remainder via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+optimized-zero-stride-load,+zvl256b</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.30 = external global &lt;16 x ptr&gt;
+
+define void @gather_no_scalar_remainder(ptr noalias noundef captures(none) %arg, ptr noalias noundef readonly captures(none) %arg1, i64 noundef %arg2) {
+bb:
+  %i = shl i64 %arg2, 4
+  %i3 = icmp eq i64 %i, 0
+  br i1 %i3, label %bb16, label %bb2
+
+bb2:                                              ; preds = %bb
+  br label %bb4
+
+bb4:                                              ; preds = %bb4, %bb2
+  %i5 = phi i64 [ %i13, %bb4 ], [ 0, %bb2 ]
+  %i6 = phi &lt;16 x i64&gt; [ %i14, %bb4 ], [ &lt;i64 0, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6, i64 7, i64 8, i64 9, i64 10, i64 11, i64 12, i64 13, i64 14, i64 15&gt;, %bb2 ]
+  %i7 = mul &lt;16 x i64&gt; %i6, splat (i64 5)
+  %i8 = getelementptr inbounds i8, ptr %arg1, &lt;16 x i64&gt; %i7
+  %i9 = call &lt;16 x i8&gt; @llvm.masked.gather.v16i8.v16p0(&lt;16 x ptr&gt; align 1 %i8, &lt;16 x i1&gt; splat (i1 true), &lt;16 x i8&gt; poison)
+  %i10 = getelementptr inbounds i8, ptr %arg, i64 %i5
+  %L = load &lt;16 x ptr&gt;, ptr %i10, align 128
+  %i11 = load &lt;16 x i8&gt;, ptr %i10, align 1
+  %S = shufflevector &lt;16 x ptr&gt; %i8, &lt;16 x ptr&gt; %L, &lt;16 x i32&gt; poison
+  %i12 = add &lt;16 x i8&gt; %i11, %i9
+  store &lt;16 x i8&gt; %i12, ptr %i10, align 1
+  %i13 = add nuw i64 %i5, 16
+  %i14 = add &lt;16 x i64&gt; %i6, splat (i64 16)
+  %i15 = icmp eq i64 %i13, %i
+  store &lt;16 x ptr&gt; %S, ptr @G.30, align 128
+  br i1 %i15, label %bb16, label %bb4
+
+bb16:                                             ; preds = %bb4, %bb
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;16 x i8&gt; @llvm.masked.gather.v16i8.v16p0(&lt;16 x ptr&gt;, &lt;16 x i1&gt;, &lt;16 x i8&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+v,+optimized-zero-stride-load,+zvl256b -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+v,+optimized-zero-stride-load,+zvl256b -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %26:_(&lt;8 x p0&gt;), %27:_(&lt;8 x p0&gt;), %28:_(p0), %29:_(&lt;8 x s1&gt;), %30:_(s64) :: (store (s64) into @G.30) (in function: gather_no_scalar_remainder)
+warning: Instruction selection used fallback path for gather_no_scalar_remainder</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-strided-load-store-asm.2fecc584d1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a><span class="dim">)</span></td><td class="l">gather_no_scalar_remainder</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+optimized-zero-stride-load,+zvl256b</code></td></tr><tr><td class="l">fixed-vectors-strided-load-store-asm.f097f94d42.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-load-store-asm.ll">fixed-vectors-strided-load-store-asm.ll</a><span class="dim">)</span></td><td class="l">gather_no_scalar_remainder</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+zvl256b</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,fcvt.lu.s,fcvt.wu.s,flt.s,li</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,fcvt.lu.s,fcvt.wu.s,flt.s,li</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-fda4724ce9-20261029-090402.html">explore-fda4724ce9-20261029-090402</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,fcvt.lu.s,fcvt.wu.s,flt.s,li <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.78745416.63278d221c.ll <span class="dim">(mutant of</span> float-convert.78745416.ll<span class="dim">)</span> @fcvt_wu_s_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+f -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+@G.5 = external global i1
+
+; Function Attrs: nounwind
+define zeroext i16 @fcvt_wu_s_i16(float %a) #0 {
+  %C = fcmp olt float %a, %a
+  %C1 = icmp ult i1 %C, %C
+  %C2 = icmp sgt i1 %C1, true
+  %1 = fptoui float %a to i16
+  store i1 %C, ptr @G.3, align 1
+  store i1 %C2, ptr @G.5, align 1
+  ret i16 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+f -O0 -code-model=small&#x27; --funcs fcvt_wu_s_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #12)
+SelectionDAG hash 7671f9994d454daf, GlobalISel hash 4a0c640c306e95b7
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f -code-model=small -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f -code-model=small -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f -code-model=small -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.78745416.63278d221c.ll <span class="dim">(mutant of</span> float-convert.78745416.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+f -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

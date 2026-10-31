@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-00cbe8231c-20261031-091100.html">explore-00cbe8231c-20261031-091100</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">split-offsets.890ef29ccc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/split-offsets.ll">split-offsets.ll</a><span class="dim">)</span> @test1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 00cbe8231c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test1(ptr %sp, ptr %t, i32 %n) {
+entry:
+  %B = add &lt;8 x i8&gt; zeroinitializer, splat (i8 127)
+  %s = load ptr, ptr %sp, align 8
+  %gep0 = getelementptr [65536 x i32], ptr %s, i64 0, i32 20000
+  %gep1 = getelementptr [65536 x i32], ptr %s, i64 0, i32 20001
+  %gep2 = getelementptr [65536 x i32], ptr %t, i64 0, i32 20000
+  %gep3 = getelementptr [65536 x i32], ptr %t, i64 0, i32 20001
+  store i32 2, ptr %gep0, align 4
+  store i32 1, ptr %gep1, align 4
+  store i32 1, ptr %gep2, align 4
+  store i32 2, ptr %gep3, align 4
+  store &lt;8 x i8&gt; %B, ptr %gep2, align 8
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %B = add &lt;8 x i8&gt; zeroinitializer, splat (i8 127)&#x27; (in function: test1)
+warning: Instruction selection used fallback path for test1</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-maximum-minimum.c713c67b8f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/double-maximum-minimum.ll">double-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fmaximum_nnan_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fp-fcanonicalize.2b2ca191c8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">rvp-mul-parts-acc-fold.92a0060f.303100a527.ll <span class="dim">(mutant of</span> rvp-mul-parts-acc-fold.92a0060f.ll<span class="dim">)</span></td><td class="l">maccsu_h00</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zfinx -O3</code></td></tr><tr><td class="l">split-offsets.890ef29ccc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/00cbe8231c064558a28b740ea2603301c3d649af/llvm/test/CodeGen/RISCV/split-offsets.ll">split-offsets.ll</a><span class="dim">)</span></td><td class="l">test1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>

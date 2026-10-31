@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,s32,&lt;N x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,s32,&lt;N x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-fda4724ce9-20261029-082507.html">main-fda4724ce9-20261029-082507</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s16&gt;,p0,s32,&lt;N x s1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 4 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-strided-vpstore.341dc3734f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span> @strided_vpstore_v8f16_unit_stride via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at fda4724ce9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global float
+
+define void @strided_vpstore_v8f16_unit_stride(&lt;8 x half&gt; %val, ptr %ptr, &lt;8 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load float, ptr @G.2, align 4
+  %C = fcmp ogt float +qnan, %LGV
+  call void @llvm.experimental.vp.strided.store.v8f16.p0.i32(&lt;8 x half&gt; %val, ptr %ptr, i32 2, &lt;8 x i1&gt; %m, i32 %evl)
+  store i1 %C, ptr poison, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.experimental.vp.strided.store.v8f16.p0.i32(&lt;8 x half&gt;, ptr captures(none), i32, &lt;8 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.experimental.vp.strided.store), %0:_(&lt;8 x s16&gt;), %1:_(p0), %10:_(s32), %2:_(&lt;8 x s1&gt;), %3:_(s32) (in function: strided_vpstore_v8f16_unit_stride)
+warning: Instruction selection used fallback path for strided_vpstore_v8f16_unit_stride</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-strided-vpstore.1759424ec7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v4i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.341dc3734f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v8f16_unit_stride</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.767ae212cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v4i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.a1013fa49a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v8f16_unit_stride</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.d7fd3c602c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v8f16_unit_stride</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+v,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.daa5483d1b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v8f16_unit_stride</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.eedde9de99.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v4i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.fb03ff5244.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/fda4724ce92b99e4d7b90af9ee264d7650a63b32/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v4i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-10-31 12:54 UTC.</p>
