@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 3 configs, 4 test files, 21 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">alu8.1fe063ebc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/alu8.ll">alu8.ll</a><span class="dim">)</span> @add via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i8 @add(i8 %a, i8 %b) #0 {
+  %1 = add i8 %a, %b
+  %C = icmp sle i8 -128, %b
+  store i1 %C, ptr poison, align 1
+  ret i8 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %1 = add i8 %a, %b&#x27; (in function: add)
+warning: Instruction selection used fallback path for add</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">alu8.1fe063ebc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/alu8.ll">alu8.ll</a><span class="dim">)</span></td><td class="l">add</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.3b664c612b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_ctlz_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">min-max.7bd6d08880.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/min-max.ll">min-max.ll</a><span class="dim">)</span></td><td class="l">smax_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zhinx,+zvkb -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbkb.2bb22b187a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbkb.ll">rv64zbkb.ll</a><span class="dim">)</span></td><td class="l">packh_i16_3</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load i64~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load i64~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load i64~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmul.d6c0600df6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span> @clmul_i48 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global i48
+
+; Function Attrs: nounwind
+define i48 @clmul_i48(i48 %a, i48 %b) #0 {
+  %LGV = load i48, ptr @G.4, align 4
+  %B = urem i48 %b, %LGV
+  %res = call i48 @llvm.clmul.i48(i48 %a, i48 %b)
+  store i48 %B, ptr poison, align 4
+  ret i48 %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i48 @llvm.clmul.i48(i48, i48) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV = load i48, ptr @G.4, align 4&#x27; (in function: clmul_i48)
+warning: Instruction selection used fallback path for clmul_i48</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul.8bbbc9d9.6554e25b.30619d455c.ll <span class="dim">(mutant of</span> clmul.8bbbc9d9.6554e25b.ll<span class="dim">)</span></td><td class="l">clmul_i48</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">clmul.8bbbc9d9.6554e25b.783d56c679.ll <span class="dim">(mutant of</span> clmul.8bbbc9d9.6554e25b.ll<span class="dim">)</span></td><td class="l">clmul_i48</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zba,+c -O2 -code-model=small</code></td></tr><tr><td class="l">clmul.d6c0600df6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i48</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

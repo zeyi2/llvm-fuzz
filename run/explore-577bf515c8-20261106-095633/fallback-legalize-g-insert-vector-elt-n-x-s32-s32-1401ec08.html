@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 10 test files, 963 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fptoui-vp.e90bf21893.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span> @vfptoui_v4i32_v4f32_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/GanjdsYnW">https://godbolt.org/z/GanjdsYnW</a> (llc-assertions-trunk, checked 2026-11-06 13:50 UTC): <a href="https://godbolt.org/z/GanjdsYnW">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x float&gt;
+@G.1 = external global &lt;4 x float&gt;
+
+define &lt;4 x i32&gt; @vfptoui_v4i32_v4f32_unmasked(&lt;4 x float&gt; %va, i32 zeroext %evl) {
+  %LGV = load &lt;4 x float&gt;, ptr @G, align 16
+  %v = fptoui &lt;4 x float&gt; %va to &lt;4 x i32&gt;
+  %I = insertelement &lt;4 x float&gt; %LGV, float f0x7F7FFFFF, i128 -170141183460469231731687303715884105728
+  store &lt;4 x float&gt; %I, ptr @G.1, align 16
+  ret &lt;4 x i32&gt; %v
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>20</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %7:_, %11:_(s32), %12:_(s32) (in function: vfptoui_v4i32_v4f32_unmasked)<br>warning: Instruction selection used fallback path for vfptoui_v4i32_v4f32_unmasked</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin -O1 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>20</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+zvfhmin -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+zvfhmin -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %7:_, %11:_(s32), %12:_(s32) (in function: vfptoui_v4i32_v4f32_unmasked)
+warning: Instruction selection used fallback path for vfptoui_v4i32_v4f32_unmasked</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fptoui-vp.e90bf21893.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i32_v4f32_unmasked</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-lrint.be02e4e7a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-lrint.ll">fixed-vectors-lrint.ll</a><span class="dim">)</span></td><td class="l">lrint_v2f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d,+zvfhmin,+zvfbfmin,+a -O0 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-vfnmsub-constrained-sdnode.4115a68c51.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfnmsub-constrained-sdnode.ll">fixed-vectors-vfnmsub-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfnmsub_vv_v16f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+xtheadba -O0 -code-model=medium</code></td></tr><tr><td class="l">indirectbr.e062d2ffc1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/indirectbr.ll">indirectbr.ll</a><span class="dim">)</span></td><td class="l">indirectbr</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfa,+m -O2</code></td></tr><tr><td class="l">umulh.5555ce95.0357e6d158.ll <span class="dim">(mutant of</span> umulh.5555ce95.ll<span class="dim">)</span></td><td class="l">umulh_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+xtheadba,+zcb -O3</code></td></tr><tr><td class="l">umulh.5555ce95.052ce23c.1828f5607f.ll <span class="dim">(mutant of</span> umulh.5555ce95.052ce23c.ll<span class="dim">)</span></td><td class="l">umulh_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+xtheadba,+zve32x -O1</code></td></tr><tr><td class="l">umulh.5555ce95.6b78665299.ll <span class="dim">(mutant of</span> umulh.5555ce95.ll<span class="dim">)</span></td><td class="l">umulh_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+xtheadba -O2 -code-model=small</code></td></tr><tr><td class="l">vsse.f2ec2f306f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vsse.ll">vsse.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vsse_v_nxv1i8_nxv1i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfbfmin,+zvbb -O2</code></td></tr><tr><td class="l">vwabda.204d99eb53.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/vwabda.ll">vwabda.ll</a><span class="dim">)</span></td><td class="l">vwabda_vx_i16mf2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+experimental-zvabd,+zicsr -O1</code></td></tr><tr><td class="l">wide-scalar-shift-legalization.aadf9b0813.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/wide-scalar-shift-legalization.ll">wide-scalar-shift-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_4bytes</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb -O0</code></td></tr><tr><td class="l">xtheadfmemidx.799002aa37.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/xtheadfmemidx.ll">xtheadfmemidx.ll</a><span class="dim">)</span></td><td class="l">flrw</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+xtheadfmemidx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

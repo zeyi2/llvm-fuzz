@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,andi,auipc,beq,bnez,fcvt.wu.h</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,andi,auipc,beq,bnez,fcvt.wu.h</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,andi,auipc,beq,bnez,fcvt.wu.h <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.cf6ea6cb.aae14a8d.3b0f44c6.18ae54841b.ll <span class="dim">(mutant of</span> half-convert.cf6ea6cb.aae14a8d.3b0f44c6.ll<span class="dim">)</span> @fcvt_wu_s_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+zfh,+v -O0 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global half
+@G.1 = external global i8
+@G.2 = external global i1
+@G.3 = external global i1
+
+; Function Attrs: nounwind
+define zeroext i16 @fcvt_wu_s_i16(half %a) #0 {
+  %A6 = alloca i1, align 1
+  store i1 false, ptr %A6, align 1
+  %A8 = alloca i1, align 1
+  %L3 = load half, ptr %A8, align 2
+  store i1 true, ptr %A8, align 1
+  %C4 = fcmp une half %a, %L3
+  %LGV2 = load i8, ptr @G.1, align 1
+  %LGV = load half, ptr @G, align 2
+  %C1 = fcmp oge half %a, %LGV
+  switch i8 %LGV2, label %SW_D [
+    i8 33, label %SW_C
+    i8 -17, label %SW_C3
+    i8 24, label %SW_C4
+    i8 -35, label %SW_C5
+    i8 -99, label %SW_C6
+    i8 -111, label %SW_C7
+  ]
+
+BB:                                               ; preds = %SW_C6, %SW_C5, %SW_C4, %SW_C3, %SW_C, %SW_D
+  %L7 = load i1, ptr %A6, align 1
+  store i1 %L7, ptr @G.2, align 1
+  br i1 %L7, label %T, label %F
+
+BB5:                                              ; preds = %F, %T
+  %A = alloca i1, align 1
+  store i1 %C1, ptr %A, align 1
+  %C = icmp ule i128 -170141183460469231731687303715884105728, 0
+  %1 = fptoui half %a to i16
+  store i1 %C, ptr %A, align 1
+  ret i16 %1
+
+SW_D:                                             ; preds = %SW_D, %0
+  %L = load i1, ptr %A8, align 1
+  store i1 %L, ptr @G.3, align 1
+  br i1 %L, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %0
+  br label %BB
+
+SW_C3:                                            ; preds = %0
+  br label %BB
+
+SW_C4:                                            ; preds = %0
+  store i1 %C4, ptr @G.2, align 1
+  %C9 = fcmp ugt half %a, %L3
+  store i1 %C9, ptr %A6, align 1
+  br label %BB
+
+SW_C5:                                            ; preds = %0
+  br label %BB
+
+SW_C6:                                            ; preds = %0
+  %B = sub i1 %C1, %C1
+  store i1 %B, ptr @G.2, align 1
+  br label %BB
+
+SW_C7:                                            ; preds = %0
+  ret i16 -32768
+
+T:                                                ; preds = %T, %BB
+  %LGV8 = load i1, ptr @G.3, align 1
+  br i1 %LGV8, label %T, label %BB5
+
+F:                                                ; preds = %BB
+  br label %BB5
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+zfh,+v -O0 -code-model=medium&#x27; --funcs fcvt_wu_s_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #12)
+SelectionDAG hash c7c80994735a01b2, GlobalISel hash 66d231c65aa03761
+b0: llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+zfh,+v -code-model=medium -O0 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+zfh,+v -code-model=medium -O2 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+zfh,+v -code-model=medium -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-convert.cf6ea6cb.aae14a8d.3b0f44c6.18ae54841b.ll <span class="dim">(mutant of</span> half-convert.cf6ea6cb.aae14a8d.3b0f44c6.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+zfh,+v -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

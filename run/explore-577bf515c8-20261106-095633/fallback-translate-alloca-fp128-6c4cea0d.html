@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca fp128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca fp128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca fp128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 3 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fp128.f7b463e1b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span> @test_load_and_cmp via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@x = external local_unnamed_addr global fp128, align 16
+@y = external local_unnamed_addr global fp128, align 16
+@G.5 = external global ptr
+
+; Function Attrs: nounwind
+define i32 @test_load_and_cmp() #0 {
+  %A = alloca fp128, align 16
+  %L1 = load i16, ptr %A, align 2
+  %G = getelementptr float, ptr %A, i16 %L1
+  store fp128 poison, ptr %A, align 16
+  %1 = load fp128, ptr @x, align 16
+  %2 = load fp128, ptr @y, align 16
+  %cmp = fcmp une fp128 %1, %2
+  %B = frem fp128 %2, 6.475180e-4966
+  %3 = zext i1 %cmp to i32
+  store fp128 %B, ptr %A, align 16
+  store ptr %G, ptr @G.5, align 8
+  ret i32 %3
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca fp128, align 16&#x27; (in function: test_load_and_cmp)
+warning: Instruction selection used fallback path for test_load_and_cmp</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp128.c6546064.92e31ee9.2ac3866d0f.ll <span class="dim">(mutant of</span> fp128.c6546064.92e31ee9.ll<span class="dim">)</span></td><td class="l">test_ftan</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+m,+zicsr -O0</code></td></tr><tr><td class="l">fp128.c6546064.92e31ee9.fa30de9ed8.ll <span class="dim">(mutant of</span> fp128.c6546064.92e31ee9.ll<span class="dim">)</span></td><td class="l">test_ftan</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbkb,+m,+zicsr -O0</code></td></tr><tr><td class="l">fp128.f7135313b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">modf</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">fp128.f7135313b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">ldexp_f128</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">fp128.f7b463e1b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">test_load_and_cmp</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr><tr><td class="l">lrint-conv.bad9e9e3.a422cc1263.ll <span class="dim">(mutant of</span> lrint-conv.bad9e9e3.ll<span class="dim">)</span></td><td class="l">test_lrint_ixx_f128</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

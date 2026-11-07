@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-imm.989b68a95a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/double-imm.ll">double-imm.ll</a><span class="dim">)</span> @double_imm via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+xtheadba -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global &lt;8 x i8&gt;
+
+; Function Attrs: nounwind
+define double @double_imm() #0 {
+  %B = srem &lt;8 x i8&gt; splat (i8 16), zeroinitializer
+  store &lt;8 x i8&gt; %B, ptr @G.4, align 8
+  ret double f0x400921FB54442D18
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+xtheadba -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+xtheadba -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem &lt;8 x i8&gt; splat (i8 16), zeroinitializer&#x27; (in function: double_imm)
+warning: Instruction selection used fallback path for double_imm</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-imm.989b68a95a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/double-imm.ll">double-imm.ll</a><span class="dim">)</span></td><td class="l">double_imm</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+xtheadba -O1</code></td></tr><tr><td class="l">fixed-vectors-bswap-vp.94073202.189055fb40.ll <span class="dim">(mutant of</span> fixed-vectors-bswap-vp.94073202.ll<span class="dim">)</span></td><td class="l">vp_bswap_v4i16_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr><tr><td class="l">rv64-float-convert-strict.32e1b32ab9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64-float-convert-strict.ll">rv64-float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">sitofp_i128_to_f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -disable-strictnode-mutation -mattr=+zfinx,+zvkb -O3 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

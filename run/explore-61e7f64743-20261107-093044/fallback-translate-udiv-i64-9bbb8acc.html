@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: udiv i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: udiv i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: udiv i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 8 test files, 40 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">split-udiv-by-constant.d3104d8fdd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/split-udiv-by-constant.ll">split-udiv-by-constant.ll</a><span class="dim">)</span> @test_udiv_9 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zhinx,+zbb -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i64 @test_udiv_9(i64 %x) #0 {
+  %a = udiv i64 %x, 9
+  %C = icmp ult i64 %x, 4294967296
+  store i1 %C, ptr poison, align 1
+  ret i64 %a
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+zhinx,+zbb -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+zhinx,+zbb -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: udiv: &#x27;  %a = udiv i64 %x, 9&#x27; (in function: test_udiv_9)
+warning: Instruction selection used fallback path for test_udiv_9</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">div-pow2.719f463de1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/div-pow2.ll">div-pow2.ll</a><span class="dim">)</span></td><td class="l">sdiv64_pow2_negative_4096</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zcb -O2 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-marith-vp.50eaf8cb5d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-marith-vp.ll">fixed-vectors-marith-vp.ll</a><span class="dim">)</span></td><td class="l">xor_v2i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vsadd.f1f4018d72.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vsadd.ll">fixed-vectors-vsadd.ll</a><span class="dim">)</span></td><td class="l">sadd_v8i32_vi</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">float-fcmp-strict.664fe103ed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/float-fcmp-strict.ll">float-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmp_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32 -mattr=+zdinx -O3</code></td></tr><tr><td class="l">idiv_large.c6157ec633.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span></td><td class="l">udiv_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O0 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">rotl-rotr.101e23f0b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotl_64_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -enable-legalize-types-checking -mattr=+zfinx,+xtheadba -O3</code></td></tr><tr><td class="l">split-udiv-by-constant.d3104d8fdd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/split-udiv-by-constant.ll">split-udiv-by-constant.ll</a><span class="dim">)</span></td><td class="l">test_udiv_9</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zhinx,+zbb -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcibm-cto-clo-brev.da13ce20cf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/xqcibm-cto-clo-brev.ll">xqcibm-cto-clo-brev.ll</a><span class="dim">)</span></td><td class="l">test_cttz_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zhinx,+zcb -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

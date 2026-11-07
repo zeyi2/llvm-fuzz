@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FMAXNUM &lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FMAXNUM &lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FMAXNUM &lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 1 configs, 1 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vfmax.228a246ed4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmax.ll">fixed-vectors-vfmax.ll</a><span class="dim">)</span> @vfmax_v2f32_vv via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+zfbfmin,+zvfbfmin -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.5 = external global &lt;4 x i32&gt;
+
+define &lt;2 x float&gt; @vfmax_v2f32_vv(&lt;2 x float&gt; %a, &lt;2 x float&gt; %b) {
+  %B = udiv &lt;4 x i32&gt; zeroinitializer, zeroinitializer
+  %v = call &lt;2 x float&gt; @llvm.maxnum.v2f32(&lt;2 x float&gt; %a, &lt;2 x float&gt; %b)
+  store &lt;4 x i32&gt; %B, ptr @G.5, align 16
+  ret &lt;2 x float&gt; %v
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x float&gt; @llvm.maxnum.v2f32(&lt;2 x float&gt;, &lt;2 x float&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+zfbfmin,+zvfbfmin -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+zfbfmin,+zvfbfmin -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(&lt;2 x s32&gt;) = G_FMAXNUM %0:_, %1:_ (in function: vfmax_v2f32_vv)
+warning: Instruction selection used fallback path for vfmax_v2f32_vv</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfmax.228a246ed4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmax.ll">fixed-vectors-vfmax.ll</a><span class="dim">)</span></td><td class="l">vfmax_v2f32_vv</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+zfbfmin,+zvfbfmin -O0</code></td></tr><tr><td class="l">fixed-vectors-vfmax.228a246ed4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmax.ll">fixed-vectors-vfmax.ll</a><span class="dim">)</span></td><td class="l">vfmax_v2f32_vf</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+zfbfmin,+zvfbfmin -O0</code></td></tr><tr><td class="l">fixed-vectors-vfmax.228a246ed4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmax.ll">fixed-vectors-vfmax.ll</a><span class="dim">)</span></td><td class="l">vfmax_v8f32_vf</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+zfbfmin,+zvfbfmin -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

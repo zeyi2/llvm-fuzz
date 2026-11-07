@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 10 configs, 10 test files, 165 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">tls-models.faed1699c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/tls-models.ll">tls-models.ll</a><span class="dim">)</span> @f3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -relocation-model=pic -enable-tlsdesc -mattr=+zhinx,+zvbb -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@ie = external thread_local(initialexec) global i32
+@G.1 = external global &lt;4 x i1&gt;
+
+; Function Attrs: nounwind
+define ptr @f3() #0 {
+entry:
+  %C = icmp sge &lt;4 x i32&gt; splat (i32 2147483647), splat (i32 42)
+  store &lt;4 x i1&gt; %C, ptr @G.1, align 1
+  ret ptr @ie
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -relocation-model=pic -enable-tlsdesc -mattr=+zhinx,+zvbb -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -relocation-model=pic -enable-tlsdesc -mattr=+zhinx,+zvbb -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp sge &lt;4 x i32&gt; splat (i32 2147483647), splat (i32 42)&#x27; (in function: f3)
+warning: Instruction selection used fallback path for f3</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cttz-elts-scalarize.e7e19adda2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/cttz-elts-scalarize.ll">cttz-elts-scalarize.ll</a><span class="dim">)</span></td><td class="l">v4i32_zero_is_poison</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O2 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">double-fcmp.acefd66015.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/GlobalISel/double-fcmp.ll">double-fcmp.ll</a><span class="dim">)</span></td><td class="l">fcmp_uno_same</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fastcc-without-f-reg.56f1775333.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_float_32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zvkb,+zihintpause -O3</code></td></tr><tr><td class="l">fixed-vectors-vror.816b4ee274.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vror.ll">fixed-vectors-vror.ll</a><span class="dim">)</span></td><td class="l">vror_vv_v4i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vsadd.529166c544.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vsadd.ll">fixed-vectors-vsadd.ll</a><span class="dim">)</span></td><td class="l">sadd_v8i32_vv</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fp128.5b22d3a630.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fadd</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvkb,+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-mul-parts-acc-fold.8b3e7a3c.ad934ebbaf.ll <span class="dim">(mutant of</span> rvp-mul-parts-acc-fold.8b3e7a3c.ll<span class="dim">)</span></td><td class="l">maccu_w11</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx -O0</code></td></tr><tr><td class="l">rvp-simd-64.e822cc4b.f621bfea7d.ll <span class="dim">(mutant of</span> rvp-simd-64.e822cc4b.ll<span class="dim">)</span></td><td class="l">test_pssubu_w</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zdinx -O2 -code-model=small</code></td></tr><tr><td class="l">sadd_sat.224212a36c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/sadd_sat.ll">sadd_sat.ll</a><span class="dim">)</span></td><td class="l">func8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">tls-models.faed1699c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/tls-models.ll">tls-models.ll</a><span class="dim">)</span></td><td class="l">f3</td><td class="l"><code>-mtriple=riscv64 -relocation-model=pic -enable-tlsdesc -mattr=+zhinx,+zvbb -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

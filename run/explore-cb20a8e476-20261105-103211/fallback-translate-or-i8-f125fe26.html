@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 18 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">avgceilu.df869fbdba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/avgceilu.ll">avgceilu.ll</a><span class="dim">)</span> @test_fixed_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i8 @test_fixed_i8(i8 %a0, i8 %a1) #0 {
+  %or = or i8 %a0, %a1
+  %xor = xor i8 %a0, %a1
+  %B = lshr i8 %xor, %or
+  %shift = lshr i8 %xor, 1
+  %res = sub i8 %or, %shift
+  store i8 %B, ptr poison, align 1
+  ret i8 %res
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %or = or i8 %a0, %a1&#x27; (in function: test_fixed_i8)
+warning: Instruction selection used fallback path for test_fixed_i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-cmpxchg.9e31176229.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i8_acquire_acquire</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+ztso,+zacas,+zfinx -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">avgceilu.df869fbdba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/avgceilu.ll">avgceilu.ll</a><span class="dim">)</span></td><td class="l">test_fixed_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O1</code></td></tr><tr><td class="l">float-convert.8db5ba0801.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/float-convert.ll">float-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_s_wu_demanded_bits</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

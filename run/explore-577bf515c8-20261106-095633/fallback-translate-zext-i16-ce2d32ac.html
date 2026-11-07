@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 5 test files, 68 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">shl-demanded.7111e8a8bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/shl-demanded.ll">shl-demanded.ll</a><span class="dim">)</span> @zext_shl_trunc_larger via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve32x,+zfinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+define zeroext i17 @zext_shl_trunc_larger(i16 %x, i32 %y) {
+  %conv = zext i16 %x to i32
+  %shl = shl i32 %conv, %y
+  %t = trunc i32 %shl to i17
+  %C = icmp sge i16 %x, 0
+  store i1 %C, ptr @G.2, align 1
+  ret i17 %t
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve32x,+zfinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve32x,+zfinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %conv = zext i16 %x to i32&#x27; (in function: zext_shl_trunc_larger)
+warning: Instruction selection used fallback path for zext_shl_trunc_larger</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu.35396849b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/abdu.ll">abdu.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i8_i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">abdu.36a352f39e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/abdu.ll">abdu.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i16_undef</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zfinx,+zbs -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">abdu.8a08457398.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/abdu.ll">abdu.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i16_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">avgflooru.c1306053bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/avgflooru.ll">avgflooru.ll</a><span class="dim">)</span></td><td class="l">test_ext_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zdinx -O1</code></td></tr><tr><td class="l">sextw-removal.566e611581.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/GlobalISel/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">zext_i16_arg</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">shl-demanded.7111e8a8bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/shl-demanded.ll">shl-demanded.ll</a><span class="dim">)</span></td><td class="l">zext_shl_trunc_larger</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve32x,+zfinx -O0</code></td></tr><tr><td class="l">signbit-test.c7878ea846.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/signbit-test.ll">signbit-test.ll</a><span class="dim">)</span></td><td class="l">test_set_mask_i16_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr,+zfinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

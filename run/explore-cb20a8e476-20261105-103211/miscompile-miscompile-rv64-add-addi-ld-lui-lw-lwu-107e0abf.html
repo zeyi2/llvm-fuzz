@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,ld,lui,lw,lwu</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,ld,lui,lw,lwu</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,ld,lui,lw,lwu <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">nest-register.3dd00e48.4299aed090.ll <span class="dim">(mutant of</span> nest-register.3dd00e48.ll<span class="dim">)</span> @nest_caller via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zicfilp,+f -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@G = global i32 2147483647
+@G.1 = global i1 true
+@G.2 = global i1 true
+
+; Function Attrs: nounwind
+define ptr @nest_receiver(ptr nest %arg) #0 {
+  %A = alloca &lt;8 x i1&gt;, align 1
+  store &lt;8 x i1&gt; poison, ptr %A, align 1
+  %C1 = icmp sle &lt;8 x i8&gt; zeroinitializer, zeroinitializer
+  %C = icmp sle i1 false, false
+  store i1 %C, ptr @G.1, align 1
+  store &lt;8 x i1&gt; %C1, ptr %A, align 1
+  ret ptr %arg
+}
+
+; Function Attrs: nounwind
+define ptr @nest_caller(ptr %arg) #0 {
+  %A = alloca i32, align 4
+  %L1 = load i64, ptr %A, align 4
+  %L5 = load i64, ptr %A, align 4
+  %C2 = icmp ne i64 %L1, %L5
+  %L3 = load i32, ptr %A, align 4
+  %G = getelementptr i64, ptr %arg, i32 %L3
+  store i32 poison, ptr %A, align 4
+  %LGV = load i32, ptr @G, align 4
+  %C6 = icmp slt i64 0, %L5
+  %result = call ptr @nest_receiver(ptr nest %arg)
+  %B = shl i32 2147483647, %LGV
+  store i32 %B, ptr %A, align 4
+  store i1 %C2, ptr @G.1, align 1
+  store ptr %G, ptr %result, align 8
+  store i1 %C6, ptr @G.2, align 1
+  ret ptr %result
+}
+
+attributes #0 = { nounwind }
+
+!llvm.module.flags = !{!2, !3}
+
+!2 = !{i32 8, !&quot;cf-protection-branch&quot;, i32 1}
+!3 = !{i32 1, !&quot;cf-branch-label-scheme&quot;, !&quot;unlabeled&quot;}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zicfilp,+f -O3&#x27; --funcs nest_caller snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">63 of 64 inputs differ (first: #1)
+SelectionDAG hash 76b52445f209c373, GlobalISel hash 33d62eb910f19166
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zicfilp,+f -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zicfilp,+f -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zicfilp,+f -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nest-register.3dd00e48.4299aed090.ll <span class="dim">(mutant of</span> nest-register.3dd00e48.ll<span class="dim">)</span></td><td class="l">nest_caller</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zicfilp,+f -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

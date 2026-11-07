@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CTLZ s32,s128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CTLZ s32,s128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CTLZ s32,s128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 113 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">idiv_large.822e24ab8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span> @udiv_i128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+; Function Attrs: nounwind
+define i128 @udiv_i128(i128 %x, i128 %y) #0 {
+  %C = icmp ne i128 %y, 1
+  %res = udiv i128 %x, %y
+  store i1 %C, ptr @G.1, align 1
+  ret i128 %res
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zbb -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zbb -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %1057:_(s32) = G_CTLZ %6:_(s128) (in function: udiv_i128)
+warning: Instruction selection used fallback path for udiv_i128</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bswap-known-bits.ac541e3b60.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/bswap-known-bits.ll">bswap-known-bits.ll</a><span class="dim">)</span></td><td class="l">bswap_src_and_byte1_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zvkb -O0</code></td></tr><tr><td class="l">fold-masked-merge.28550b003e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/fold-masked-merge.ll">fold-masked-merge.ll</a><span class="dim">)</span></td><td class="l">not_a_masked_merge1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zicond -O1 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">idiv_large.822e24ab8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span></td><td class="l">udiv_i128</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memset-pattern.cdd867bab5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/memset-pattern.ll">memset-pattern.ll</a><span class="dim">)</span></td><td class="l">memset_1_noalign</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+c -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

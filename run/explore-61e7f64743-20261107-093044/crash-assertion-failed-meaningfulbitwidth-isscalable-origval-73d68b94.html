@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: ((MeaningfulBitWidth.isScalable() || OrigValueBitWidth &gt;= MeaningfulBitWidth) &amp;&amp; &quot;Meaningful bits not covered by the mapping&quot;), function verify, file RegisterBankInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: ((MeaningfulBitWidth.isScalable() || OrigValueBitWidth &gt;= MeaningfulBitWidth) &amp;&amp; &quot;Meaningful bits not covered by the mapping&quot;), function verify, file RegisterBankInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: ((MeaningfulBitWidth.isScalable() || OrigValueBitWidth &gt;= MeaningfulBitWidth) &amp;&amp; &quot;Meaningful bits not covered by the mapping&quot;), function verify, file RegisterBankInfo.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">18 in 14 configs, 12 test files, 258 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/calling-conv-ilp32d.ll">calling-conv-ilp32d.ll</a> @caller_double_ret via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/PPefT7McE">https://godbolt.org/z/PPefT7McE</a> (llc-assertions-trunk, checked 2026-10-26 12:20 UTC): <a href="https://godbolt.org/z/PPefT7McE">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+declare double @callee_double_ret() #0
+
+; Function Attrs: nounwind
+define i32 @caller_double_ret() #0 {
+  %1 = call double @callee_double_ret()
+  %2 = bitcast double %1 to i64
+  %3 = trunc i64 %2 to i32
+  ret i32 %3
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/RegisterBankInfo.cpp:567: bool llvm::RegisterBankInfo::ValueMapping::verify(const llvm::RegisterBankInfo&amp;, llvm::TypeSize) const: Assertion `(MeaningfulBitWidth.isScalable() || OrigValueBitWidth &gt;= MeaningfulBitWidth) &amp;&amp; &quot;Meaningful bits not covered by the mapping&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d -global-isel=0</code></td><td>0</td><td>8</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/RegisterBankInfo.cpp:545: bool llvm::RegisterBankInfo::ValueMapping::verify(const RegisterBankInfo &amp;, TypeSize) const: Assertion `(MeaningfulBitWidth.isScalable() || OrigValueBitWidth &gt;= MeaningfulBitWidth) &amp;&amp; &quot;Meaningful bits not covered by the mapping&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RegBankSelect&#x27; on function &#x27;@caller_double_ret&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000056099bd50fdb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000056099bd4de81 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000056099bd51a5b
+3  libc.so.6 0x00007f314b045330
+4  libc.so.6 0x00007f314b09ec0c pthread_kill + 284
+5  libc.so.6 0x00007f314b04527e gsignal + 30
+6  libc.so.6 0x00007f314b0288ff abort + 223
+7  libc.so.6 0x00007f314b02881b
+8  libc.so.6 0x00007f314b03b517
+9  llc       0x000056099c41666f llvm::RegisterBankInfo::ValueMapping::verify(llvm::RegisterBankInfo const&amp;, llvm::TypeSize) const + 831
+10 llc       0x000056099c415446 llvm::RegisterBankInfo::InstructionMapping::verify(llvm::MachineInstr const&amp;) const + 246
+11 llc       0x000056099df3d674
+12 llc       0x000056099df3c8a5 llvm::RegBankSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 197
+13 llc       0x000056099c3234b1 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+14 llc       0x000056099c0ab1f7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x000056099c0b3712 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x000056099c0abfa0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x000056099bd58697 llcMain + 12151
+18 llc       0x000056099bc92caf main + 63
+19 libc.so.6 0x00007f314b02a1ca
+20 libc.so.6 0x00007f314b02a28b __libc_start_main + 139
+21 llc       0x000056099bc92ba5 _start + 37</pre>
+<h4>Occurrences (18) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/calling-conv-ilp32d.ll">calling-conv-ilp32d.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d -target-abi ilp32d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/fpclamptosat.ll">fpclamptosat.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/extractelt-fp.ll">extractelt-fp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+d,+zfhmin,+zfbfmin,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/extractelt-fp.ll">extractelt-fp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+d,+zfhmin,+zvfhmin,+experimental-zvfbfa -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/extractelt-fp.ll">extractelt-fp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+d,+zvfh,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/extractelt-fp.ll">extractelt-fp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+d,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/insertelt-fp.ll">insertelt-fp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zfbfmin,+zvfh,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/insertelt-fp.ll">insertelt-fp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zfbfmin,+zvfhmin,+zvfbfmin,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/insertelt-fp.ll">insertelt-fp.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfhmin,+experimental-zvfbfa,+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/insertelt-int-rv32.ll">insertelt-int-rv32.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/splat-repeated-i32-rv32.ll">splat-repeated-i32-rv32.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v -riscv-v-vector-bits-min=256 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/splat-repeated-i32-rv32.ll">splat-repeated-i32-rv32.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vfmv.f.s.ll">vfmv.f.s.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+v,+zvfh -target-abi ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vfmv.s.f.ll">vfmv.s.f.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vfmv.v.f.ll">vfmv.v.f.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh -verify-machineinstrs -target-abi=ilp32d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

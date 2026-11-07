@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: atomicrmw ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: atomicrmw ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: atomicrmw ptr <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 6 configs, 5 test files, 61 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomicrmw-and-or-xor.fcd5449007.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-and-or-xor.ll">atomicrmw-and-or-xor.ll</a><span class="dim">)</span> @atomicrmw_xor_i32_release via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+zabha,+zhinx,+zve32x -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @atomicrmw_xor_i32_release(ptr %ptr, i32 %val) #0 {
+  %res = atomicrmw xor ptr %ptr, i32 %val release, align 4
+  %B = and i32 %res, -2147483648
+  ret i32 %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+a,+zabha,+zhinx,+zve32x -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+a,+zabha,+zhinx,+zve32x -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: atomicrmw: &#x27;  %res = atomicrmw xor ptr %ptr, i32 %val release, align 4&#x27; (in function: atomicrmw_xor_i32_release)
+warning: Instruction selection used fallback path for atomicrmw_xor_i32_release</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-rmw-discard.7b341c3a89.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/atomic-rmw-discard.ll">atomic-rmw-discard.ll</a><span class="dim">)</span></td><td class="l">amomaxu_w_discard</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zbkb,+zfinx -O2</code></td></tr><tr><td class="l">atomic-rmw.c6e3bc7c2c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/atomic-rmw.ll">atomic-rmw.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_sub_i64_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zabha,+zacas,+zhinx -O1</code></td></tr><tr><td class="l">atomic-signext.31772a0baf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/atomic-signext.ll">atomic-signext.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_umax_i32_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zalrsc,+zhinx,+zvbb -O3</code></td></tr><tr><td class="l">atomic-signext.9ef7054fbf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/atomic-signext.ll">atomic-signext.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_max_i64_monotonic</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zhinx -O2</code></td></tr><tr><td class="l">atomicrmw-and-or-xor.fcd5449007.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-and-or-xor.ll">atomicrmw-and-or-xor.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_xor_i32_release</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+zabha,+zhinx,+zve32x -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">atomicrmw-and-or-xor.fcd5449007.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-and-or-xor.ll">atomicrmw-and-or-xor.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_or_i16_seq_cst</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+zabha,+zhinx,+zve32x -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">atomicrmw-xchg.335846d74e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-xchg.ll">atomicrmw-xchg.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_xchg_i16_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zabha,+c,+zdinx -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

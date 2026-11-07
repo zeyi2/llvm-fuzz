@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem bfloat <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 11 test files, 997 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">llvm.sincos.f59a9dfa86.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/llvm.sincos.ll">llvm.sincos.ll</a><span class="dim">)</span> @test_sincos_f128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-linux-gnu -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/M1Y4PrGoo">https://godbolt.org/z/M1Y4PrGoo</a> (llc-assertions-trunk, checked 2026-11-05 13:58 UTC): <a href="https://godbolt.org/z/M1Y4PrGoo">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global bfloat
+
+; Function Attrs: nounwind
+define { fp128, fp128 } @test_sincos_f128(fp128 %a) #0 {
+  %LGV = load bfloat, ptr @G.1, align 2
+  %result = call { fp128, fp128 } @llvm.sincos.f128(fp128 %a)
+  %B = frem bfloat 1.000000e+00, %LGV
+  store bfloat %B, ptr poison, align 2
+  ret { fp128, fp128 } %result
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare { fp128, fp128 } @llvm.sincos.f128(fp128) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64-linux-gnu -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>39</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem bfloat 1.000000e+00, %LGV&#x27; (in function: test_sincos_f128)<br>warning: Instruction selection used fallback path for test_sincos_f128</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64-linux-gnu -O3 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>39</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-linux-gnu -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-linux-gnu -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem bfloat 1.000000e+00, %LGV&#x27; (in function: test_sincos_f128)
+warning: Instruction selection used fallback path for test_sincos_f128</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">eh-dwarf-cfa.b308e1929a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/eh-dwarf-cfa.ll">eh-dwarf-cfa.ll</a><span class="dim">)</span></td><td class="l">dwarf</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfh -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-reduction-fp.d1212c048e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l">vreduce_fmax_v128f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfh,+zvfh,+f,+d,+zicsr -O2</code></td></tr><tr><td class="l">fixed-vectors-vitofp-constrained-sdnode.a700d1876e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vitofp-constrained-sdnode.ll">fixed-vectors-vitofp-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vsitofp_v8i16_v8f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa,+v,+zve64d,+zcb -O3</code></td></tr><tr><td class="l">llvm.sincos.f59a9dfa86.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/llvm.sincos.ll">llvm.sincos.ll</a><span class="dim">)</span></td><td class="l">test_sincos_f128</td><td class="l"><code>-mtriple=riscv64-linux-gnu -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">lrint-llrint.cd37808f9f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/lrint-llrint.ll">lrint-llrint.ll</a><span class="dim">)</span></td><td class="l">llrint_f64</td><td class="l"><code>-mtriple=riscv64 -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64i-exhaustive-w-insts.64adb751f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64i-exhaustive-w-insts.ll">rv64i-exhaustive-w-insts.ll</a><span class="dim">)</span></td><td class="l">aext_sllw_aext_sext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zba -O0</code></td></tr><tr><td class="l">umulh.8aaab93738.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_i128</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">vfwcvtbf16-f-f.e96f228e2a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vfwcvtbf16-f-f.ll">vfwcvtbf16-f-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwcvtbf16_f.f.v_nxv1f32_nxv1bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfbfmin,+zbb -O0</code></td></tr><tr><td class="l">vloxseg-rv32.afa8548fe0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vloxseg-rv32.ll">vloxseg-rv32.ll</a><span class="dim">)</span></td><td class="l">test_vloxseg7_nxv4bf16_triscv.vector.tuple_nxv8i8_7t_nxv4i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin,+v -O3</code></td></tr><tr><td class="l">vreductions-int.38c04c915a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vreductions-int.ll">vreductions-int.ll</a><span class="dim">)</span></td><td class="l">vreduce_smin_nxv4i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v -O1</code></td></tr><tr><td class="l">vsetvli-insert.000269a097.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vsetvli-insert.ll">vsetvli-insert.ll</a><span class="dim">)</span></td><td class="l">avl_forward3b</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+f,+d,+a,+c,+v,+zihintpause -O1 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

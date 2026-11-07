@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-simd-32.a532386d.6cfbf5f3f4.ll <span class="dim">(mutant of</span> rvp-simd-32.a532386d.ll<span class="dim">)</span> @test_sgt_b via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zhinx,+zicond -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i8&gt; @test_sgt_b(&lt;4 x i8&gt; %a, &lt;4 x i8&gt; %b) {
+  %B = srem i16 1, 0
+  %C = icmp uge &lt;4 x i8&gt; %a, zeroinitializer
+  %res = sext &lt;4 x i1&gt; %C to &lt;4 x i8&gt;
+  store i16 %B, ptr poison, align 2
+  ret &lt;4 x i8&gt; %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zhinx,+zicond -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zhinx,+zicond -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem i16 1, 0&#x27; (in function: test_sgt_b)
+warning: Instruction selection used fallback path for test_sgt_b</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-calling-conv.b734d6d7b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/double-calling-conv.ll">double-calling-conv.ll</a><span class="dim">)</span></td><td class="l">caller_double_split_reg_stack</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">emutls.91208bec5d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/emutls.ll">emutls.ll</a><span class="dim">)</span></td><td class="l">get_internal_z</td><td class="l"><code>-mtriple=riscv32 -emulated-tls -relocation-model=pic -mattr=+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64xtheadbb.544dab22c3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">ctlz_zero_poison_i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb,+zdinx,+zvbb -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-simd-32.a532386d.6cfbf5f3f4.ll <span class="dim">(mutant of</span> rvp-simd-32.a532386d.ll<span class="dim">)</span></td><td class="l">test_sgt_b</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zhinx,+zicond -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

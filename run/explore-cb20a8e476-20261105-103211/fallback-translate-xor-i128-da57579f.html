@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">imm.33e3607b48.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/imm.ll">imm.ll</a><span class="dim">)</span> @imm64_6 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -riscv-use-rematerializable-movimm -mattr=+zvbb,+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+define i64 @imm64_6() #0 {
+  %B = xor i128 1, 18446744073709551616
+  store i128 %B, ptr @G, align 4
+  ret i64 1311768464867721216
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -riscv-use-rematerializable-movimm -mattr=+zvbb,+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -riscv-use-rematerializable-movimm -mattr=+zvbb,+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %B = xor i128 1, 18446744073709551616&#x27; (in function: imm64_6)
+warning: Instruction selection used fallback path for imm64_6</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bitreverse-shift.6a5a108913.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/bitreverse-shift.ll">bitreverse-shift.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_shli_bitreverse_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zicond,+zhinx -O3</code></td></tr><tr><td class="l">double-intrinsics.da7ccb6fb7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fmuladd_f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O0</code></td></tr><tr><td class="l">imm.33e3607b48.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/imm.ll">imm.ll</a><span class="dim">)</span></td><td class="l">imm64_6</td><td class="l"><code>-mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -riscv-use-rematerializable-movimm -mattr=+zvbb,+zdinx -O1</code></td></tr><tr><td class="l">memset-pattern.370d0ec97c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/memset-pattern.ll">memset-pattern.ll</a><span class="dim">)</span></td><td class="l">memset_1_noalign</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+unaligned-scalar-mem,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">vdot4aus.0088f211d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vdot4aus.ll">vdot4aus.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vdot4aus_vx_nxv4i32_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zdinx -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

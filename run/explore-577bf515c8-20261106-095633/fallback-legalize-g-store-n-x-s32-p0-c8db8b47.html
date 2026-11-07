@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE &lt;N x s32~&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE &lt;N x s32~&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE &lt;N x s32~&gt;,p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-zvdot4a8i.45303a90.04d6759431.ll <span class="dim">(mutant of</span> fixed-vectors-zvdot4a8i.45303a90.ll<span class="dim">)</span> @vdot4asu_vv_partial_v4i31_v16i7 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i31&gt; @vdot4asu_vv_partial_v4i31_v16i7(&lt;16 x i7&gt; %a, &lt;16 x i7&gt; %b) {
+entry:
+  %a.ext = sext &lt;16 x i7&gt; %a to &lt;16 x i31&gt;
+  %b.ext = zext &lt;16 x i7&gt; %b to &lt;16 x i31&gt;
+  %mul = mul &lt;16 x i31&gt; %b.ext, %a.ext
+  %res = call &lt;4 x i31&gt; @llvm.vector.partial.reduce.add.v4i31.v16i31(&lt;4 x i31&gt; zeroinitializer, &lt;16 x i31&gt; %mul)
+  %C = icmp sge &lt;16 x i7&gt; %b, splat (i7 -64)
+  %E = extractelement &lt;16 x i7&gt; %a, i128 42
+  store &lt;16 x i1&gt; %C, ptr poison, align 2
+  store i7 %E, ptr poison, align 1
+  ret &lt;4 x i31&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x i31&gt; @llvm.vector.partial.reduce.add.v4i31.v16i31(&lt;4 x i31&gt;, &lt;16 x i31&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %8:_(&lt;4 x s31&gt;), %2:_(p0) :: (store (&lt;4 x s31&gt;)) (in function: vdot4asu_vv_partial_v4i31_v16i7)
+warning: Instruction selection used fallback path for vdot4asu_vv_partial_v4i31_v16i7</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-zvdot4a8i.45303a90.04d6759431.ll <span class="dim">(mutant of</span> fixed-vectors-zvdot4a8i.45303a90.ll<span class="dim">)</span></td><td class="l">vdot4asu_vv_partial_v4i31_v16i7</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.45303a90.24e1bac13f.ll <span class="dim">(mutant of</span> fixed-vectors-zvdot4a8i.45303a90.ll<span class="dim">)</span></td><td class="l">vdot4asu_vv_partial_v4i31_v16i7</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbs -O2</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.ab75744f93.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">vdot4asu_vv_partial_v4i31_v16i7</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 664 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-lrint-vp.9faa79f822.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-lrint-vp.ll">fixed-vectors-lrint-vp.ll</a><span class="dim">)</span> @lrint_v2f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/8vo5WofnT">https://godbolt.org/z/8vo5WofnT</a> (llc-assertions-trunk, checked 2026-11-07 13:15 UTC): <a href="https://godbolt.org/z/8vo5WofnT">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i32&gt; @lrint_v2f64(&lt;2 x double&gt; %x, &lt;2 x i1&gt; %m, i32 zeroext %evl) {
+  %A = alloca &lt;2 x i32&gt;, align 8
+  store &lt;2 x i32&gt; poison, ptr %A, align 8
+  %a = call &lt;2 x i32&gt; @llvm.lrint.v2i32.v2f64(&lt;2 x double&gt; %x)
+  %I = insertelement &lt;2 x i32&gt; %a, i32 -2147483648, i32 %evl
+  store &lt;2 x i32&gt; %I, ptr %A, align 8
+  ret &lt;2 x i32&gt; %a
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i32&gt; @llvm.lrint.v2i32.v2f64(&lt;2 x double&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>17</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;2 x s32&gt;) = G_INSERT_VECTOR_ELT %10:_, %12:_(s32), %2:_(s32) (in function: lrint_v2f64)<br>warning: Instruction selection used fallback path for lrint_v2f64</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d -O0 -code-model=small -global-isel=0</code></td><td>0</td><td>17</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;2 x s32&gt;) = G_INSERT_VECTOR_ELT %10:_, %12:_(s32), %2:_(s32) (in function: lrint_v2f64)
+warning: Instruction selection used fallback path for lrint_v2f64</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-lrint-vp.9faa79f822.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-lrint-vp.ll">fixed-vectors-lrint-vp.ll</a><span class="dim">)</span></td><td class="l">lrint_v2f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d -O0 -code-model=small</code></td></tr><tr><td class="l">ucmp.8af5fedb00.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.32.32</td><td class="l"><code>-mtriple=riscv32 -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vdot4asu.9028cb06bb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vdot4asu.ll">vdot4asu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vdot4asu_mask_vv_nxv16i32_nxv16i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zicsr,+d -O0</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.39190e127f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_32bytes</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+c -O1</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.56374374d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_4bytes</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve32x -O3 -code-model=small</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.5dabfde969.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">ashr_16bytes_wordOff</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3 -code-model=small</code></td></tr><tr><td class="l">xsfvcp-x.53f969366e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/xsfvcp-x.ll">xsfvcp-x.ll</a><span class="dim">)</span></td><td class="l">test_f_sf_vc_v_i_se_e64m4</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xsfvcp,+zvfh -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

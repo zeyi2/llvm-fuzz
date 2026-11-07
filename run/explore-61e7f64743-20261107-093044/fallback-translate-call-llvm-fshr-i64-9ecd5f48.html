@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.fshr.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.fshr.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.fshr.i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zbb-zbkb.ceddcd37ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span> @rori_i64_fshr via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zhinx,+zfinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i64 @rori_i64_fshr(i64 %a) #0 {
+  %1 = tail call i64 @llvm.fshr.i64(i64 %a, i64 %a, i64 63)
+  %B = ashr i64 %1, %1
+  ret i64 %B
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.fshr.i64(i64, i64, i64) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zhinx,+zfinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zhinx,+zfinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.fshr.i64: &#x27;  %1 = tail call i64 @llvm.fshr.i64(i64 %a, i64 %a, i64 63)&#x27; (in function: rori_i64_fshr)
+warning: Instruction selection used fallback path for rori_i64_fshr</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64zbb-zbkb.ceddcd37ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">rori_i64_fshr</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zhinx,+zfinx -O2</code></td></tr><tr><td class="l">shifts.863d20d207.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/shifts.ll">shifts.ll</a><span class="dim">)</span></td><td class="l">fshr64_minsize</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zbkb -O0</code></td></tr><tr><td class="l">shifts.983856cf7d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/shifts.ll">shifts.ll</a><span class="dim">)</span></td><td class="l">fshr64_minsize</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: insertelement &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: insertelement &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: insertelement &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.14a78c85c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span> @bitcast_h_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinxmin -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define half @bitcast_h_i16(i16 %a) #0 {
+  %I = insertelement &lt;8 x i8&gt; splat (i8 1), i8 1, i16 1
+  %1 = bitcast i16 %a to half
+  store &lt;8 x i8&gt; %I, ptr poison, align 8
+  ret half %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinxmin -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinxmin -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: insertelement: &#x27;  %I = insertelement &lt;8 x i8&gt; splat (i8 1), i8 1, i16 1&#x27; (in function: bitcast_h_i16)
+warning: Instruction selection used fallback path for bitcast_h_i16</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-int-buildvec.55619eac04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-buildvec.ll">fixed-vectors-int-buildvec.ll</a><span class="dim">)</span></td><td class="l">buildvec_v8i8_pack</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+zvl128b,+zvkb,+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vmacc-vp.e3ef511a30.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmacc-vp.ll">fixed-vectors-vmacc-vp.ll</a><span class="dim">)</span></td><td class="l">vmacc_vx_nxv16i8</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+zfinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vrsub-vp.1276935355.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vrsub-vp.ll">fixed-vectors-vrsub-vp.ll</a><span class="dim">)</span></td><td class="l">vrsub_vx_v2i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">half-convert.14a78c85c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">bitcast_h_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinxmin -O1</code></td></tr><tr><td class="l">half-fcmp-strict.eacf7639ed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/half-fcmp-strict.ll">half-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmps_uge</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation -mattr=+zhinx -O2</code></td></tr><tr><td class="l">memmove.8eca350883.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/memmove.ll">memmove.ll</a><span class="dim">)</span></td><td class="l">aligned_memmove8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-simd-32.23d118be35.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_build_vector_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zdinx -O3 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

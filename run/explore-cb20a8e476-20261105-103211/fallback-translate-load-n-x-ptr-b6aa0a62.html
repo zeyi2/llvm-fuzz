@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load &lt;N x ptr&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load &lt;N x ptr&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load &lt;N x ptr&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-interleaved-access-zve32x.3c6353b4.8add5e35ef.ll <span class="dim">(mutant of</span> fixed-vectors-interleaved-access-zve32x.3c6353b4.ll<span class="dim">)</span> @load_large_vector via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve64x,+zvl1024b,+zhinx,+zbs,+zvkb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i32&gt;
+@G.1 = external global &lt;12 x ptr&gt;
+
+define &lt;4 x i1&gt; @load_large_vector(ptr %p) {
+  %l = load &lt;12 x ptr&gt;, ptr %p, align 128
+  %B = xor &lt;4 x i32&gt; zeroinitializer, zeroinitializer
+  %s1 = shufflevector &lt;12 x ptr&gt; %l, &lt;12 x ptr&gt; poison, &lt;4 x i32&gt; &lt;i32 0, i32 3, i32 6, i32 9&gt;
+  %s2 = shufflevector &lt;12 x ptr&gt; %l, &lt;12 x ptr&gt; poison, &lt;4 x i32&gt; &lt;i32 1, i32 4, i32 7, i32 10&gt;
+  %ret = icmp ne &lt;4 x ptr&gt; %s1, %s2
+  store &lt;4 x i32&gt; %B, ptr @G, align 16
+  store &lt;12 x ptr&gt; %l, ptr poison, align 128
+  store &lt;12 x ptr&gt; %l, ptr @G.1, align 128
+  ret &lt;4 x i1&gt; %ret
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve64x,+zvl1024b,+zhinx,+zbs,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve64x,+zvl1024b,+zhinx,+zbs,+zvkb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %l = load &lt;12 x ptr&gt;, ptr %p, align 128&#x27; (in function: load_large_vector)
+warning: Instruction selection used fallback path for load_large_vector</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-interleaved-access-zve32x.3c6353b4.123ac72979.ll <span class="dim">(mutant of</span> fixed-vectors-interleaved-access-zve32x.3c6353b4.ll<span class="dim">)</span></td><td class="l">load_large_vector</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve64x,+zvl1024b,+zhinx,+zbs,+zbkb -O3</code></td></tr><tr><td class="l">fixed-vectors-interleaved-access-zve32x.3c6353b4.8add5e35ef.ll <span class="dim">(mutant of</span> fixed-vectors-interleaved-access-zve32x.3c6353b4.ll<span class="dim">)</span></td><td class="l">load_large_vector</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve64x,+zvl1024b,+zhinx,+zbs,+zvkb -O1</code></td></tr><tr><td class="l">fixed-vectors-interleaved-access-zve32x.3c6353b4.97937707e0.ll <span class="dim">(mutant of</span> fixed-vectors-interleaved-access-zve32x.3c6353b4.ll<span class="dim">)</span></td><td class="l">load_large_vector</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve64x,+zvl1024b,+zhinx,+zbs -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

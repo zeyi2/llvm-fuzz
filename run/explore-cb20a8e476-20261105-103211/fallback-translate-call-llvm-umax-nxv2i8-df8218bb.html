@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.umax.nxv2i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.umax.nxv2i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.umax.nxv2i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 4 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vmaxu-vp.62f465f7bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vmaxu-vp.ll">vmaxu-vp.ll</a><span class="dim">)</span> @vmaxu_vx_nxv2i8_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+m -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 2 x i8&gt; @vmaxu_vx_nxv2i8_unmasked(&lt;vscale x 2 x i8&gt; %va, i8 %b, i32 zeroext %evl) {
+  %B = sub i64 -9223372036854775808, -1
+  %elt.head = insertelement &lt;vscale x 2 x i8&gt; poison, i8 %b, i32 0
+  %vb = shufflevector &lt;vscale x 2 x i8&gt; %elt.head, &lt;vscale x 2 x i8&gt; poison, &lt;vscale x 2 x i32&gt; zeroinitializer
+  %v = call &lt;vscale x 2 x i8&gt; @llvm.umax.nxv2i8(&lt;vscale x 2 x i8&gt; %va, &lt;vscale x 2 x i8&gt; %vb)
+  store i64 %B, ptr poison, align 4
+  ret &lt;vscale x 2 x i8&gt; %v
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 2 x i8&gt; @llvm.umax.nxv2i8(&lt;vscale x 2 x i8&gt;, &lt;vscale x 2 x i8&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+m -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+m -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.umax.nxv2i8: &#x27;  %v = call &lt;vscale x 2 x i8&gt; @llvm.umax.nxv2i8(&lt;vscale x 2 x i8&gt; %va, &lt;vscale x 2 x i8&gt; %vb)&#x27; (in function: vmaxu_vx_nxv2i8_unmasked)
+warning: Instruction selection used fallback path for vmaxu_vx_nxv2i8_unmasked</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vmaxu-vp.4ec0e8b29e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vmaxu-vp.ll">vmaxu-vp.ll</a><span class="dim">)</span></td><td class="l">vmaxu_vv_nxv2i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3</code></td></tr><tr><td class="l">vmaxu-vp.5f0ccbab50.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vmaxu-vp.ll">vmaxu-vp.ll</a><span class="dim">)</span></td><td class="l">vmaxu_vx_nxv2i8_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3 -code-model=small</code></td></tr><tr><td class="l">vmaxu-vp.62f465f7bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vmaxu-vp.ll">vmaxu-vp.ll</a><span class="dim">)</span></td><td class="l">vmaxu_vx_nxv2i8_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+m -O1</code></td></tr><tr><td class="l">vmaxu-vp.7fd79600ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vmaxu-vp.ll">vmaxu-vp.ll</a><span class="dim">)</span></td><td class="l">vmaxu_vv_nxv2i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3</code></td></tr><tr><td class="l">vmaxu-vp.c0474a5e26.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vmaxu-vp.ll">vmaxu-vp.ll</a><span class="dim">)</span></td><td class="l">vmaxu_vx_nxv2i8_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3</code></td></tr><tr><td class="l">vmaxu-vp.d2d6b24e8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vmaxu-vp.ll">vmaxu-vp.ll</a><span class="dim">)</span></td><td class="l">vmaxu_vx_nxv2i8_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

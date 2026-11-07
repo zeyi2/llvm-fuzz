@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 15 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zilx.71e1e53199.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/zilx.ll">zilx.ll</a><span class="dim">)</span> @lxsb_anyext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+experimental-zilx,+zhinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i8 @lxsb_anyext(ptr %a, i32 %b) {
+  %B = add &lt;8 x i8&gt; splat (i8 16), splat (i8 127)
+  %1 = getelementptr i8, ptr %a, i32 %b
+  %2 = load i8, ptr %1, align 1
+  store &lt;8 x i8&gt; %B, ptr %1, align 8
+  ret i8 %2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+experimental-zilx,+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+experimental-zilx,+zhinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %B = add &lt;8 x i8&gt; splat (i8 16), splat (i8 127)&#x27; (in function: lxsb_anyext)
+warning: Instruction selection used fallback path for lxsb_anyext</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.194f720458.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-bitreverse-zbkb.f366ae1d.296eefc966.ll <span class="dim">(mutant of</span> rvp-bitreverse-zbkb.f366ae1d.ll<span class="dim">)</span></td><td class="l">test_bitreverse_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbkb,+a,+zhinx -O2</code></td></tr><tr><td class="l">rvp-simd-32.e07eb28c.6bab6df3fc.ll <span class="dim">(mutant of</span> rvp-simd-32.e07eb28c.ll<span class="dim">)</span></td><td class="l">test_pmulhu_b</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx -O2 -code-model=small</code></td></tr><tr><td class="l">zilx.71e1e53199.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/zilx.ll">zilx.ll</a><span class="dim">)</span></td><td class="l">lxsb_anyext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+experimental-zilx,+zhinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

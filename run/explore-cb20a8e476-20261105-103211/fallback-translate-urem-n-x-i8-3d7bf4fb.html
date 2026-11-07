@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xqccmp-push-pop-popret.d105021fb0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/xqccmp-push-pop-popret.ll">xqccmp-push-pop-popret.ll</a><span class="dim">)</span> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xqccmp,+save-restore,+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare void @test(ptr)
+
+define i32 @foo() {
+  %B = urem &lt;8 x i8&gt; splat (i8 16), splat (i8 -128)
+  %1 = alloca [512 x i8], align 1
+  %2 = getelementptr [512 x i8], ptr %1, i32 0, i32 0
+  call void @test(ptr %2)
+  store &lt;8 x i8&gt; %B, ptr %2, align 8
+  ret i32 0
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xqccmp,+save-restore,+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xqccmp,+save-restore,+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %B = urem &lt;8 x i8&gt; splat (i8 16), splat (i8 -128)&#x27; (in function: foo)
+warning: Instruction selection used fallback path for foo</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vssub-vp.3c74fb4f.712b29a4.88e14b58ee.ll <span class="dim">(mutant of</span> fixed-vectors-vssub-vp.3c74fb4f.712b29a4.ll<span class="dim">)</span></td><td class="l">vssub_vi_v8i8_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+a,+c,+xtheadba -O1</code></td></tr><tr><td class="l">rvp-simd-32.a532386d.f8a0bfeb22.ll <span class="dim">(mutant of</span> rvp-simd-32.a532386d.ll<span class="dim">)</span></td><td class="l">test_nez_b</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zhinx,+zbkb -O2</code></td></tr><tr><td class="l">rvp-simd-64.5bfaf14846.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvp-simd-64.ll">rvp-simd-64.ll</a><span class="dim">)</span></td><td class="l">test_pmerge_mvm_u8x8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zfinx -O0</code></td></tr><tr><td class="l">xqccmp-push-pop-popret.d105021fb0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/xqccmp-push-pop-popret.ll">xqccmp-push-pop-popret.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xqccmp,+save-restore,+zdinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

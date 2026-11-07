@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fence</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fence</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fence <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 5 configs, 3 test files, 80 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-fence.0d2e6bca91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span> @fence_acquire via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @fence_acquire() #0 {
+  fence acquire
+  %C = fcmp olt &lt;4 x float&gt; zeroinitializer, splat (float 1.401300e-45)
+  store &lt;4 x i1&gt; %C, ptr poison, align 1
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fence: &#x27;  fence acquire&#x27; (in function: fence_acquire)
+warning: Instruction selection used fallback path for fence_acquire</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-fence.0d2e6bca91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span></td><td class="l">fence_acquire</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">atomic-fence.0d2e6bca91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span></td><td class="l">fence_release</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">atomic-fence.0d2e6bca91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span></td><td class="l">fence_acq_rel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">atomic-fence.9d088f1151.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span></td><td class="l">fence_singlethread_release</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zfinx -O3</code></td></tr><tr><td class="l">atomic-fence.b7f58ffedd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span></td><td class="l">fence_acquire</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zve32x,+zdinx -O1</code></td></tr><tr><td class="l">atomic-load-store.1808c9e4d3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zhinx -O1</code></td></tr><tr><td class="l">atomic-load-store.1808c9e4d3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_store_i16_release</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zhinx -O1</code></td></tr><tr><td class="l">atomic-load-store.91f225d495.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_store_i64_release</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zhinx -O1</code></td></tr><tr><td class="l">forced-atomics.e7e389759c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/forced-atomics.ll">forced-atomics.ll</a><span class="dim">)</span></td><td class="l">load16</td><td class="l"><code>-mtriple=riscv64 -mattr=+forced-atomics,+no-trailing-seq-cst-fence,+zbb,+zhinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

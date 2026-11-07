@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: and &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: and &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: and &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-int-buildvec.151c2ac593.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-buildvec.ll">fixed-vectors-int-buildvec.ll</a><span class="dim">)</span> @buildvec_not_vid_v4i8_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;8 x i8&gt;
+
+define &lt;4 x i8&gt; @buildvec_not_vid_v4i8_2() {
+  %B = and &lt;8 x i8&gt; splat (i8 -128), splat (i8 1)
+  store &lt;8 x i8&gt; %B, ptr @G.1, align 8
+  ret &lt;4 x i8&gt; &lt;i8 3, i8 3, i8 1, i8 0&gt;
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: and: &#x27;  %B = and &lt;8 x i8&gt; splat (i8 -128), splat (i8 1)&#x27; (in function: buildvec_not_vid_v4i8_2)
+warning: Instruction selection used fallback path for buildvec_not_vid_v4i8_2</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-fence.0d2e6bca91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/atomic-fence.ll">atomic-fence.ll</a><span class="dim">)</span></td><td class="l">fence_singlethread_acq_rel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-int-buildvec.151c2ac593.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-buildvec.ll">fixed-vectors-int-buildvec.ll</a><span class="dim">)</span></td><td class="l">buildvec_not_vid_v4i8_2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">float-imm.fa66221dc7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/float-imm.ll">float-imm.ll</a><span class="dim">)</span></td><td class="l">poison</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O2</code></td></tr><tr><td class="l">smulh.662b8b80.94d538fdca.ll <span class="dim">(mutant of</span> smulh.662b8b80.ll<span class="dim">)</span></td><td class="l">smulh_v4i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zihintpause -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

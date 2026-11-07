@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: lshr i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: lshr i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: lshr i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr94145.6cd95af388.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/pr94145.ll">pr94145.ll</a><span class="dim">)</span> @PR94145 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-- -mattr=+zba,+zhinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+@G.1 = external global i16
+
+define i32 @PR94145(i16 %a0) {
+  %lshr = lshr i16 %a0, 1
+  %and = and i16 %lshr, 1
+  %xor = xor i16 %and, 1
+  %shl = shl i16 1, %xor
+  %B = and i16 %a0, -1
+  %freeze = freeze i16 %shl
+  %zext = zext i16 %freeze to i32
+  store i32 %zext, ptr @G, align 4
+  %B1 = mul i32 42, -2147483648
+  store i16 %B, ptr @G.1, align 2
+  ret i32 %B1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-- -mattr=+zba,+zhinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-- -mattr=+zba,+zhinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: lshr: &#x27;  %lshr = lshr i16 %a0, 1&#x27; (in function: PR94145)
+warning: Instruction selection used fallback path for PR94145</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-fcmp-strict.085ea69c98.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/double-fcmp-strict.ll">double-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmps_une</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64 -mattr=+zdinx,+zihintpause -O3</code></td></tr><tr><td class="l">fp-fcanonicalize.abe4fc1514.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">pr94145.6cd95af388.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/pr94145.ll">pr94145.ll</a><span class="dim">)</span></td><td class="l">PR94145</td><td class="l"><code>-mtriple=riscv64-- -mattr=+zba,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-mul-parts-acc-fold.6fe85edd8f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvp-mul-parts-acc-fold.ll">rvp-mul-parts-acc-fold.ll</a><span class="dim">)</span></td><td class="l">maccu_w11</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

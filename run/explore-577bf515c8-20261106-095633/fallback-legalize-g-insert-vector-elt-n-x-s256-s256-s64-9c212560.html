@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s256~&gt;,s256~,s64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s256~&gt;,s256~,s64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x s256~&gt;,s256~,s64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.a8785e9abd.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.ll<span class="dim">)</span> @shuffle_i256_ldst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global &lt;4 x i256&gt;
+@G.5 = external global i256
+@G.6 = external global &lt;4 x i256&gt;
+@G.8 = external global i1
+@G.10 = external global i128
+@G.11 = external global i128
+@G.13 = external global ptr
+@G.14 = external global i256
+
+; Function Attrs: vscale_range(2,2)
+define void @shuffle_i256_ldst(ptr %p) #0 {
+  %LGV1 = load i128, ptr @G.10, align 4
+  %LGV = load i256, ptr @G.5, align 4
+  %a = load &lt;4 x i256&gt;, ptr %p, align 128
+  %G1 = getelementptr i128, ptr %p, i64 42
+  %res = shufflevector &lt;4 x i256&gt; %a, &lt;4 x i256&gt; poison, &lt;4 x i32&gt; &lt;i32 0, i32 0, i32 3, i32 2&gt;
+  %B2 = shl i128 42, %LGV1
+  %G = getelementptr &lt;4 x i256&gt;, ptr %p, i32 0
+  %L3 = load i128, ptr %G, align 4
+  %L = load i128, ptr %G, align 4
+  store &lt;4 x i256&gt; %res, ptr %p, align 128
+  %B = and &lt;4 x i256&gt; %res, splat (i256 -57896044618658097711785492504343953926634992332820282019728792003956564819968)
+  %E = extractelement &lt;4 x i256&gt; %B, i128 %B2
+  %C = icmp sgt i128 %L, %LGV1
+  %B4 = ashr i128 %L, %L3
+  %B10 = or i128 %B2, 170141183460469231731687303715884105727
+  %I = insertelement &lt;4 x i256&gt; %B, i256 %LGV, i16 -1
+  store &lt;4 x i256&gt; %B, ptr @G.4, align 128
+  %B7 = xor i1 %C, false
+  store &lt;4 x i256&gt; %I, ptr @G.6, align 128
+  store i128 %B10, ptr @G.11, align 4
+  store &lt;4 x i256&gt; %I, ptr poison, align 128
+  store ptr %G, ptr @G.13, align 8
+  store i1 %C, ptr @G.8, align 1
+  store i256 %E, ptr @G.14, align 4
+  store i1 %B7, ptr @G.8, align 1
+  store ptr %G1, ptr %G, align 8
+  store i128 %B4, ptr @G.10, align 4
+  ret void
+}
+
+attributes #0 = { vscale_range(2,2) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %23:_(&lt;4 x s256&gt;) = G_INSERT_VECTOR_ELT %16:_, %3:_(s256), %24:_(s64) (in function: shuffle_i256_ldst)
+warning: Instruction selection used fallback path for shuffle_i256_ldst</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.3c9a2b19fd.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.ll<span class="dim">)</span></td><td class="l">shuffle_i256_ldst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.a8785e9abd.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.ll<span class="dim">)</span></td><td class="l">shuffle_i256_ldst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x -O0</code></td></tr><tr><td class="l">fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.ee342e4127.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.78f7006d.01ad6382.67b64ffb.8668bf2f.ll<span class="dim">)</span></td><td class="l">shuffle_i256_ldst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+zba,+zicond -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

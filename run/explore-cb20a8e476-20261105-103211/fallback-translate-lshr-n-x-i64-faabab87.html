@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: lshr &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: lshr &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: lshr &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">hoist-global-addr-base.f60263f3f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span> @big_offset_lui_tail via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcili,+zhinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@g = external global [1048576 x i8], align 1
+
+; Function Attrs: nounwind
+define ptr @big_offset_lui_tail() #0 {
+  %B = lshr &lt;2 x i64&gt; splat (i64 -9223372036854775808), zeroinitializer
+  store &lt;2 x i64&gt; %B, ptr poison, align 16
+  ret ptr getelementptr inbounds ([1048576 x i8], ptr @g, i32 0, i32 524288)
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xqcili,+zhinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xqcili,+zhinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: lshr: &#x27;  %B = lshr &lt;2 x i64&gt; splat (i64 -9223372036854775808), zeroinitializer&#x27; (in function: big_offset_lui_tail)
+warning: Instruction selection used fallback path for big_offset_lui_tail</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert-strict.63143bdcb7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/float-convert-strict.ll">float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_s_wu_load</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32 -mattr=+zfinx -O3</code></td></tr><tr><td class="l">half-round-conv.c64cc09348.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/half-round-conv.ll">half-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_floor_half</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinxmin -O3</code></td></tr><tr><td class="l">hoist-global-addr-base.f60263f3f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">big_offset_lui_tail</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcili,+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">umulh.d88ede803d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_v4i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O2 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: inttoptr i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: inttoptr i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: inttoptr i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64-stackmap.0696364cd3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64-stackmap.ll">rv64-stackmap.ll</a><span class="dim">)</span> @jsIntCall via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+define i64 @jsIntCall(i64 %dummy1, ptr %obj, i64 %arg, i64 %l1, i64 %l2) {
+entry:
+  %resolveCall = inttoptr i64 244837814094590 to ptr
+  %result = call i64 (i64, i32, ptr, i32, ...) @llvm.experimental.patchpoint.i64(i64 8, i32 28, ptr %resolveCall, i32 2, ptr %obj, i64 %arg, i64 %l1, i64 %l2)
+  %add = add i64 %result, 3
+  %C = icmp sle i64 %dummy1, %l2
+  store i1 %C, ptr @G, align 1
+  ret i64 %add
+}
+
+declare i64 @llvm.experimental.patchpoint.i64(i64 immarg, i32 immarg, ptr, i32 immarg, ...)
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zhinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zhinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: inttoptr: &#x27;  %resolveCall = inttoptr i64 244837814094590 to ptr&#x27; (in function: jsIntCall)
+warning: Instruction selection used fallback path for jsIntCall</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">prefetch.00dc6c8934.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/prefetch.ll">prefetch.ll</a><span class="dim">)</span></td><td class="l">test_prefetch_constant_address_1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicbop,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">prefetch.6547333252.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/prefetch.ll">prefetch.ll</a><span class="dim">)</span></td><td class="l">test_prefetch_constant_address_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">rv64-stackmap.0696364cd3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64-stackmap.ll">rv64-stackmap.ll</a><span class="dim">)</span></td><td class="l">jsIntCall</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

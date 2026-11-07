@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 38 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vsplats-i1.9f0b1464a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vsplats-i1.ll">vsplats-i1.ll</a><span class="dim">)</span> @vsplat_nxv4i1_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;8 x i8&gt;
+
+define &lt;vscale x 4 x i1&gt; @vsplat_nxv4i1_2(i1 %x) {
+  %S = shufflevector &lt;8 x i8&gt; splat (i8 42), &lt;8 x i8&gt; splat (i8 127), &lt;8 x i32&gt; poison
+  %head = insertelement &lt;vscale x 4 x i1&gt; poison, i1 %x, i32 0
+  %splat = shufflevector &lt;vscale x 4 x i1&gt; %head, &lt;vscale x 4 x i1&gt; poison, &lt;vscale x 4 x i32&gt; zeroinitializer
+  store &lt;8 x i8&gt; %S, ptr @G.2, align 8
+  ret &lt;vscale x 4 x i1&gt; %splat
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %8:_(&lt;4 x s8&gt;), %8:_(&lt;4 x s8&gt;), %9:_(p0), %10:_(&lt;4 x s1&gt;), %12:_(s32) :: (store (s8) into @G.2) (in function: vsplat_nxv4i1_2)
+warning: Instruction selection used fallback path for vsplat_nxv4i1_2</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vfrec7.a666f70d82.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vfrec7.ll">vfrec7.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfrec7_v_nxv2f64_nxv2f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfh,+c -O1</code></td></tr><tr><td class="l">vsplats-i1.9f0b1464a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vsplats-i1.ll">vsplats-i1.ll</a><span class="dim">)</span></td><td class="l">vsplat_nxv4i1_2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3</code></td></tr><tr><td class="l">vsub-vp.b33c61fe89.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vsub-vp.ll">vsub-vp.ll</a><span class="dim">)</span></td><td class="l">vsub_vx_nxv16i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zicsr -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

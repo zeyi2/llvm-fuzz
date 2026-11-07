@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: phi &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: phi &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: phi &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 2 test files, 24 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-shuffle-vslide1down.ffaa418181.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-vslide1down.ll">fixed-vectors-shuffle-vslide1down.ll</a><span class="dim">)</span> @vslide1down_4xi8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zfhmin,+zvfhmin,+zvkb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">target datalayout = &quot;e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128&quot;
+
+@G = external global i32
+@G.1 = external global &lt;4 x i8&gt;
+
+define &lt;4 x i8&gt; @vslide1down_4xi8(&lt;4 x i8&gt; %v, i8 %b) {
+  %LGV = load i32, ptr @G, align 4
+  %vb = insertelement &lt;4 x i8&gt; poison, i8 %b, i64 0
+  %v1 = shufflevector &lt;4 x i8&gt; %v, &lt;4 x i8&gt; %vb, &lt;4 x i32&gt; &lt;i32 1, i32 2, i32 3, i32 4&gt;
+  switch i32 %LGV, label %SW_D [
+    i32 -1727965818, label %SW_C
+    i32 -1331895249, label %SW_C1
+    i32 1460277418, label %SW_C2
+    i32 -1506804337, label %SW_C3
+  ]
+
+BB:                                               ; preds = %SW_C1
+  ret &lt;4 x i8&gt; %v1
+
+SW_D:                                             ; preds = %0
+  %LGV4 = load &lt;4 x i8&gt;, ptr @G.1, align 4
+  ret &lt;4 x i8&gt; %LGV4
+
+SW_C:                                             ; preds = %0
+  %1 = phi &lt;vscale x 4 x i1&gt; [ zeroinitializer, %0 ]
+  store &lt;vscale x 4 x i1&gt; %1, ptr poison, align 1
+  ret &lt;4 x i8&gt; %v1
+
+SW_C1:                                            ; preds = %0
+  br label %BB
+
+SW_C2:                                            ; preds = %0
+  ret &lt;4 x i8&gt; %vb
+
+SW_C3:                                            ; preds = %0
+  ret &lt;4 x i8&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zfhmin,+zvfhmin,+zvkb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zfhmin,+zvfhmin,+zvkb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: phi: &#x27;  %1 = phi &lt;vscale x 4 x i1&gt; [ zeroinitializer, %0 ]&#x27; (in function: vslide1down_4xi8)
+warning: Instruction selection used fallback path for vslide1down_4xi8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-shuffle-vslide1down.ffaa418181.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-vslide1down.ll">fixed-vectors-shuffle-vslide1down.ll</a><span class="dim">)</span></td><td class="l">vslide1down_4xi8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zfhmin,+zvfhmin,+zvkb -O0</code></td></tr><tr><td class="l">riscv-codegenprepare-asm.b1bbe1c988.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a><span class="dim">)</span></td><td class="l">widen_anyof_rdx</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">riscv-codegenprepare-asm.b1bbe1c988.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a><span class="dim">)</span></td><td class="l">widen_anyof_rdx_use_in_loop</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-cmp.cb5f066f.69ac6f1791.ll <span class="dim">(mutant of</span> fixed-vectors-reduction-cmp.cb5f066f.ll<span class="dim">)</span> @test2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i1 @test2(&lt;4 x i16&gt; %v) {
+  %B1 = xor &lt;4 x i16&gt; %v, zeroinitializer
+  %red = call i16 @llvm.vector.reduce.or.v4i16(&lt;4 x i16&gt; %B1)
+  %C = icmp ne i8 0, 42
+  %cmp = icmp ne i16 %red, 0
+  %B = mul i1 %cmp, %C
+  store i1 %B, ptr poison, align 1
+  ret i1 %cmp
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i16 @llvm.vector.reduce.or.v4i16(&lt;4 x i16&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %B1 = xor &lt;4 x i16&gt; %v, zeroinitializer&#x27; (in function: test2)
+warning: Instruction selection used fallback path for test2</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-cmp.cb5f066f.69ac6f1791.ll <span class="dim">(mutant of</span> fixed-vectors-reduction-cmp.cb5f066f.ll<span class="dim">)</span></td><td class="l">test2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vsaddu-vp.a198e690.99367be941.ll <span class="dim">(mutant of</span> fixed-vectors-vsaddu-vp.a198e690.ll<span class="dim">)</span></td><td class="l">vsaddu_vi_v16i16_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+zfinx -O1</code></td></tr><tr><td class="l">rvp-simd-64.5ff2c4ce.46d8403417.ll <span class="dim">(mutant of</span> rvp-simd-64.5ff2c4ce.ll<span class="dim">)</span></td><td class="l">test_pasa_x_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+a -O2 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

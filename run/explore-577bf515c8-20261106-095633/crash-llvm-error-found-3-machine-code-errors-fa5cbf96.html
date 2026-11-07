@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 3 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 3 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 3 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">min-max.673f71abee.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/min-max.ll">min-max.ll</a><span class="dim">)</span> @smax_undef_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+f -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/vje4aqPhW">https://godbolt.org/z/vje4aqPhW</a> (llc-assertions-trunk, checked 2026-11-06 13:50 UTC): <a href="https://godbolt.org/z/vje4aqPhW">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define signext i32 @smax_undef_i32() {
+  %A = alloca i32, align 4
+  store i32 poison, ptr %A, align 4
+  %c = call i32 @llvm.smax.i32(i32 undef, i32 undef)
+  %B = udiv i32 %c, %c
+  store i32 %B, ptr %A, align 4
+  ret i32 %c
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.smax.i32(i32, i32) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+f -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After Machine Copy Propagation Pass<br># Machine code for function smax_undef_i32: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+f -O3 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>3</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zbb,+f -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zbb,+f -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After Machine Copy Propagation Pass
+# Machine code for function smax_undef_i32: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+Frame Objects:
+  fi#0: size=4, align=4, at location [SP-12]
+  fi#1: size=4, align=4, at location [SP-4]
+  fi#2: size=4, align=4, at location [SP-8]
+save/restore points:
+save points are empty
+restore points are empty
+bb.0 (%ir-block.0):
+  liveins: $x1, $x8
+  $x2 = frame-setup ADDI $x2, -16
+  frame-setup CFI_INSTRUCTION def_cfa_offset 16
+  frame-setup SW killed $x1, $x2, 12 :: (store (s32) into %stack.1)
+  frame-setup SW killed $x8, $x2, 8 :: (store (s32) into %stack.2)
+  frame-setup CFI_INSTRUCTION offset $x1, -4
+  frame-setup CFI_INSTRUCTION offset $x8, -8
+  renamable $x8 = ADDI renamable $x10, 0
+  $x11 = ADDI $x10, 0
+  PseudoCALL target-flags(riscv-call) &amp;__udivsi3, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f $f22_f $f23_f $f24_f $f25_f $f26_f $f27_f $f8_h $f9_h $f18_h $f19_h $f20_h $f21_h and 41 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit-def $x10
+  $x11 = ADDI $x10, 0
+  $x10 = ADDI killed renamable $x8, 0
+  SW killed renamable $x11, $x2, 4 :: (store (s32) into %ir.A)
+  $x1 = frame-destroy LW $x2, 12 :: (load (s32) from %stack.1)
+  $x8 = frame-destroy LW $x2, 8 :: (load (s32) from %stack.2)
+  frame-destroy CFI_INSTRUCTION restore $x1
+  frame-destroy CFI_INSTRUCTION restore $x8
+  $x2 = frame-destroy ADDI $x2, 16
+  frame-destroy CFI_INSTRUCTION def_cfa_offset 0
+  PseudoRET implicit $x10
+# End machine code for function smax_undef_i32.
+*** Bad machine code: Using an undefined physical register ***
+- function:    smax_undef_i32
+- basic block: %bb.0  (0x55f2e6a0e6f0)
+- instruction: renamable $x8 = ADDI renamable $x10, 0
+- operand 1:   renamable $x10
+*** Bad machine code: Using an undefined physical register ***
+- function:    smax_undef_i32
+- basic block: %bb.0  (0x55f2e6a0e6f0)
+- instruction: $x11 = ADDI $x10, 0
+- operand 1:   $x10
+*** Bad machine code: Using an undefined physical register ***
+- function:    smax_undef_i32
+- basic block: %bb.0  (0x55f2e6a0e6f0)
+- instruction: PseudoCALL target-flags(riscv-call) &amp;__udivsi3, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f $f22_f $f23_f $f24_f $f25_f $f26_f $f27_f $f8_h $f9_h $f18_h $f19_h $f20_h $f21_h and 41 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit-def $x10
+- operand 3:   implicit $x10
+LLVM ERROR: Found 3 machine code errors.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+zbb,+f -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Verify generated machine code&#x27; on function &#x27;@smax_undef_i32&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055f2ccd77e1b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055f2ccd74cc1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055f2ccd7889b
+3  libc.so.6 0x00007f96ff645330
+4  libc.so.6 0x00007f96ff69ec0c pthread_kill + 284
+5  libc.so.6 0x00007f96ff64527e gsignal + 30
+6  libc.so.6 0x00007f96ff6288ff abort + 223
+7  llc       0x000055f2cccba08d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x000055f2cd3e68d3
+9  llc       0x000055f2cd3e7a63
+10 llc       0x000055f2cd3499a0 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 640
+11 llc       0x000055f2cd0d1eb7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+12 llc       0x000055f2cd0da3</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">min-max.673f71abee.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/min-max.ll">min-max.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+f -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">zilsd.b7e639a365.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/GlobalISel/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

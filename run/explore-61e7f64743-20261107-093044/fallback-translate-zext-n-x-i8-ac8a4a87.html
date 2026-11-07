@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 3 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vaaddu.eb63153d0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaaddu.ll">fixed-vectors-vaaddu.ll</a><span class="dim">)</span> @vaaddu_vv_v8i8_floor_lshr2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global bfloat
+
+define &lt;8 x i8&gt; @vaaddu_vv_v8i8_floor_lshr2(&lt;8 x i8&gt; %x, &lt;8 x i8&gt; %y) {
+  %xzv = zext &lt;8 x i8&gt; %x to &lt;8 x i16&gt;
+  %B = fadd bfloat +qnan, 0.000000e+00
+  %yzv = zext &lt;8 x i8&gt; %y to &lt;8 x i16&gt;
+  %add = add nuw nsw &lt;8 x i16&gt; %xzv, %yzv
+  %div = lshr &lt;8 x i16&gt; %add, splat (i16 2)
+  %ret = trunc &lt;8 x i16&gt; %div to &lt;8 x i8&gt;
+  store bfloat %B, ptr @G, align 2
+  ret &lt;8 x i8&gt; %ret
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %xzv = zext &lt;8 x i8&gt; %x to &lt;8 x i16&gt;&#x27; (in function: vaaddu_vv_v8i8_floor_lshr2)
+warning: Instruction selection used fallback path for vaaddu_vv_v8i8_floor_lshr2</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vaaddu.eb63153d0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaaddu.ll">fixed-vectors-vaaddu.ll</a><span class="dim">)</span></td><td class="l">vaaddu_vv_v8i8_floor_lshr2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.4bd5691d68.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">reduce_of_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zfinx -O3</code></td></tr><tr><td class="l">rvp-widening-add-acc.2a1a2d512d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvp-widening-add-acc.ll">rvp-widening-add-acc.ll</a><span class="dim">)</span></td><td class="l">test_pwaddau_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zhinx -O2</code></td></tr><tr><td class="l">rvp-widening-add-acc.c0d5213a69.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvp-widening-add-acc.ll">rvp-widening-add-acc.ll</a><span class="dim">)</span></td><td class="l">test_pwaddau_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast ptr <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 6 test files, 220 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-load-store.e9393ac7db.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span> @atomic_load_i8_seq_cst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zba,+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i8 @atomic_load_i8_seq_cst(ptr %a) #0 {
+  %G = getelementptr i64, ptr %a, i1 false
+  %1 = load atomic i8, ptr %a seq_cst, align 1
+  store ptr %G, ptr poison, align 8
+  ret i8 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zba,+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zba,+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %G1 = bitcast ptr %a to ptr&#x27; (in function: atomic_load_i8_seq_cst)
+warning: Instruction selection used fallback path for atomic_load_i8_seq_cst</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">addrspacecast.ab453696.70c0848b59.ll <span class="dim">(mutant of</span> addrspacecast.ab453696.ll<span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zvbb -O1 -code-model=small</code></td></tr><tr><td class="l">atomic-load-store.33c82d6081.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i32_unordered</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zdinx -O2 -code-model=medium</code></td></tr><tr><td class="l">atomic-load-store.e9393ac7db.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zba,+zhinx -O3</code></td></tr><tr><td class="l">atomic-load-store.f2d81df574.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i32_unordered</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zalasr,+zfinx -O3</code></td></tr><tr><td class="l">calling-conv-ilp32e.d38b8a6ab5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span></td><td class="l">callee_large_struct_ret</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+a,+zdinx -O3</code></td></tr><tr><td class="l">clmul.c607149ec9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">commutative_clmul_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zihintpause,+zdinx -O1 -code-model=small</code></td></tr><tr><td class="l">urem-seteq-illegal-types.d5eb92ea25.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/urem-seteq-illegal-types.ll">urem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_urem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">xandesvsinload-vlnu8.beac67230e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/xandesvsinload-vlnu8.ll">xandesvsinload-vlnu8.ll</a><span class="dim">)</span></td><td class="l">intrinsic_nds_vlnu_mask_v_nxv1i8_nxv1i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zve64x,+xandesvsintload,+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

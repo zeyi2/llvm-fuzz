@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 3 test files, 29 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-interleave-store.22131bf41b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span> @vector_interleave_store_factor3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i128
+@G.3 = external global ptr
+
+define void @vector_interleave_store_factor3(&lt;4 x i32&gt; %a, &lt;4 x i32&gt; %b, &lt;4 x i32&gt; %c, ptr %p) {
+  %LGV2 = load i128, ptr @G.2, align 4
+  %G = getelementptr half, ptr %p, i128 %LGV2
+  %v = call &lt;12 x i32&gt; @llvm.vector.interleave3.v12i32(&lt;4 x i32&gt; %a, &lt;4 x i32&gt; %b, &lt;4 x i32&gt; %c)
+  store &lt;12 x i32&gt; %v, ptr %p, align 64
+  store ptr %G, ptr @G.3, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;12 x i32&gt; @llvm.vector.interleave3.v12i32(&lt;4 x i32&gt;, &lt;4 x i32&gt;, &lt;4 x i32&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %13:_(&lt;12 x s32&gt;) = G_INTRINSIC intrinsic(@llvm.vector.interleave3), %0:_(&lt;4 x s32&gt;), %1:_(&lt;4 x s32&gt;), %2:_(&lt;4 x s32&gt;) (in function: vector_interleave_store_factor3)
+warning: Instruction selection used fallback path for vector_interleave_store_factor3</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-interleave-store.22131bf41b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_factor3</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-interleave-store.f94e534acc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_factor4</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfh -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.aad89d2e50.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">vdot4a_vv_partial_reduce_v2i32_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr -O1</code></td></tr><tr><td class="l">vector-deinterleave-fixed.7be742cf70.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave4_v2i32_v8i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh,+zvfbfmin -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-fixed.a40941aac9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave3_v6f32_v2f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh,+zvfbfmin -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-fixed.bb036d5b89.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave4_v2i32_v8i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh,+zvfbfmin,+zbb -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,lw,mv,sw</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,lw,mv,sw</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,lw,mv,sw <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memcpy-inline.9d11af8db9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span> @unaligned_memcpy16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+unaligned-scalar-mem,+a -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @unaligned_memcpy16(ptr captures(none) %dest, ptr %src) #0 {
+entry:
+  %G = getelementptr i32, ptr %dest, i32 -1
+  tail call void @llvm.memcpy.inline.p0.p0.i64(ptr %dest, ptr %G, i64 16, i1 false)
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.inline.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -mattr=+unaligned-scalar-mem,+a -O0 -verify-machineinstrs&#x27; --funcs unaligned_memcpy16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash a65bd2e81d9c435f, GlobalISel hash 510435b61b1aee69
+b0: llc -mtriple=riscv32 -mattr=+unaligned-scalar-mem,+a -verify-machineinstrs -O0 -global-isel=0
+b1: llc -mtriple=riscv32 -mattr=+unaligned-scalar-mem,+a -verify-machineinstrs -O2 -global-isel=0
+b2: llc -mtriple=riscv32 -mattr=+unaligned-scalar-mem,+a -verify-machineinstrs -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memcpy-inline.9d11af8db9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy16</td><td class="l"><code>-mtriple=riscv32 -mattr=+unaligned-scalar-mem,+a -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

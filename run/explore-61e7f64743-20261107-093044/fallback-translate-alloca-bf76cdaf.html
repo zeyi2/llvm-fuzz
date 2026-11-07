@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 3 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">tail-calls-sret.a8d4d0987a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/tail-calls-sret.ll">tail-calls-sret.ll</a><span class="dim">)</span> @local_sret_buffer via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">%struct.Buffer = type { [7 x i64] }
+
+declare void @forward_sret(ptr sret(%struct.Buffer), i64)
+
+define void @local_sret_buffer(i64 %tag) {
+entry:
+  %local = alloca %struct.Buffer, align 8
+  %L1 = load i16, ptr %local, align 2
+  tail call void @forward_sret(ptr sret(%struct.Buffer) %local, i64 %tag)
+  %C = icmp slt i16 0, %L1
+  store i1 %C, ptr poison, align 1
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %local = alloca %struct.Buffer, align 8&#x27; (in function: local_sret_buffer)
+warning: Instruction selection used fallback path for local_sret_buffer</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.7a122375cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">caller_large_struct</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32d -verify-machineinstrs -mattr=+zfinx -O2 -code-model=medium</code></td></tr><tr><td class="l">mem.2446be5f18.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/mem.ll">mem.ll</a><span class="dim">)</span></td><td class="l">addi_fold_crash</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr><tr><td class="l">tail-calls-sret.a8d4d0987a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/tail-calls-sret.ll">tail-calls-sret.ll</a><span class="dim">)</span></td><td class="l">local_sret_buffer</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

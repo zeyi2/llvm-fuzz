@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca bfloat <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 8 test files, 109 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calllowering-zfinx-zhinx.63bc724b25.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/calllowering-zfinx-zhinx.ll">calllowering-zfinx-zhinx.ll</a><span class="dim">)</span> @callee_fastcc_half via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global bfloat
+
+; Function Attrs: nounwind
+define fastcc half @callee_fastcc_half(half %x) #0 {
+  %A = alloca bfloat, align 2
+  store bfloat poison, ptr %A, align 2
+  %LGV = load bfloat, ptr @G.2, align 2
+  %B = frem bfloat %LGV, +qnan
+  store bfloat %B, ptr %A, align 2
+  ret half %x
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zhinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zhinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca bfloat, align 2&#x27; (in function: callee_fastcc_half)
+warning: Instruction selection used fallback path for callee_fastcc_half</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.26ef3fb26b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv32 -mattr=+zve64x,+zdinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">calllowering-zfinx-zhinx.63bc724b25.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/GlobalISel/calllowering-zfinx-zhinx.ll">calllowering-zfinx-zhinx.ll</a><span class="dim">)</span></td><td class="l">callee_fastcc_half</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">half-convert.14a78c85c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinxmin -O1</code></td></tr><tr><td class="l">half-imm.840e2590b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/half-imm.ll">half-imm.ll</a><span class="dim">)</span></td><td class="l">half_imm</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O1</code></td></tr><tr><td class="l">imm.5536f8ffa7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/imm.ll">imm.ll</a><span class="dim">)</span></td><td class="l">imm_12884889601</td><td class="l"><code>-mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -mattr=+zbb,+zfinx -O0</code></td></tr><tr><td class="l">musttail-indirect-args.d7e2914e3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_two_indirect_dup</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx,+zicsr -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">signed-truncation-check.46691768d2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ugecmp_i32_i8</td><td class="l"><code>-mtriple=riscv32-unknown-linux-gnu -mattr=+zbb,+zve32x,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">typepromotion-overflow.2c9b17bfd1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/typepromotion-overflow.ll">typepromotion-overflow.ll</a><span class="dim">)</span></td><td class="l">overflow_add_no_consts</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zhinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

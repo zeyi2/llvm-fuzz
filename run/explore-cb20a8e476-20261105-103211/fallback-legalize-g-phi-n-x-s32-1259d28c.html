@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 113 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-br-fcmp.e23e985df5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/float-br-fcmp.ll">float-br-fcmp.ll</a><span class="dim">)</span> @br_fcmp_uno via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+xtheadba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare void @abort()
+
+; Function Attrs: nounwind
+define void @br_fcmp_uno(float %a, float %b) #0 {
+  %A = alloca &lt;4 x i32&gt;, align 16
+  store &lt;4 x i32&gt; poison, ptr %A, align 16
+  %1 = fcmp uno float %a, %b
+  br i1 %1, label %if.then, label %if.else
+
+if.else:                                          ; preds = %0
+  %2 = phi &lt;4 x i32&gt; [ splat (i32 2147483647), %0 ]
+  store &lt;4 x i32&gt; %2, ptr %A, align 16
+  ret void
+
+if.then:                                          ; preds = %0
+  tail call void @abort()
+  unreachable
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+xtheadba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+xtheadba -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;4 x s32&gt;) = G_PHI %6:_(&lt;4 x s32&gt;), %bb.1 (in function: br_fcmp_uno)
+warning: Instruction selection used fallback path for br_fcmp_uno</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.2cbbded70b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicsr -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vpload.5f497ddb18.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpload.ll">fixed-vectors-vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_v2f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d -O1</code></td></tr><tr><td class="l">float-br-fcmp.e23e985df5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/float-br-fcmp.ll">float-br-fcmp.ll</a><span class="dim">)</span></td><td class="l">br_fcmp_uno</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+xtheadba -O0</code></td></tr><tr><td class="l">sextw-removal.2c09e3f138.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">test9</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64f -mattr=+m,+f,+zknh -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

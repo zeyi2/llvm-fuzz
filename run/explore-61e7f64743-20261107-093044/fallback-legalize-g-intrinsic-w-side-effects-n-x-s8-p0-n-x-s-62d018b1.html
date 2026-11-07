@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;,s32,s8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 59 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-int.8877d292f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int.ll">fixed-vectors-int.ll</a><span class="dim">)</span> @smax_vx_v16i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;16 x i8&gt;
+
+define void @smax_vx_v16i8(ptr %x, i8 %y) {
+  %LGV = load &lt;16 x i8&gt;, ptr @G.2, align 16
+  %a = load &lt;16 x i8&gt;, ptr %x, align 16
+  %S = shufflevector &lt;16 x i8&gt; %a, &lt;16 x i8&gt; %LGV, &lt;16 x i32&gt; poison
+  store &lt;16 x i8&gt; %S, ptr %x, align 16
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %6:_(&lt;8 x s8&gt;), %7:_(&lt;8 x s8&gt;), %0:_(p0), %8:_(&lt;8 x s1&gt;), %10:_(s32) :: (store (s8) into %ir.x) (in function: smax_vx_v16i8)
+warning: Instruction selection used fallback path for smax_vx_v16i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-int.8877d292f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int.ll">fixed-vectors-int.ll</a><span class="dim">)</span></td><td class="l">smax_vx_v16i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2</code></td></tr><tr><td class="l">saverestore-scs.209ec49f5a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/saverestore-scs.ll">saverestore-scs.ll</a><span class="dim">)</span></td><td class="l">callee_scs</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32f -mattr=+f,+save-restore,+v,+zcb -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vfwcvt-f-xu.44d4e7be78.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vfwcvt-f-xu.ll">vfwcvt-f-xu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwcvt_mask_f.xu.v_nxv2f64_nxv2i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfh,+zve64d -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

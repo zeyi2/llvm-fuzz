@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_MUL &lt;N x s128&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_MUL &lt;N x s128&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_MUL &lt;N x s128&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vaadd.3c271e3a.57af16ce4c.ll <span class="dim">(mutant of</span> fixed-vectors-vaadd.3c271e3a.ll<span class="dim">)</span> @vaadd_vv_v8i64_floor via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+avoid-vxrm -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.5 = external global &lt;8 x i64&gt;
+
+define &lt;8 x i64&gt; @vaadd_vv_v8i64_floor(&lt;8 x i64&gt; %x, &lt;8 x i64&gt; %y) {
+  %yzv = sext &lt;8 x i64&gt; %y to &lt;8 x i128&gt;
+  %B = lshr &lt;8 x i64&gt; %y, %y
+  %B1 = mul &lt;8 x i128&gt; %yzv, %yzv
+  %ret = trunc &lt;8 x i128&gt; %B1 to &lt;8 x i64&gt;
+  store &lt;8 x i64&gt; %B, ptr @G.5, align 64
+  ret &lt;8 x i64&gt; %ret
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+avoid-vxrm -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+avoid-vxrm -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(&lt;8 x s128&gt;) = G_MUL %5:_, %5:_ (in function: vaadd_vv_v8i64_floor)
+warning: Instruction selection used fallback path for vaadd_vv_v8i64_floor</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmulh.92bb73b0b9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb -O2</code></td></tr><tr><td class="l">clmulh.a6f9eca12b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+xtheadba -O1</code></td></tr><tr><td class="l">fixed-vectors-vaadd.3c271e3a.57af16ce4c.ll <span class="dim">(mutant of</span> fixed-vectors-vaadd.3c271e3a.ll<span class="dim">)</span></td><td class="l">vaadd_vv_v8i64_floor</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+avoid-vxrm -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

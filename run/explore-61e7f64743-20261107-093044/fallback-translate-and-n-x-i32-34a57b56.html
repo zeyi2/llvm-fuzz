@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: and &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: and &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: and &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">short-forward-branch-opt-zibi.3666c3f00a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/short-forward-branch-opt-zibi.ll">short-forward-branch-opt-zibi.ll</a><span class="dim">)</span> @select_eq_xor_minsize via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zibi,+zca,+conditional-cmv-fusion,+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: minsize
+define i32 @select_eq_xor_minsize(i32 %a, i32 %b, i32 %c) #0 {
+  %B = and &lt;4 x i32&gt; splat (i32 -1), splat (i32 -2147483648)
+  %tst = icmp eq i32 %a, 5
+  %xor = xor i32 %b, %c
+  %ret = select i1 %tst, i32 %xor, i32 %b
+  store &lt;4 x i32&gt; %B, ptr poison, align 16
+  ret i32 %ret
+}
+
+attributes #0 = { minsize }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zibi,+zca,+conditional-cmv-fusion,+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zibi,+zca,+conditional-cmv-fusion,+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: and: &#x27;  %B = and &lt;4 x i32&gt; splat (i32 -1), splat (i32 -2147483648)&#x27; (in function: select_eq_xor_minsize)
+warning: Instruction selection used fallback path for select_eq_xor_minsize</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-intrinsics-strict.3c738e34cc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/double-intrinsics-strict.ll">double-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">minnum_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -mattr=+zicond,+zhinx -O3 -code-model=small</code></td></tr><tr><td class="l">half-arith-strict.eb86932491.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fnmsub_h</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32 -mattr=+zhinx -O1</code></td></tr><tr><td class="l">short-forward-branch-opt-zibi.3666c3f00a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/short-forward-branch-opt-zibi.ll">short-forward-branch-opt-zibi.ll</a><span class="dim">)</span></td><td class="l">select_eq_xor_minsize</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zibi,+zca,+conditional-cmv-fusion,+zhinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

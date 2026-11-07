@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: extractelement &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: extractelement &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: extractelement &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 2 test files, 33 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">reduction-formation.f9d0ec6d71.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a><span class="dim">)</span> @reduce_sum_4xi32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+a -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+define i32 @reduce_sum_4xi32(&lt;4 x i32&gt; %v) {
+  %e0 = extractelement &lt;4 x i32&gt; %v, i32 0
+  %e1 = extractelement &lt;4 x i32&gt; %v, i32 1
+  %e2 = extractelement &lt;4 x i32&gt; %v, i32 2
+  %B = add i32 %e0, %e1
+  %e3 = extractelement &lt;4 x i32&gt; %v, i32 3
+  %C = icmp uge i32 %B, %e3
+  %add0 = add i32 %e0, %e1
+  %add1 = add i32 %add0, %e2
+  %add2 = add i32 %add1, %e3
+  store i32 %B, ptr @G, align 4
+  store i1 %C, ptr poison, align 1
+  ret i32 %add2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+a -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+a -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: extractelement: &#x27;  %e0 = extractelement &lt;4 x i32&gt; %v, i32 0&#x27; (in function: reduce_sum_4xi32)
+warning: Instruction selection used fallback path for reduce_sum_4xi32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">reduction-formation.f9d0ec6d71.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a><span class="dim">)</span></td><td class="l">reduce_sum_4xi32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+a -O2</code></td></tr><tr><td class="l">reduction-formation.f9d0ec6d71.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/reduction-formation.ll">reduction-formation.ll</a><span class="dim">)</span></td><td class="l">reduce_or_4xi32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+a -O2</code></td></tr><tr><td class="l">rv64-float-convert-strict.8f6c81f9e6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rv64-float-convert-strict.ll">rv64-float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -disable-strictnode-mutation -mattr=+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

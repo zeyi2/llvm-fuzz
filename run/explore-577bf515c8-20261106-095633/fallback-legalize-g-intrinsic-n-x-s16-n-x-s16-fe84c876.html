@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;N x s16&gt;,&lt;N x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;N x s16&gt;,&lt;N x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;N x s16&gt;,&lt;N x s16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 2 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-interleave-fixed.1183901315.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span> @vector_interleave6_v12i16_v2i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfh,+zvfbfmin -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;12 x i16&gt; @vector_interleave6_v12i16_v2i16(&lt;2 x i16&gt; %a, &lt;2 x i16&gt; %b, &lt;2 x i16&gt; %c, &lt;2 x i16&gt; %d, &lt;2 x i16&gt; %e, &lt;2 x i16&gt; %f) #0 {
+  %B = urem &lt;2 x i16&gt; %a, splat (i16 256)
+  %res = call &lt;12 x i16&gt; @llvm.vector.interleave6.v12i16(&lt;2 x i16&gt; %a, &lt;2 x i16&gt; %b, &lt;2 x i16&gt; %c, &lt;2 x i16&gt; %B, &lt;2 x i16&gt; %e, &lt;2 x i16&gt; %f)
+  ret &lt;12 x i16&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;12 x i16&gt; @llvm.vector.interleave6.v12i16(&lt;2 x i16&gt;, &lt;2 x i16&gt;, &lt;2 x i16&gt;, &lt;2 x i16&gt;, &lt;2 x i16&gt;, &lt;2 x i16&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zvfh,+zvfbfmin -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zvfh,+zvfbfmin -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %33:_(&lt;12 x s16&gt;) = G_INTRINSIC intrinsic(@llvm.vector.interleave6), %0:_(&lt;2 x s16&gt;), %1:_(&lt;2 x s16&gt;), %2:_(&lt;2 x s16&gt;), %32:_(&lt;2 x s16&gt;), %4:_(&lt;2 x s16&gt;), %5:_(&lt;2 x s16&gt;) (in function: vector_interleave6_v12i16_v2i16)
+warning: Instruction selection used fallback path for vector_interleave6_v12i16_v2i16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vector-deinterleave-fixed.5dfbdf12bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave6_v12f16_v2f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+m,+zvfbfmin -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-fixed.0dd0be507a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">interleave4_same_nonconst_splat_v8i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh,+zvfbfmin -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-fixed.1183901315.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_interleave6_v12i16_v2i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfh,+zvfbfmin -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-fixed.50dc74cb33.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_interleave5_v10i16_v2i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvbb,+zvfh,+experimental-zvzip -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-fixed.644972bced.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">interleave4_const_splat_v8i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvbb,+zvfh,+zvfbfmin,+experimental-zvzip -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">sf_vfexpa.4bd9dc0489.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/sf_vfexpa.ll">sf_vfexpa.ll</a><span class="dim">)</span> @test_intrinsic_sf_vfexpa_v_nxv4f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64f,+zvfh,+xsfvfexpa,+zvkb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/M3WPzKvPW">https://godbolt.org/z/M3WPzKvPW</a> (llc-assertions-trunk, checked 2026-11-05 13:58 UTC): <a href="https://godbolt.org/z/M3WPzKvPW">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+@G.2 = external global i16
+@G.3 = external global i1
+
+define &lt;vscale x 4 x float&gt; @test_intrinsic_sf_vfexpa_v_nxv4f32(&lt;vscale x 4 x float&gt; %0, i32 %1) {
+entry:
+  %A11 = alloca i1, align 1
+  store i1 true, ptr %A11, align 1
+  %A8 = alloca i1, align 1
+  store i1 false, ptr %A8, align 1
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %LGV = load i16, ptr @G.2, align 2
+  switch i16 %LGV, label %SW_D [
+    i16 7135, label %SW_C
+    i16 -9996, label %SW_C1
+    i16 -16186, label %SW_C2
+    i16 20093, label %SW_C3
+    i16 -9228, label %SW_C4
+    i16 -2569, label %SW_C5
+    i16 31542, label %SW_C6
+  ]
+
+BB:                                               ; preds = %SW_C6, %SW_C4, %SW_C3, %SW_C2, %SW_C1, %SW_C, %SW_D
+  %f = call &lt;vscale x 4 x float&gt; @llvm.riscv.sf.vfexpa.nxv4f32.i32(&lt;vscale x 4 x float&gt; poison, &lt;vscale x 4 x float&gt; %0, i32 %1)
+  ret &lt;vscale x 4 x float&gt; %f
+
+SW_D:                                             ; preds = %entry
+  br label %BB
+
+SW_C:                                             ; preds = %SW_C, %entry
+  %LGV7 = load i1, ptr @G.1, align 1
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %SW_C, label %BB
+
+SW_C1:                                            ; preds = %SW_C1, %entry
+  %L9 = load i1, ptr %A8, align 1
+  br i1 %L9, label %SW_C1, label %BB
+
+SW_C2:                                            ; preds = %entry
+  br label %BB
+
+SW_C3:                                            ; preds = %SW_C3, %entry
+  %LGV10 = load i1, ptr @G.3, align 1
+  br i1 %LGV10, label %BB, label %SW_C3
+
+SW_C4:                                            ; preds = %entry
+  br label %BB
+
+SW_C5:                                            ; preds = %entry
+  ret &lt;vscale x 4 x float&gt; splat (float f0x7F7FFFFF)
+
+SW_C6:                                            ; preds = %SW_C6, %entry
+  %L12 = load i1, ptr %A11, align 1
+  br i1 %L12, label %SW_C6, label %BB
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 4 x float&gt; @llvm.riscv.sf.vfexpa.nxv4f32.i32(&lt;vscale x 4 x float&gt;, &lt;vscale x 4 x float&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64f,+zvfh,+xsfvfexpa,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVRegisterBankInfo.cpp:569: virtual const llvm::RegisterBankInfo::InstructionMapping&amp; llvm::RISCVRegisterBankInfo::getInstrMapping(const llvm::MachineInstr&amp;) const: Assertion `MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64f,+zvfh,+xsfvfexpa,+zvkb -O1 -global-isel=0</code></td><td>0</td><td>47</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64f,+zvfh,+xsfvfexpa,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64f,+zvfh,+xsfvfexpa,+zvkb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVRegisterBankInfo.cpp:569: virtual const RegisterBankInfo::InstructionMapping &amp;llvm::RISCVRegisterBankInfo::getInstrMapping(const MachineInstr &amp;) const: Assertion `MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64f,+zvfh,+xsfvfexpa,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RegBankSelect&#x27; on function &#x27;@test_intrinsic_sf_vfexpa_v_nxv4f32&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000562d3450119b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000562d344fe041 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000562d34501c1b
+3  libc.so.6 0x00007fa091645330
+4  libc.so.6 0x00007fa09169ec0c pthread_kill + 284
+5  libc.so.6 0x00007fa09164527e gsignal + 30
+6  libc.so.6 0x00007fa0916288ff abort + 223
+7  libc.so.6 0x00007fa09162881b
+8  libc.so.6 0x00007fa09163b517
+9  llc       0x0000562d3577e3db
+10 llc       0x0000562d366e4007
+11 llc       0x0000562d366e3425 llvm::RegBankSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 197
+12 llc       0x0000562d34ad2c0d llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 653
+13 llc       0x0000562d3485b347 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x0000562d34863862 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x0000562d3485c0f0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x0000562d34508857 llcMain + 12151
+17 llc       0x0000562d34442e6f main + 63
+18 libc.so.6 0x00007fa09162a1ca
+19 libc.so.6 0x00007fa09162a28b __libc_start_main + 139
+20 llc       0x0000562d34442d65 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">sf_vfexpa.4bd9dc0489.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/sf_vfexpa.ll">sf_vfexpa.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64f,+zvfh,+xsfvfexpa,+zvkb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

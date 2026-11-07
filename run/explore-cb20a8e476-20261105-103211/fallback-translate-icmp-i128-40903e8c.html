@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">12 in 12 configs, 11 test files, 117 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">iabs.10484b226e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span> @select_abs128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvkb,+zhinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/58jGWbqes">https://godbolt.org/z/58jGWbqes</a> (llc-assertions-trunk, checked 2026-11-05 13:58 UTC): <a href="https://godbolt.org/z/58jGWbqes">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i16
+
+define i128 @select_abs128(i128 %x) {
+  %1 = icmp slt i128 %x, 0
+  %B = mul i16 1, 0
+  %2 = sub nsw i128 0, %x
+  %3 = select i1 %1, i128 %2, i128 %x
+  store i16 %B, ptr @G.3, align 2
+  ret i128 %3
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvkb,+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>8</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %1 = icmp slt i128 %x, 0&#x27; (in function: select_abs128)<br>warning: Instruction selection used fallback path for select_abs128</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvkb,+zhinx -O2 -global-isel=0</code></td><td>0</td><td>8</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvkb,+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvkb,+zhinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %1 = icmp slt i128 %x, 0&#x27; (in function: select_abs128)
+warning: Instruction selection used fallback path for select_abs128</pre>
+<h4>Occurrences (12):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.d4382a939f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i16_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zfinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vror.85b70ed1f3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vror.ll">fixed-vectors-vror.ll</a><span class="dim">)</span></td><td class="l">vror_vx_v32i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">float-bitmanip-dagcombines.da10ac4640.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/float-bitmanip-dagcombines.ll">float-bitmanip-dagcombines.ll</a><span class="dim">)</span></td><td class="l">fabs</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">float-intrinsics.6a2493838e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">tanh_f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zfinx -O3</code></td></tr><tr><td class="l">float-intrinsics.bc7d55da72.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">sincos_f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+zfinx -O2</code></td></tr><tr><td class="l">fp-fcanonicalize.c78f7b6f3f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v8f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+a -O0</code></td></tr><tr><td class="l">half-round-conv.58325f6298.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/half-round-conv.ll">half-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_roundeven_ui8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinx,+zbkb -O0</code></td></tr><tr><td class="l">iabs.10484b226e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span></td><td class="l">select_abs128</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvkb,+zhinx -O2</code></td></tr><tr><td class="l">rvp-simd-32.a9b9a50ee3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_pmhacc_b1_v2i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+a -O1</code></td></tr><tr><td class="l">rvp-simd-64.5ff2c4ce.f4473a7c77.ll <span class="dim">(mutant of</span> rvp-simd-64.5ff2c4ce.ll<span class="dim">)</span></td><td class="l">test_paas_x_w</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+a -O0</code></td></tr><tr><td class="l">rvp-simd-64.a973abb7.ecec53d8f9.ll <span class="dim">(mutant of</span> rvp-simd-64.a973abb7.ll<span class="dim">)</span></td><td class="l">test_pwmaccsu_i32x2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zfinx -O0</code></td></tr><tr><td class="l">sf_vqmaccsu_4x8x4.41c27ba96e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/sf_vqmaccsu_4x8x4.ll">sf_vqmaccsu_4x8x4.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vqmaccsu_4x8x4_ta_i32m1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xsfvqmaccqoq,+zfinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

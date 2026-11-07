@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.fshr.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.fshr.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.fshr.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zbb-zbkb.37cb2b8ac5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span> @ror_i32_neg_constant_rhs via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define signext i32 @ror_i32_neg_constant_rhs(i32 signext %a) #0 {
+  %1 = tail call i32 @llvm.fshr.i32(i32 -2, i32 -2, i32 %a)
+  %B = add i32 %a, %1
+  ret i32 %B
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.fshr.i32(i32, i32, i32) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.fshr.i32: &#x27;  %1 = tail call i32 @llvm.fshr.i32(i32 -2, i32 -2, i32 %a)&#x27; (in function: ror_i32_neg_constant_rhs)
+warning: Instruction selection used fallback path for ror_i32_neg_constant_rhs</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64zbb-zbkb.37cb2b8ac5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">ror_i32_neg_constant_rhs</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O2</code></td></tr><tr><td class="l">rv64zbb-zbkb.bb0ff45f3a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">rori_i32_fshr_nosext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zdinx -O0</code></td></tr><tr><td class="l">xcvbitmanip.daab0fd1.123b80beb7.ll <span class="dim">(mutant of</span> xcvbitmanip.daab0fd1.ll<span class="dim">)</span></td><td class="l">test.llvm.fshr.reg</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xcvbitmanip,+zdinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

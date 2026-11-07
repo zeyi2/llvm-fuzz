@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i8~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i8~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i8~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">sadd_sat_plus.1547af3c29.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/sadd_sat_plus.ll">sadd_sat_plus.ll</a><span class="dim">)</span> @func4 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zhinx,+zihintpause -O3 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i4
+
+; Function Attrs: nounwind
+define i4 @func4(i4 %x, i4 %y, i4 %z) #0 {
+  %a = mul i4 %y, %z
+  %tmp = call i4 @llvm.sadd.sat.i4(i4 %x, i4 %a)
+  store i4 %tmp, ptr @G.3, align 1
+  ret i4 %tmp
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i4 @llvm.sadd.sat.i4(i4, i4) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+zhinx,+zihintpause -O3 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+zhinx,+zihintpause -O3 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %a = mul i4 %y, %z&#x27; (in function: func4)
+warning: Instruction selection used fallback path for func4</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">sadd_sat_plus.1547af3c29.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/sadd_sat_plus.ll">sadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func4</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zhinx,+zihintpause -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">uadd_sat_plus.210e106a16.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/uadd_sat_plus.ll">uadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func4</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zfinx,+zve32x -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">uadd_sat_plus.7dd194930d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/uadd_sat_plus.ll">uadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func4</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zve32x,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">uadd_sat_plus.eaca359400.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/uadd_sat_plus.ll">uadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func4</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbb,+xtheadba,+zfinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

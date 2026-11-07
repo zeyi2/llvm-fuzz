@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 59 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">attributes.c114fbad55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span> @addi via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zksed,+zdinx,+zvbb -O0 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i32
+
+define i32 @addi(i32 %a) {
+  %B = srem i32 %a, -2147483648
+  %1 = add i32 %a, 1
+  store i32 %B, ptr @G.1, align 4
+  ret i32 %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zksed,+zdinx,+zvbb -O0 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zksed,+zdinx,+zvbb -O0 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem i32 %a, -2147483648&#x27; (in function: addi)
+warning: Instruction selection used fallback path for addi</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds.7d20404dfd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/abds.ll">abds.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zba,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">atomicrmw-xchg.8d86bb1b7b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-xchg.ll">atomicrmw-xchg.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_xchg_i32_monotonic</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zabha,+zihintpause,+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">attributes.c114fbad55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv64 -mattr=+zksed,+zdinx,+zvbb -O0 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">short-forward-branch-opt-with-branch-with-immediates_48_ne.daf1ad8a0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/short-forward-branch-opt-with-branch-with-immediates_48_ne.ll">short-forward-branch-opt-with-branch-with-immediates_48_ne.ll</a><span class="dim">)</span></td><td class="l">branch_with_immSFB_mul</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+zdinx -O2</code></td></tr><tr><td class="l">srem-seteq-illegal-types.dc086824cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_even</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">xandesvdot-vd4dots.0dbaefd5a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/xandesvdot-vd4dots.ll">xandesvdot-vd4dots.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vd4dots_mask_vv_nxv4i64_nxv16i16_nxv16i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zve64x,+xandesvdot,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

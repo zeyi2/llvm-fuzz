@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: store i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: store i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: store i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 4 configs, 4 test files, 26 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xcvmem.27b664b13b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/xcvmem.ll">xcvmem.ll</a><span class="dim">)</span> @sw_rr_inc via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xcvmem,+zhinx,+zcb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define ptr @sw_rr_inc(ptr %a, i32 %b, i32 %c) {
+  store i32 %b, ptr %a, align 4
+  %G = getelementptr ptr, ptr %a, i32 %c
+  %1 = getelementptr i32, ptr %a, i32 %c
+  store ptr %1, ptr %G, align 8
+  ret ptr %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xcvmem,+zhinx,+zcb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xcvmem,+zhinx,+zcb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: store: &#x27;  store i32 %b, ptr %a, align 4&#x27; (in function: sw_rr_inc)
+warning: Instruction selection used fallback path for sw_rr_inc</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.d4382a939f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_store_i32_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zfinx -O3</code></td></tr><tr><td class="l">branch-opt.beea00a8cf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/branch-opt.ll">branch-opt.ll</a><span class="dim">)</span></td><td class="l">u_case2_a</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbs,+zhinx,+zcb -O2</code></td></tr><tr><td class="l">branch-opt.beea00a8cf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/branch-opt.ll">branch-opt.ll</a><span class="dim">)</span></td><td class="l">case2_a</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbs,+zhinx,+zcb -O2</code></td></tr><tr><td class="l">global-merge.3cd490903d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/global-merge.ll">global-merge.ll</a><span class="dim">)</span></td><td class="l">f1</td><td class="l"><code>-mtriple=riscv32 -global-merge-on-external=false -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">xcvmem.27b664b13b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/xcvmem.ll">xcvmem.ll</a><span class="dim">)</span></td><td class="l">sw_rr_inc</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xcvmem,+zhinx,+zcb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

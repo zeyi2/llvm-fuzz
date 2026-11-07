@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: lshr &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: lshr &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: lshr &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-without-f-reg.d5ba5276e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span> @h via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zihintpause,+zvkb -O2 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.1 = external global &lt;8 x i8&gt;
+
+; Function Attrs: nounwind
+define hidden fastcc half @h(half %x) #0 {
+  %B = lshr &lt;8 x i8&gt; splat (i8 16), splat (i8 16)
+  %C = fcmp ugt half %x, 6.550400e+04
+  store i1 %C, ptr @G, align 1
+  store &lt;8 x i8&gt; %B, ptr @G.1, align 8
+  ret half %x
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zihintpause,+zvkb -O2 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zihintpause,+zvkb -O2 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: lshr: &#x27;  %B = lshr &lt;8 x i8&gt; splat (i8 16), splat (i8 16)&#x27; (in function: h)
+warning: Instruction selection used fallback path for h</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.d1d367ec3c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">callee_large_struct_ret</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32d -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">double-round-conv.928a0da937.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/double-round-conv.ll">double-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_round_ui16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fastcc-without-f-reg.d5ba5276e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zihintpause,+zvkb -O2 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-interleaved-access-zve32x.3c6353b4.df28fe96b0.ll <span class="dim">(mutant of</span> fixed-vectors-interleaved-access-zve32x.3c6353b4.ll<span class="dim">)</span></td><td class="l">load_large_vector</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve64x,+zvl1024b,+zhinx,+zbs,+zcb -O3</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.45303a90.574d11518a.ll <span class="dim">(mutant of</span> fixed-vectors-zvdot4a8i.45303a90.ll<span class="dim">)</span></td><td class="l">vdot4a_vx_constant_swapped</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3 -code-model=medium</code></td></tr><tr><td class="l">xcvbitmanip.daab0fd1.e2bd5ac33c.ll <span class="dim">(mutant of</span> xcvbitmanip.daab0fd1.ll<span class="dim">)</span></td><td class="l">test.llvm.fshr.reg</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xcvbitmanip,+zdinx -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

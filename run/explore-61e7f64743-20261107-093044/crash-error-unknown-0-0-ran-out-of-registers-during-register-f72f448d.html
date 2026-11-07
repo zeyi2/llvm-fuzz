@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32&#x27;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32&#x27;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32&#x27; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">branch-relaxation-rv32e.7ab1862c2d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/branch-relaxation-rv32e.ll">branch-relaxation-rv32e.ll</a><span class="dim">)</span> @relax_jal_spill_32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zihintpause -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/8MjxMxrsz">https://godbolt.org/z/8MjxMxrsz</a> (llc-assertions-trunk, checked 2026-11-07 13:15 UTC): <a href="https://godbolt.org/z/8MjxMxrsz">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+@G.1 = external global i1
+
+define void @relax_jal_spill_32() {
+  %A10 = alloca i1, align 1
+  store i1 true, ptr %A10, align 1
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %LGV6 = load i1, ptr @G.1, align 1
+  %ra = call i32 asm sideeffect &quot;addi ra, x0, 1&quot;, &quot;={ra}&quot;()
+  %t0 = call i32 asm sideeffect &quot;addi t0, x0, 5&quot;, &quot;={t0}&quot;()
+  %t1 = call i32 asm sideeffect &quot;addi t1, x0, 6&quot;, &quot;={t1}&quot;()
+  %t2 = call i32 asm sideeffect &quot;addi t2, x0, 7&quot;, &quot;={t2}&quot;()
+  %s0 = call i32 asm sideeffect &quot;addi s0, x0, 8&quot;, &quot;={s0}&quot;()
+  %s1 = call i32 asm sideeffect &quot;addi s1, x0, 9&quot;, &quot;={s1}&quot;()
+  %a0 = call i32 asm sideeffect &quot;addi a0, x0, 10&quot;, &quot;={a0}&quot;()
+  %a1 = call i32 asm sideeffect &quot;addi a1, x0, 11&quot;, &quot;={a1}&quot;()
+  %a2 = call i32 asm sideeffect &quot;addi a2, x0, 12&quot;, &quot;={a2}&quot;()
+  %L = load i1, ptr %A, align 1
+  switch i1 %L, label %SW_D7 [
+    i1 true, label %SW_C8
+  ]
+
+BB5:                                              ; preds = %SW_C8, %SW_D7
+  %a3 = call i32 asm sideeffect &quot;addi a3, x0, 13&quot;, &quot;={a3}&quot;()
+  %a4 = call i32 asm sideeffect &quot;addi a4, x0, 14&quot;, &quot;={a4}&quot;()
+  %a5 = call i32 asm sideeffect &quot;addi a5, x0, 15&quot;, &quot;={a5}&quot;()
+  %cmp = icmp eq i32 %a4, %a5
+  br i1 %cmp, label %branch_1, label %branch_2
+
+branch_1:                                         ; preds = %BB5
+  call void asm sideeffect &quot;.space 1048576&quot;, &quot;&quot;()
+  br label %branch_2
+
+branch_2:                                         ; preds = %branch_1, %BB5
+  %LGV = load i64, ptr @G, align 4
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{ra}&quot;(i32 %ra)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{t0}&quot;(i32 %t0)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{t1}&quot;(i32 %t1)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{t2}&quot;(i32 %t2)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{s0}&quot;(i32 %s0)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{s1}&quot;(i32 %s1)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a0}&quot;(i32 %a0)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a1}&quot;(i32 %a1)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a2}&quot;(i32 %a2)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a3}&quot;(i32 %a3)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a4}&quot;(i32 %a4)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a5}&quot;(i32 %a5)
+  switch i64 %LGV, label %SW_D [
+    i64 6790755875507605575, label %SW_C
+    i64 9081736857856167178, label %SW_C1
+    i64 5958758699759921436, label %SW_C2
+    i64 -3825712111524052936, label %SW_C3
+  ]
+
+BB:                                               ; preds = %SW_C3, %SW_C2, %SW_C1, %SW_C, %SW_D
+  ret void
+
+SW_D:                                             ; preds = %SW_D, %branch_2
+  %LGV4 = load i1, ptr @G.1, align 1
+  br i1 %LGV4, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %branch_2
+  br label %BB
+
+SW_C1:                                            ; preds = %branch_2
+  br label %BB
+
+SW_C2:                                            ; preds = %branch_2
+  br label %BB
+
+SW_C3:                                            ; preds = %branch_2
+  br label %BB
+
+SW_D7:                                            ; preds = %0
+  br label %BB5
+
+SW_C8:                                            ; preds = %SW_C8, %0
+  %LGV9 = load i1, ptr @G.1, align 1
+  %L11 = load i1, ptr %A10, align 1
+  br i1 %L11, label %BB5, label %SW_C8
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zihintpause -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>1</td><td>0</td><td class="msg err">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32&#x27;</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zihintpause -O3 -global-isel=0</code></td><td>0</td><td>85</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zihintpause -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zihintpause -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32&#x27;</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">branch-relaxation-rv32e.7ab1862c2d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/branch-relaxation-rv32e.ll">branch-relaxation-rv32e.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zihintpause -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 15 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-ilp32e.7e9178901b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span> @caller_aligned_stack via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare i32 @callee_aligned_stack(i32, i32, fp128, i32, i32, i64, i32, i32, double, i32, [2 x i32])
+
+define void @caller_aligned_stack() {
+  %B = sdiv &lt;4 x i32&gt; splat (i32 -2147483648), splat (i32 -1)
+  %1 = call i32 @callee_aligned_stack(i32 1, i32 11, fp128 3.140000e+00, i32 12, i32 13, i64 20000000000, i32 14, i32 15, double 2.720000e+00, i32 16, [2 x i32] [i32 17, i32 18])
+  store &lt;4 x i32&gt; %B, ptr poison, align 16
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv &lt;4 x i32&gt; splat (i32 -2147483648), splat (i32 -1)&#x27; (in function: caller_aligned_stack)
+warning: Instruction selection used fallback path for caller_aligned_stack</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-ilp32e.7e9178901b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span></td><td class="l">caller_aligned_stack</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">rv64zbb.6547b0993e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">ctpop_v2i32_eq_one</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zfinx -O3</code></td></tr><tr><td class="l">rvp-simd-64.b4e7f136.1439f9ea.85a2170113.ll <span class="dim">(mutant of</span> rvp-simd-64.b4e7f136.1439f9ea.ll<span class="dim">)</span></td><td class="l">test_pm2adda_v2i32_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zfinx,+zdinx -O2</code></td></tr><tr><td class="l">smulh.ca306fc8.5b74da94.332ff5907b.ll <span class="dim">(mutant of</span> smulh.ca306fc8.5b74da94.ll<span class="dim">)</span></td><td class="l">smulh_v2i128</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zicsr,+zbs,+zbkb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

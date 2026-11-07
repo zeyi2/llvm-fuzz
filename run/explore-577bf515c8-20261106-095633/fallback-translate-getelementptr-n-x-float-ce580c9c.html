@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: getelementptr &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: getelementptr &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: getelementptr &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 27 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">concat-vector-insert-elt.4f88299e2f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/concat-vector-insert-elt.ll">concat-vector-insert-elt.ll</a><span class="dim">)</span> @v4xi64_concat_vector_insert_idx1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global ptr
+
+define void @v4xi64_concat_vector_insert_idx1(ptr %a, ptr %b, i64 %x) {
+  %G = getelementptr &lt;4 x float&gt;, ptr %a, i64 %x
+  %v1 = load &lt;2 x i64&gt;, ptr %a, align 16
+  %v2 = load &lt;2 x i64&gt;, ptr %b, align 16
+  %concat = shufflevector &lt;2 x i64&gt; %v1, &lt;2 x i64&gt; %v2, &lt;4 x i32&gt; &lt;i32 0, i32 1, i32 2, i32 3&gt;
+  %ins = insertelement &lt;4 x i64&gt; %concat, i64 %x, i32 1
+  store &lt;4 x i64&gt; %ins, ptr %a, align 32
+  store ptr %G, ptr @G.2, align 8
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: getelementptr: &#x27;  %G = getelementptr &lt;4 x float&gt;, ptr %a, i64 %x&#x27; (in function: v4xi64_concat_vector_insert_idx1)
+warning: Instruction selection used fallback path for v4xi64_concat_vector_insert_idx1</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">concat-vector-insert-elt.4f88299e2f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/rvv/concat-vector-insert-elt.ll">concat-vector-insert-elt.ll</a><span class="dim">)</span></td><td class="l">v4xi64_concat_vector_insert_idx1</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">half-convert-strict.52b918adb1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_w_load</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zhinxmin -O3</code></td></tr><tr><td class="l">memset-inline.2f879b2632.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/GlobalISel/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">test_memset_inline_2bytes</td><td class="l"><code>-mtriple=riscv32 -mattr=+c,+zfinx -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

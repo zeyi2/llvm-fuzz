@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem &lt;vscale x N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem &lt;vscale x N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem &lt;vscale x N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 17 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-shuffle-reverse.7c2f727ad1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-reverse.ll">fixed-vectors-shuffle-reverse.ll</a><span class="dim">)</span> @reverse_v4i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvbb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i32&gt; @reverse_v4i32(&lt;4 x i32&gt; %a) {
+  %A = alloca &lt;vscale x 2 x float&gt;, align 8
+  store &lt;vscale x 2 x float&gt; poison, ptr %A, align 8
+  %res = shufflevector &lt;4 x i32&gt; %a, &lt;4 x i32&gt; poison, &lt;4 x i32&gt; &lt;i32 3, i32 2, i32 1, i32 0&gt;
+  %B = frem &lt;vscale x 2 x float&gt; splat (float f0x7F7FFFFF), splat (float +qnan)
+  store &lt;vscale x 2 x float&gt; %B, ptr %A, align 8
+  ret &lt;4 x i32&gt; %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvbb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvbb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem &lt;vscale x 2 x float&gt; splat (float f0x7F7FFFFF), splat (float +qnan)&#x27; (in function: reverse_v4i32)
+warning: Instruction selection used fallback path for reverse_v4i32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-shuffle-reverse.7c2f727ad1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-reverse.ll">fixed-vectors-shuffle-reverse.ll</a><span class="dim">)</span></td><td class="l">reverse_v4i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvbb -O0</code></td></tr><tr><td class="l">fixed-vectors-vcopysign-vp.616a789f14.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vcopysign-vp.ll">fixed-vectors-vcopysign-vp.ll</a><span class="dim">)</span></td><td class="l">vfsgnj_vv_v2f64_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+zvfh,+experimental-zvfbfa,+v,+zbb,+zihintpause -O2</code></td></tr><tr><td class="l">vsplats-f16.9f687ee6d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vsplats-f16.ll">vsplats-f16.ll</a><span class="dim">)</span></td><td class="l">vsplat_nxv8f16</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64d -verify-machineinstrs -mattr=+f,+d,+zvfhmin,+v -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

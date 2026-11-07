@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 205 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">nontemporal-vp.4b95e0625f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span> @test_nontemporal_vp_gather_v4i32_DEFAULT via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+c -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i32&gt; @test_nontemporal_vp_gather_v4i32_DEFAULT(&lt;4 x ptr&gt; %ptrs, i32 zeroext %vl) {
+  %B = add i32 42, 42
+  %x = call &lt;4 x i32&gt; @llvm.vp.gather.v4i32.v4p0(&lt;4 x ptr&gt; %ptrs, &lt;4 x i1&gt; splat (i1 true), i32 %B), !nontemporal !0
+  ret &lt;4 x i32&gt; %x
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;4 x i32&gt; @llvm.vp.gather.v4i32.v4p0(&lt;4 x ptr&gt;, &lt;4 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+
+!0 = !{i32 1}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+c -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+c -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %47:_(&lt;4 x s32&gt;) = G_PHI %46:_(&lt;4 x s32&gt;), %bb.8, %40:_(&lt;4 x s32&gt;), %bb.7 (in function: test_nontemporal_vp_gather_v4i32_DEFAULT)
+warning: Instruction selection used fallback path for test_nontemporal_vp_gather_v4i32_DEFAULT</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">imm.80a2516d.1b9596ee14.ll <span class="dim">(mutant of</span> imm.80a2516d.ll<span class="dim">)</span></td><td class="l">imm_right_shifted_addi</td><td class="l"><code>-mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -mattr=+zvkb -O0</code></td></tr><tr><td class="l">mask-variable-shift.457a686d50.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/mask-variable-shift.ll">mask-variable-shift.ll</a><span class="dim">)</span></td><td class="l">mask_pair_64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+f -O0</code></td></tr><tr><td class="l">nontemporal-vp.4b95e0625f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp.ll">nontemporal-vp.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_gather_v4i32_DEFAULT</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+c -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">target-abi-valid.dbf98a903c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/target-abi-valid.ll">target-abi-valid.ll</a><span class="dim">)</span></td><td class="l">nothing</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32 -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 3 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 3 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 3 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-gprs.7d64aa91a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span> @callee via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zbs -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/MnndxrqPP">https://godbolt.org/z/MnndxrqPP</a> (llc-assertions-trunk, checked 2026-11-07 13:15 UTC): <a href="https://godbolt.org/z/MnndxrqPP">G</a> <span class="fp">crashes differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var = external global [32 x i32]
+@G.3 = external global i32
+
+define void @callee() {
+  %LGV = load i32, ptr @G.3, align 4
+  %val = load [32 x i32], ptr @var, align 4
+  store volatile [32 x i32] %val, ptr @var, align 4
+  %I = insertvalue [32 x i32] %val, i32 %LGV, 29
+  store [32 x i32] %I, ptr poison, align 4
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After RISC-V Load / Store Optimizer<br># Machine code for function callee: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zbs -O2 -global-isel=0</code></td><td>0</td><td>136</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zbs -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After RISC-V Load / Store Optimizer
+# Machine code for function callee: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+Frame Objects:
+  fi#0: size=4, align=4, at location [SP-16]
+  fi#1: size=4, align=4, at location [SP-20]
+  fi#2: size=4, align=4, at location [SP-24]
+  fi#3: size=4, align=4, at location [SP-28]
+  fi#4: size=4, align=4, at location [SP-32]
+  fi#5: size=4, align=4, at location [SP-36]
+  fi#6: size=4, align=4, at location [SP-40]
+  fi#7: size=4, align=4, at location [SP-44]
+  fi#8: size=4, align=4, at location [SP-48]
+  fi#9: size=4, align=4, at location [SP-52]
+  fi#10: size=4, align=4, at location [SP-56]
+  fi#11: size=4, align=4, at location [SP-60]
+  fi#12: size=4, align=4, at location [SP-64]
+  fi#13: size=4, align=4, at location [SP-4]
+  fi#14: size=8, align=4, at location [SP-12]
+save/restore points:
+save points are empty
+restore points are empty
+bb.0 (%ir-block.0):
+  liveins: $x1, $x8_x9
+  $x2 = frame-setup ADDI $x2, -64
+  frame-setup CFI_INSTRUCTION def_cfa_offset 64
+  frame-setup SW killed $x1, $x2, 60 :: (store (s32) into %stack.13)
+  frame-setup SD_RV32 killed $x8_x9, $x2, 52 :: (store (s64) into %stack.14, align 4)
+  frame-setup CFI_INSTRUCTION offset $x1, -4
+  frame-setup CFI_INSTRUCTION offset $x8, -12
+  frame-setup CFI_INSTRUCTION offset $x9, -8
+  renamable $x10 = LUI target-flags(riscv-hi) @G.3
+  renamable $x11 = LUI target-flags(riscv-hi) @var
+  renamable $x12 = ADDI killed renamable $x11, target-flags(riscv-lo) @var
+  renamable $x10 = LW killed renamable $x10, target-flags(riscv-lo) @G.3 :: (dereferenceable load (s32) from @G.3)
+  SW killed renamable $x10, $x2, 48 :: (store (s32) into %stack.0)
+  $x10 = LW $x12, 0 :: (dereferenceable load (s32) from @var), (dereferenceable load (s32) from @var + 4)
+  $x13 = LW $x12, 4 :: (dereferenceable load (s32) from @var), (dereferenceable load (s32) from @var + 4)
+  SW renamable $x13, $x2, 32 :: (store (s32) into %stack.4)
+  SW renamable $x10, $x2, 44 :: (store (s32) into %stack.1)
+  $x14_x15 = LD_RV32 $x12, 8 :: (dereferenceable load (s32) from @var + 8), (dereferenceable load (s32) from @var + 12)
+  SW renamable $x15, $x2, 16 :: (store (s32) into %stack.8)
+  SW renamable $x14, $x2, 24 :: (store (s32) into %stack.6)
+  $x20 = LW $x12, 16 :: (dereferenceable load (s32) from @var + 16), (dereferenceable load (s32) from @var + 20)
+  $x11 = LW $x12, 20 :: (dereferenceable load (s32) from @var + 16), (dereferenceable load (s32) from @var + 20)
+  SW renamable $x11, $x2, 8 :: (store (s32) into %stack.10)
+  $x21 = LW $x12, 24 :: (dereferenceable load (s32) from @var + 24), (dereferenceable load (s32) from @var + 28)
+  $x17 = LW $x12, 28 :: (dereferenceable load (s32) from @var + 24), (dereferenceable load (s32) from @var + 28)
+  $x5 = LW $x12, 32 :: (dereferenceable load (s32) from @var + 32), (dereferenceable load (s32) from @var + 36)
+  $x7 = LW $x12, 36 :: (dereferenceable load (s32) from @var + 32), (dereferenceable load (s32) from @var + 36)
+  $x28_x29 = LD_RV32 $x12, 40 :: (dereferenceable load (s32) from @var + 40), (dereferenceable load (s32) from @var + 44)
+  $x30_x31 = LD_RV32 $x12, 48 :: (dereferenceable load (s32) from @var + 48), (dereferenceable load (s32) from @var + 52)
+  $x18 = LW $x12, 56 :: (dereferenceable load (s32) from @var + 56), (dereferenceable load (s32) from @var + 60)
+  $x23 = LW $x12, 60 :: (dereferenceable load (s32) from @var + 56), (dereferenceable load (s32) from @var + 60)
+  $x22 = LW $x12, 64 :: (dereferenceable load (s32) from @var + 64), (dereferenceable load (s32) from @var + 68)
+  $x16 = LW $x12, 68 :: (dereferenceable load (s32) from @var + 64), (dereferenceable load (s32) from @var + 68)
+  SW killed renamable $x16, $x2, 0 :: (store (s32) into %stack.12)
+  $x24_x25 = LD_RV32 $x12, 72 :: (dereferenceable load (s32) from @var + 72), (dereferenceable load (s32) from @var + 76)
+  $x26_x27 = LD_RV32 $x12, 80 :: (dereferenceable load (s32) from @var + 80), (derefe</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-gprs.49fd5b450c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align -O1 -code-model=small</code></td></tr><tr><td class="l">callee-saved-gprs.7d64aa91a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zbs -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

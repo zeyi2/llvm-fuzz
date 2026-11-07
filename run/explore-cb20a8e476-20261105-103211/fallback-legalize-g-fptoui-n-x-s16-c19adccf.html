@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTOUI &lt;N x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTOUI &lt;N x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTOUI &lt;N x s16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fptoui-vp.ede43a7000.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span> @vfptoui_v4i16_v4f16_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfhmin,+a -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global half
+
+define &lt;4 x i16&gt; @vfptoui_v4i16_v4f16_unmasked(&lt;4 x half&gt; %va, i32 zeroext %evl) {
+  %B = fadd half 6.550400e+04, 6.550400e+04
+  %v = fptoui &lt;4 x half&gt; %va to &lt;4 x i16&gt;
+  store half %B, ptr @G.3, align 2
+  ret &lt;4 x i16&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+zvfhmin,+a -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+zvfhmin,+a -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %8:_(&lt;4 x s16&gt;) = G_FPTOUI %0:_(&lt;4 x s16&gt;) (in function: vfptoui_v4i16_v4f16_unmasked)
+warning: Instruction selection used fallback path for vfptoui_v4i16_v4f16_unmasked</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fp2i.13f70e8a42.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v64f16_v64i16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -O2</code></td></tr><tr><td class="l">fixed-vectors-fp2i.ead7f9a1ba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2ui_v64f16_v64i16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -O0</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.e484bb48dc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i16_v4f16_unmasked</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.ede43a7000.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i16_v4f16_unmasked</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfhmin,+a -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

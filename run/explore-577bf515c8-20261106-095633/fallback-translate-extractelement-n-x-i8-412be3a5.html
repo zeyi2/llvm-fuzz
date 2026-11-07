@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: extractelement &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: extractelement &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-577bf515c8-20261106-095633.html">explore-577bf515c8-20261106-095633</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: extractelement &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 20 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-cmpxchg.326df985f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span> @cmpxchg_i64_acquire_acquire via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zdinx,+xtheadba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 577bf515c8</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i8
+
+; Function Attrs: nounwind
+define void @cmpxchg_i64_acquire_acquire(ptr %ptr, i64 %cmp, i64 %val) #0 {
+  %E = extractelement &lt;8 x i8&gt; splat (i8 127), i64 %cmp
+  %res = cmpxchg ptr %ptr, i64 %cmp, i64 %val acquire acquire, align 8
+  store i8 %E, ptr @G.1, align 1
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zdinx,+xtheadba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zdinx,+xtheadba -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: extractelement: &#x27;  %E = extractelement &lt;8 x i8&gt; splat (i8 127), i64 %cmp&#x27; (in function: cmpxchg_i64_acquire_acquire)
+warning: Instruction selection used fallback path for cmpxchg_i64_acquire_acquire</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-cmpxchg.326df985f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i64_acquire_acquire</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zdinx,+xtheadba -O0</code></td></tr><tr><td class="l">half-convert-strict.a456b25f49.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_lu</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation -mattr=+zhinx -O0</code></td></tr><tr><td class="l">half-intrinsics.dee1b1b6e8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/577bf515c84ab419ed043bee47c787e4f260b2f5/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fabs_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zba,+zfinx -O2</code></td></tr><tr><td class="l">rvp-mul-parts-acc-fold.8b3e7a3c.bd94a135b5.ll <span class="dim">(mutant of</span> rvp-mul-parts-acc-fold.8b3e7a3c.ll<span class="dim">)</span></td><td class="l">maccu_w11</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.riscv.clmulr.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.riscv.clmulr.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.riscv.clmulr.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32zbc-intrinsic.3cce91c5f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv32zbc-intrinsic.ll">rv32zbc-intrinsic.ll</a><span class="dim">)</span> @clmul32r via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbc,+c,+zfinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @clmul32r(i32 %a, i32 %b) #0 {
+  %tmp = call i32 @llvm.riscv.clmulr.i32(i32 %a, i32 %b)
+  %B = lshr i32 %a, %tmp
+  ret i32 %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.riscv.clmulr.i32(i32, i32) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbc,+c,+zfinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbc,+c,+zfinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.riscv.clmulr.i32: &#x27;  %tmp = call i32 @llvm.riscv.clmulr.i32(i32 %a, i32 %b)&#x27; (in function: clmul32r)
+warning: Instruction selection used fallback path for clmul32r</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmulr-rv64.66e9f96089.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/GlobalISel/clmulr-rv64.ll">clmulr-rv64.ll</a><span class="dim">)</span></td><td class="l">clmulr_i32_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbc,+zdinx,+zicsr -O0</code></td></tr><tr><td class="l">rv32zbc-intrinsic.3cce91c5f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv32zbc-intrinsic.ll">rv32zbc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul32r</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbc,+c,+zfinx -O1</code></td></tr><tr><td class="l">rv64zbc-intrinsic.2d1077b75d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64zbc-intrinsic.ll">rv64zbc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul32r</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbc,+zhinx -O1</code></td></tr><tr><td class="l">rv64zbc-intrinsic.db990ccd66.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64zbc-intrinsic.ll">rv64zbc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul32r_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

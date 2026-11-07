@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,and,andi,beqz,lbu,neg</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,and,andi,beqz,lbu,neg</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,and,andi,beqz,lbu,neg </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">mem64.3fbba1ef.b57dbc21.d807fea6.a7d221be.ll @load_sext_zext_anyext_i1_i16 via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; isel-diff-config: -mtriple=riscv64 -verify-machineinstrs -O3
+; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@G = dso_local global i64 0
+@G.1 = global i1 false
+@G.2 = global i16 1
+@G.3 = global i16 42
+@G.4 = global i1 false
+@G.5 = global &lt;2 x i64&gt; splat (i64 9223372036854775807)
+@G.6 = global &lt;2 x i64&gt; splat (i64 9223372036854775807)
+@G.7 = global i8 0
+@G.8 = global i1 true
+@G.9 = global i1 true
+
+; Function Attrs: nounwind
+define dso_local i64 @lb(ptr %a) #0 {
+  %B1 = lshr i64 -1, -9223372036854775808
+  %LGV = load i8, ptr @G.7, align 1
+  %1 = load volatile i8, ptr %a, align 1
+  %2 = getelementptr i8, ptr %a, i32 1
+  %L = load i8, ptr %2, align 1
+  %L1 = load i16, ptr %2, align 2
+  %C = icmp sgt i8 %LGV, %L
+  %C3 = icmp slt i8 %1, -1
+  %B = and i16 0, %L1
+  store i16 %B, ptr @G.3, align 2
+  store i1 %C, ptr poison, align 1
+  store i1 %C3, ptr @G.8, align 1
+  ret i64 %B1
+}
+
+; Function Attrs: nounwind
+declare dso_local i64 @lh(ptr) #0
+
+; Function Attrs: nounwind
+declare dso_local i64 @lw(ptr) #0
+
+; Function Attrs: nounwind
+declare dso_local i64 @lbu(ptr) #0
+
+; Function Attrs: nounwind
+declare dso_local i64 @lhu(ptr) #0
+
+; Function Attrs: nounwind
+declare dso_local i64 @lwu(ptr) #0
+
+; Function Attrs: nounwind
+declare dso_local void @sb(ptr, i8) #0
+
+; Function Attrs: nounwind
+declare dso_local void @sh(ptr, i16) #0
+
+; Function Attrs: nounwind
+declare dso_local void @sw(ptr, i32) #0
+
+; Function Attrs: nounwind
+declare dso_local i64 @ld(ptr) #0
+
+; Function Attrs: nounwind
+declare dso_local void @sd(ptr, i64) #0
+
+; Function Attrs: nounwind
+declare dso_local i64 @load_sext_zext_anyext_i1(ptr) #0
+
+; Function Attrs: nounwind
+define dso_local i16 @load_sext_zext_anyext_i1_i16(ptr %a) #0 {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %1 = getelementptr i1, ptr %a, i32 1
+  %L2 = load i16, ptr %1, align 2
+  %L1 = load i1, ptr %1, align 1
+  %2 = load i1, ptr %1, align 1
+  %3 = sext i1 %2 to i16
+  %4 = getelementptr i1, ptr %a, i32 2
+  %L = load i16, ptr %4, align 2
+  %5 = load i1, ptr %4, align 1
+  %6 = zext i1 %5 to i16
+  %B = and i16 %3, %L
+  %7 = add i16 %3, %6
+  %8 = load volatile i1, ptr %a, align 1
+  %C = icmp sgt i16 %7, %L2
+  store i16 %B, ptr @G.3, align 2
+  store i1 %C, ptr %A, align 1
+  br i1 %L1, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  store i1 %2, ptr %4, align 1
+  ret i16 %7
+
+T:                                                ; preds = %0
+  %C3 = icmp ne i1 false, false
+  store i1 %C3, ptr @G.8, align 1
+  br label %BB
+
+F:                                                ; preds = %F, %0
+  %LGV1 = load i1, ptr @G.9, align 1
+  %C2 = icmp sle i1 %L1, %LGV1
+  br i1 %C2, label %F, label %BB
+}
+
+; Function Attrs: nounwind
+declare dso_local i64 @ld_sd_global(i64) #0
+
+declare i64 @lw_near_local(ptr)
+
+declare void @st_near_local(ptr, i64)
+
+declare i64 @lw_sw_near_local(ptr, i64)
+
+declare i64 @lw_far_local(ptr)
+
+declare void @st_far_local(ptr, i64)
+
+declare i64 @lw_sw_far_local(ptr, i64)
+
+declare i64 @lw_really_far_local(ptr)
+
+declare void @st_really_far_local(ptr, i64)
+
+declare i64 @lw_sw_really_far_local(ptr, i64)
+
+; Function Attrs: nounwind
+declare void @addi_fold_crash(i64) #0
+
+declare void @snork(ptr)
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -O3&#x27; --funcs load_sext_zext_anyext_i1_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">32 of 64 inputs differ (first: #0)
+SelectionDAG hash 6f899409f77c1aa0, GlobalISel hash 524e6f8aff45c7e6
+b0: llc -mtriple=riscv64 -verify-machineinstrs -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">mem64.3fbba1ef.b57dbc21.d807fea6.a7d221be.ll</td><td class="l">load_sext_zext_anyext_i1_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

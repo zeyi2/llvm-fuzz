@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp i8~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp i8~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp i8~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmulr.cdc8549783.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span> @clmulr_i4_bitreverse via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zfinx,+zbkb -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+; Function Attrs: nounwind
+define i4 @clmulr_i4_bitreverse(i4 %a, i4 %b) #0 {
+  %C = icmp ule i4 %a, -1
+  %a.rev = call i4 @llvm.bitreverse.i4(i4 %a)
+  %b.rev = call i4 @llvm.bitreverse.i4(i4 %b)
+  %res.rev = call i4 @llvm.clmul.i4(i4 %a.rev, i4 %b.rev)
+  %res = call i4 @llvm.bitreverse.i4(i4 %res.rev)
+  store i1 %C, ptr @G.2, align 1
+  ret i4 %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i4 @llvm.bitreverse.i4(i4) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i4 @llvm.clmul.i4(i4, i4) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zfinx,+zbkb -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zfinx,+zbkb -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp ule i4 %a, -1&#x27; (in function: clmulr_i4_bitreverse)
+warning: Instruction selection used fallback path for clmulr_i4_bitreverse</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul.5a8d039f.01f97a6f.8b8dbfa150.ll <span class="dim">(mutant of</span> clmul.5a8d039f.01f97a6f.ll<span class="dim">)</span></td><td class="l">clmul_i4_noimplicitfloat</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zhinx -O0</code></td></tr><tr><td class="l">clmulr.cdc8549783.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i4_bitreverse</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zfinx,+zbkb -O3</code></td></tr><tr><td class="l">sadd_sat.c9d24fbd.690295a2d2.ll <span class="dim">(mutant of</span> sadd_sat.c9d24fbd.ll<span class="dim">)</span></td><td class="l">func3</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbb,+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

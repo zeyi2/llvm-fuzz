@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,lbu,li,lui,sb</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,lbu,li,lui,sb</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,lbu,li,lui,sb <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zero-call-used-regs.d674e8c8.3e638c570f.ll <span class="dim">(mutant of</span> zero-call-used-regs.d674e8c8.ll<span class="dim">)</span> @used_gpr_arg_float via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64-unknown-unknown -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+define double @used_gpr_arg_float(double noundef %a, float noundef %b) #0 {
+entry:
+  %LGV = load i1, ptr @G.1, align 1
+  %conv = fpext float %b to double
+  %C = icmp sgt i1 false, %LGV
+  %mul = fmul double %conv, %a
+  store i1 %C, ptr @G.1, align 1
+  br label %BB
+
+BB:                                               ; preds = %entry
+  ret double %mul
+}
+
+attributes #0 = { &quot;target-cpu&quot;=&quot;generic&quot; &quot;target-features&quot;=&quot;+m,+f,+d&quot; &quot;zero-call-used-regs&quot;=&quot;used-gpr-arg&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-verify-machineinstrs -mtriple=riscv64-unknown-unknown -O0 -code-model=small&#x27; --funcs used_gpr_arg_float snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">62 of 64 inputs differ (first: #0)
+SelectionDAG hash b20cf4000708a2c2, GlobalISel hash 2fb004a7b7c4d96e
+b0: llc -verify-machineinstrs -mtriple=riscv64-unknown-unknown -code-model=small -O0 -global-isel=0
+b1: llc -verify-machineinstrs -mtriple=riscv64-unknown-unknown -code-model=small -O2 -global-isel=0
+b2: llc -verify-machineinstrs -mtriple=riscv64-unknown-unknown -code-model=small -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">zero-call-used-regs.d674e8c8.3e638c570f.ll <span class="dim">(mutant of</span> zero-call-used-regs.d674e8c8.ll<span class="dim">)</span></td><td class="l">used_gpr_arg_float</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64-unknown-unknown -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

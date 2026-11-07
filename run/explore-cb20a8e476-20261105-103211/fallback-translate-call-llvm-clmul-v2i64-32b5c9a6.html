@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.clmul.v2i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.clmul.v2i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.clmul.v2i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmul.259777ba62.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span> @commutative_clmul_v2i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zvbb,+zfinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @commutative_clmul_v2i64(&lt;2 x i64&gt; %x, &lt;2 x i64&gt; %y, ptr %p0, ptr %p1) #0 {
+  %xy = call &lt;2 x i64&gt; @llvm.clmul.v2i64(&lt;2 x i64&gt; %x, &lt;2 x i64&gt; %y)
+  %yx = call &lt;2 x i64&gt; @llvm.clmul.v2i64(&lt;2 x i64&gt; %y, &lt;2 x i64&gt; %x)
+  store &lt;2 x i64&gt; %yx, ptr %p1, align 16
+  store &lt;2 x i64&gt; %xy, ptr %p0, align 16
+  ret void
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i64&gt; @llvm.clmul.v2i64(&lt;2 x i64&gt;, &lt;2 x i64&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zvbb,+zfinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zvbb,+zfinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.clmul.v2i64: &#x27;  %xy = call &lt;2 x i64&gt; @llvm.clmul.v2i64(&lt;2 x i64&gt; %x, &lt;2 x i64&gt; %y)&#x27; (in function: commutative_clmul_v2i64)
+warning: Instruction selection used fallback path for commutative_clmul_v2i64</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul.259777ba62.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">commutative_clmul_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zvbb,+zfinx -O0</code></td></tr><tr><td class="l">clmul.459cafcf6b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">commutative_clmul_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zdinx -O0</code></td></tr><tr><td class="l">clmul.a88116c29b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">commutative_clmul_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvbb,+zdinx -O2</code></td></tr><tr><td class="l">clmul.b281122d20.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">mul_use_commutative_clmul_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

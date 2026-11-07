@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 7 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-trunc-vp-mask.940304c531.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-trunc-vp-mask.ll">fixed-vectors-trunc-vp-mask.ll</a><span class="dim">)</span> @vtrunc_v2i1_v2i16_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i1&gt;
+
+define &lt;2 x i1&gt; @vtrunc_v2i1_v2i16_unmasked(&lt;2 x i16&gt; %a, i32 zeroext %vl) {
+  %C = icmp sle &lt;2 x i16&gt; %a, %a
+  %v = trunc &lt;2 x i16&gt; %a to &lt;2 x i1&gt;
+  store &lt;2 x i1&gt; %C, ptr @G, align 1
+  ret &lt;2 x i1&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp sle &lt;2 x i16&gt; %a, %a&#x27; (in function: vtrunc_v2i1_v2i16_unmasked)
+warning: Instruction selection used fallback path for vtrunc_v2i1_v2i16_unmasked</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-cttz-vp.4ab3158b.3525edd906.ll <span class="dim">(mutant of</span> fixed-vectors-cttz-vp.4ab3158b.ll<span class="dim">)</span></td><td class="l">vp_cttz_v2i16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+zhinx,+zbb -O1</code></td></tr><tr><td class="l">fixed-vectors-trunc-vp-mask.940304c531.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-trunc-vp-mask.ll">fixed-vectors-trunc-vp-mask.ll</a><span class="dim">)</span></td><td class="l">vtrunc_v2i1_v2i16_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vsadd-vp.4c1bba056a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vsadd-vp.ll">fixed-vectors-vsadd-vp.ll</a><span class="dim">)</span></td><td class="l">vsadd_vv_v4i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vsaddu-vp.dc2aa19a.203dfce891.ll <span class="dim">(mutant of</span> fixed-vectors-vsaddu-vp.dc2aa19a.ll<span class="dim">)</span></td><td class="l">vsaddu_vi_v4i16_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">rvp-simd-32.b8db5de38c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_eq_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zbb,+zfinx -O1</code></td></tr><tr><td class="l">rvp-simd-32.cd786fa2d3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_ugt_h</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+zvbb -O1</code></td></tr><tr><td class="l">rvp-widening-add-acc.05768a3943.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvp-widening-add-acc.ll">rvp-widening-add-acc.ll</a><span class="dim">)</span></td><td class="l">test_pwaddau_v2i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zhinx,+zbb -O3</code></td></tr><tr><td class="l">srem-vector-lkk.122b4331ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/srem-vector-lkk.ll">srem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_srem_power_of_two</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

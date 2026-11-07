@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 4 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 4 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 4 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-gprs.9a3bc25bd5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span> @bar via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zfa -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/dj8aGbTqs">https://godbolt.org/z/dj8aGbTqs</a> (llc-assertions-trunk, checked 2026-11-07 13:15 UTC): <a href="https://godbolt.org/z/dj8aGbTqs">G</a> <span class="fp">crashes differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+@G.4 = external global i1
+
+define void @bar() {
+entry:
+  %LGV = load i1, ptr @G.4, align 1
+  %LGV1 = load i128, ptr @G, align 4
+  br i1 %LGV, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  tail call void asm sideeffect &quot;li s11, 0&quot;, &quot;~{s11}&quot;()
+  %B = ashr i128 -170141183460469231731687303715884105728, %LGV1
+  store i128 %B, ptr poison, align 4
+  ret void
+
+T:                                                ; preds = %T, %entry
+  br i1 %LGV, label %T, label %BB
+
+F:                                                ; preds = %entry
+  br label %BB
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zfa -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After RISC-V Load / Store Optimizer<br># Machine code for function bar: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zfa -O3 -global-isel=0</code></td><td>0</td><td>47</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zfa -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zfa -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After RISC-V Load / Store Optimizer
+# Machine code for function bar: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten, TracksDebugUserValues
+bb.0.entry:
+  successors: %bb.1(0x40000000), %bb.3(0x40000000); %bb.1(50.00%), %bb.3(50.00%)
+  renamable $x10 = LUI target-flags(riscv-hi) @G.4
+  renamable $x11 = LBU killed renamable $x10, target-flags(riscv-lo) @G.4 :: (dereferenceable load (s8) from @G.4)
+  renamable $x10 = LUI target-flags(riscv-hi) @G
+  renamable $x10 = LW killed renamable $x10, target-flags(riscv-lo) @G :: (dereferenceable load (s32) from @G)
+  renamable $x12 = XORI renamable $x11, 1
+  renamable $x12 = ANDI killed renamable $x12, 1
+  BNE killed renamable $x12, $x0, %bb.3
+bb.1.T.preheader:
+; predecessors: %bb.0
+  successors: %bb.2(0x80000000); %bb.2(100.00%)
+  liveins: $x10, $x11
+  renamable $x11 = ANDI killed renamable $x11, 1
+bb.2.T:
+; predecessors: %bb.1, %bb.2
+  successors: %bb.2(0x7c000000), %bb.3(0x04000000); %bb.2(96.88%), %bb.3(3.12%)
+  liveins: $x10, $x11
+  BNE renamable $x11, $x0, %bb.2
+bb.3.BB:
+; predecessors: %bb.0, %bb.2
+  successors: %bb.5(0x40000000), %bb.4(0x40000000); %bb.5(50.00%), %bb.4(50.00%)
+  liveins: $x10
+  renamable $x11 = LUI 524288
+  renamable $x14 = ADDI $x0, 32
+  INLINEASM &amp;&quot;li s11, 0&quot; [sideeffect] [attdialect], $0:[clobber], implicit-def dead early-clobber $x27
+  renamable $x16 = SUB $x0, renamable $x10
+  BGEU renamable $x10, renamable $x14, %bb.5
+bb.4:
+; predecessors: %bb.3
+  successors: %bb.6(0x80000000); %bb.6(100.00%)
+  liveins: $x10, $x11, $x14, $x16
+  renamable $x15 = SLL renamable $x11, renamable $x16
+  PseudoBR %bb.6
+bb.5.BB:
+; predecessors: %bb.3
+  successors: %bb.6(0x80000000); %bb.6(100.00%)
+  liveins: $x10, $x11, $x14, $x16
+  renamable $x15 = SRA renamable $x11, renamable $x10
+bb.6.BB:
+; predecessors: %bb.5, %bb.4
+  successors: %bb.7(0x40000000), %bb.8(0x40000000); %bb.7(50.00%), %bb.8(50.00%)
+  liveins: $x10, $x11, $x14, $x15, $x16
+  $x12 = ADDI $x0, 0
+  renamable $x13 = ADDI $x0, 64
+  BEQ renamable $x10, $x0, %bb.8
+bb.7.BB:
+; predecessors: %bb.6
+  successors: %bb.8(0x80000000); %bb.8(100.00%)
+  liveins: $x10, $x11, $x13, $x14, $x15, $x16
+  $x12 = ADDI killed renamable $x15, 0
+bb.8.BB:
+; predecessors: %bb.6, %bb.7
+  successors: %bb.10(0x40000000), %bb.9(0x40000000); %bb.10(50.00%), %bb.9(50.00%)
+  liveins: $x10, $x11, $x12, $x13, $x14, $x16
+  renamable $x5 = SUB renamable $x13, renamable $x10
+  BGEU renamable $x10, renamable $x14, %bb.10
+bb.9:
+; predecessors: %bb.8
+  successors: %bb.11(0x80000000); %bb.11(100.00%)
+  liveins: $x5, $x10, $x11, $x12, $x13, $x14, $x16
+  renamable $x15 = SRA renamable $x11, renamable $x10
+  PseudoBR %bb.11
+bb.10.BB:
+; predecessors: %bb.8
+  successors: %bb.11(0x80000000); %bb.11(100.00%)
+  liveins: $x5, $x10, $x11, $x12, $x13, $x14, $x16
+  renamable $x15 = SRAI renamable $x11, 31
+bb.11.BB:
+; predecessors: %bb.10, %bb.9
+  successors: %bb.13(0x40000000), %bb.12(0x40000000); %bb.13(50.00%), %bb.12(50.00%)
+  liveins: $x5, $x10, $x11, $x12, $x13, $x14, $x15, $x16
+  BGEU renamable $x5, renamable $x14, %bb.13
+bb.12:
+; predecessors: %bb.11
+  successors: %bb.14(0x80000000); %bb.14(100.00%)
+  liveins: $x5, $x10, $x11, $x12, $x13, $x14, $x15, $x16
+  renamable $x6 = SLL renamable $x11, killed renamable $x16
+  PseudoBR %bb.14
+bb.13.BB:
+; predecessors: %bb.11
+  successors: %bb.14(0x80000000); %bb.14(100.00%)
+  liveins: $x5, $x10, $x11, $x12, $x13, $x14, $x15
+  $x6 = ADDI $x0, 0
+bb.14.BB:
+; predecessors: %bb.13, %bb.12
+  successors: %bb.15(0x40000000), %bb.16(0x40000000); %bb.15(50.00%), %bb.16(50.00%)
+  liveins: $x5, $x6, $x10, $x11, $x12, $x13, $x14, $x15
+  renamable $x17 = ADDI renamable $x10, -64
+  renamable $x16 = LUI 524288
+  BEQ killed renamable $x5, $x0, %bb.16
+bb.15.BB:
+; predecessors: %bb.14
+  successors: %bb.16(0x80000000); %bb.16(100.00%)
+  liveins: $x6, $x10, $x11, $x12, $x13, $x14, $x15, $x17
+  $x16 = ADDI killed renamable $x6, 0
+bb.16.BB:
+; predecessors: %bb.14, %bb.15
+  successors: %bb.18(0x40000000), %bb.</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-gprs.9a3bc25bd5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/callee-saved-gprs.ll">callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+zilsd,+zilsd-word-align,+zfa -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shufflevector &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shufflevector &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-cb20a8e476-20261105-103211.html">explore-cb20a8e476-20261105-103211</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shufflevector &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-zip.d37b92dd76.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvp-zip.ll">rvp-zip.ll</a><span class="dim">)</span> @test_unzip8p_v8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+zihintpause -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at cb20a8e476</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i8&gt; @test_unzip8p_v8i8(&lt;8 x i8&gt; %a, &lt;8 x i8&gt; %b) {
+  %r = shufflevector &lt;8 x i8&gt; %a, &lt;8 x i8&gt; %b, &lt;8 x i32&gt; &lt;i32 0, i32 2, i32 4, i32 6, i32 8, i32 10, i32 12, i32 14&gt;
+  %B = udiv &lt;8 x i8&gt; %r, %b
+  store &lt;8 x i8&gt; %B, ptr poison, align 8
+  ret &lt;8 x i8&gt; %r
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+zihintpause -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+zihintpause -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shufflevector: &#x27;  %r = shufflevector &lt;8 x i8&gt; %a, &lt;8 x i8&gt; %b, &lt;8 x i32&gt; &lt;i32 0, i32 2, i32 4, i32 6, i32 8, i32 10, i32 12, i32 14&gt;&#x27; (in function: test_unzip8p_v8i8)
+warning: Instruction selection used fallback path for test_unzip8p_v8i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-select-fcmp.c2c7ec401e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/half-select-fcmp.ll">half-select-fcmp.ll</a><span class="dim">)</span></td><td class="l">select_fcmp_ule</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinxmin -O0</code></td></tr><tr><td class="l">rv64zbs.529632b231.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rv64zbs.ll">rv64zbs.ll</a><span class="dim">)</span></td><td class="l">icmp_eq_pow2_64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zdinx -O0</code></td></tr><tr><td class="l">rvp-zip.d37b92dd76.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/cb20a8e476f54f96e601701a862fbf8c459d79fb/llvm/test/CodeGen/RISCV/rvp-zip.ll">rvp-zip.ll</a><span class="dim">)</span></td><td class="l">test_unzip8p_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+zihintpause -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

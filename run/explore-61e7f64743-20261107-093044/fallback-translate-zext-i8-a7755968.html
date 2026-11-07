@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 8 configs, 6 test files, 53 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32zbkb.e944de0b34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rv32zbkb.ll">rv32zbkb.ll</a><span class="dim">)</span> @packh_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define zeroext i16 @packh_i16(i8 zeroext %a, i8 zeroext %b) #0 {
+  %zext1 = zext i8 %b to i16
+  %zext = zext i8 %a to i16
+  %shl = shl i16 %zext1, 8
+  %or = or i16 %shl, %zext
+  ret i16 %or
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %zext1 = zext i8 %b to i16&#x27; (in function: packh_i16)
+warning: Instruction selection used fallback path for packh_i16</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bswap-known-bits.c2988aaf24.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/bswap-known-bits.ll">bswap-known-bits.ll</a><span class="dim">)</span></td><td class="l">bswap_src_zext_i8_to_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">clmulr.9df9c01e8f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulr_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0 -code-model=small</code></td></tr><tr><td class="l">clmulr.fdb20f95af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulr_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbb,+zdinx -O1</code></td></tr><tr><td class="l">rv32zbkb.e944de0b34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rv32zbkb.ll">rv32zbkb.ll</a><span class="dim">)</span></td><td class="l">packh_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">rv32zbkb.e944de0b34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rv32zbkb.ll">rv32zbkb.ll</a><span class="dim">)</span></td><td class="l">packh_zero_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">short-forward-branch-opt.3f455a950b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/short-forward-branch-opt.ll">short-forward-branch-opt.ll</a><span class="dim">)</span></td><td class="l">select_xor_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+c,+zbb,+zdinx -O2</code></td></tr><tr><td class="l">split-store.a138404a47.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/split-store.ll">split-store.ll</a><span class="dim">)</span></td><td class="l">int8_float_pair</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=medium</code></td></tr><tr><td class="l">typepromotion-overflow.1c27bdd06a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/typepromotion-overflow.ll">typepromotion-overflow.ll</a><span class="dim">)</span></td><td class="l">safe_sub_underflow_neg</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">typepromotion-overflow.1c27bdd06a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/typepromotion-overflow.ll">typepromotion-overflow.ll</a><span class="dim">)</span></td><td class="l">sext_sub_underflow_neg</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">typepromotion-overflow.a73ead1fef.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/typepromotion-overflow.ll">typepromotion-overflow.ll</a><span class="dim">)</span></td><td class="l">underflow_if_sub</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O1 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: udiv &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: udiv &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: udiv &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 10 configs, 8 test files, 67 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">named-vector-shuffle-reverse.519e30ccfd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span> @reverse_nxv32i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 32 x i1&gt; @reverse_nxv32i1(&lt;vscale x 32 x i1&gt; %a) {
+  %B = udiv &lt;vscale x 32 x i1&gt; %a, %a
+  ret &lt;vscale x 32 x i1&gt; %B
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: udiv: &#x27;  %B = udiv &lt;vscale x 32 x i1&gt; %a, %a&#x27; (in function: reverse_nxv32i1)
+warning: Instruction selection used fallback path for reverse_nxv32i1</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-select-bf16.97410ca429.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-bf16.ll">fixed-vectors-select-bf16.ll</a><span class="dim">)</span></td><td class="l">select_v4bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+v,+zfbfmin,+experimental-zvfbfa,+xtheadba -O2 -code-model=small</code></td></tr><tr><td class="l">named-vector-shuffle-reverse.519e30ccfd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span></td><td class="l">reverse_nxv32i1</td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin -O1 -code-model=small</code></td></tr><tr><td class="l">vfsub-bf.4d9d170ff7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vfsub-bf.ll">vfsub-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfsub_mask_vv_nxv1bf16_nxv1bf16_nxv1bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa -O1</code></td></tr><tr><td class="l">vmfge.2dcae99ead.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vmfge.ll">vmfge.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmfge_mask_vv_nxv1f32_nxv1f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfh,+d -O3</code></td></tr><tr><td class="l">vpgather-sdnode.5347ccd806.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vpgather-sdnode.ll">vpgather-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpgather_nxv8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfbfmin,+v,+zba -O0</code></td></tr><tr><td class="l">vpgather-sdnode.75d2868c98.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vpgather-sdnode.ll">vpgather-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpgather_nxv2i32_zextload_nxv2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zvfbfmin,+v,+zvbb -O0</code></td></tr><tr><td class="l">vreductions-mask-vp.509f8e2f55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+m,+zfh -O2</code></td></tr><tr><td class="l">vreductions-mask.bb7eb95ee7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vreductions-mask.ll">vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_xor_nxv128i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v -O2</code></td></tr><tr><td class="l">vreductions-mask.da6e0c4413.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vreductions-mask.ll">vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_smin_nxv16i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v -O1</code></td></tr><tr><td class="l">vselect-fp.975a03443c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/vselect-fp.ll">vselect-fp.ll</a><span class="dim">)</span></td><td class="l">vfmerge_vv_nxv4f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+d,+zfh,+zvfhmin,+v -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>

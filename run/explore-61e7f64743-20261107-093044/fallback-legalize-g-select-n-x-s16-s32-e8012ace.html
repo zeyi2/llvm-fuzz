@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SELECT &lt;N x s16&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SELECT &lt;N x s16&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-61e7f64743-20261107-093044.html">explore-61e7f64743-20261107-093044</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SELECT &lt;N x s16&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 2 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-select-int.af9ec442f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-int.ll">fixed-vectors-select-int.ll</a><span class="dim">)</span> @selectcc_v2i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 61e7f64743</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i16&gt; @selectcc_v2i16(i16 signext %a, i16 signext %b, &lt;2 x i16&gt; %c, &lt;2 x i16&gt; %d) {
+  %cmp = icmp uge i16 %a, %b
+  %v = select i1 %cmp, &lt;2 x i16&gt; %c, &lt;2 x i16&gt; %d
+  ret &lt;2 x i16&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %15:_(&lt;2 x s16&gt;) = G_SELECT %20:_(s32), %2:_, %3:_ (in function: selectcc_v2i16)
+warning: Instruction selection used fallback path for selectcc_v2i16</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-select-fp.49dc8b8494.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-fp.ll">fixed-vectors-select-fp.ll</a><span class="dim">)</span></td><td class="l">selectcc_v16f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh -O1</code></td></tr><tr><td class="l">fixed-vectors-select-fp.e45f54a63b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-fp.ll">fixed-vectors-select-fp.ll</a><span class="dim">)</span></td><td class="l">selectcc_v16f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -riscv-v-vector-bits-min=128 -verify-machineinstrs -mattr=+d,+zfh,+v,+m,+zbs -O0</code></td></tr><tr><td class="l">fixed-vectors-select-int.5be326d723.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-int.ll">fixed-vectors-select-int.ll</a><span class="dim">)</span></td><td class="l">select_v2i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+f -O3</code></td></tr><tr><td class="l">fixed-vectors-select-int.af9ec442f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-int.ll">fixed-vectors-select-int.ll</a><span class="dim">)</span></td><td class="l">selectcc_v2i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr><tr><td class="l">fixed-vectors-select-int.d0ad0a91b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-int.ll">fixed-vectors-select-int.ll</a><span class="dim">)</span></td><td class="l">selectcc_v4i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh -O0</code></td></tr><tr><td class="l">fixed-vectors-select-int.eb13363c38.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/61e7f6474304acf575e8b64aa51e2d78771164c5/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-int.ll">fixed-vectors-select-int.ll</a><span class="dim">)</span></td><td class="l">selectcc_v16i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-07 13:15 UTC.</p>
