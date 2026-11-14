@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-preserve-most.0e722e37ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/calling-conv-preserve-most.ll">calling-conv-preserve-most.ll</a><span class="dim">)</span> @preserve_mostcc1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -mattr=+e,+zdinx,+zhinx -O0 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x i1&gt;
+@G.4 = external global &lt;8 x i8&gt;
+
+declare void @standard_cc_func()
+
+; Function Attrs: nounwind
+define preserve_mostcc void @preserve_mostcc1() #0 {
+entry:
+  %B = xor &lt;8 x i8&gt; splat (i8 42), splat (i8 127)
+  %C = icmp uge &lt;4 x i32&gt; zeroinitializer, zeroinitializer
+  call void @standard_cc_func()
+  store &lt;4 x i1&gt; %C, ptr @G.1, align 1
+  store &lt;8 x i8&gt; %B, ptr @G.4, align 8
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -mattr=+e,+zdinx,+zhinx -O0 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -mattr=+e,+zdinx,+zhinx -O0 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %B = xor &lt;8 x i8&gt; splat (i8 42), splat (i8 127)&#x27; (in function: preserve_mostcc1)
+warning: Instruction selection used fallback path for preserve_mostcc1</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-preserve-most.0e722e37ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/calling-conv-preserve-most.ll">calling-conv-preserve-most.ll</a><span class="dim">)</span></td><td class="l">preserve_mostcc1</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -mattr=+e,+zdinx,+zhinx -O0 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">double-br-fcmp.1ac2182ea1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-br-fcmp.ll">double-br-fcmp.ll</a><span class="dim">)</span></td><td class="l">br_fcmp_oge</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O0 -code-model=small</code></td></tr><tr><td class="l">ssub_sat_plus.7f1828624e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/ssub_sat_plus.ll">ssub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zfinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC s16,&lt;N x s16&gt;,&lt;N x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC s16,&lt;N x s16&gt;,&lt;N x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC s16,&lt;N x s16&gt;,&lt;N x s1&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 121 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-int-vp.fec702bdba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int-vp.ll">fixed-vectors-reduction-int-vp.ll</a><span class="dim">)</span> @vpreduce_umax_v2i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O0 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i16
+
+define signext i16 @vpreduce_umax_v2i16(i16 signext %s, &lt;2 x i16&gt; %v, &lt;2 x i1&gt; %m, i32 zeroext %evl) {
+  %r = call i16 @llvm.vp.reduce.umax.v2i16(i16 %s, &lt;2 x i16&gt; %v, &lt;2 x i1&gt; %m, i32 %evl)
+  %B = or i16 %s, %s
+  store i16 %B, ptr @G.2, align 2
+  ret i16 %r
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i16 @llvm.vp.reduce.umax.v2i16(i16, &lt;2 x i16&gt;, &lt;2 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v -O0 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(s16) = G_INTRINSIC intrinsic(@llvm.vp.reduce.umax), %0:_(s16), %1:_(&lt;2 x s16&gt;), %2:_(&lt;2 x s1&gt;), %3:_(s32) (in function: vpreduce_umax_v2i16)
+warning: Instruction selection used fallback path for vpreduce_umax_v2i16</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-fp-vp.c60e684ade.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp-vp.ll">fixed-vectors-reduction-fp-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_ord_fadd_v2f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbb,+zbs -O0</code></td></tr><tr><td class="l">fixed-vectors-reduction-int-vp.10870ab287.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int-vp.ll">fixed-vectors-reduction-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_v2i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O2</code></td></tr><tr><td class="l">fixed-vectors-reduction-int-vp.f4b4901fc4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int-vp.ll">fixed-vectors-reduction-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_smin_v4i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+c,+m -O3</code></td></tr><tr><td class="l">fixed-vectors-reduction-int-vp.fec702bdba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int-vp.ll">fixed-vectors-reduction-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umax_v2i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

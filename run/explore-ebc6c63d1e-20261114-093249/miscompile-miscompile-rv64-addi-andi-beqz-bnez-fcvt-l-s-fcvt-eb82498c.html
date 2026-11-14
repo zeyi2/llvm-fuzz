@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,beqz,bnez,fcvt.l.s,fcvt.w.s</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,beqz,bnez,fcvt.l.s,fcvt.w.s</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,beqz,bnez,fcvt.l.s,fcvt.w.s <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.0c81705a.9cd7e08b.b7c9826d.73d8cf1b.e5fd291e4d.ll <span class="dim">(mutant of</span> float-convert.0c81705a.9cd7e08b.b7c9826d.73d8cf1b.ll<span class="dim">)</span> @fcvt_w_s_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+f,+zbkb,+m,+zihintpause,+zbs -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+@G.6 = external global double
+@G.7 = external global double
+@G.10 = external global i16
+@G.11 = external global i1
+@G.12 = external global i16
+@G.13 = external global i16
+
+; Function Attrs: nounwind
+define signext i16 @fcvt_w_s_i16(float %a) #0 {
+  %A2 = alloca i128, align 8
+  store i128 1, ptr %A2, align 4
+  %LGV1 = load double, ptr @G.6, align 8
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %1 = fptosi float %a to i16
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %C = fcmp uge float %a, %a
+  store i1 %C, ptr %A, align 1
+  %L3 = load i128, ptr %A2, align 4
+  switch i128 %L3, label %SW_D [
+    i128 10601176870138381046, label %SW_C
+    i128 6717172702254992303, label %SW_C4
+    i128 2064877780733158145, label %SW_C5
+    i128 3336824387229726457, label %SW_C6
+    i128 13521495873503573213, label %SW_C7
+    i128 10500565638325478723, label %SW_C8
+    i128 4027384854446657482, label %SW_C9
+    i128 20409766149113665, label %SW_C10
+  ]
+
+BB1:                                              ; preds = %SW_C10, %SW_C8, %SW_C5, %SW_C4, %SW_C, %SW_D
+  ret i16 %1
+
+T:                                                ; preds = %0
+  %2 = phi nsz double [ %LGV1, %0 ]
+  store double %2, ptr @G.7, align 8
+  br label %BB
+
+F:                                                ; preds = %0
+  %LGV = load i16, ptr @G.10, align 2
+  %B = ashr i16 0, %LGV
+  store i16 %B, ptr %A, align 2
+  br label %BB
+
+SW_D:                                             ; preds = %BB
+  br label %BB1
+
+SW_C:                                             ; preds = %BB
+  br label %BB1
+
+SW_C4:                                            ; preds = %SW_C4, %BB
+  %LGV11 = load i1, ptr @G.11, align 1
+  br i1 %LGV11, label %SW_C4, label %BB1
+
+SW_C5:                                            ; preds = %BB
+  br label %BB1
+
+SW_C6:                                            ; preds = %BB
+  ret i16 256
+
+SW_C7:                                            ; preds = %BB
+  %LGV12 = load i16, ptr @G.12, align 2
+  ret i16 %LGV12
+
+SW_C8:                                            ; preds = %SW_C8, %BB
+  %LGV13 = load i1, ptr @G.2, align 1
+  br i1 %C, label %BB1, label %SW_C8
+
+SW_C9:                                            ; preds = %BB
+  %LGV14 = load i16, ptr @G.13, align 2
+  ret i16 %LGV14
+
+SW_C10:                                           ; preds = %BB
+  br label %BB1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+f,+zbkb,+m,+zihintpause,+zbs -O3&#x27; --funcs fcvt_w_s_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">3 of 64 inputs differ (first: #12)
+SelectionDAG hash 35a83a8c39022ab9, GlobalISel hash 4a0c640c306e95b7
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f,+zbkb,+m,+zihintpause,+zbs -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f,+zbkb,+m,+zihintpause,+zbs -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f,+zbkb,+m,+zihintpause,+zbs -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.0c81705a.9cd7e08b.b7c9826d.73d8cf1b.e5fd291e4d.ll <span class="dim">(mutant of</span> float-convert.0c81705a.9cd7e08b.b7c9826d.73d8cf1b.ll<span class="dim">)</span></td><td class="l">fcvt_w_s_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+f,+zbkb,+m,+zihintpause,+zbs -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

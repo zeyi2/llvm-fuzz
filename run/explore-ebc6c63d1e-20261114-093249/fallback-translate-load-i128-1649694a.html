@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load i128~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load i128~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load i128~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 3 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmul.5a8d039f.01f97a6f.83b27550d4.ll <span class="dim">(mutant of</span> clmul.5a8d039f.01f97a6f.ll<span class="dim">)</span> @clmul_i96 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global i96
+@G.8 = external global i96
+
+define i96 @clmul_i96(i96 %x, i96 %y) {
+  %LGV = load i96, ptr @G.8, align 4
+  %B = srem i96 %y, %y
+  %B2 = and i96 %x, %x
+  %B1 = mul i96 %y, 42
+  %B4 = xor i96 %LGV, %y
+  store i96 %B, ptr @G.6, align 4
+  store i96 %B2, ptr @G.6, align 4
+  %B3 = mul i96 %y, %LGV
+  store i96 %B3, ptr poison, align 4
+  store i96 %B4, ptr @G.8, align 4
+  ret i96 %B1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV = load i96, ptr @G.8, align 4&#x27; (in function: clmul_i96)
+warning: Instruction selection used fallback path for clmul_i96</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul.5a8d039f.01f97a6f.83b27550d4.ll <span class="dim">(mutant of</span> clmul.5a8d039f.01f97a6f.ll<span class="dim">)</span></td><td class="l">clmul_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">pr56110.61be2d7350.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/pr56110.ll">pr56110.ll</a><span class="dim">)</span></td><td class="l">foo_set</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">smulh.4bef688047.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_i96</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">smulh.5f6c79673b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_i96</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvkb,+zdinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,call,lbu,ld,lh,li</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,call,lbu,ld,lh,li</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,call,lbu,ld,lh,li <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memcpy.a872db2a.315511fe73.ll <span class="dim">(mutant of</span> memcpy.a872db2a.ll<span class="dim">)</span> @aligned_memcpy3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global i8
+
+; Function Attrs: nounwind
+define void @aligned_memcpy3(ptr captures(none) %dest, ptr %src) #0 {
+entry:
+  %LGV = load i8, ptr @G.6, align 1
+  %G = getelementptr i8, ptr %dest, i8 1
+  tail call void @llvm.memcpy.p0.p0.i64(ptr align 8 %dest, ptr align 8 %G, i64 3, i1 false)
+  switch i8 %LGV, label %SW_D [
+    i8 -17, label %SW_C
+    i8 -2, label %SW_C1
+  ]
+
+BB:                                               ; preds = %SW_C1, %SW_C, %SW_D
+  ret void
+
+SW_D:                                             ; preds = %entry
+  br label %BB
+
+SW_C:                                             ; preds = %entry
+  br label %BB
+
+SW_C1:                                            ; preds = %entry
+  br label %BB
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh -O1&#x27; --funcs aligned_memcpy3 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash bcf50269d903820f, GlobalISel hash f5930ae7fc536bc1
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memcpy.a872db2a.315511fe73.ll <span class="dim">(mutant of</span> memcpy.a872db2a.ll<span class="dim">)</span></td><td class="l">aligned_memcpy3</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

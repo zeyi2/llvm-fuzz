@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast fp128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast fp128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast fp128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-ilp32e.92c653384a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span> @callee_large_scalars via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+save-restore,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+define i32 @callee_large_scalars(i128 %a, fp128 %b) {
+  %b_bitcast = bitcast fp128 %b to i128
+  %1 = icmp eq i128 %a, %b_bitcast
+  %2 = zext i1 %1 to i32
+  %C = fcmp ogt bfloat +inf, 0.000000e+00
+  store i1 %C, ptr @G.1, align 1
+  ret i32 %2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+save-restore,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+save-restore,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %b_bitcast = bitcast fp128 %b to i128&#x27; (in function: callee_large_scalars)
+warning: Instruction selection used fallback path for callee_large_scalars</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-ilp32-ilp32f-common.8f813557f8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-common.ll">calling-conv-ilp32-ilp32f-common.ll</a><span class="dim">)</span></td><td class="l">callee_aligned_stack</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb,+zdinx -O3</code></td></tr><tr><td class="l">calling-conv-ilp32-ilp32f-ilp32d-common.2eb166f37f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/calling-conv-ilp32-ilp32f-ilp32d-common.ll">calling-conv-ilp32-ilp32f-ilp32d-common.ll</a><span class="dim">)</span></td><td class="l">callee_large_scalars_exhausted_regs</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -target-abi ilp32d -mattr=+zdinx -O3 -code-model=small</code></td></tr><tr><td class="l">calling-conv-ilp32e.92c653384a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span></td><td class="l">callee_large_scalars</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+save-restore,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 108 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-sext-vp.4761992989.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-sext-vp.ll">fixed-vectors-sext-vp.ll</a><span class="dim">)</span> @vsext_v4i32_v4i8_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zhinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+define &lt;4 x i32&gt; @vsext_v4i32_v4i8_unmasked(&lt;4 x i8&gt; %va, i32 zeroext %evl) {
+  %B = sdiv i32 %evl, %evl
+  %v = sext &lt;4 x i8&gt; %va to &lt;4 x i32&gt;
+  store i32 %B, ptr @G, align 4
+  ret &lt;4 x i32&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+zhinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+zhinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv i32 %evl, %evl&#x27; (in function: vsext_v4i32_v4i8_unmasked)
+warning: Instruction selection used fallback path for vsext_v4i32_v4i8_unmasked</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calls.57439fd5f7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/calls.ll">calls.ll</a><span class="dim">)</span></td><td class="l">defined_many_args</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadba,+zdinx -O1</code></td></tr><tr><td class="l">codemodel-lowering.8f59931ca2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a><span class="dim">)</span></td><td class="l">lower_extern_weak</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zfinx,+zhinx -O1</code></td></tr><tr><td class="l">div.5add68e0cf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/div.ll">div.ll</a><span class="dim">)</span></td><td class="l">sdiv</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx -O0 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-sext-vp.4761992989.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-sext-vp.ll">fixed-vectors-sext-vp.ll</a><span class="dim">)</span></td><td class="l">vsext_v4i32_v4i8_unmasked</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">lrint-conv.a73bb08333.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/lrint-conv.ll">lrint-conv.ll</a><span class="dim">)</span></td><td class="l">test_lrint_ixx_f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">select.7f2b9dcb37.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/select.ll">select.ll</a><span class="dim">)</span></td><td class="l">select_udiv_2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O1</code></td></tr><tr><td class="l">short-forward-branch-opt-with-branch-with-immediates_32_ult.5fae73706a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/short-forward-branch-opt-with-branch-with-immediates_32_ult.ll">short-forward-branch-opt-with-branch-with-immediates_32_ult.ll</a><span class="dim">)</span></td><td class="l">branch_with_immSFB_lh</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+xqci,+short-forward-branch-ialu,+short-forward-branch-imul,+short-forward-branch-iload,+m,+zhinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

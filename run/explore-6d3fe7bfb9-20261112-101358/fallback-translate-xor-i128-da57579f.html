@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-half.ff1dbe96e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/calling-conv-half.ll">calling-conv-half.ll</a><span class="dim">)</span> @callee_half_on_stack via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i128
+@G.5 = external global i64
+
+; Function Attrs: nounwind
+define i32 @callee_half_on_stack(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %g, i32 %h, half %i) #0 {
+  %B1 = xor i128 0, 0
+  %LGV = load i64, ptr @G.5, align 4
+  %B = srem i64 0, %LGV
+  %1 = fptosi half %i to i32
+  %2 = add i32 %h, %1
+  store i64 %B, ptr @G.5, align 4
+  store i128 %B1, ptr @G.3, align 4
+  ret i32 %2
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %B1 = xor i128 0, 0&#x27; (in function: callee_half_on_stack)
+warning: Instruction selection used fallback path for callee_half_on_stack</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-half.ff1dbe96e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/calling-conv-half.ll">calling-conv-half.ll</a><span class="dim">)</span></td><td class="l">callee_half_on_stack</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zhinx -O0</code></td></tr><tr><td class="l">rv64-double-convert-strict.08f6b22ed7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64-double-convert-strict.ll">rv64-double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -disable-strictnode-mutation -mattr=+zdinx,+xtheadba -O2</code></td></tr><tr><td class="l">sextw-removal.615c91300b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">sext_i32_arg</td><td class="l"><code>-mtriple=riscv64 -riscv-sextw-removal=0 -mattr=+zicond,+zfinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: insertelement &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: insertelement &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: insertelement &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 23 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-rmw-minmax.7d2e7a5a43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/atomic-rmw-minmax.ll">atomic-rmw-minmax.ll</a><span class="dim">)</span> @atomicrmw_min_i32_seq_cst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+zba,+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @atomicrmw_min_i32_seq_cst(ptr %a, i32 %b) #0 {
+  %I = insertelement &lt;4 x i32&gt; zeroinitializer, i32 42, i32 %b
+  %1 = atomicrmw min ptr %a, i32 %b seq_cst, align 4
+  store &lt;4 x i32&gt; %I, ptr poison, align 16
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+zba,+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+zba,+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: insertelement: &#x27;  %I = insertelement &lt;4 x i32&gt; zeroinitializer, i32 42, i32 %b&#x27; (in function: atomicrmw_min_i32_seq_cst)
+warning: Instruction selection used fallback path for atomicrmw_min_i32_seq_cst</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-rmw-minmax.7d2e7a5a43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/atomic-rmw-minmax.ll">atomic-rmw-minmax.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_min_i32_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+zba,+zhinx -O3</code></td></tr><tr><td class="l">combine-vmnot-setcc.5ad50d1056.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/combine-vmnot-setcc.ll">combine-vmnot-setcc.ll</a><span class="dim">)</span></td><td class="l">not_vp_reverse_v8i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vadd-vp.44589713f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vadd-vp.ll">fixed-vectors-vadd-vp.ll</a><span class="dim">)</span></td><td class="l">vadd_vx_v2i32_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vmin-vp.2ca24558e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmin-vp.ll">fixed-vectors-vmin-vp.ll</a><span class="dim">)</span></td><td class="l">vmin_vx_v2i32_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vrsub-vp.cc1d511a15.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vrsub-vp.ll">fixed-vectors-vrsub-vp.ll</a><span class="dim">)</span></td><td class="l">vrsub_vx_v8i32_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vssubu-vp.4714b7e421.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vssubu-vp.ll">fixed-vectors-vssubu-vp.ll</a><span class="dim">)</span></td><td class="l">vssubu_vx_v2i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

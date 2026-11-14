@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE p1,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE p1,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE p1,p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">12 in 10 configs, 1 test files, 62 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">addrspacecast.ef47b72804.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span> @cast0 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr addrspace(1)
+
+define void @cast0(ptr addrspace(1) %ptr) {
+  %G = getelementptr float, ptr addrspace(1) %ptr, i1 true
+  %ptr0 = addrspacecast ptr addrspace(1) %ptr to ptr
+  store i32 0, ptr %ptr0, align 4
+  store ptr addrspace(1) %G, ptr @G.1, align 8
+  %G2 = getelementptr &lt;8 x i8&gt;, ptr %ptr0, i16 42
+  store ptr %G2, ptr poison, align 8
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %2:_(p1), %5:_(p0) :: (store (p1) into @G.1) (in function: cast0)
+warning: Instruction selection used fallback path for cast0</pre>
+<h4>Occurrences (12):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">addrspacecast.198f50ad91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">addrspacecast.4917d49c59.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfh -O1</code></td></tr><tr><td class="l">addrspacecast.4f90962bab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">addrspacecast.512e32229b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">addrspacecast.5b2a4f51c0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O0 -code-model=medium</code></td></tr><tr><td class="l">addrspacecast.6d0816298f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0 -code-model=small</code></td></tr><tr><td class="l">addrspacecast.7098f71ee7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfa -O3</code></td></tr><tr><td class="l">addrspacecast.79a36457b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr><tr><td class="l">addrspacecast.7ad6fd9455.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvbb -O1</code></td></tr><tr><td class="l">addrspacecast.9038da84b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">addrspacecast.daf3f80b88.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O2</code></td></tr><tr><td class="l">addrspacecast.ef47b72804.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

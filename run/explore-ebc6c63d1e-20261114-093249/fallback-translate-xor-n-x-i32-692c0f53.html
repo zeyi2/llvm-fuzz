@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">inline-asm-mem-constraint.32e4261518.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a><span class="dim">)</span> @constraint_o_with_offset via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -no-integrated-as -mattr=+zihintpause,+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @constraint_o_with_offset(ptr %a) #0 {
+  %B = xor &lt;4 x i32&gt; zeroinitializer, splat (i32 65536)
+  %1 = getelementptr i32, ptr %a, i32 1
+  %2 = tail call i32 asm &quot;lw $0, $1&quot;, &quot;=r,*o&quot;(ptr elementtype(i32) %1)
+  store &lt;4 x i32&gt; %B, ptr %1, align 16
+  ret i32 %2
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -no-integrated-as -mattr=+zihintpause,+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -no-integrated-as -mattr=+zihintpause,+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %B = xor &lt;4 x i32&gt; zeroinitializer, splat (i32 65536)&#x27; (in function: constraint_o_with_offset)
+warning: Instruction selection used fallback path for constraint_o_with_offset</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-arith-strict.c81ab57817.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-arith-strict.ll">double-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64 -mattr=+zdinx,+xtheadba,+a -O1</code></td></tr><tr><td class="l">inline-asm-mem-constraint.32e4261518.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_o_with_offset</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -no-integrated-as -mattr=+zihintpause,+zhinx -O3</code></td></tr><tr><td class="l">short-forward-branch-opt-qcloads.6676327255.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/short-forward-branch-opt-qcloads.ll">short-forward-branch-opt-qcloads.ll</a><span class="dim">)</span></td><td class="l">test_i8_s_volatile_op</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+xqcilo,+short-forward-branch-ialu,+zihintpause,+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

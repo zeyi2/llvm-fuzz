@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.trunc.v4f64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.trunc.v4f64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.trunc.v4f64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 6 configs, 1 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-ftrunc-constrained-sdnode.0315e93953.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span> @trunc_v4f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicond,+zbs -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i1&gt;
+
+; Function Attrs: strictfp
+define &lt;4 x double&gt; @trunc_v4f64(&lt;4 x double&gt; %x) #0 {
+  %a = call &lt;4 x double&gt; @llvm.experimental.constrained.trunc.v4f64(&lt;4 x double&gt; %x, metadata !&quot;fpexcept.strict&quot;)
+  %C = fcmp false &lt;4 x double&gt; %x, %x
+  store &lt;4 x i1&gt; %C, ptr @G, align 1
+  ret &lt;4 x double&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;4 x double&gt; @llvm.experimental.constrained.trunc.v4f64(&lt;4 x double&gt;, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicond,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicond,+zbs -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.trunc.v4f64: &#x27;  %a = call &lt;4 x double&gt; @llvm.experimental.constrained.trunc.v4f64(&lt;4 x double&gt; %x, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: trunc_v4f64)
+warning: Instruction selection used fallback path for trunc_v4f64</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-ftrunc-constrained-sdnode.00ff2c2abb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">trunc_v4f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O3</code></td></tr><tr><td class="l">fixed-vectors-ftrunc-constrained-sdnode.0315e93953.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">trunc_v4f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicond,+zbs -O2</code></td></tr><tr><td class="l">fixed-vectors-ftrunc-constrained-sdnode.136c976f91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">trunc_v4f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+c -O3</code></td></tr><tr><td class="l">fixed-vectors-ftrunc-constrained-sdnode.36009a63eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">trunc_v4f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zbs -O0</code></td></tr><tr><td class="l">fixed-vectors-ftrunc-constrained-sdnode.bb01135b4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">trunc_v4f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v -O1</code></td></tr><tr><td class="l">fixed-vectors-ftrunc-constrained-sdnode.d60a1bcbf1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">trunc_v4f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O3</code></td></tr><tr><td class="l">fixed-vectors-ftrunc-constrained-sdnode.d6bc3c0311.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ftrunc-constrained-sdnode.ll">fixed-vectors-ftrunc-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">trunc_v4f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,beq,beqz,bnez</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,beq,beqz,bnez</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,beq,beqz,bnez <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.709ef91d.b73dd6ecfe.ll <span class="dim">(mutant of</span> float-convert.709ef91d.ll<span class="dim">)</span> @fcvt_wu_s_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zihintpause -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+@G.1 = external global i1
+@G.2 = external global i1
+@G.3 = external global float
+
+; Function Attrs: nounwind
+define zeroext i16 @fcvt_wu_s_i16(float %a) #0 {
+  %A = alloca &lt;4 x float&gt;, align 16
+  store &lt;4 x float&gt; poison, ptr %A, align 16
+  %LGV1 = load i1, ptr @G.2, align 1
+  br i1 %LGV1, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %LGV = load i128, ptr @G, align 4
+  %1 = fptoui float %a to i16
+  %B3 = fadd &lt;4 x float&gt; splat (float 1.401300e-45), splat (float +inf)
+  %C = icmp ult i128 170141183460469231731687303715884105727, %LGV
+  store i1 %C, ptr @G.1, align 1
+  store &lt;4 x float&gt; %B3, ptr %A, align 16
+  ret i16 %1
+
+T:                                                ; preds = %T, %0
+  %B = fadd float %a, +qnan
+  store float %B, ptr @G.3, align 4
+  br i1 %LGV1, label %BB, label %T
+
+F:                                                ; preds = %0
+  %2 = phi float [ f0x7F7FFFFF, %0 ]
+  %C2 = fcmp ugt half 6.550400e+04, 0.000000e+00
+  store float %2, ptr @G.3, align 4
+  store i1 %C2, ptr @G.1, align 1
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zihintpause -O1&#x27; --funcs fcvt_wu_s_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #12)
+SelectionDAG hash 7671f9994d454daf, GlobalISel hash 4a0c640c306e95b7
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zihintpause -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zihintpause -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zihintpause -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.709ef91d.b73dd6ecfe.ll <span class="dim">(mutant of</span> float-convert.709ef91d.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zihintpause -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

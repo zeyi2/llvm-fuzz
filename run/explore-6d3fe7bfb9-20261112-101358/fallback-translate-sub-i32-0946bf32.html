@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 8 configs, 7 test files, 214 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">shadow-stack-frame-opts.7caeeb56c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/shadow-stack-frame-opts.ll">shadow-stack-frame-opts.ll</a><span class="dim">)</span> @caller_sw_tail via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -mattr=+zimop,+save-restore,+zfinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare i32 @callee(i32)
+
+; Function Attrs: shadowcallstack
+define i32 @caller_sw_tail(i32 %x) #0 {
+  %sub = sub nsw i32 0, %x
+  %call = tail call i32 @callee(i32 %sub)
+  %B = sdiv i32 0, 2147483647
+  ret i32 %B
+}
+
+attributes #0 = { shadowcallstack }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -mattr=+zimop,+save-restore,+zfinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -mattr=+zimop,+save-restore,+zfinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %sub = sub nsw i32 0, %x&#x27; (in function: caller_sw_tail)
+warning: Instruction selection used fallback path for caller_sw_tail</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bswap-vp.03c1534e.3f693a1ebf.ll <span class="dim">(mutant of</span> fixed-vectors-bswap-vp.03c1534e.ll<span class="dim">)</span></td><td class="l">vp_bswap_v16i64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr><tr><td class="l">half-select-icmp.34f1023011.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-select-icmp.ll">half-select-icmp.ll</a><span class="dim">)</span></td><td class="l">select_icmp_sle</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinxmin -O1 -code-model=medium</code></td></tr><tr><td class="l">iabs.d042a66dbd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span></td><td class="l">abs32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zve32x -O1</code></td></tr><tr><td class="l">neg-abs.320ab9c7d2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/neg-abs.ll">neg-abs.ll</a><span class="dim">)</span></td><td class="l">expanded_neg_abs32_unsigned</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zdinx -O2</code></td></tr><tr><td class="l">neg-abs.cc0ea457a7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/neg-abs.ll">neg-abs.ll</a><span class="dim">)</span></td><td class="l">expanded_neg_abs32_unsigned</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">rotl-rotr.fefdc549b4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">rotl-rotr.fefdc549b4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">shadow-stack-frame-opts.7caeeb56c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/shadow-stack-frame-opts.ll">shadow-stack-frame-opts.ll</a><span class="dim">)</span></td><td class="l">caller_sw_tail</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -mattr=+zimop,+save-restore,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">short-forward-branch-opt-min-max.66a6c956b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/short-forward-branch-opt-min-max.ll">short-forward-branch-opt-min-max.ll</a><span class="dim">)</span></td><td class="l">select_example_smax</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+short-forward-branch-ialu,+zcb,+zfinx -O3 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

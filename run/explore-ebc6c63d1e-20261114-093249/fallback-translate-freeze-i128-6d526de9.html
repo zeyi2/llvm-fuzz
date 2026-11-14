@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: freeze i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: freeze i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: freeze i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">idiv_large.7b3a473e46.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span> @udiv_i128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zhinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+; Function Attrs: nounwind
+define i128 @udiv_i128(i128 %x, i128 %y) #0 {
+  %C = icmp uge i128 %y, %x
+  %res = udiv i128 %x, %y
+  %B = and i128 %y, %res
+  store i1 %C, ptr @G.3, align 1
+  ret i128 %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xtheadba,+zhinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xtheadba,+zhinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: freeze: &#x27;  %0 = freeze i128 %y&#x27; (in function: udiv_i128)
+warning: Instruction selection used fallback path for udiv_i128</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.5ad01a54d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i128_undef</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">double-maximum-minimum.0e88c6275b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-maximum-minimum.ll">double-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_op_f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O1</code></td></tr><tr><td class="l">half-bitmanip-dagcombines.61699ccab5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-bitmanip-dagcombines.ll">half-bitmanip-dagcombines.ll</a><span class="dim">)</span></td><td class="l">fcopysign_fneg</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32 -verify-machineinstrs -mattr=+zhinx -O3 -code-model=medium</code></td></tr><tr><td class="l">idiv_large.7b3a473e46.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span></td><td class="l">udiv_i128</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">urem-vector-lkk.af7b4fd4a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/urem-vector-lkk.ll">urem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">fold_urem_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">xandesvsinload-vlnu8.34cc86b715.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/xandesvsinload-vlnu8.ll">xandesvsinload-vlnu8.ll</a><span class="dim">)</span></td><td class="l">intrinsic_nds_vlnu_mask_v_nxv2i8_nxv2i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zve64x,+xandesvsintload,+zdinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

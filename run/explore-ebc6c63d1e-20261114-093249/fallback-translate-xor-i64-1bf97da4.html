@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 9 test files, 117 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rotl-rotr.588d9ee3bd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span> @rotl_64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i64 @rotl_64(i64 %x, i64 %y) #0 {
+  %B = xor i64 42, %x
+  %b = shl i64 %x, %y
+  %d = or i64 %b, %B
+  ret i64 %d
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %B = xor i64 42, %x&#x27; (in function: rotl_64)
+warning: Instruction selection used fallback path for rotl_64</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-signext.fb51c62ec3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/atomic-signext.ll">atomic-signext.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_xchg_i64_monotonic</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zdinx -O1</code></td></tr><tr><td class="l">rotl-rotr.588d9ee3bd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotl_64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -code-model=medium</code></td></tr><tr><td class="l">rv32zbb-zbkb.69312a5d7e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">or_hoisted_not_i64_swapped</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">rv32zbb-zbkb.9fe21c8ba1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">orn_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">rv64zbb-zbkb.98fa968496.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">xor_hoisted_not_i64_swapped</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0 -code-model=small</code></td></tr><tr><td class="l">rv64zbb.75a759dc27.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">sexth_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx -O0</code></td></tr><tr><td class="l">rvp-scalar-rv64.52611bf603.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvp-scalar-rv64.ll">rvp-scalar-rv64.ll</a><span class="dim">)</span></td><td class="l">mvmn_i64_2</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">short-forward-branch-opt.732d66f794.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/short-forward-branch-opt.ll">short-forward-branch-opt.ll</a><span class="dim">)</span></td><td class="l">select_orn</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+c,+zbb,+zfinx -O0</code></td></tr><tr><td class="l">zdinx-boundary-check.bcb138dfcb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a><span class="dim">)</span></td><td class="l">foo13</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+zcb,+zba -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

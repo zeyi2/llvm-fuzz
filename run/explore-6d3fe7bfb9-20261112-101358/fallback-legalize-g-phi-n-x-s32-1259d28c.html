@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 231 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">signbit-test.63ea09b703.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/signbit-test.ll">signbit-test.ll</a><span class="dim">)</span> @test_clear_mask_i64_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x i32&gt;
+
+; Function Attrs: nounwind
+define i64 @test_clear_mask_i64_i8(i64 %x) #0 {
+entry:
+  %a = and i64 %x, 128
+  %r = icmp eq i64 %a, 0
+  br i1 %r, label %t, label %f
+
+t:                                                ; preds = %entry
+  %0 = phi &lt;4 x i32&gt; [ splat (i32 42), %entry ]
+  store &lt;4 x i32&gt; %0, ptr @G.1, align 16
+  br label %f
+
+f:                                                ; preds = %t, %entry
+  %ret = phi i64 [ %x, %entry ], [ 42, %t ]
+  ret i64 %ret
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(&lt;4 x s32&gt;) = G_PHI %12:_(&lt;4 x s32&gt;), %bb.1 (in function: test_clear_mask_i64_i8)
+warning: Instruction selection used fallback path for test_clear_mask_i64_i8</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-expandload-fp.d30c2e0517.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-expandload-fp.ll">fixed-vectors-expandload-fp.ll</a><span class="dim">)</span></td><td class="l">expandload_v4f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+f,+d,+zvfh -O1</code></td></tr><tr><td class="l">fixed-vectors-masked-gather.daa4e6eee2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_v2i32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zba -O1 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-unaligned.ecc3cb9486.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-unaligned.ll">fixed-vectors-unaligned.ll</a><span class="dim">)</span></td><td class="l">masked_load_v2i32_align1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbs -O3 -code-model=medium</code></td></tr><tr><td class="l">machine-combiner-strategies.de35735e61.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/machine-combiner-strategies.ll">machine-combiner-strategies.ll</a><span class="dim">)</span></td><td class="l">test_local_strategy</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mcpu=sifive-u74 -riscv-enable-machine-combiner=true -riscv-force-machine-combiner-strategy=local -mattr=+zve64d -O0</code></td></tr><tr><td class="l">rv64i-w-insts-legalization.7b5c9aea7b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64i-w-insts-legalization.ll">rv64i-w-insts-legalization.ll</a><span class="dim">)</span></td><td class="l">addw</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O3</code></td></tr><tr><td class="l">signbit-test.63ea09b703.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/signbit-test.ll">signbit-test.ll</a><span class="dim">)</span></td><td class="l">test_clear_mask_i64_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

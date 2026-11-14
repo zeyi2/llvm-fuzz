@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">shadowcallstack.6cfce00551.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/shadowcallstack.ll">shadowcallstack.ll</a><span class="dim">)</span> @f4 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zvkb -O1 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+
+declare i32 @bar()
+
+; Function Attrs: shadowcallstack
+define i32 @f4() #0 {
+  %B = sdiv i128 18446744073709551616, 0
+  %res1 = call i32 @bar()
+  %res2 = call i32 @bar()
+  %res3 = call i32 @bar()
+  %res4 = call i32 @bar()
+  %res12 = add i32 %res1, %res2
+  %res34 = add i32 %res3, %res4
+  %res1234 = add i32 %res12, %res34
+  store i128 %B, ptr @G.1, align 4
+  ret i32 %res1234
+}
+
+attributes #0 = { shadowcallstack }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zvkb -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zvkb -O1 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv i128 18446744073709551616, 0&#x27; (in function: f4)
+warning: Instruction selection used fallback path for f4</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64-double-convert-strict.750b6ecfc8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64-double-convert-strict.ll">rv64-double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -disable-strictnode-mutation -mattr=+zbb,+zhinx -O0</code></td></tr><tr><td class="l">rvp-bitreverse-zbkb.f366ae1d.743165589c.ll <span class="dim">(mutant of</span> rvp-bitreverse-zbkb.f366ae1d.ll<span class="dim">)</span></td><td class="l">test_bitreverse_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbkb,+a,+zhinx -O1</code></td></tr><tr><td class="l">shadowcallstack.6cfce00551.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/shadowcallstack.ll">shadowcallstack.ll</a><span class="dim">)</span></td><td class="l">f4</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zvkb -O1 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

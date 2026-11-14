@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;), function getMinRVVVectorSizeInBits, file RISCVSubtarget.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;), function getMinRVVVectorSizeInBits, file RISCVSubtarget.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;), function getMinRVVVectorSizeInBits, file RISCVSubtarget.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">known-never-zero.d2f179571f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/known-never-zero.ll">known-never-zero.ll</a><span class="dim">)</span> @vscale_known_nonzero via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/xT7c8Y1cx">https://godbolt.org/z/xT7c8Y1cx</a> (llc-assertions-trunk, checked 2026-11-13 14:00 UTC): <a href="https://godbolt.org/z/xT7c8Y1cx">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+@G.1 = external global i1
+@G.2 = external global i1
+@G.3 = external global i32
+
+define i32 @vscale_known_nonzero() {
+  %LGV6 = load i32, ptr @G.3, align 4
+  %LGV = load i64, ptr @G, align 4
+  %C1 = icmp ule i64 42, -1
+  %A = alloca i1, align 1
+  %L = load i64, ptr %A, align 4
+  store i1 poison, ptr %A, align 1
+  %B = add i32 -2147483648, %LGV6
+  %x = call i32 @llvm.vscale.i32()
+  %C = icmp slt i32 %x, %x
+  %C4 = icmp sle i32 %x, %x
+  store i1 %C, ptr %A, align 1
+  %C3 = icmp eq i64 %LGV, %L
+  store i1 %C1, ptr %A, align 1
+  store i1 %C3, ptr @G.1, align 1
+  store i1 %C4, ptr @G.2, align 1
+  ret i32 %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.vscale.i32() #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/RISCVSubtarget.cpp:212: unsigned int llvm::RISCVSubtarget::getMinRVVVectorSizeInBits() const: Assertion `hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium -global-isel=0</code></td><td>0</td><td>21</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVSubtarget.cpp:213: unsigned int llvm::RISCVSubtarget::getMinRVVVectorSizeInBits() const: Assertion `hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Legalizer&#x27; on function &#x27;@vscale_known_nonzero&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055d8a12f42cb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055d8a12f1171 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055d8a12f4d4b
+3  libc.so.6 0x00007fe01ba45330
+4  libc.so.6 0x00007fe01ba9ec0c pthread_kill + 284
+5  libc.so.6 0x00007fe01ba4527e gsignal + 30
+6  libc.so.6 0x00007fe01ba288ff abort + 223
+7  libc.so.6 0x00007fe01ba2881b
+8  libc.so.6 0x00007fe01ba3b517
+9  llc       0x000055d8a20d5a3a
+10 llc       0x000055d8a256bf0c
+11 llc       0x000055d8a34713cf llvm::LegalizerHelper::legalizeInstrStep(llvm::MachineInstr&amp;, llvm::LostDebugLocObserver&amp;) + 959
+12 llc       0x000055d8a3465699 llvm::legalizeMachineFunction(llvm::MachineFunction&amp;, llvm::LegalizerInfo const&amp;, llvm::ArrayRef&lt;llvm::GISelChangeObserver*&gt;, llvm::LostDebugLocObserver&amp;, llvm::MachineIRBuilder&amp;, llvm::LibcallLoweringInfo const*, llvm::GISelValueTracking*) + 1753
+13 llc       0x000055d8a34673e0
+14 llc       0x000055d8a3467002 llvm::LegalizerLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 242
+15 llc       0x000055d8a18c8e91 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+16 llc       0x000055d8a1650747 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+17 llc       0x000055d8a1658c62 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+18 llc       0x000055d8a16514f0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+19 llc       0x000055d8a12fb992 llcMain + 12162
+20 llc       0x000055d8a12352ef main + 63
+21 libc.so.6 0x00007fe01ba2a1ca
+22 libc.so.6 0x00007fe01ba2a28b __libc_start_main + 139
+23 llc       0x000055d8a12351e5 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">known-never-zero.52958060.42ed46f2e8.ll <span class="dim">(mutant of</span> known-never-zero.52958060.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba -O2 -code-model=medium</code></td></tr><tr><td class="l">known-never-zero.52958060.b318aae935.ll <span class="dim">(mutant of</span> known-never-zero.52958060.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O2</code></td></tr><tr><td class="l">known-never-zero.d2f179571f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/known-never-zero.ll">known-never-zero.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

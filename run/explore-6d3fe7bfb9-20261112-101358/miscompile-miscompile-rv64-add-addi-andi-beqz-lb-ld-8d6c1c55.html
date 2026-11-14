@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,beqz,lb,ld</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,beqz,lb,ld</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,beqz,lb,ld <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">nest-register.24fe406a.686d9a5a.0a0a340f.bfba7ab4.9828052589.ll <span class="dim">(mutant of</span> nest-register.24fe406a.686d9a5a.0a0a340f.bfba7ab4.ll<span class="dim">)</span> @nest_caller via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zfh,+zve64d,+zvkb -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@G = global &lt;2 x i64&gt; splat (i64 42)
+@G.1 = global i32 2147483647
+@G.2 = global i64 0
+@G.3 = global &lt;8 x i8&gt; splat (i8 1)
+@G.4 = global i8 -128
+@G.5 = global ptr poison
+@G.6 = global ptr poison
+@G.7 = global i1 false
+
+; Function Attrs: nounwind
+define ptr @nest_receiver(ptr nest %arg) #0 {
+  %A5 = alloca i1, align 1
+  store i1 false, ptr %A5, align 1
+  %A1 = alloca i16, align 2
+  store i16 1, ptr %A1, align 2
+  %A = alloca &lt;2 x i64&gt;, align 16
+  %L2 = load i16, ptr %A1, align 2
+  %C = icmp eq i16 %L2, -32768
+  store i1 %C, ptr @G.7, align 1
+  switch i16 %L2, label %SW_D [
+    i16 24685, label %SW_C
+    i16 23136, label %SW_C3
+    i16 -882, label %SW_C4
+  ]
+
+BB:                                               ; preds = %SW_C4, %SW_C3, %SW_C, %SW_D
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %LGV = load &lt;2 x i64&gt;, ptr @G, align 16
+  %B = ashr &lt;2 x i64&gt; %LGV, splat (i64 4294967296)
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  ret ptr %arg
+
+SW_D:                                             ; preds = %0
+  %G4 = getelementptr double, ptr %A, i1 true
+  store ptr %G4, ptr @G.6, align 8
+  br label %BB
+
+SW_C:                                             ; preds = %SW_C, %0
+  %B7 = udiv i32 2147483647, -1
+  %L6 = load i1, ptr %A5, align 1
+  store i32 %B7, ptr @G.1, align 4
+  %G1 = getelementptr ptr, ptr %arg, i1 true
+  store ptr %G1, ptr poison, align 8
+  br i1 %L6, label %BB, label %SW_C
+
+SW_C3:                                            ; preds = %0
+  %G5 = getelementptr ptr, ptr %arg, i16 -1
+  store ptr %G5, ptr @G.5, align 8
+  br label %BB
+
+SW_C4:                                            ; preds = %0
+  %LGV2 = load &lt;8 x i8&gt;, ptr @G.3, align 8
+  %B3 = or &lt;8 x i8&gt; splat (i8 -128), %LGV2
+  %G = getelementptr &lt;2 x i64&gt;, ptr %arg, i128 42
+  store ptr %G, ptr poison, align 8
+  store &lt;8 x i8&gt; %B3, ptr %G, align 8
+  store &lt;8 x i8&gt; %B3, ptr %A5, align 8
+  br label %BB
+}
+
+; Function Attrs: nounwind
+define ptr @nest_caller(ptr %arg) #0 {
+  %A2 = alloca ptr, align 8
+  store ptr poison, ptr %A2, align 8
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %result = call ptr @nest_receiver(ptr nest %arg)
+  %L = load i1, ptr %result, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %1 = phi i64 [ %LGV, %F ], [ -9223372036854775808, %T ]
+  %G5 = getelementptr &lt;4 x float&gt;, ptr %arg, i1 %L
+  %G = getelementptr ptr, ptr %arg, i16 1
+  %G2 = getelementptr ptr, ptr %arg, i1 true
+  store i64 %1, ptr %result, align 4
+  %G1 = getelementptr i1, ptr %G, i1 %L
+  store ptr %G1, ptr %A2, align 8
+  store ptr %G5, ptr @G.6, align 8
+  store ptr %G2, ptr %A2, align 8
+  ret ptr %G
+
+T:                                                ; preds = %0
+  %C = fcmp ole double +qnan, 1.000000e+00
+  %G4 = getelementptr i1, ptr %A, i1 %C
+  store i1 %C, ptr %G4, align 1
+  store i1 %C, ptr %A, align 1
+  br label %BB
+
+F:                                                ; preds = %0
+  %LGV2 = load i8, ptr @G.4, align 1
+  %LGV = load i64, ptr @G.2, align 4
+  %G3 = getelementptr ptr, ptr %arg, i8 %LGV2
+  store ptr %G3, ptr %result, align 8
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+
+!llvm.module.flags = !{!2, !3}
+
+!2 = !{i32 8, !&quot;cf-protection-branch&quot;, i32 1}
+!3 = !{i32 1, !&quot;cf-branch-label-scheme&quot;, !&quot;unlabeled&quot;}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zfh,+zve64d,+zvkb -O2&#x27; --funcs nest_caller snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">62 of 64 inputs differ (first: #1)
+SelectionDAG hash f578bc4a80f88291, GlobalISel hash d083eb5792abeeb3
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zfh,+zve64d,+zvkb -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zfh,+zve64d,+zvkb -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zfh,+zve64d,+zvkb -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nest-register.24fe406a.686d9a5a.0a0a340f.bfba7ab4.9828052589.ll <span class="dim">(mutant of</span> nest-register.24fe406a.686d9a5a.0a0a340f.bfba7ab4.ll<span class="dim">)</span></td><td class="l">nest_caller</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zfh,+zve64d,+zvkb -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

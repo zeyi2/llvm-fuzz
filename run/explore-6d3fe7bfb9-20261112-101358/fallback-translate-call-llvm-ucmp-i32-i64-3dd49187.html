@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.ucmp.i32.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.ucmp.i32.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.ucmp.i32.i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">ucmp.9e19802caa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span> @ucmp.32.64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx,+zvkb -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @ucmp.32.64(i64 %x, i64 %y) #0 {
+  %1 = call i32 @llvm.ucmp.i32.i64(i64 %x, i64 %y)
+  %B = srem i64 %x, %x
+  store i64 %B, ptr poison, align 4
+  ret i32 %1
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare range(i32 -1, 2) i32 @llvm.ucmp.i32.i64(i64, i64) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zhinx,+zvkb -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zhinx,+zvkb -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.ucmp.i32.i64: &#x27;  %1 = call i32 @llvm.ucmp.i32.i64(i64 %x, i64 %y)&#x27; (in function: ucmp.32.64)
+warning: Instruction selection used fallback path for ucmp.32.64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">ucmp.9e19802caa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.32.64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx,+zvkb -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">ucmp.9eefe9d1a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.32.64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintpause,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">ucmp.e4023cfd5e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.32.64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

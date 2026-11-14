@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: xor i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: xor i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: xor i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 32 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">sext-zext-trunc.9212ec9282.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/sext-zext-trunc.ll">sext-zext-trunc.ll</a><span class="dim">)</span> @sext_of_not_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+define i64 @sext_of_not_i64(i1 %x) {
+  %xor = xor i1 %x, true
+  %C = icmp sle i1 %xor, %xor
+  %sext = sext i1 %xor to i64
+  store i1 %C, ptr @G, align 1
+  ret i64 %sext
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: xor: &#x27;  %xor = xor i1 %x, true&#x27; (in function: sext_of_not_i64)
+warning: Instruction selection used fallback path for sext_of_not_i64</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cmp-bool.a2bdbec77e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/cmp-bool.ll">cmp-bool.ll</a><span class="dim">)</span></td><td class="l">bool_ne</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">double-arith.9e894d9fff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-arith.ll">double-arith.ll</a><span class="dim">)</span></td><td class="l">fnmadd_nsz</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+a,+c -O1</code></td></tr><tr><td class="l">double-intrinsics.e89f8088eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">acos_f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-vmaxu-vp.3558c9c3.05d4ffb132.ll <span class="dim">(mutant of</span> fixed-vectors-vmaxu-vp.3558c9c3.ll<span class="dim">)</span></td><td class="l">vmaxu_vv_v5i8_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">imm.6bb5f3e0f1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/imm.ll">imm.ll</a><span class="dim">)</span></td><td class="l">imm_neg_16116864687</td><td class="l"><code>-mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -mattr=+xtheadbb,+zfinx -O0</code></td></tr><tr><td class="l">sext-zext-trunc.9212ec9282.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/sext-zext-trunc.ll">sext-zext-trunc.ll</a><span class="dim">)</span></td><td class="l">sext_of_not_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

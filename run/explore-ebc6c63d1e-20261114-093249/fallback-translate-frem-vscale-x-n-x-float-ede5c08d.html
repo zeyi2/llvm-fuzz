@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem &lt;vscale x N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem &lt;vscale x N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem &lt;vscale x N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 28 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">bswap-bitreverse.cb44fc186f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span> @test_bswap_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+zvfh -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @test_bswap_i32(i32 %a) #0 {
+  %A = alloca &lt;vscale x 2 x float&gt;, align 8
+  store &lt;vscale x 2 x float&gt; poison, ptr %A, align 8
+  %B = frem &lt;vscale x 2 x float&gt; splat (float 1.401300e-45), splat (float 1.401300e-45)
+  %tmp = call i32 @llvm.bswap.i32(i32 %a)
+  store &lt;vscale x 2 x float&gt; %B, ptr %A, align 8
+  ret i32 %tmp
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.bswap.i32(i32) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+zvfh -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+zvfh -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem &lt;vscale x 2 x float&gt; splat (float 1.401300e-45), splat (float 1.401300e-45)&#x27; (in function: test_bswap_i32)
+warning: Instruction selection used fallback path for test_bswap_i32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bswap-bitreverse.cb44fc186f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bswap_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64d,+zvfh -O3</code></td></tr><tr><td class="l">fixed-vectors-fmaximum.cb7c1b4514.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fmaximum.ll">fixed-vectors-fmaximum.ll</a><span class="dim">)</span></td><td class="l">vfmax_v2f32_vv</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+experimental-zvfbfa,+v,+zve32x -O2</code></td></tr><tr><td class="l">vwmaccu.0a9ae0adc6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vwmaccu.ll">vwmaccu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vwmaccu_vv_nxv1i64_nxv1i32_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

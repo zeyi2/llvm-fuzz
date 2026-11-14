@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s8&gt;,p0,&lt;N x s1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 6 configs, 3 test files, 72 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-masked-store-int.cab7d0e7b9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-store-int.ll">fixed-vectors-masked-store-int.ll</a><span class="dim">)</span> @masked_store_v8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O1 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global ptr
+
+define void @masked_store_v8i8(&lt;8 x i8&gt; %val, ptr %a, &lt;8 x i1&gt; %mask) {
+  call void @llvm.masked.store.v8i8.p0(&lt;8 x i8&gt; %val, ptr align 8 %a, &lt;8 x i1&gt; %mask)
+  %G = getelementptr ptr, ptr %a, i8 -1
+  store ptr %G, ptr @G.4, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.masked.store.v8i8.p0(&lt;8 x i8&gt;, ptr captures(none), &lt;8 x i1&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v -O1 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.masked.store), %0:_(&lt;8 x s8&gt;), %1:_(p0), %2:_(&lt;8 x s1&gt;) (in function: masked_store_v8i8)
+warning: Instruction selection used fallback path for masked_store_v8i8</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">compressstore.3e158b3436.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v2i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+v,+d,+m,+zbb -O3</code></td></tr><tr><td class="l">compressstore.3e158b3436.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v128i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+v,+d,+m,+zbb -O3</code></td></tr><tr><td class="l">compressstore.b2bccb88c8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v4i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+v,+d,+m,+zbb -O1 -code-model=medium</code></td></tr><tr><td class="l">compressstore.f104ab83d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v64i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+v,+d,+m,+zbb,+zve64d,+zbs -O1</code></td></tr><tr><td class="l">compressstore.fea5a9daa5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/compressstore.ll">compressstore.ll</a><span class="dim">)</span></td><td class="l">test_compresstore_v16i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+v,+d,+m,+zbb -O3</code></td></tr><tr><td class="l">fixed-vectors-compressstore-int.988ec6f0b9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compressstore-int.ll">fixed-vectors-compressstore-int.ll</a><span class="dim">)</span></td><td class="l">compressstore_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v -O1</code></td></tr><tr><td class="l">fixed-vectors-masked-store-int.9e93f97e3b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-store-int.ll">fixed-vectors-masked-store-int.ll</a><span class="dim">)</span></td><td class="l">masked_store_v64i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-masked-store-int.cab7d0e7b9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-store-int.ll">fixed-vectors-masked-store-int.ll</a><span class="dim">)</span></td><td class="l">masked_store_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O1 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: insertelement &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: insertelement &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: insertelement &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 7 configs, 7 test files, 18 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64d-double-convert.b4b38be189.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64d-double-convert.ll">rv64d-double-convert.ll</a><span class="dim">)</span> @uitofp_aext_i32_to_f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicsr -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define double @uitofp_aext_i32_to_f64(i32 %a) #0 {
+  %I = insertelement &lt;2 x i64&gt; zeroinitializer, i64 -1, i128 18446744073709551616
+  %1 = uitofp i32 %a to double
+  store &lt;2 x i64&gt; %I, ptr @G.3, align 16
+  ret double %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicsr -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicsr -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: insertelement: &#x27;  %I = insertelement &lt;2 x i64&gt; zeroinitializer, i64 -1, i128 18446744073709551616&#x27; (in function: uitofp_aext_i32_to_f64)
+warning: Instruction selection used fallback path for uitofp_aext_i32_to_f64</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vand-vp.1abcc0125b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vand-vp.ll">fixed-vectors-vand-vp.ll</a><span class="dim">)</span></td><td class="l">vand_vx_v8i64_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-vmaxu-vp.ce10e0327e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmaxu-vp.ll">fixed-vectors-vmaxu-vp.ll</a><span class="dim">)</span></td><td class="l">vmaxu_vx_v4i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-vmin-vp.2ca24558e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmin-vp.ll">fixed-vectors-vmin-vp.ll</a><span class="dim">)</span></td><td class="l">vmin_vx_v4i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vmin-vp.2ca24558e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmin-vp.ll">fixed-vectors-vmin-vp.ll</a><span class="dim">)</span></td><td class="l">vmin_vx_v8i64_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vrol.5c0981ec8e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vrol.ll">fixed-vectors-vrol.ll</a><span class="dim">)</span></td><td class="l">vrol_vx_v4i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb,+zfinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vsadd.b63cd51dc3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vsadd.ll">fixed-vectors-vsadd.ll</a><span class="dim">)</span></td><td class="l">sadd_v8i64_vx</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=small</code></td></tr><tr><td class="l">iabs.61dd3510e8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span></td><td class="l">zext_abs16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zicond -O2</code></td></tr><tr><td class="l">rv64d-double-convert.b4b38be189.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64d-double-convert.ll">rv64d-double-convert.ll</a><span class="dim">)</span></td><td class="l">uitofp_aext_i32_to_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicsr -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

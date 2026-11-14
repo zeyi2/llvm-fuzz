@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 20 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-imm.8ab4f7005b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/float-imm.ll">float-imm.ll</a><span class="dim">)</span> @float_imm via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O1 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i128
+
+; Function Attrs: nounwind
+define float @float_imm() #0 {
+  %B = or i128 42, 42
+  store i128 %B, ptr @G.2, align 4
+  ret float f0x40490FDB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O1 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B = or i128 42, 42&#x27; (in function: float_imm)
+warning: Instruction selection used fallback path for float_imm</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cmov-branch-opt.0b13e21e6c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/cmov-branch-opt.ll">cmov-branch-opt.ll</a><span class="dim">)</span></td><td class="l">select_xor_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zvbb,+zhinx -O1</code></td></tr><tr><td class="l">div-by-constant.42bd74cb43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/div-by-constant.ll">div-by-constant.ll</a><span class="dim">)</span></td><td class="l">sdiv_constant_no_srai</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx,+a -O2</code></td></tr><tr><td class="l">float-imm.8ab4f7005b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/float-imm.ll">float-imm.ll</a><span class="dim">)</span></td><td class="l">float_imm</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O1 -code-model=medium</code></td></tr><tr><td class="l">lround-llround.b6aef1fbe5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/lround-llround.ll">lround-llround.ll</a><span class="dim">)</span></td><td class="l">llround_f128</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

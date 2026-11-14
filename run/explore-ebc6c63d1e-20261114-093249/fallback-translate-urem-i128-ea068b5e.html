@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-imm.97966ad92d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-imm.ll">double-imm.ll</a><span class="dim">)</span> @double_positive_zero via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicond -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+define double @double_positive_zero(ptr %pd) #0 {
+  %B = urem i128 0, 0
+  store i128 %B, ptr @G, align 4
+  ret double 0.000000e+00
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicond -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicond -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %B = urem i128 0, 0&#x27; (in function: double_positive_zero)
+warning: Instruction selection used fallback path for double_positive_zero</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.4ce460bcb0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_store_i8_monotonic</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zvbb -O3</code></td></tr><tr><td class="l">double-imm.97966ad92d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-imm.ll">double-imm.ll</a><span class="dim">)</span></td><td class="l">double_positive_zero</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zicond -O3</code></td></tr><tr><td class="l">llvm.exp10.4d0467e609.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/llvm.exp10.ll">llvm.exp10.ll</a><span class="dim">)</span></td><td class="l">exp10_v2f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+zdinx -O2</code></td></tr><tr><td class="l">rv64-half-convert.b1abcd1d55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64-half-convert.ll">rv64-half-convert.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx,+zvbb -O1</code></td></tr><tr><td class="l">zfh-half-intrinsics-strict.5645caa03d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/zfh-half-intrinsics-strict.ll">zfh-half-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">floor_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

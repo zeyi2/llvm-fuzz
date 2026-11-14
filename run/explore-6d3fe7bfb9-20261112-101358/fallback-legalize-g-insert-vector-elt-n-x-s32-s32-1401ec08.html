@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 900 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-fcmp.d9e06501e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-fcmp.ll">half-fcmp.ll</a><span class="dim">)</span> @fcmp_ord via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh,+zicsr -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/vGddd3x3f">https://godbolt.org/z/vGddd3x3f</a> (llc-assertions-trunk, checked 2026-11-12 14:12 UTC): <a href="https://godbolt.org/z/vGddd3x3f">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+@G.1 = external global i1
+@G.2 = external global &lt;4 x i32&gt;
+@G.3 = external global i1
+
+; Function Attrs: nounwind
+define i32 @fcmp_ord(half %a, half %b) #0 {
+  %LGV1 = load i1, ptr @G.1, align 1
+  %LGV = load i32, ptr @G, align 4
+  %1 = fcmp ord half %a, %b
+  %I = insertelement &lt;4 x i32&gt; zeroinitializer, i32 %LGV, i1 %LGV1
+  %2 = zext i1 %1 to i32
+  %C = fcmp true half 0.000000e+00, %b
+  store &lt;4 x i32&gt; %I, ptr @G.2, align 16
+  store i1 %C, ptr @G.3, align 1
+  ret i32 %2
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh,+zicsr -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>31</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %8:_, %4:_(s32), %10:_(s32) (in function: fcmp_ord)<br>warning: Instruction selection used fallback path for fcmp_ord</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh,+zicsr -O1 -global-isel=0</code></td><td>0</td><td>31</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh,+zicsr -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh,+zicsr -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %8:_, %4:_(s32), %10:_(s32) (in function: fcmp_ord)
+warning: Instruction selection used fallback path for fcmp_ord</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fpowi.b8da724506.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fpowi.ll">fixed-vectors-fpowi.ll</a><span class="dim">)</span></td><td class="l">powi_v8f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+f,+d -O0</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.3a12b60465.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_umax_v1i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O3</code></td></tr><tr><td class="l">half-fcmp.d9e06501e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-fcmp.ll">half-fcmp.ll</a><span class="dim">)</span></td><td class="l">fcmp_ord</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh,+zicsr -O1</code></td></tr><tr><td class="l">pr95271.f1adaee92b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/pr95271.ll">pr95271.ll</a><span class="dim">)</span></td><td class="l">PR95271</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr><tr><td class="l">rv32zkne-intrinsic-autoupgrade.386ae994b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zkne-intrinsic-autoupgrade.ll">rv32zkne-intrinsic-autoupgrade.ll</a><span class="dim">)</span></td><td class="l">aes32esi</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zkne -O0</code></td></tr><tr><td class="l">vsext.e23f4bec3b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vsext.ll">vsext.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vsext_mask_vf8_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zcb,+zfh -O3</code></td></tr><tr><td class="l">wide-scalar-shift-by-byte-multiple-legalization.5fc5f4b17e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/wide-scalar-shift-by-byte-multiple-legalization.ll">wide-scalar-shift-by-byte-multiple-legalization.ll</a><span class="dim">)</span></td><td class="l">lshr_32bytes</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

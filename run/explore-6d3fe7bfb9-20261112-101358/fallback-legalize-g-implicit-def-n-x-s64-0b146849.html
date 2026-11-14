@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_IMPLICIT_DEF &lt;N x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_IMPLICIT_DEF &lt;N x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_IMPLICIT_DEF &lt;N x s64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 239 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-select-icmp.3a5106127d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-select-icmp.ll">half-select-icmp.ll</a><span class="dim">)</span> @select_icmp_sle via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define half @select_icmp_sle(i32 signext %a, i32 signext %b, half %c, half %d) {
+  %A = alloca &lt;2 x i64&gt;, align 16
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %1 = icmp sle i32 %a, %b
+  %2 = select i1 %1, half %c, half %d
+  %B = lshr &lt;2 x i64&gt; splat (i64 -1), splat (i64 9223372036854775807)
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  ret half %2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(&lt;2 x s64&gt;) = G_IMPLICIT_DEF (in function: select_icmp_sle)
+warning: Instruction selection used fallback path for select_icmp_sle</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">constantpool.3a3c76a039.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/constantpool.ll">constantpool.ll</a><span class="dim">)</span></td><td class="l">constpool_f32_1234_5</td><td class="l"><code>-mtriple=riscv32 -relocation-model=pic -verify-machineinstrs -O0</code></td></tr><tr><td class="l">half-select-icmp.3a5106127d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-select-icmp.ll">half-select-icmp.ll</a><span class="dim">)</span></td><td class="l">select_icmp_sle</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh -O0</code></td></tr><tr><td class="l">vfcvt-f-xu.aa358538e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vfcvt-f-xu.ll">vfcvt-f-xu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfcvt_f.xu.v_nxv2f64_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfh -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

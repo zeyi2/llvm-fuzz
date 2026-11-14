@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x s8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x s8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x s8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 118 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">expandload.a08561543b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/expandload.ll">expandload.ll</a><span class="dim">)</span> @test_expandload_v32i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+m,+zbb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global ptr
+@G.2 = external global i16
+
+define &lt;32 x i8&gt; @test_expandload_v32i8(ptr %base, &lt;32 x i1&gt; %mask, &lt;32 x i8&gt; %passthru) {
+  %LGV = load i16, ptr @G.2, align 2
+  %G = getelementptr bfloat, ptr %base, i16 %LGV
+  %res = call &lt;32 x i8&gt; @llvm.masked.expandload.v32i8.p0(ptr align 1 %base, &lt;32 x i1&gt; %mask, &lt;32 x i8&gt; %passthru)
+  store ptr %G, ptr @G, align 8
+  ret &lt;32 x i8&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;32 x i8&gt; @llvm.masked.expandload.v32i8.p0(ptr captures(none), &lt;32 x i1&gt;, &lt;32 x i8&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv64 -mattr=+m,+zbb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv64 -mattr=+m,+zbb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %330:_(&lt;32 x s8&gt;) = G_PHI %328:_(&lt;32 x s8&gt;), %bb.64, %322:_(&lt;32 x s8&gt;), %bb.63 (in function: test_expandload_v32i8)
+warning: Instruction selection used fallback path for test_expandload_v32i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">align-loops.31ca0ca89c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/align-loops.ll">align-loops.ll</a><span class="dim">)</span></td><td class="l">test</td><td class="l"><code>-mtriple=riscv64 -align-loops=32 -mattr=+zbs,+c -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">expandload.a08561543b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/expandload.ll">expandload.ll</a><span class="dim">)</span></td><td class="l">test_expandload_v32i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+m,+zbb -O1</code></td></tr><tr><td class="l">sifive_sf_vste8.bd5943fa33.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/sifive_sf_vste8.ll">sifive_sf_vste8.ll</a><span class="dim">)</span></td><td class="l">test_sf_vste8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xsfmmbase -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

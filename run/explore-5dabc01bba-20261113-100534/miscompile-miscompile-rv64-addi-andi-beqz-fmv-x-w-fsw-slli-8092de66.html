@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,beqz,fmv.x.w,fsw,slli</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,beqz,fmv.x.w,fsw,slli</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,beqz,fmv.x.w,fsw,slli <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.dfe9cb3b51.ll <span class="dim">(mutant of</span> stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.ll<span class="dim">)</span> @two_float_rotate via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+f,+a -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+declare void @g()
+
+define void @two_float_rotate(ptr %p, ptr %q) {
+  %p0 = getelementptr i8, ptr %p, i64 0
+  %p1 = getelementptr i8, ptr %p, i64 4
+  %x0 = load float, ptr %p0, align 8
+  %x1 = load float, ptr %p1, align 4
+  %C6 = fcmp oeq float %x1, %x0
+  call void @g()
+  %q0 = getelementptr i8, ptr %q, i64 0
+  %C = fcmp une float %x1, %x1
+  %L = load i1, ptr %q0, align 1
+  store float %x1, ptr %q0, align 8
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F
+  %G = getelementptr ptr, ptr %p, i8 -1
+  br i1 %B, label %T3, label %F4
+
+BB2:                                              ; preds = %F4, %T3
+  store float %x0, ptr %G, align 4
+  ret void
+
+T:                                                ; preds = %0
+  %G3 = getelementptr &lt;8 x i8&gt;, ptr %p, i1 %C
+  store ptr %G3, ptr %p0, align 8
+  ret void
+
+F:                                                ; preds = %0
+  %B = lshr i1 %L, true
+  %B3 = add i1 true, %L
+  store i1 %B, ptr %p0, align 1
+  store i1 %C6, ptr @G.2, align 1
+  br label %BB
+
+T3:                                               ; preds = %T3, %BB
+  br i1 %B3, label %BB2, label %T3
+
+F4:                                               ; preds = %BB
+  br label %BB2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+f,+a -O1&#x27; --funcs two_float_rotate snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">62 of 64 inputs differ (first: #0)
+SelectionDAG hash fd70be306b72d7e8, GlobalISel hash fce804b0c517ddbf
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+f,+a -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+f,+a -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+f,+a -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.dfe9cb3b51.ll <span class="dim">(mutant of</span> stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.ll<span class="dim">)</span></td><td class="l">two_float_rotate</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+f,+a -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

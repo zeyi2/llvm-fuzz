@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 6 test files, 92 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-lp64-lp64f-lp64d-common.0fbc8e52ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/calling-conv-lp64-lp64f-lp64d-common.ll">calling-conv-lp64-lp64f-lp64d-common.ll</a><span class="dim">)</span> @callee_many_scalars via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define i32 @callee_many_scalars(i8 %a, i16 %b, i32 %c, i128 %d, i32 %e, i32 %f, i128 %g, i32 %h) #0 {
+  %a_ext = zext i8 %a to i32
+  %b_ext = zext i16 %b to i32
+  %1 = add i32 %a_ext, %b_ext
+  %2 = add i32 %1, %c
+  %C = icmp sge i32 %2, %1
+  %3 = icmp eq i128 %d, %g
+  %4 = zext i1 %3 to i32
+  %5 = add i32 %4, %2
+  %6 = add i32 %5, %e
+  %7 = add i32 %6, %f
+  %8 = add i32 %7, %h
+  store i1 %C, ptr @G, align 1
+  ret i32 %8
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %a_ext = zext i8 %a to i32&#x27; (in function: callee_many_scalars)
+warning: Instruction selection used fallback path for callee_many_scalars</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.f852753dae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i8_undef</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-ilp32e.3060888fa9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span></td><td class="l">callee_many_scalars</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+save-restore,+zhinx -O2</code></td></tr><tr><td class="l">calling-conv-lp64-lp64f-lp64d-common.0fbc8e52ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/calling-conv-lp64-lp64f-lp64d-common.ll">calling-conv-lp64-lp64f-lp64d-common.ll</a><span class="dim">)</span></td><td class="l">callee_many_scalars</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr><tr><td class="l">clmulh.db1e727f7c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbs,+zdinx -O3</code></td></tr><tr><td class="l">clmulh.ea52c0be43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbs,+zfinx -O2 -code-model=small</code></td></tr><tr><td class="l">clmulh.f156692b09.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zfinx -O2 -code-model=medium</code></td></tr><tr><td class="l">clmulh.f6dcd464b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">clmulr.645ade1fc7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbs,+zfinx -O3</code></td></tr><tr><td class="l">stack-folding.30f55222ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/stack-folding.ll">stack-folding.ll</a><span class="dim">)</span></td><td class="l">test_zext_b</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zbs -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fsub bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fsub bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fsub bfloat <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 10 test files, 1806 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-ctpop.93917fedab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctpop.ll">fixed-vectors-ctpop.ll</a><span class="dim">)</span> @ctpop_v8i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zbb,+zvfh -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/e4xTEj54M">https://godbolt.org/z/e4xTEj54M</a> (llc-assertions-trunk, checked 2026-11-12 14:12 UTC): <a href="https://godbolt.org/z/e4xTEj54M">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @ctpop_v8i32(ptr %x, ptr %y) {
+  %a = load &lt;8 x i32&gt;, ptr %x, align 32
+  %c = call &lt;8 x i32&gt; @llvm.ctpop.v8i32(&lt;8 x i32&gt; %a)
+  store &lt;8 x i32&gt; %c, ptr %x, align 32
+  %B = fsub bfloat 1.000000e+00, 4.200000e+01
+  store bfloat %B, ptr poison, align 2
+  ret void
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;8 x i32&gt; @llvm.ctpop.v8i32(&lt;8 x i32&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zbb,+zvfh -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>27</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fsub: &#x27;  %B = fsub bfloat 1.000000e+00, 4.200000e+01&#x27; (in function: ctpop_v8i32)<br>warning: Instruction selection used fallback path for ctpop_v8i32</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zbb,+zvfh -O3 -global-isel=0</code></td><td>0</td><td>27</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zbb,+zvfh -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zbb,+zvfh -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fsub: &#x27;  %B = fsub bfloat 1.000000e+00, 4.200000e+01&#x27; (in function: ctpop_v8i32)
+warning: Instruction selection used fallback path for ctpop_v8i32</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-ctpop.93917fedab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctpop.ll">fixed-vectors-ctpop.ll</a><span class="dim">)</span></td><td class="l">ctpop_v8i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zbb,+zvfh -O3</code></td></tr><tr><td class="l">fixed-vectors-ctpop.98c8baf0af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctpop.ll">fixed-vectors-ctpop.ll</a><span class="dim">)</span></td><td class="l">ctpop_v8i32_ne_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvbb,+zicsr,+zihintpause -O0</code></td></tr><tr><td class="l">fixed-vectors-vfmin-vp.4fa66b8154.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin-vp.ll">fixed-vectors-vfmin-vp.ll</a><span class="dim">)</span></td><td class="l">vfmin_vv_v15f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh -O2</code></td></tr><tr><td class="l">orc-b-rv32.a815710c32.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/orc-b-rv32.ll">orc-b-rv32.ll</a><span class="dim">)</span></td><td class="l">orc_b_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb -O3</code></td></tr><tr><td class="l">rv32zbkb.f032704808.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbkb.ll">rv32zbkb.ll</a><span class="dim">)</span></td><td class="l">pack_i64_3</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+v -O3</code></td></tr><tr><td class="l">sdata-local-sym.f7f08f261d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/sdata-local-sym.ll">sdata-local-sym.ll</a><span class="dim">)</span></td><td class="l">f</td><td class="l"><code>-mtriple=riscv32 -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vfmuladd-vp.7460d2a554.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vfmuladd-vp.ll">vfmuladd-vp.ll</a><span class="dim">)</span></td><td class="l">vfnmadd_vf_nxv4f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+m -O3 -code-model=small</code></td></tr><tr><td class="l">vfptoi-constrained-sdnode.67875d637a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vfptoi-constrained-sdnode.ll">vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_nxv1f16_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+experimental-zvfbfa,+v,+xtheadba -O0</code></td></tr><tr><td class="l">vfsgnj-bf.43f3200b04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vfsgnj-bf.ll">vfsgnj-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfsgnj_mask_vv_nxv4bf16_nxv4bf16_nxv4bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa -O2</code></td></tr><tr><td class="l">vpairo.7c60e5ade9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vpairo.ll">vpairo.ll</a><span class="dim">)</span></td><td class="l">test_vpairo_bf16m2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+experimental-zvzip -O1 -code-model=small</code></td></tr><tr><td class="l">vpscatter-sdnode.2acd44c6a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vpscatter-sdnode.ll">vpscatter-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpscatter_nxv2i64_truncstore_nxv2i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+m,+zfh -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

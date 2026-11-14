@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vp.reduce.umin.nxv1i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vp.reduce.umin.nxv1i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vp.reduce.umin.nxv1i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 1 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vreductions-int-vp.6ffb17e864.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span> @vpreduce_umin_nxv1i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+define signext i32 @vpreduce_umin_nxv1i32(i32 signext %s, &lt;vscale x 1 x i32&gt; %v, &lt;vscale x 1 x i1&gt; %m, i32 zeroext %evl) {
+  %r = call i32 @llvm.vp.reduce.umin.nxv1i32(i32 %s, &lt;vscale x 1 x i32&gt; %v, &lt;vscale x 1 x i1&gt; %m, i32 %evl)
+  %B = and i32 %s, %evl
+  store i32 %B, ptr @G, align 4
+  ret i32 %r
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.vp.reduce.umin.nxv1i32(i32, &lt;vscale x 1 x i32&gt;, &lt;vscale x 1 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vp.reduce.umin.nxv1i32: &#x27;  %r = call i32 @llvm.vp.reduce.umin.nxv1i32(i32 %s, &lt;vscale x 1 x i32&gt; %v, &lt;vscale x 1 x i1&gt; %m, i32 %evl)&#x27; (in function: vpreduce_umin_nxv1i32)
+warning: Instruction selection used fallback path for vpreduce_umin_nxv1i32</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vreductions-int-vp.6141910671.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+c -O0</code></td></tr><tr><td class="l">vreductions-int-vp.6ffb17e864.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O2</code></td></tr><tr><td class="l">vreductions-int-vp.727a3847ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zve32x -O3</code></td></tr><tr><td class="l">vreductions-int-vp.80768f3a86.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O3 -code-model=medium</code></td></tr><tr><td class="l">vreductions-int-vp.a11393b2e6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+a -O2</code></td></tr><tr><td class="l">vreductions-int-vp.c24a08c483.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O0</code></td></tr><tr><td class="l">vreductions-int-vp.cba0f0d55a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2</code></td></tr><tr><td class="l">vreductions-int-vp.d2c1207d26.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbs -O2</code></td></tr><tr><td class="l">vreductions-int-vp.df999e171b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umin_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

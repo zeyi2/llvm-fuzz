@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load &lt;N x i16~&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load &lt;N x i16~&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load &lt;N x i16~&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">urem-seteq-illegal-types.0a67cb4d32.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/urem-seteq-illegal-types.ll">urem-seteq-illegal-types.ll</a><span class="dim">)</span> @test_urem_vec via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @test_urem_vec(ptr %X) #0 {
+  %ld = load &lt;3 x i11&gt;, ptr %X, align 8
+  %urem = urem &lt;3 x i11&gt; %ld, &lt;i11 6, i11 7, i11 -5&gt;
+  %cmp = icmp ne &lt;3 x i11&gt; %urem, &lt;i11 0, i11 1, i11 2&gt;
+  %G = getelementptr ptr, ptr %X, i32 -1
+  %ext = sext &lt;3 x i1&gt; %cmp to &lt;3 x i11&gt;
+  store &lt;3 x i11&gt; %ext, ptr %G, align 8
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %ld = load &lt;3 x i11&gt;, ptr %X, align 8&#x27; (in function: test_urem_vec)
+warning: Instruction selection used fallback path for test_urem_vec</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">urem-seteq-illegal-types.0a67cb4d32.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/urem-seteq-illegal-types.ll">urem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_urem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">urem-seteq-illegal-types.9128873fcc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/urem-seteq-illegal-types.ll">urem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_urem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">urem-seteq-illegal-types.bef6ca9275.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/urem-seteq-illegal-types.ll">urem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_urem_vec</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">urem-seteq-illegal-types.ff925e239a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/urem-seteq-illegal-types.ll">urem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_urem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx,+c -O3 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

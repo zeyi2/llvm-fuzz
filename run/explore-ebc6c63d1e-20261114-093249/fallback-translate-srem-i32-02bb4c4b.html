@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 86 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-fcmp.b9ca16e262.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-fcmp.ll">double-fcmp.ll</a><span class="dim">)</span> @fcmp_une via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @fcmp_une(double %a, double %b) #0 {
+  %B = srem i32 -2147483648, 0
+  ret i32 %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem i32 -2147483648, 0&#x27; (in function: fcmp_une)
+warning: Instruction selection used fallback path for fcmp_une</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.4ce460bcb0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_store_i16_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zvbb -O3</code></td></tr><tr><td class="l">double-fcmp.b9ca16e262.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-fcmp.ll">double-fcmp.ll</a><span class="dim">)</span></td><td class="l">fcmp_une</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-shuffle-extract-subvector.b247f2262c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-extract-subvector.ll">fixed-vectors-shuffle-extract-subvector.ll</a><span class="dim">)</span></td><td class="l">v8i64_from_v16xi64_high</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zdinx -O1</code></td></tr><tr><td class="l">min-max.a735b7916c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/min-max.ll">min-max.ll</a><span class="dim">)</span></td><td class="l">smax_same_op_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcicm,+xqcics,+xqcicli,+zca,+short-forward-branch-ialu,+conditional-cmv-fusion,+zdinx,+zbkb -O1</code></td></tr><tr><td class="l">rv64zfh-half-convert.a20e54b1f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64zfh-half-convert.ll">rv64zfh-half-convert.ll</a><span class="dim">)</span></td><td class="l">sitofp_sext_i32_to_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx,+zdinx,+zvkb -O0</code></td></tr><tr><td class="l">sdata-limit-8.2d510ad7c1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/sdata-limit-8.ll">sdata-limit-8.ll</a><span class="dim">)</span></td><td class="l">f</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">xcvbitmanip.26697add76.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/xcvbitmanip.ll">xcvbitmanip.ll</a><span class="dim">)</span></td><td class="l">test.cv.extractr</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xcvbitmanip,+zfinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

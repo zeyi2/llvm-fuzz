@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;N x s32&gt;,&lt;N x s32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 3 test files, 106 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-zvdot4a8i.b00b688a81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span> @partial_of_zext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+
+define &lt;4 x i32&gt; @partial_of_zext(&lt;16 x i8&gt; %a) {
+entry:
+  %A = alloca &lt;16 x i8&gt;, align 16
+  store &lt;16 x i8&gt; poison, ptr %A, align 16
+  %LGV = load i8, ptr @G, align 1
+  %a.ext = zext &lt;16 x i8&gt; %a to &lt;16 x i32&gt;
+  %I = insertelement &lt;16 x i8&gt; %a, i8 %LGV, i1 false
+  %res = call &lt;4 x i32&gt; @llvm.vector.partial.reduce.add.v4i32.v16i32(&lt;4 x i32&gt; zeroinitializer, &lt;16 x i32&gt; %a.ext)
+  store &lt;16 x i8&gt; %I, ptr %A, align 16
+  ret &lt;4 x i32&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x i32&gt; @llvm.vector.partial.reduce.add.v4i32.v16i32(&lt;4 x i32&gt;, &lt;16 x i32&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(&lt;4 x s32&gt;) = G_INTRINSIC intrinsic(@llvm.vector.partial.reduce.add), %11:_(&lt;4 x s32&gt;), %7:_(&lt;16 x s32&gt;) (in function: partial_of_zext)
+warning: Instruction selection used fallback path for partial_of_zext</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-interleave-store.338ede1bb4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_factor6</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfhmin,+zvfbfmin -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-interleave-store.338ede1bb4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_factor8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfhmin,+zvfbfmin -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.7531cb7746.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">vdot4a_vv_partial_reduce_v2i32_v8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zihintpause -O0</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.b00b688a81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">partial_of_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a -O2</code></td></tr><tr><td class="l">vector-deinterleave-fixed.4d75c02baa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave3_v2i32_v6i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh,+zvfbfmin,+zfhmin -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-fixed.7fc6416ef2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave4_v2i32_v8i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

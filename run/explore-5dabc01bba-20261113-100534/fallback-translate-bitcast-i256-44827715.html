@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast i256~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast i256~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast i256~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">idiv_large.07052aa0.42a9c8a302.ll <span class="dim">(mutant of</span> idiv_large.07052aa0.ll<span class="dim">)</span> @udiv_i129 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.2 = external global i129
+
+; Function Attrs: nounwind
+define i129 @udiv_i129(i129 %x, i129 %y) #0 {
+  %C = icmp uge i129 %x, %y
+  %B1 = udiv exact i129 %x, 0
+  %res = udiv i129 %x, %y
+  %B = lshr i129 %x, %B1
+  store i1 %C, ptr @G, align 1
+  store i129 %B, ptr @G.2, align 4
+  ret i129 %res
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %const = bitcast i129 128 to i129&#x27; (in function: udiv_i129)
+warning: Instruction selection used fallback path for udiv_i129</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">idiv_large.07052aa0.42a9c8a302.ll <span class="dim">(mutant of</span> idiv_large.07052aa0.ll<span class="dim">)</span></td><td class="l">udiv_i129</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zbkb -O3</code></td></tr><tr><td class="l">idiv_large.b7d885f1.9f2a7ccf.0088dd7d.aa52bcabe0.ll <span class="dim">(mutant of</span> idiv_large.b7d885f1.9f2a7ccf.0088dd7d.ll<span class="dim">)</span></td><td class="l">udiv_i129</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zdinx,+zvbb -O2</code></td></tr><tr><td class="l">idiv_large.b7d885f1.9f2a7ccf.4707a30ffe.ll <span class="dim">(mutant of</span> idiv_large.b7d885f1.9f2a7ccf.ll<span class="dim">)</span></td><td class="l">udiv_i129</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx,+zbkb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

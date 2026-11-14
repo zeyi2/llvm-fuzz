@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 15 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-widening-convert.a233fa9693.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-widening-convert.ll">rvp-widening-convert.ll</a><span class="dim">)</span> @test_pwcvth_v4i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zhinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;4 x i8&gt;
+@G.6 = external global &lt;4 x i8&gt;
+
+define &lt;4 x i16&gt; @test_pwcvth_v4i8(&lt;4 x i8&gt; %a) {
+  %B1 = mul &lt;4 x i8&gt; %a, zeroinitializer
+  %shuffle = shufflevector &lt;4 x i8&gt; %a, &lt;4 x i8&gt; zeroinitializer, &lt;8 x i32&gt; &lt;i32 4, i32 0, i32 5, i32 1, i32 6, i32 2, i32 7, i32 3&gt;
+  %B = xor &lt;4 x i8&gt; %a, %a
+  %res = bitcast &lt;8 x i8&gt; %shuffle to &lt;4 x i16&gt;
+  store &lt;4 x i8&gt; %B, ptr @G.2, align 4
+  store &lt;4 x i8&gt; %B1, ptr @G.6, align 4
+  ret &lt;4 x i16&gt; %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zhinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zhinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %B1 = mul &lt;4 x i8&gt; %a, zeroinitializer&#x27; (in function: test_pwcvth_v4i8)
+warning: Instruction selection used fallback path for test_pwcvth_v4i8</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vrol.e9b02951.0ca43084.2fd747c9ff.ll <span class="dim">(mutant of</span> fixed-vectors-vrol.e9b02951.0ca43084.ll<span class="dim">)</span></td><td class="l">vrol_vv_v32i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvbb,+zfinx,+zicsr -O2</code></td></tr><tr><td class="l">float-bitmanip-dagcombines.cd421615ba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/float-bitmanip-dagcombines.ll">float-bitmanip-dagcombines.ll</a><span class="dim">)</span></td><td class="l">fabs</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">rvp-widening-convert.a233fa9693.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-widening-convert.ll">rvp-widening-convert.ll</a><span class="dim">)</span></td><td class="l">test_pwcvth_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zhinx -O1</code></td></tr><tr><td class="l">zfhmin-half-intrinsics-strict.1ab6b7e3fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/zfhmin-half-intrinsics-strict.ll">zfhmin-half-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">lround_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zhinxmin,+zba -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

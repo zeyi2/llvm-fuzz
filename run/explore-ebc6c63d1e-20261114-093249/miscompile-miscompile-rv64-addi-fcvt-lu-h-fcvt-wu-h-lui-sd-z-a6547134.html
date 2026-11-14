@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,fcvt.lu.h,fcvt.wu.h,lui,sd,zext.b</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,fcvt.lu.h,fcvt.wu.h,lui,sd,zext.b</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,fcvt.lu.h,fcvt.wu.h,lui,sd,zext.b <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-round-conv.f80ac9c2fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-round-conv.ll">half-round-conv.ll</a><span class="dim">)</span> @test_floor_ui8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+zfh,+f -O1 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+define zeroext i8 @test_floor_ui8(half %x) {
+  %B = udiv &lt;2 x i64&gt; zeroinitializer, zeroinitializer
+  %a = call half @llvm.floor.f16(half %x)
+  %b = fptoui half %a to i8
+  store &lt;2 x i64&gt; %B, ptr @G, align 16
+  ret i8 %b
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare half @llvm.floor.f16(half) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+zfh,+f -O1 -code-model=small&#x27; --funcs test_floor_ui8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">9 of 64 inputs differ (first: #12)
+SelectionDAG hash 5bef58d3690d6076, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+zfh,+f -code-model=small -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+zfh,+f -code-model=small -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+zfh,+f -code-model=small -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-round-conv.f80ac9c2fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-round-conv.ll">half-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_floor_ui8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+zfh,+f -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

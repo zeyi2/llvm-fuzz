@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 3 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64-inline-asm-pairs.e91d6d417d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a><span class="dim">)</span> @test_cR_wide_scalar_with_ops via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+; Function Attrs: nounwind
+define i64 @test_cR_wide_scalar_with_ops(i64 noundef %0) #0 {
+entry:
+  %1 = zext i64 %0 to i128
+  %2 = shl i128 %1, 64
+  %3 = or i128 %1, %2
+  %4 = call i128 asm sideeffect &quot;/* $0 &lt;- $1 */&quot;, &quot;=&amp;^cR,^cR&quot;(i128 %3)
+  %5 = trunc i128 %4 to i64
+  %6 = lshr i128 %4, 64
+  %7 = trunc i128 %6 to i64
+  %B1 = add i64 %0, %5
+  %8 = or i64 %5, %7
+  store i64 %B1, ptr @G.1, align 4
+  ret i64 %8
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %1 = zext i64 %0 to i128&#x27; (in function: test_cR_wide_scalar_with_ops)
+warning: Instruction selection used fallback path for test_cR_wide_scalar_with_ops</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.0ab42afba7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i64_undef</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">abdu-neg.f852753dae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i64_undef</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64-inline-asm-pairs.c9d18710ba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l">test_R_wide_scalar_with_ops</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbs,+zhinx -O3</code></td></tr><tr><td class="l">rv64-inline-asm-pairs.e91d6d417d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64-inline-asm-pairs.ll">rv64-inline-asm-pairs.ll</a><span class="dim">)</span></td><td class="l">test_cR_wide_scalar_with_ops</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zfinx -O0</code></td></tr><tr><td class="l">rv64zbc-zbkc-intrinsic.796658cf10.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64zbc-zbkc-intrinsic.ll">rv64zbc-zbkc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">llvm_clmulh_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

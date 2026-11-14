@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: freeze i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: freeze i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: freeze i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 21 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-select-icmp.ffe4045816.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-select-icmp.ll">half-select-icmp.ll</a><span class="dim">)</span> @select_icmp_sge via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx,+zicsr -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+
+define half @select_icmp_sge(i32 signext %a, i32 signext %b, half %c, half %d) {
+  %B = sdiv i128 1, 0
+  %1 = icmp sge i32 %a, %b
+  %2 = select i1 %1, half %c, half %d
+  store i128 %B, ptr @G.1, align 4
+  ret half %2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx,+zicsr -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx,+zicsr -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: freeze: &#x27;  %0 = freeze i128 1&#x27; (in function: select_icmp_sge)
+warning: Instruction selection used fallback path for select_icmp_sge</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-stepvector.464be71830.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-stepvector.ll">fixed-vectors-stepvector.ll</a><span class="dim">)</span></td><td class="l">stepvector_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">half-select-icmp.ffe4045816.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-select-icmp.ll">half-select-icmp.ll</a><span class="dim">)</span></td><td class="l">select_icmp_sge</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx,+zicsr -O3</code></td></tr><tr><td class="l">idiv_large.8583b349bc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/idiv_large.ll">idiv_large.ll</a><span class="dim">)</span></td><td class="l">udiv_i128</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">zfh-half-intrinsics-strict.9d202e471a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/zfh-half-intrinsics-strict.ll">zfh-half-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">trunc_f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation -mattr=+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_MUL &lt;N x s128&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_MUL &lt;N x s128&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_MUL &lt;N x s128&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-clmulh.74968ed37a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-clmulh.ll">fixed-vectors-clmulh.ll</a><span class="dim">)</span> @clmulh_v2i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvbc32e -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+; Function Attrs: nounwind
+define &lt;2 x i64&gt; @clmulh_v2i64(&lt;2 x i64&gt; %x, &lt;2 x i64&gt; %y) #0 {
+  %LGV = load i32, ptr @G, align 4
+  %x.ext = zext &lt;2 x i64&gt; %x to &lt;2 x i128&gt;
+  %C = icmp sle i32 42, %LGV
+  %y.ext = zext &lt;2 x i64&gt; %y to &lt;2 x i128&gt;
+  %clmul = call &lt;2 x i128&gt; @llvm.clmul.v2i128(&lt;2 x i128&gt; %x.ext, &lt;2 x i128&gt; %y.ext)
+  %res.ext = lshr &lt;2 x i128&gt; %clmul, splat (i128 64)
+  %B = mul &lt;2 x i128&gt; %x.ext, %res.ext
+  %res = trunc &lt;2 x i128&gt; %B to &lt;2 x i64&gt;
+  store i1 %C, ptr poison, align 1
+  ret &lt;2 x i64&gt; %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i128&gt; @llvm.clmul.v2i128(&lt;2 x i128&gt;, &lt;2 x i128&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvbc32e -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvbc32e -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %16:_(&lt;2 x s128&gt;) = G_MUL %8:_, %15:_ (in function: clmulh_v2i64)
+warning: Instruction selection used fallback path for clmulh_v2i64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmulh.def722edd8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbs -O1</code></td></tr><tr><td class="l">fixed-vectors-abd.45d2b5cd6f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span></td><td class="l">uabd_2d</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+experimental-zvabd,+zvfh -O3 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-clmulh.74968ed37a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-clmulh.ll">fixed-vectors-clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvbc32e -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

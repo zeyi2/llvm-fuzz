@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FMINNUM &lt;N x s16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FMINNUM &lt;N x s16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FMINNUM &lt;N x s16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 2 test files, 19 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vfmin.27bf1e9297.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin.ll">fixed-vectors-vfmin.ll</a><span class="dim">)</span> @vfmin_v4f16_vf via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zfbfmin,+zvfbfmin -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+
+define &lt;4 x half&gt; @vfmin_v4f16_vf(&lt;4 x half&gt; %a, half %b) {
+  %LGV = load i64, ptr @G, align 4
+  %C = icmp ne i64 -9223372036854775808, %LGV
+  %head = insertelement &lt;4 x half&gt; poison, half %b, i32 0
+  %splat = shufflevector &lt;4 x half&gt; %head, &lt;4 x half&gt; poison, &lt;4 x i32&gt; zeroinitializer
+  %v = call &lt;4 x half&gt; @llvm.minnum.v4f16(&lt;4 x half&gt; %a, &lt;4 x half&gt; %splat)
+  store i1 %C, ptr poison, align 1
+  ret &lt;4 x half&gt; %v
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x half&gt; @llvm.minnum.v4f16(&lt;4 x half&gt;, &lt;4 x half&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zfbfmin,+zvfbfmin -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zfbfmin,+zvfbfmin -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %15:_(&lt;4 x s16&gt;) = G_FMINNUM %0:_, %14:_ (in function: vfmin_v4f16_vf)
+warning: Instruction selection used fallback path for vfmin_v4f16_vf</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfmin-vp.310f4a579a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin-vp.ll">fixed-vectors-vfmin-vp.ll</a><span class="dim">)</span></td><td class="l">vfmin_vv_v16f16_unmasked</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfhmin -O0</code></td></tr><tr><td class="l">fixed-vectors-vfmin.27bf1e9297.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin.ll">fixed-vectors-vfmin.ll</a><span class="dim">)</span></td><td class="l">vfmin_v4f16_vf</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+zfbfmin,+zvfbfmin -O2</code></td></tr><tr><td class="l">fixed-vectors-vfmin.5617c57510.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin.ll">fixed-vectors-vfmin.ll</a><span class="dim">)</span></td><td class="l">vfmin_v2f16_fv</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zfh,+experimental-zvfbfa,+v -O3</code></td></tr><tr><td class="l">fixed-vectors-vfmin.9557ddac48.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin.ll">fixed-vectors-vfmin.ll</a><span class="dim">)</span></td><td class="l">vfmin_v16f16_fv</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zfbfmin,+zvfbfmin -O2</code></td></tr><tr><td class="l">fixed-vectors-vfmin.9b56db1ca3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfmin.ll">fixed-vectors-vfmin.ll</a><span class="dim">)</span></td><td class="l">vfmin_v2f16_vf</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+experimental-zvfbfa,+zvbb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

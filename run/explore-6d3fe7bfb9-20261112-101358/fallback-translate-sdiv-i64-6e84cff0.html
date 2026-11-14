@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 57 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">alu-roundtrip-rv64.9743b2c788.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/alu-roundtrip-rv64.ll">alu-roundtrip-rv64.ll</a><span class="dim">)</span> @sdiv_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zvkb,+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+define i64 @sdiv_i64(i64 %a, i64 %b) {
+entry:
+  %0 = sdiv i64 %a, %b
+  %B = urem i64 %0, %0
+  store i64 %B, ptr @G.1, align 4
+  ret i64 %0
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zvkb,+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zvkb,+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %0 = sdiv i64 %a, %b&#x27; (in function: sdiv_i64)
+warning: Instruction selection used fallback path for sdiv_i64</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">alu-roundtrip-rv64.9743b2c788.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/alu-roundtrip-rv64.ll">alu-roundtrip-rv64.ll</a><span class="dim">)</span></td><td class="l">sdiv_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zvkb,+zdinx -O1</code></td></tr><tr><td class="l">div-by-constant.36f564c5c4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/div-by-constant.ll">div-by-constant.ll</a><span class="dim">)</span></td><td class="l">sdiv64_constant_add_srai</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zba,+zbb,+zdinx -O1</code></td></tr><tr><td class="l">fold-mem-offset.d47987b3c9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fold-mem-offset.ll">fold-mem-offset.ll</a><span class="dim">)</span></td><td class="l">test_medium_offset</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba,+zfinx,+zicsr -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32zbb.22aeb33dac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a><span class="dim">)</span></td><td class="l">orc_b_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zhinx -O0</code></td></tr><tr><td class="l">rv64zbs.62ca35f62d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbs.ll">rv64zbs.ll</a><span class="dim">)</span></td><td class="l">bclri_i64_30</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbs,+zdinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

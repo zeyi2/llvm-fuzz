@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.vector.interleave3.nxv6i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.vector.interleave3.nxv6i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.vector.interleave3.nxv6i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-interleave-store.24b7c6728c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vector-interleave-store.ll">vector-interleave-store.ll</a><span class="dim">)</span> @store_factor3_oneactive via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @store_factor3_oneactive(&lt;vscale x 2 x i32&gt; %a, ptr %p) {
+  %A = alloca ptr, align 8
+  store ptr poison, ptr %A, align 8
+  %G = getelementptr ptr, ptr %p, i32 -1
+  %v = call &lt;vscale x 6 x i32&gt; @llvm.vector.interleave3.nxv6i32(&lt;vscale x 2 x i32&gt; %a, &lt;vscale x 2 x i32&gt; poison, &lt;vscale x 2 x i32&gt; poison)
+  store &lt;vscale x 6 x i32&gt; %v, ptr %p, align 32
+  store ptr %G, ptr %A, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 6 x i32&gt; @llvm.vector.interleave3.nxv6i32(&lt;vscale x 2 x i32&gt;, &lt;vscale x 2 x i32&gt;, &lt;vscale x 2 x i32&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.vector.interleave3.nxv6i32: &#x27;  %v = call &lt;vscale x 6 x i32&gt; @llvm.vector.interleave3.nxv6i32(&lt;vscale x 2 x i32&gt; %a, &lt;vscale x 2 x i32&gt; poison, &lt;vscale x 2 x i32&gt; poison)&#x27; (in function: store_factor3_oneactive)
+warning: Instruction selection used fallback path for store_factor3_oneactive</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vector-interleave-store.24b7c6728c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vector-interleave-store.ll">vector-interleave-store.ll</a><span class="dim">)</span></td><td class="l">store_factor3_oneactive</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-store.53420b05b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vector-interleave-store.ll">vector-interleave-store.ll</a><span class="dim">)</span></td><td class="l">store_factor3_oneactive</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfbfmin,+zcb -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-store.6fb5befd7c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vector-interleave-store.ll">vector-interleave-store.ll</a><span class="dim">)</span></td><td class="l">masked_store_factor3</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin,+zicond -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-store.7272c767eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vector-interleave-store.ll">vector-interleave-store.ll</a><span class="dim">)</span></td><td class="l">masked_store_factor3</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin,+f -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-store.cce1d170a3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vector-interleave-store.ll">vector-interleave-store.ll</a><span class="dim">)</span></td><td class="l">store_factor3_oneactive</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin,+c -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

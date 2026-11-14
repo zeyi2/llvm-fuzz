@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fdiv &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fdiv &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fdiv &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.80e2020900.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span> @fcvt_h_si via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x float&gt;
+
+; Function Attrs: nounwind
+define half @fcvt_h_si(i16 %a) #0 {
+  %B = fdiv &lt;4 x float&gt; zeroinitializer, splat (float 1.401300e-45)
+  %1 = sitofp i16 %a to half
+  store &lt;4 x float&gt; %B, ptr @G, align 16
+  ret half %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fdiv: &#x27;  %B = fdiv &lt;4 x float&gt; zeroinitializer, splat (float 1.401300e-45)&#x27; (in function: fcvt_h_si)
+warning: Instruction selection used fallback path for fcvt_h_si</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vreductions-mask.705b48dc.2efbdba256.ll <span class="dim">(mutant of</span> fixed-vectors-vreductions-mask.705b48dc.ll<span class="dim">)</span></td><td class="l">vreduce_smax_v8i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx -O1</code></td></tr><tr><td class="l">half-convert.80e2020900.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_si</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O0</code></td></tr><tr><td class="l">sadd_sat.f31672b2eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/sadd_sat.ll">sadd_sat.ll</a><span class="dim">)</span></td><td class="l">func3</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zhinx -O2 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">ucmp.6d2b14eb08.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.32.32_zext</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">zfh-half-intrinsics.8aff19dc4e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/zfh-half-intrinsics.ll">zfh-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">lrint_f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O3 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

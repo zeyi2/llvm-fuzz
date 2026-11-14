@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.scmp.i64.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.scmp.i64.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.scmp.i64.i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">scmp.7549280288.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span> @scmp.64.64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+
+; Function Attrs: nounwind
+define i64 @scmp.64.64(i64 %x, i64 %y) #0 {
+  %1 = call i64 @llvm.scmp.i64.i64(i64 %x, i64 %y)
+  store i64 %1, ptr @G, align 4
+  ret i64 %1
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare range(i64 -1, 2) i64 @llvm.scmp.i64.i64(i64, i64) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.scmp.i64.i64: &#x27;  %1 = call i64 @llvm.scmp.i64.i64(i64 %x, i64 %y)&#x27; (in function: scmp.64.64)
+warning: Instruction selection used fallback path for scmp.64.64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">scmp.22782df084.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.64.64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx,+m -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">scmp.7549280288.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.64.64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">scmp.d693432eaf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.64.64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zhinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

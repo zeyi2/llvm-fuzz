@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-without-f-reg.994cbed944.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span> @f via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global &lt;8 x i8&gt;
+
+; Function Attrs: nounwind
+define hidden fastcc float @f(float %x) #0 {
+entry:
+  %B = add &lt;8 x i8&gt; splat (i8 -128), splat (i8 127)
+  store &lt;8 x i8&gt; %B, ptr @G.6, align 8
+  ret float %x
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %B = add &lt;8 x i8&gt; splat (i8 -128), splat (i8 127)&#x27; (in function: f)
+warning: Instruction selection used fallback path for f</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert.48647f6cb6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_w_s_sat_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+zfinx -O2</code></td></tr><tr><td class="l">fastcc-without-f-reg.994cbed944.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">f</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr><tr><td class="l">float-intrinsics.aae45b3e60.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">lround_f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx,+m,+zvbb -O2</code></td></tr><tr><td class="l">rv64f-float-convert-strict.fa8805220d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64f-float-convert-strict.ll">rv64f-float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">sitofp_zext_i32_to_f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -disable-strictnode-mutation -mattr=+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

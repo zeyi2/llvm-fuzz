@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: freeze i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: freeze i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: freeze i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 4 test files, 13 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">shl-cttz.abf559af23.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/shl-cttz.ll">shl-cttz.ll</a><span class="dim">)</span> @shl_cttz_i32_zero_is_defined via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @shl_cttz_i32_zero_is_defined(i32 %x, i32 %y) {
+entry:
+  %cttz = call i32 @llvm.cttz.i32(i32 %y, i1 false)
+  %res = shl i32 %cttz, %x
+  ret i32 %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.cttz.i32(i32, i1 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: freeze: &#x27;  %y.fr = freeze i32 %y&#x27; (in function: shl_cttz_i32_zero_is_defined)
+warning: Instruction selection used fallback path for shl_cttz_i32_zero_is_defined</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">ctlz-cttz-ctpop.82a0704be5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_ctlz_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.b7edbf08a6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_ctlz_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx -O3</code></td></tr><tr><td class="l">ctz_zero_return_test.20a457271a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/ctz_zero_return_test.ll">ctz_zero_return_test.ll</a><span class="dim">)</span></td><td class="l">ctz2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zcb,+zfinx -O3</code></td></tr><tr><td class="l">rv64xtheadbb.d817507205.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">ctlz_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">rv64xtheadbb.d817507205.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">log2_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">shl-cttz.abf559af23.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/shl-cttz.ll">shl-cttz.ll</a><span class="dim">)</span></td><td class="l">shl_cttz_i32_zero_is_defined</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

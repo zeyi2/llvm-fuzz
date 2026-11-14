@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 20 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-select-fcmp.4c51f29018.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/half-select-fcmp.ll">half-select-fcmp.ll</a><span class="dim">)</span> @select_fcmp_ogt via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define half @select_fcmp_ogt(half %a, half %b) #0 {
+  %B = srem i1 false, true
+  %1 = fcmp ogt half %a, %b
+  %2 = select i1 %1, half %a, half %b
+  store i1 %B, ptr poison, align 1
+  ret half %2
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem i1 false, true&#x27; (in function: select_fcmp_ogt)
+warning: Instruction selection used fallback path for select_fcmp_ogt</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.1a6d21a086.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/float-convert.ll">float-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_w_s_sat_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zfinx -O3</code></td></tr><tr><td class="l">float-select-fcmp.000b915144.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/float-select-fcmp.ll">float-select-fcmp.ll</a><span class="dim">)</span></td><td class="l">select_fcmp_ord</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx,+zvbb -O0</code></td></tr><tr><td class="l">half-fcmp-strict.e29b475c94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/half-fcmp-strict.ll">half-fcmp-strict.ll</a><span class="dim">)</span></td><td class="l">fcmps_olt</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zhinx,+zvkb -O2</code></td></tr><tr><td class="l">half-select-fcmp.4c51f29018.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/half-select-fcmp.ll">half-select-fcmp.ll</a><span class="dim">)</span></td><td class="l">select_fcmp_ogt</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O1</code></td></tr><tr><td class="l">rvp-narrowing-shift.3503b66ac2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvp-narrowing-shift.ll">rvp-narrowing-shift.ll</a><span class="dim">)</span></td><td class="l">pnsra_v2i16_32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+a,+zfinx -O3 -code-model=small</code></td></tr><tr><td class="l">short-forward-branch-opt-min-max.e1aeafce94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/short-forward-branch-opt-min-max.ll">short-forward-branch-opt-min-max.ll</a><span class="dim">)</span></td><td class="l">select_example_smin</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+short-forward-branch-ialu,+zdinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

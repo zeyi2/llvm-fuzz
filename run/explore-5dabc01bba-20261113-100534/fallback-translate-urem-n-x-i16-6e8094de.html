@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 3 test files, 15 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">urem-vector-lkk.a99a28a1e9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/urem-vector-lkk.ll">urem-vector-lkk.ll</a><span class="dim">)</span> @dont_fold_urem_one via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;4 x i16&gt; @dont_fold_urem_one(&lt;4 x i16&gt; %x) #0 {
+  %1 = urem &lt;4 x i16&gt; %x, &lt;i16 1, i16 654, i16 23, i16 5423&gt;
+  %B = udiv &lt;4 x i32&gt; splat (i32 1), splat (i32 1)
+  store &lt;4 x i32&gt; %B, ptr poison, align 16
+  ret &lt;4 x i16&gt; %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %1 = urem &lt;4 x i16&gt; %x, &lt;i16 1, i16 654, i16 23, i16 5423&gt;&#x27; (in function: dont_fold_urem_one)
+warning: Instruction selection used fallback path for dont_fold_urem_one</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rvp-narrowing-shift.59526bde24.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvp-narrowing-shift.ll">rvp-narrowing-shift.ll</a><span class="dim">)</span></td><td class="l">pnsrl_v4i8_15</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zdinx,+zicond -O2</code></td></tr><tr><td class="l">rvp-simd-32.e1d08bd8.bba3a810d6.ll <span class="dim">(mutant of</span> rvp-simd-32.e1d08bd8.ll<span class="dim">)</span></td><td class="l">test_pm2add_v2i16_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbkb,+zdinx -O1</code></td></tr><tr><td class="l">urem-vector-lkk.62a096096e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/urem-vector-lkk.ll">urem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_urem_one</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zicsr,+zfinx -O1</code></td></tr><tr><td class="l">urem-vector-lkk.a99a28a1e9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/urem-vector-lkk.ll">urem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_urem_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zhinx -O0</code></td></tr><tr><td class="l">urem-vector-lkk.cd2e4419a3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/urem-vector-lkk.ll">urem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">combine_urem_udiv</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

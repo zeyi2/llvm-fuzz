@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shufflevector &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shufflevector &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shufflevector &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">attributes.e492d789b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span> @addi via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zawrs,+zdinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @addi(i32 %a) {
+  %S = shufflevector &lt;4 x float&gt; splat (float 1.000000e+00), &lt;4 x float&gt; splat (float 1.401300e-45), &lt;4 x i32&gt; poison
+  %1 = add i32 %a, 1
+  store &lt;4 x float&gt; %S, ptr poison, align 16
+  ret i32 %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zawrs,+zdinx -O0 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zawrs,+zdinx -O0 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shufflevector: &#x27;  %S = shufflevector &lt;4 x float&gt; splat (float 1.000000e+00), &lt;4 x float&gt; splat (float 1.401300e-45), &lt;4 x i32&gt; poison&#x27; (in function: addi)
+warning: Instruction selection used fallback path for addi</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.e492d789b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv64 -mattr=+zawrs,+zdinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">double-select-icmp.12c7c57ea5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-select-icmp.ll">double-select-icmp.ll</a><span class="dim">)</span></td><td class="l">select_icmp_sgt</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+c -O2</code></td></tr><tr><td class="l">rv32zimop-intrinsic.547b8bdb9a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv32zimop-intrinsic.ll">rv32zimop-intrinsic.ll</a><span class="dim">)</span></td><td class="l">moprr0_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zimop,+zfinx -O1</code></td></tr><tr><td class="l">setcc-logic.b5b7438b70.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/setcc-logic.ll">setcc-logic.ll</a><span class="dim">)</span></td><td class="l">or_icmps_const_1bit_diff</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

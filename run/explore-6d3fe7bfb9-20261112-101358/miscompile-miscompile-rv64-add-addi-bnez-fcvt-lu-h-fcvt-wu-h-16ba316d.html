@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,bnez,fcvt.lu.h,fcvt.wu.h,feq.h</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,bnez,fcvt.lu.h,fcvt.wu.h,feq.h</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,bnez,fcvt.lu.h,fcvt.wu.h,feq.h <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zfh-half-convert.9b237d7e.77d95d27.17e4aa47.8291115e.3a28995ef7.ll <span class="dim">(mutant of</span> rv64zfh-half-convert.9b237d7e.77d95d27.17e4aa47.8291115e.ll<span class="dim">)</span> @zext_fptoui via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+m,+zfa,+zve64d,+a -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global half
+@G.1 = external global i1
+@G.2 = external global i1
+@G.3 = external global ptr
+
+; Function Attrs: nounwind
+define zeroext i32 @zext_fptoui(half %a) #0 {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %C2 = fcmp uge half %a, 6.550400e+04
+  br i1 %C2, label %T, label %F
+
+BB:                                               ; preds = %T
+  %LGV = load half, ptr @G, align 2
+  %G = getelementptr i16, ptr %A, i1 %C2
+  %1 = fptoui half %a to i32
+  %C = fcmp une half %a, %LGV
+  %C1 = fcmp uge half %a, %a
+  %C5 = icmp sgt i32 %1, 0
+  store i1 %C, ptr @G.1, align 1
+  store i1 %C1, ptr @G.2, align 1
+  store i1 %C2, ptr @G.2, align 1
+  %C4 = icmp ne i1 %C2, true
+  store i1 %C4, ptr @G.2, align 1
+  store i1 %C5, ptr %A, align 1
+  store ptr %G, ptr @G.3, align 8
+  ret i32 %1
+
+T:                                                ; preds = %0
+  br label %BB
+
+F:                                                ; preds = %0
+  ret i32 2147483647
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+m,+zfa,+zve64d,+a -O3&#x27; --funcs zext_fptoui snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #12)
+SelectionDAG hash 5bef58d3690d6076, GlobalISel hash b0327560e339d2be
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+m,+zfa,+zve64d,+a -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+m,+zfa,+zve64d,+a -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+m,+zfa,+zve64d,+a -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64zfh-half-convert.9b237d7e.77d95d27.17e4aa47.8291115e.3a28995ef7.ll <span class="dim">(mutant of</span> rv64zfh-half-convert.9b237d7e.77d95d27.17e4aa47.8291115e.ll<span class="dim">)</span></td><td class="l">zext_fptoui</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+m,+zfa,+zve64d,+a -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

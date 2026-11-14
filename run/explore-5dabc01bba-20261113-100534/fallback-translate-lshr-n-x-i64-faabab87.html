@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: lshr &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: lshr &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: lshr &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 14 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-fcmp.bc064feebe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/double-fcmp.ll">double-fcmp.ll</a><span class="dim">)</span> @fcmp_ugt via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinx -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define i32 @fcmp_ugt(double %a, double %b) #0 {
+  %B = lshr &lt;2 x i64&gt; splat (i64 9223372036854775807), splat (i64 -9223372036854775808)
+  %1 = fcmp ugt double %a, %b
+  %2 = zext i1 %1 to i32
+  store &lt;2 x i64&gt; %B, ptr @G, align 16
+  ret i32 %2
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinx -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinx -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: lshr: &#x27;  %B = lshr &lt;2 x i64&gt; splat (i64 9223372036854775807), splat (i64 -9223372036854775808)&#x27; (in function: fcmp_ugt)
+warning: Instruction selection used fallback path for fcmp_ugt</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-fcmp.bc064feebe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/double-fcmp.ll">double-fcmp.ll</a><span class="dim">)</span></td><td class="l">fcmp_ugt</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinx -O0 -code-model=small</code></td></tr><tr><td class="l">fastcc-without-f-reg.61ac2978c4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">caller_double</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbkb,+zcb -O0</code></td></tr><tr><td class="l">fixed-vectors-vsadd-vp.06b43acf.80919e99da.ll <span class="dim">(mutant of</span> fixed-vectors-vsadd-vp.06b43acf.ll<span class="dim">)</span></td><td class="l">vsadd_vv_v16i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">half-convert-strict.c4ae3b868f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_wu_load</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation -mattr=+zhinxmin -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

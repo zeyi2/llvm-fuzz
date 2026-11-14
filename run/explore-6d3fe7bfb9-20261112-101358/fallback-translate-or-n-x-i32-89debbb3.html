@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 17 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-bswap-vp.03c1534e.f8e0c866c3.ll <span class="dim">(mutant of</span> fixed-vectors-bswap-vp.03c1534e.ll<span class="dim">)</span> @vp_bswap_v2i32_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global &lt;2 x i64&gt;
+
+define &lt;2 x i32&gt; @vp_bswap_v2i32_unmasked(&lt;2 x i32&gt; %va, i32 zeroext %evl) {
+  %B1 = or &lt;2 x i32&gt; %va, splat (i32 -2147483648)
+  %C = icmp eq i32 %evl, 0
+  %B = lshr &lt;2 x i32&gt; %B1, %va
+  %B2 = srem &lt;2 x i64&gt; splat (i64 -9223372036854775808), splat (i64 9223372036854775807)
+  store i1 %C, ptr poison, align 1
+  store &lt;2 x i64&gt; %B2, ptr @G.3, align 16
+  ret &lt;2 x i32&gt; %B
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B1 = or &lt;2 x i32&gt; %va, splat (i32 -2147483648)&#x27; (in function: vp_bswap_v2i32_unmasked)
+warning: Instruction selection used fallback path for vp_bswap_v2i32_unmasked</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bswap-vp.03c1534e.f8e0c866c3.ll <span class="dim">(mutant of</span> fixed-vectors-bswap-vp.03c1534e.ll<span class="dim">)</span></td><td class="l">vp_bswap_v2i32_unmasked</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr><tr><td class="l">rv64zfh-half-convert-strict.120ee55b94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zfh-half-convert-strict.ll">rv64zfh-half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">sext_fptoui</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zhinx -O0</code></td></tr><tr><td class="l">vecreduce-or-constant-fold.6746855f.b197b7cdab.ll <span class="dim">(mutant of</span> vecreduce-or-constant-fold.6746855f.ll<span class="dim">)</span></td><td class="l">test_or_const_wide</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

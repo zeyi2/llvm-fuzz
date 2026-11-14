@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_ICMP &lt;N x s1&gt;,&lt;N x s32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_ICMP &lt;N x s1&gt;,&lt;N x s32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-6d3fe7bfb9-20261112-094420.html">main-6d3fe7bfb9-20261112-094420</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_ICMP &lt;N x s1&gt;,&lt;N x s32&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">36 in 7 configs, 5 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-setcc.ll">fixed-vectors-int-setcc.ll</a> @setne_vv_v4i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @setne_vv_v4i32(ptr %x, ptr %y) {
+  %a = load &lt;4 x i32&gt;, ptr %x, align 16
+  %b = load &lt;4 x i32&gt;, ptr %y, align 16
+  %c = icmp ne &lt;4 x i32&gt; %a, %b
+  %d = sext &lt;4 x i1&gt; %c to &lt;4 x i32&gt;
+  store &lt;4 x i32&gt; %d, ptr %x, align 16
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;4 x s1&gt;) = G_ICMP intpred(ne), %2:_(&lt;4 x s32&gt;), %3:_ (in function: setne_vv_v4i32)
+warning: Instruction selection used fallback path for setne_vv_v4i32</pre>
+<h4>Occurrences (36) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/get-setcc-result-type.ll">get-setcc-result-type.ll</a></td><td class="l">getSetCCResultType</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_ult_two</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_ugt_one</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_eq_one</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_ne_one</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_ult_two</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_ugt_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_eq_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a></td><td class="l">ctpop_v2i32_ne_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l">ctpop_v2i32_ult_two</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l">ctpop_v2i32_ugt_one</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l">ctpop_v2i32_eq_one</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l">ctpop_v2i32_ne_one</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l">ctpop_v2i32_ult_two</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a></td><td class="l">ctpop_v2i32_ugt_one</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

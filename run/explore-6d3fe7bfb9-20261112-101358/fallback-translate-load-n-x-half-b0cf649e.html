@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load &lt;N x half&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load &lt;N x half&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load &lt;N x half&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 2 test files, 39 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-without-f-reg.40047bd5e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span> @caller_half_32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global &lt;32 x half&gt;
+@G.5 = external global &lt;32 x half&gt;
+
+; Function Attrs: nounwind
+declare fastcc half @callee_half_32(&lt;32 x half&gt;) #0
+
+; Function Attrs: nounwind
+define half @caller_half_32(&lt;32 x half&gt; %A) #0 {
+  %LGV1 = load &lt;32 x half&gt;, ptr @G.4, align 64
+  %B = fdiv &lt;32 x half&gt; %A, %LGV1
+  %C = call fastcc half @callee_half_32(&lt;32 x half&gt; %A)
+  store &lt;32 x half&gt; %B, ptr @G.5, align 64
+  ret half %C
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV1 = load &lt;32 x half&gt;, ptr @G.4, align 64&#x27; (in function: caller_half_32)
+warning: Instruction selection used fallback path for caller_half_32</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fastcc-without-f-reg.40047bd5e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">caller_half_32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">fp-fcanonicalize.3edf3e18e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16_nnan</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fp-fcanonicalize.4d5f411c58.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16_nnan</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">fp-fcanonicalize.8a84a68f24.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">fp-fcanonicalize.d1ecc07049.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16_nnan</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fp-fcanonicalize.fd18be981b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zhinx -O2 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

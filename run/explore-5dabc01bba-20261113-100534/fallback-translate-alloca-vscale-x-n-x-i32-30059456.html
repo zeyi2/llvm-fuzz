@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca &lt;vscale x N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca &lt;vscale x N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca &lt;vscale x N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 3 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vdot4aus.b44fcf55.5de3f49834.ll <span class="dim">(mutant of</span> vdot4aus.b44fcf55.ll<span class="dim">)</span> @intrinsic_vdot4aus_vx_nxv16i32_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zhinx,+zihintpause -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 16 x i32&gt; @intrinsic_vdot4aus_vx_nxv16i32_i32(&lt;vscale x 16 x i32&gt; %0, &lt;vscale x 16 x i32&gt; %1, i32 %2, i32 %3) #0 {
+entry:
+  %A = alloca &lt;vscale x 16 x i32&gt;, align 64
+  store &lt;vscale x 16 x i32&gt; poison, ptr %A, align 64
+  %a = call &lt;vscale x 16 x i32&gt; @llvm.riscv.vdot4aus.nxv16i32.i32.i32(&lt;vscale x 16 x i32&gt; %0, &lt;vscale x 16 x i32&gt; %1, i32 %2, i32 %3, i32 0)
+  %B = mul &lt;vscale x 16 x i32&gt; %a, splat (i32 2147483647)
+  %B1 = sub &lt;vscale x 16 x i32&gt; %a, %1
+  store &lt;vscale x 16 x i32&gt; %B1, ptr %A, align 64
+  ret &lt;vscale x 16 x i32&gt; %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 16 x i32&gt; @llvm.riscv.vdot4aus.nxv16i32.i32.i32(&lt;vscale x 16 x i32&gt;, &lt;vscale x 16 x i32&gt;, i32, i32, i32 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zhinx,+zihintpause -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zhinx,+zihintpause -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca &lt;vscale x 16 x i32&gt;, align 64&#x27; (in function: intrinsic_vdot4aus_vx_nxv16i32_i32)
+warning: Instruction selection used fallback path for intrinsic_vdot4aus_vx_nxv16i32_i32</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vdot4asu.bd608618.6549f834ff.ll <span class="dim">(mutant of</span> vdot4asu.bd608618.ll<span class="dim">)</span></td><td class="l">intrinsic_vdot4asu_mask_vx_nxv2i32_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zhinx -O1</code></td></tr><tr><td class="l">vdot4asu.bd608618.8b9ebf7877.ll <span class="dim">(mutant of</span> vdot4asu.bd608618.ll<span class="dim">)</span></td><td class="l">intrinsic_vdot4asu_mask_vv_nxv4i32_nxv4i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zhinx,+zbb,+a -O2</code></td></tr><tr><td class="l">vdot4aus.b44fcf55.5de3f49834.ll <span class="dim">(mutant of</span> vdot4aus.b44fcf55.ll<span class="dim">)</span></td><td class="l">intrinsic_vdot4aus_vx_nxv16i32_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zhinx,+zihintpause -O0</code></td></tr><tr><td class="l">xandesvdot-vd4dots.53083a61.ecd7d4b8b2.ll <span class="dim">(mutant of</span> xandesvdot-vd4dots.53083a61.ll<span class="dim">)</span></td><td class="l">intrinsic_vd4dots_vv_nxv1i32_nxv4i8_nxv4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zve64x,+xandesvdot,+zhinx,+m -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

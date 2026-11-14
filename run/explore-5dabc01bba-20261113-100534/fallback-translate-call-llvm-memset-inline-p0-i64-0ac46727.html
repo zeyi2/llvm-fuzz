@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.memset.inline.p0.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.memset.inline.p0.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.memset.inline.p0.i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 3 configs, 1 test files, 22 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memset-inline.c0e9b1ba13.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span> @memset_zero_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+unaligned-scalar-mem,+zfinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @memset_zero_2(ptr %a) #0 {
+  tail call void @llvm.memset.inline.p0.i64(ptr %a, i8 0, i64 2, i1 false)
+  %C = fcmp uno half 6.550400e+04, +qnan
+  store i1 %C, ptr poison, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.memset.inline.p0.i64(ptr writeonly captures(none), i8, i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+unaligned-scalar-mem,+zfinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+unaligned-scalar-mem,+zfinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.memset.inline.p0.i64: &#x27;  tail call void @llvm.memset.inline.p0.i64(ptr %a, i8 0, i64 2, i1 false)&#x27; (in function: memset_zero_2)
+warning: Instruction selection used fallback path for memset_zero_2</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memset-inline.14b3a410fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">aligned_memset_zero_32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">memset-inline.5593414163.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">memset_2</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem,+zfinx,+zcb -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memset-inline.5593414163.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">memset_4</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem,+zfinx,+zcb -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memset-inline.c0e9b1ba13.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">memset_zero_2</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+unaligned-scalar-mem,+zfinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">memset-inline.c0e9b1ba13.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/memset-inline.ll">memset-inline.ll</a><span class="dim">)</span></td><td class="l">memset_zero_16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+unaligned-scalar-mem,+zfinx -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

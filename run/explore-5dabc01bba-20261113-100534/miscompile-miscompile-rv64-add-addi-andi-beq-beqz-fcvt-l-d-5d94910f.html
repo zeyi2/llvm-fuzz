@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,beq,beqz,fcvt.l.d</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,beq,beqz,fcvt.l.d</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,beq,beqz,fcvt.l.d <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-convert.90590572.b88292c8.193ff88b.8d5e15a0.de00c12db3.ll <span class="dim">(mutant of</span> double-convert.90590572.b88292c8.193ff88b.8d5e15a0.ll<span class="dim">)</span> @fcvt_w_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zve64d -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+@G.3 = external global i16
+@G.6 = external global i1
+
+; Function Attrs: nounwind
+define signext i8 @fcvt_w_s_i8(double %a) #0 {
+  %A5 = alloca i1, align 1
+  store i1 true, ptr %A5, align 1
+  %A4 = alloca i1, align 1
+  store i1 true, ptr %A4, align 1
+  %A1 = alloca i128, align 8
+  store i128 -170141183460469231731687303715884105728, ptr %A1, align 4
+  %L2 = load i128, ptr %A1, align 4
+  switch i128 %L2, label %SW_D [
+    i128 4166002109734291029, label %SW_C
+  ]
+
+BB:                                               ; preds = %BB4, %SW_D
+  %G = getelementptr double, ptr %A5, i128 %L2
+  %A = alloca i1, align 1
+  %L = load i1, ptr %A, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV1 = load i16, ptr @G.3, align 2
+  %1 = fptosi double %a to i8
+  %C = icmp uge i16 32767, %LGV1
+  store i1 %C, ptr %A, align 1
+  %C1 = icmp sge i1 %C, %L
+  store i1 %C1, ptr @G.1, align 1
+  store ptr %G, ptr %A, align 8
+  ret i8 %1
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %BB4, %0
+  %L6 = load i1, ptr %A5, align 1
+  br i1 %L6, label %T, label %F
+
+BB4:                                              ; preds = %F, %T
+  %C3 = fcmp false double %a, %a
+  %C4 = fcmp olt double %a, 0.000000e+00
+  store i1 %C4, ptr poison, align 1
+  br i1 %C3, label %BB, label %SW_C
+
+T:                                                ; preds = %SW_C
+  br label %BB4
+
+F:                                                ; preds = %SW_C
+  %C2 = fcmp olt double %a, %a
+  store i1 %C2, ptr @G.6, align 1
+  br label %BB4
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zve64d -O0&#x27; --funcs fcvt_w_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">3 of 64 inputs differ (first: #12)
+SelectionDAG hash a0c2d26326127464, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zve64d -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zve64d -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zve64d -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert.90590572.b88292c8.193ff88b.8d5e15a0.de00c12db3.ll <span class="dim">(mutant of</span> double-convert.90590572.b88292c8.193ff88b.8d5e15a0.ll<span class="dim">)</span></td><td class="l">fcvt_w_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zve64d -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

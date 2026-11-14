@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,lb,lbu,li,lui,lw</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,lb,lbu,li,lui,lw</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,lb,lbu,li,lui,lw <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">scalar-stack-align.21574674.64de65acb4.ll <span class="dim">(mutant of</span> scalar-stack-align.21574674.ll<span class="dim">)</span> @scalar_stack_align16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global ptr
+@G.1 = external global i1
+@G.2 = external global ptr
+
+; Function Attrs: nounwind
+define ptr @scalar_stack_align16() #0 {
+  %a = alloca &lt;vscale x 2 x i32&gt;, align 8
+  %C = icmp eq i1 false, false
+  %c = alloca i64, align 16
+  %L2 = load i8, ptr %c, align 1
+  %L = load i8, ptr %c, align 1
+  %C5 = icmp ugt i1 %C, %C
+  %B = ashr i8 %L, %L2
+  call void @extern(ptr %a)
+  %G = getelementptr &lt;4 x i32&gt;, ptr %c, i64 42
+  store ptr %G, ptr @G, align 8
+  store i8 %B, ptr %G, align 1
+  store i1 %C, ptr %c, align 1
+  store i1 %C5, ptr @G.1, align 1
+  store ptr %G, ptr @G.2, align 8
+  ret ptr %c
+}
+
+declare void @extern(ptr)
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2&#x27; --funcs scalar_stack_align16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash 10ced065a76d00b3, GlobalISel hash 25f56ba0e0c320d7
+b0: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O0 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">scalar-stack-align.21574674.64de65acb4.ll <span class="dim">(mutant of</span> scalar-stack-align.21574674.ll<span class="dim">)</span></td><td class="l">scalar_stack_align16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

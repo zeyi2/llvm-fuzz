@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-bitcast.4d4ed9c840.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitcast.ll">fixed-vectors-bitcast.ll</a><span class="dim">)</span> @bitcast_v2i8_bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+d,+zvfh,+zfbfmin,+zvfbfmin,+zba,+c -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;2 x i8&gt;
+
+define bfloat @bitcast_v2i8_bf16(&lt;2 x i8&gt; %a) {
+  %LGV1 = load &lt;2 x i8&gt;, ptr @G.2, align 2
+  %B = add &lt;2 x i8&gt; %a, %LGV1
+  %b = bitcast &lt;2 x i8&gt; %a to bfloat
+  store &lt;2 x i8&gt; %B, ptr poison, align 2
+  ret bfloat %b
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+d,+zvfh,+zfbfmin,+zvfbfmin,+zba,+c -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+d,+zvfh,+zfbfmin,+zvfbfmin,+zba,+c -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %b = bitcast &lt;2 x i8&gt; %a to bfloat&#x27; (in function: bitcast_v2i8_bf16)
+warning: Instruction selection used fallback path for bitcast_v2i8_bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bitcast.4d4ed9c840.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitcast.ll">fixed-vectors-bitcast.ll</a><span class="dim">)</span></td><td class="l">bitcast_v2i8_bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+d,+zvfh,+zfbfmin,+zvfbfmin,+zba,+c -O2</code></td></tr><tr><td class="l">fixed-vectors-bitcast.eb1c0f3525.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitcast.ll">fixed-vectors-bitcast.ll</a><span class="dim">)</span></td><td class="l">bitcast_v2i8_bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+zve32f,+zvl128b,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve64d -O0 -code-model=medium</code></td></tr><tr><td class="l">rvp-simd-64.43a2746128.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-simd-64.ll">rvp-simd-64.ll</a><span class="dim">)</span></td><td class="l">test_pslidedownx_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

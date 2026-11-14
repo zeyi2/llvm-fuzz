@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 61 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">forced-atomics.9ba297eb28.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/forced-atomics.ll">forced-atomics.ll</a><span class="dim">)</span> @store32_monotonic via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zhinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @store32_monotonic(ptr %p) #0 {
+  %B = sdiv i64 -1, 0
+  store atomic i32 0, ptr %p monotonic, align 4
+  store i64 %B, ptr poison, align 4
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+zhinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+zhinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv i64 -1, 0&#x27; (in function: store32_monotonic)
+warning: Instruction selection used fallback path for store32_monotonic</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu.5816e56381.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/abdu.ll">abdu.ll</a><span class="dim">)</span></td><td class="l">abd_minmax_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">forced-atomics.9ba297eb28.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/forced-atomics.ll">forced-atomics.ll</a><span class="dim">)</span></td><td class="l">store32_monotonic</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbc-zbkc-intrinsic.796658cf10.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64zbc-zbkc-intrinsic.ll">rv64zbc-zbkc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul64h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr><tr><td class="l">uadd_sat.bd30706554.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/uadd_sat.ll">uadd_sat.ll</a><span class="dim">)</span></td><td class="l">func3</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">ucmp.d8ee6c624f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.64.64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

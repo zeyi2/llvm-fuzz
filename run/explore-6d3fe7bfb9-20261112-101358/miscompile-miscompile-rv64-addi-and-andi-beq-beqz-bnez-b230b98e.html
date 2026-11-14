@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,and,andi,beq,beqz,bnez</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,and,andi,beq,beqz,bnez</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,and,andi,beq,beqz,bnez <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.34eb3443.aa6d5a7c.17f1ddee42.ll <span class="dim">(mutant of</span> half-convert.34eb3443.aa6d5a7c.ll<span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicond -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+@G.4 = external global half
+@G.5 = external global i8
+@G.6 = external global i16
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(half %a) #0 {
+  %A13 = alloca i1, align 1
+  store i1 poison, ptr %A13, align 1
+  %A10 = alloca i1, align 1
+  store i1 false, ptr %A10, align 1
+  %A3 = alloca i128, align 8
+  store i128 0, ptr %A3, align 4
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %BB2
+  %C = fcmp ord half %a, +qnan
+  %1 = fptoui half %a to i8
+  store i1 %C, ptr @G.1, align 1
+  %C18 = icmp slt i1 %C, true
+  store i1 %C18, ptr @G.1, align 1
+  ret i8 %1
+
+T:                                                ; preds = %0
+  %LGV = load half, ptr @G.4, align 2
+  %C1 = fcmp true half %a, %LGV
+  store i1 %C1, ptr @G.1, align 1
+  %L4 = load i128, ptr %A3, align 4
+  switch i128 %L4, label %SW_D [
+    i128 10769460807439023009, label %SW_C
+    i128 5429173826221915841, label %SW_C5
+    i128 7648537247427253870, label %SW_C6
+    i128 6076078531730494432, label %SW_C7
+    i128 2965550282803030702, label %SW_C8
+    i128 415642598744017852, label %SW_C9
+  ]
+
+BB2:                                              ; preds = %BB14, %SW_C8, %SW_C7, %SW_C5, %SW_C, %SW_D
+  %B = sdiv i16 0, 1
+  store i16 %B, ptr @G.6, align 2
+  br label %BB
+
+F:                                                ; preds = %0
+  br label %BB
+
+SW_D:                                             ; preds = %SW_D, %T
+  %L11 = load i1, ptr %A10, align 1
+  br i1 %L11, label %SW_D, label %BB2
+
+SW_C:                                             ; preds = %T
+  br label %BB2
+
+SW_C5:                                            ; preds = %T
+  br label %BB2
+
+SW_C6:                                            ; preds = %T
+  %C12 = icmp uge i8 127, -1
+  store i1 %C12, ptr %A13, align 1
+  ret i8 1
+
+SW_C7:                                            ; preds = %SW_C7, %T
+  br i1 %C1, label %SW_C7, label %BB2
+
+SW_C8:                                            ; preds = %T
+  br label %BB2
+
+SW_C9:                                            ; preds = %BB14, %T
+  br i1 %C1, label %T15, label %F16
+
+BB14:                                             ; preds = %F16
+  br i1 %L, label %BB2, label %SW_C9
+
+T15:                                              ; preds = %SW_C9
+  %LGV17 = load i8, ptr @G.5, align 1
+  ret i8 %LGV17
+
+F16:                                              ; preds = %SW_C9
+  br label %BB14
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicond -O0&#x27; --funcs fcvt_wu_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">9 of 64 inputs differ (first: #12)
+SelectionDAG hash 5bef58d3690d6076, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicond -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicond -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicond -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-convert.34eb3443.aa6d5a7c.17f1ddee42.ll <span class="dim">(mutant of</span> half-convert.34eb3443.aa6d5a7c.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfh,+zicond -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

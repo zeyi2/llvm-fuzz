@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,beqz,bnez,bseti</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,beqz,bnez,bseti</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,beqz,bnez,bseti <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stores-of-loads-merging.3d4a7af7.bf1b3cb8.978c0330.6b89c813.14469cecc3.ll <span class="dim">(mutant of</span> stores-of-loads-merging.3d4a7af7.bf1b3cb8.978c0330.6b89c813.ll<span class="dim">)</span> @two_float_rotate via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+a,+zbb,+d,+xtheadba -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global i128
+@G.7 = external global float
+@G.8 = external global i1
+
+declare void @g()
+
+define void @two_float_rotate(ptr %p, ptr %q) {
+  %A4 = alloca ptr, align 8
+  store ptr poison, ptr %A4, align 8
+  %A = alloca ptr, align 8
+  store ptr poison, ptr %A, align 8
+  %p0 = getelementptr i8, ptr %p, i64 0
+  %p1 = getelementptr i8, ptr %p, i64 4
+  %x0 = load float, ptr %p0, align 8
+  %x1 = load float, ptr %p1, align 4
+  call void @g()
+  %q0 = getelementptr inbounds i8, ptr %q, i64 0
+  %L = load i1, ptr %q0, align 1
+  %q1 = getelementptr i8, ptr %q, i64 4
+  store float %x1, ptr %q0, align 8
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F
+  %LGV = load float, ptr @G.7, align 4
+  %LGV1 = load i128, ptr @G.6, align 4
+  %C5 = fcmp ule float %LGV, 0.000000e+00
+  %B = sub i128 170141183460469231731687303715884105727, %LGV1
+  store float %x0, ptr %q1, align 4
+  store i128 %B, ptr @G.6, align 4
+  %C1 = fcmp one float %x1, %x0
+  %G = getelementptr ptr, ptr %q, i16 32767
+  store i1 %C1, ptr %p0, align 1
+  store ptr %G, ptr %A, align 8
+  store i1 %C5, ptr @G.8, align 1
+  ret void
+
+T:                                                ; preds = %0
+  %B7 = fdiv float %x0, 0.000000e+00
+  %B6 = mul i16 -32768, 0
+  %C = fcmp une float 4.200000e+01, 0.000000e+00
+  %G9 = getelementptr i1, ptr %p, i16 %B6
+  store i1 %C, ptr %p0, align 1
+  %G3 = getelementptr i1, ptr %p0, i1 %C
+  store ptr %G3, ptr %A4, align 8
+  store i16 %B6, ptr %G3, align 2
+  store float %B7, ptr %G3, align 4
+  store ptr %G9, ptr %G3, align 8
+  ret void
+
+F:                                                ; preds = %0
+  %G1 = getelementptr ptr, ptr %p, i16 1
+  store ptr %G1, ptr %A, align 8
+  br label %BB
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+a,+zbb,+d,+xtheadba -O3&#x27; --funcs two_float_rotate snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">62 of 64 inputs differ (first: #0)
+SelectionDAG hash 66b0fa9d08c365f9, GlobalISel hash a7998b6450240ea3
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+a,+zbb,+d,+xtheadba -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+a,+zbb,+d,+xtheadba -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+a,+zbb,+d,+xtheadba -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">stores-of-loads-merging.3d4a7af7.bf1b3cb8.978c0330.6b89c813.14469cecc3.ll <span class="dim">(mutant of</span> stores-of-loads-merging.3d4a7af7.bf1b3cb8.978c0330.6b89c813.ll<span class="dim">)</span></td><td class="l">two_float_rotate</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+zicsr,+a,+zbb,+d,+xtheadba -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

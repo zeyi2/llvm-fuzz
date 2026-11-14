@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 76 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-load-store-fp.68e16e1832.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store-fp.ll">atomic-load-store-fp.ll</a><span class="dim">)</span> @atomic_store_f32_seq_cst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zdinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @atomic_store_f32_seq_cst(ptr %a, float %b) #0 {
+  %B = or i64 1, 0
+  store atomic float %b, ptr %a seq_cst, align 4
+  store i64 %B, ptr poison, align 4
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zdinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zdinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B = or i64 1, 0&#x27; (in function: atomic_store_f32_seq_cst)
+warning: Instruction selection used fallback path for atomic_store_f32_seq_cst</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store-fp.68e16e1832.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store-fp.ll">atomic-load-store-fp.ll</a><span class="dim">)</span></td><td class="l">atomic_store_f32_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zdinx -O2</code></td></tr><tr><td class="l">i64-icmp.74c935326c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/i64-icmp.ll">i64-icmp.ll</a><span class="dim">)</span></td><td class="l">icmp_ne_zext_inreg_small_constant</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zdinx -O2</code></td></tr><tr><td class="l">rotl-rotr.665231f6a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask_or_128_or_64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -enable-legalize-types-checking -mattr=+zdinx -O3</code></td></tr><tr><td class="l">rvp-scalar-rv64.4a1550f2fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvp-scalar-rv64.ll">rvp-scalar-rv64.ll</a><span class="dim">)</span></td><td class="l">mm_sati_minallones_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zhinx,+zicsr -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">tail-calls.3877f52ac8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/tail-calls.ll">tail-calls.ll</a><span class="dim">)</span></td><td class="l">caller_args</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

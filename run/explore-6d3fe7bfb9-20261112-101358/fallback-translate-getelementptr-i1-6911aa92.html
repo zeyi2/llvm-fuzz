@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: getelementptr i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: getelementptr i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: getelementptr i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 28 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">attributes.e7b837fced.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span> @atomic_load_i8_seq_cst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr
+
+; Function Attrs: nounwind
+define i8 @atomic_load_i8_seq_cst(ptr %a) #0 {
+  %G3 = getelementptr i1, ptr %a, i1 true
+  %LGV = load i16, ptr %G3, align 2
+  %1 = load atomic i8, ptr %a seq_cst, align 1
+  %G = getelementptr i8, ptr %a, i16 %LGV
+  store ptr %G, ptr @G.1, align 8
+  ret i8 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: getelementptr: &#x27;  %G3 = getelementptr i1, ptr %a, i1 true&#x27; (in function: atomic_load_i8_seq_cst)
+warning: Instruction selection used fallback path for atomic_load_i8_seq_cst</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.71e197dfac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+zve64x,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">attributes.e7b837fced.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">mem64.5aa1ad2953.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/mem64.ll">mem64.ll</a><span class="dim">)</span></td><td class="l">load_sext_zext_anyext_i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

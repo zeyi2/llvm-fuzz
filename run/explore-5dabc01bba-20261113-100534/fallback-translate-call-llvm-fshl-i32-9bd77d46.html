@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.fshl.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.fshl.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.fshl.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 14 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32zbb-zbkb.5fc4a06d38.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span> @rori_i32_fshl via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zhinx,+xtheadba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @rori_i32_fshl(i32 %a) #0 {
+  %1 = tail call i32 @llvm.fshl.i32(i32 %a, i32 %a, i32 31)
+  %B = urem i32 -2147483648, %1
+  ret i32 %B
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.fshl.i32(i32, i32, i32) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zhinx,+xtheadba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zhinx,+xtheadba -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.fshl.i32: &#x27;  %1 = tail call i32 @llvm.fshl.i32(i32 %a, i32 %a, i32 31)&#x27; (in function: rori_i32_fshl)
+warning: Instruction selection used fallback path for rori_i32_fshl</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv32zbb-zbkb.5fc4a06d38.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">rori_i32_fshl</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zhinx,+xtheadba -O0</code></td></tr><tr><td class="l">rv64zbb-zbkb.65803110cb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">rol_i32_nosext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zicsr,+zfinx -O0</code></td></tr><tr><td class="l">rv64zbb-zbkb.9fb36757fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">rol_i32_neg_constant_rhs</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zvkb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sext &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sext &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sext &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 3 configs, 2 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vnsra-vnsrl.a189f2709d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vnsra-vnsrl.ll">fixed-vectors-vnsra-vnsrl.ll</a><span class="dim">)</span> @vnsra_v8i16_v8i8_sext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global &lt;8 x i1&gt;
+
+define &lt;8 x i8&gt; @vnsra_v8i16_v8i8_sext(&lt;8 x i16&gt; %x, &lt;8 x i8&gt; %y) {
+  %sext = sext &lt;8 x i8&gt; %y to &lt;8 x i16&gt;
+  %C = icmp eq &lt;8 x i16&gt; %x, %x
+  %a = ashr &lt;8 x i16&gt; %x, %sext
+  %b = trunc &lt;8 x i16&gt; %a to &lt;8 x i8&gt;
+  store &lt;8 x i1&gt; %C, ptr @G.4, align 1
+  ret &lt;8 x i8&gt; %b
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sext: &#x27;  %sext = sext &lt;8 x i8&gt; %y to &lt;8 x i16&gt;&#x27; (in function: vnsra_v8i16_v8i8_sext)
+warning: Instruction selection used fallback path for vnsra_v8i16_v8i8_sext</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vaadd.0c5413156e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaadd.ll">fixed-vectors-vaadd.ll</a><span class="dim">)</span></td><td class="l">vaadd_vx_v8i8_floor</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+avoid-vxrm,+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vaadd.0c5413156e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaadd.ll">fixed-vectors-vaadd.ll</a><span class="dim">)</span></td><td class="l">vaadd_vv_v8i8_floor_ashr2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+avoid-vxrm,+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vaadd.0c5413156e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaadd.ll">fixed-vectors-vaadd.ll</a><span class="dim">)</span></td><td class="l">vaadd_vv_v8i8_ceil_sexti32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+avoid-vxrm,+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vaadd.12eccb2a9c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaadd.ll">fixed-vectors-vaadd.ll</a><span class="dim">)</span></td><td class="l">vaadd_vv_v8i8_ceil_sexti32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vnsra-vnsrl.a189f2709d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vnsra-vnsrl.ll">fixed-vectors-vnsra-vnsrl.ll</a><span class="dim">)</span></td><td class="l">vnsra_v8i16_v8i8_sext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

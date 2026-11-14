@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;), function emitPrologue, file RISCVFrameLowering.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;), function emitPrologue, file RISCVFrameLowering.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;), function emitPrologue, file RISCVFrameLowering.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32e.ada2609398.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32e.ll">rv32e.ll</a><span class="dim">)</span> @exhausted via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zvkb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/qhn7dGGGs">https://godbolt.org/z/qhn7dGGGs</a> (llc-assertions-trunk, checked 2026-11-12 14:11 UTC): <a href="https://godbolt.org/z/qhn7dGGGs">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+@G.1 = external global i1
+
+define i32 @exhausted(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %g) {
+  %LGV = load i32, ptr @G, align 4
+  %C = icmp ne i32 %e, %LGV
+  %C1 = icmp sgt i1 true, %C
+  %1 = add i32 %a, %b
+  %2 = add i32 %c, %1
+  %3 = add i32 %d, %2
+  %4 = add i32 %e, %3
+  %5 = add i32 %f, %4
+  %6 = add i32 %g, %5
+  store i1 %C1, ptr @G.1, align 1
+  ret i32 %6
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zvkb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/RISCVFrameLowering.cpp:1173: virtual void llvm::RISCVFrameLowering::emitPrologue(llvm::MachineFunction&amp;, llvm::MachineBasicBlock&amp;) const: Assertion `MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zvkb -O0 -global-isel=0</code></td><td>0</td><td>14</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zvkb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zvkb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVFrameLowering.cpp:1173: virtual void llvm::RISCVFrameLowering::emitPrologue(MachineFunction &amp;, MachineBasicBlock &amp;) const: Assertion `MF.getRegInfo().isReserved(FPReg) &amp;&amp; &quot;FP not reserved&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zvkb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Prologue/Epilogue Insertion &amp; Frame Finalization&#x27; on function &#x27;@exhausted&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000561b2ea3d9db llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000561b2ea3a881 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000561b2ea3e45b
+3  libc.so.6 0x00007f3787445330
+4  libc.so.6 0x00007f378749ec0c pthread_kill + 284
+5  libc.so.6 0x00007f378744527e gsignal + 30
+6  libc.so.6 0x00007f37874288ff abort + 223
+7  libc.so.6 0x00007f378742881b
+8  libc.so.6 0x00007f378743b517
+9  llc       0x0000561b2f82a93e
+10 llc       0x0000561b2f5d65f0
+11 llc       0x0000561b2f5d9707
+12 llc       0x0000561b2f011d01 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+13 llc       0x0000561b2ed99637 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x0000561b2eda1b52 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x0000561b2ed9a3e0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x0000561b2ea45082 llcMain + 12130
+17 llc       0x0000561b2e97f6af main + 63
+18 libc.so.6 0x00007f378742a1ca
+19 libc.so.6 0x00007f378742a28b __libc_start_main + 139
+20 llc       0x0000561b2e97f5a5 _start + 37</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv32e.ada2609398.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv32e.ll">rv32e.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e,+zvkb -O0</code></td></tr><tr><td class="l">target-abi-valid.463e4b6a30.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/target-abi-valid.ll">target-abi-valid.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi lp64e -mattr=+zfhmin,+zvkb -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

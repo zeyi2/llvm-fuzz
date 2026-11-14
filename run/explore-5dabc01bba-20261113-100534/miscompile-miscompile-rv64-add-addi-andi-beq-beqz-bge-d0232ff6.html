@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,beq,beqz,bge</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,beq,beqz,bge</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,beq,beqz,bge <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.f638f6b1.b830e5e1.c789755e5a.ll <span class="dim">(mutant of</span> float-convert.f638f6b1.b830e5e1.ll<span class="dim">)</span> @fcvt_w_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicond -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+@G.1 = external global i1
+@G.2 = external global i1
+
+; Function Attrs: nounwind
+define signext i8 @fcvt_w_s_i8(float %a) #0 {
+  %A1 = alloca ptr, align 8
+  store ptr poison, ptr %A1, align 8
+  %A6 = alloca i1, align 1
+  store i1 true, ptr %A6, align 1
+  %A = alloca i64, align 8
+  store i64 9223372036854775807, ptr %A, align 4
+  %LGV = load i128, ptr @G, align 4
+  %C = icmp ule i128 %LGV, 42
+  %B = fadd float %a, %a
+  %1 = fptosi float %B to i8
+  %L = load i64, ptr %A, align 4
+  switch i64 %L, label %SW_D [
+    i64 6406985415547878164, label %SW_C
+    i64 6785573307225709875, label %SW_C1
+    i64 367193284111272642, label %SW_C2
+    i64 -5965585882663280391, label %SW_C3
+    i64 3067523566627622833, label %SW_C4
+  ]
+
+BB:                                               ; preds = %SW_C4, %SW_C3, %SW_C2, %SW_C1, %SW_D
+  %C4 = fcmp true float %a, %a
+  store i1 %C, ptr @G.1, align 1
+  store i1 %C4, ptr @G.2, align 1
+  ret i8 %1
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %0
+  %C3 = fcmp oge float 1.401300e-45, %B
+  store i1 %C3, ptr %A1, align 1
+  ret i8 42
+
+SW_C1:                                            ; preds = %0
+  %G = getelementptr float, ptr %A6, i1 %C
+  store ptr %G, ptr %A1, align 8
+  br label %BB
+
+SW_C2:                                            ; preds = %0
+  br label %BB
+
+SW_C3:                                            ; preds = %SW_C3, %0
+  %L7 = load i1, ptr %A6, align 1
+  br i1 %L7, label %BB, label %SW_C3
+
+SW_C4:                                            ; preds = %SW_C4, %0
+  br i1 %C, label %BB, label %SW_C4
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicond -O1&#x27; --funcs fcvt_w_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">3 of 64 inputs differ (first: #12)
+SelectionDAG hash a0c2d26326127464, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicond -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicond -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicond -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.f638f6b1.b830e5e1.c789755e5a.ll <span class="dim">(mutant of</span> float-convert.f638f6b1.b830e5e1.ll<span class="dim">)</span></td><td class="l">fcvt_w_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicond -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

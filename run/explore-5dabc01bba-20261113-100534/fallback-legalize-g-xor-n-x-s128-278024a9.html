@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_XOR &lt;N x s128&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_XOR &lt;N x s128&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_XOR &lt;N x s128&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-abd.a56c724060.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span> @uabd_2d via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i64&gt; @uabd_2d(&lt;2 x i64&gt; %a, &lt;2 x i64&gt; %b) {
+  %A = alloca i8, align 1
+  store i8 poison, ptr %A, align 1
+  %a.zext = zext &lt;2 x i64&gt; %a to &lt;2 x i128&gt;
+  %b.zext = zext &lt;2 x i64&gt; %b to &lt;2 x i128&gt;
+  %sub = sub &lt;2 x i128&gt; %a.zext, %b.zext
+  %abs = call &lt;2 x i128&gt; @llvm.abs.v2i128(&lt;2 x i128&gt; %sub, i1 true)
+  %B = and i8 0, -128
+  %trunc = trunc &lt;2 x i128&gt; %abs to &lt;2 x i64&gt;
+  store i8 %B, ptr %A, align 1
+  ret &lt;2 x i64&gt; %trunc
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i128&gt; @llvm.abs.v2i128(&lt;2 x i128&gt;, i1 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;2 x s128&gt;) = G_XOR %23:_, %22:_ (in function: uabd_2d)
+warning: Instruction selection used fallback path for uabd_2d</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-abd.52c021371a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span></td><td class="l">uabd_2d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d -O3</code></td></tr><tr><td class="l">fixed-vectors-abd.a56c724060.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span></td><td class="l">uabd_2d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0</code></td></tr><tr><td class="l">fixed-vectors-abd.f77500cc32.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-abd.ll">fixed-vectors-abd.ll</a><span class="dim">)</span></td><td class="l">uabd_2d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

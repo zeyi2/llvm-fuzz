@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 23 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">tagged-globals.72abd8b0ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span> @global_int_load via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 --relocation-model=pic -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@global_int = external hidden global i32
+@G.4 = external global i1
+
+define i32 @global_int_load() #0 {
+  %B = urem i1 false, true
+  %load = load i32, ptr @global_int, align 4
+  store i1 %B, ptr @G.4, align 1
+  ret i32 %load
+}
+
+attributes #0 = { &quot;target-features&quot;=&quot;+tagged-globals&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 --relocation-model=pic -mattr=+zhinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 --relocation-model=pic -mattr=+zhinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %B = urem i1 false, true&#x27; (in function: global_int_load)
+warning: Instruction selection used fallback path for global_int_load</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp-fcanonicalize.a510682b99.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v8f16_nnan</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zvkb,+m -O0 -code-model=small</code></td></tr><tr><td class="l">half-maximum-minimum.f44a555380.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-maximum-minimum.ll">half-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O1</code></td></tr><tr><td class="l">tagged-globals.72abd8b0ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span></td><td class="l">global_int_load</td><td class="l"><code>-mtriple=riscv64 --relocation-model=pic -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CTLZ s64,s256~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CTLZ s64,s256~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CTLZ s64,s256~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">bitcast-cmp.855565a02c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/bitcast-cmp.ll">bitcast-cmp.ll</a><span class="dim">)</span> @cmp_plain_to_v16i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+rva23u64,+xtheadba -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i1 @cmp_plain_to_v16i16(ptr %a0, ptr %a1) {
+  %x = load i256, ptr %a0, align 32
+  %B = udiv i256 %x, %x
+  %cmp = icmp eq i256 %x, %B
+  ret i1 %cmp
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+rva23u64,+xtheadba -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+rva23u64,+xtheadba -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %1046:_(s64) = G_CTLZ %4:_(s256) (in function: cmp_plain_to_v16i16)
+warning: Instruction selection used fallback path for cmp_plain_to_v16i16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bitcast-cmp.30d1b099f2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/bitcast-cmp.ll">bitcast-cmp.ll</a><span class="dim">)</span></td><td class="l">cmp_v16i16_to_plain</td><td class="l"><code>-mtriple=riscv64 -mattr=+rva23u64,+xtheadba,+zbkb -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">bitcast-cmp.855565a02c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/bitcast-cmp.ll">bitcast-cmp.ll</a><span class="dim">)</span></td><td class="l">cmp_plain_to_v16i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+rva23u64,+xtheadba -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">idiv_large.07052aa0.6a099dff.4b50fb58ac.ll <span class="dim">(mutant of</span> idiv_large.07052aa0.6a099dff.ll<span class="dim">)</span></td><td class="l">udiv_i129</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zbb -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

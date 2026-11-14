@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 7 test files, 78 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-ilp32e.a4fca2e762.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span> @caller_large_scalars via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+declare i32 @callee_large_scalars(i128, fp128)
+
+define i32 @caller_large_scalars() {
+  %B = or i64 1, -1
+  %1 = call i32 @callee_large_scalars(i128 1, fp128 +inf)
+  store i64 %B, ptr @G.1, align 4
+  ret i32 %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B = or i64 1, -1&#x27; (in function: caller_large_scalars)
+warning: Instruction selection used fallback path for caller_large_scalars</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu.8d4679f967.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/abdu.ll">abdu.ll</a><span class="dim">)</span></td><td class="l">abd_minmax_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">alu64.e9628e75f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/alu64.ll">alu64.ll</a><span class="dim">)</span></td><td class="l">or</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">avgceils.182f0c089f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/avgceils.ll">avgceils.ll</a><span class="dim">)</span></td><td class="l">test_fixed_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">avgceils.42fa299a57.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/avgceils.ll">avgceils.ll</a><span class="dim">)</span></td><td class="l">test_fixed_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">calling-conv-ilp32e.a4fca2e762.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/calling-conv-ilp32e.ll">calling-conv-ilp32e.ll</a><span class="dim">)</span></td><td class="l">caller_large_scalars</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -frame-pointer=all -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">clmul.752e406ffe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">rotl-rotr.0861aebd9e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask_or_128_or_64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zve32x,+zdinx -O3</code></td></tr><tr><td class="l">rotl-rotr.51365a2973.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask_or_128_or_64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -enable-legalize-types-checking -mattr=+zdinx -O2</code></td></tr><tr><td class="l">rotl-rotr.7fbcf9d2ee.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask_or_128_or_64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O0 -code-model=small</code></td></tr><tr><td class="l">rotl-rotr.fefdc549b4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask_multiple</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">scmp.1c2e80de75.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.8.64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O1 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

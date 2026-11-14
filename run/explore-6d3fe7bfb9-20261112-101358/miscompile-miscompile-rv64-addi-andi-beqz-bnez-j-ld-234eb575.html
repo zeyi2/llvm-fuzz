@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,beqz,bnez,j,ld</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,beqz,bnez,j,ld</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,beqz,bnez,j,ld <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vror.a8b648fa.05d065ef7a.ll <span class="dim">(mutant of</span> fixed-vectors-vror.a8b648fa.ll<span class="dim">)</span> @vror_vi_v1i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;1 x i1&gt;
+@G.5 = external global i128
+@G.6 = external global i1
+
+define &lt;1 x i32&gt; @vror_vi_v1i32(&lt;1 x i32&gt; %a) {
+  %LGV = load i128, ptr @G.5, align 4
+  %x = call &lt;1 x i32&gt; @llvm.fshr.v1i32(&lt;1 x i32&gt; %a, &lt;1 x i32&gt; %a, &lt;1 x i32&gt; splat (i32 1))
+  switch i128 %LGV, label %SW_D [
+    i128 2485243579302075861, label %SW_C
+    i128 16360190125455047181, label %SW_C1
+    i128 16613242911449114066, label %SW_C2
+    i128 2622762328089378656, label %SW_C3
+    i128 13940380849269059046, label %SW_C4
+    i128 13655008456586678087, label %SW_C5
+    i128 16443456523980542505, label %SW_C6
+  ]
+
+BB:                                               ; preds = %SW_C6, %SW_C5, %SW_C1, %SW_C, %SW_D
+  %C = icmp sge &lt;1 x i32&gt; %x, %x
+  store &lt;1 x i1&gt; %C, ptr @G.2, align 1
+  ret &lt;1 x i32&gt; %x
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %0
+  br label %BB
+
+SW_C1:                                            ; preds = %SW_C1, %0
+  %LGV7 = load i1, ptr @G.6, align 1
+  br i1 %LGV7, label %BB, label %SW_C1
+
+SW_C2:                                            ; preds = %0
+  ret &lt;1 x i32&gt; %a
+
+SW_C3:                                            ; preds = %0
+  ret &lt;1 x i32&gt; %a
+
+SW_C4:                                            ; preds = %0
+  ret &lt;1 x i32&gt; %a
+
+SW_C5:                                            ; preds = %0
+  br label %BB
+
+SW_C6:                                            ; preds = %0
+  br label %BB
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;1 x i32&gt; @llvm.fshr.v1i32(&lt;1 x i32&gt;, &lt;1 x i32&gt;, &lt;1 x i32&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -O1&#x27; --funcs vror_vi_v1i32 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">34 of 64 inputs differ (first: #1)
+SelectionDAG hash a234a8089b4985b7, GlobalISel hash d67b7c7c82f32740
+b0: llc -mtriple=riscv64 -verify-machineinstrs -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vror.a8b648fa.05d065ef7a.ll <span class="dim">(mutant of</span> fixed-vectors-vror.a8b648fa.ll<span class="dim">)</span></td><td class="l">vror_vi_v1i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

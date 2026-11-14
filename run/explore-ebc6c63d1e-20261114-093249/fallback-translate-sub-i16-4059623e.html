@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 32 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">alu16.206605d952.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/alu16.ll">alu16.ll</a><span class="dim">)</span> @sub via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicond,+zhinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i16
+@G.3 = external global i1
+
+; Function Attrs: nounwind
+define i16 @sub(i16 %a, i16 %b) #0 {
+  %1 = sub i16 %a, %b
+  %B = urem i16 %b, %b
+  %C = icmp eq i8 1, -128
+  store i16 %B, ptr @G.2, align 2
+  store i1 %C, ptr @G.3, align 1
+  ret i16 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zicond,+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zicond,+zhinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %1 = sub i16 %a, %b&#x27; (in function: sub)
+warning: Instruction selection used fallback path for sub</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.6f693d9d06.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_subnsw_i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">alu16.206605d952.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/alu16.ll">alu16.ll</a><span class="dim">)</span></td><td class="l">sub</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicond,+zhinx -O2</code></td></tr><tr><td class="l">bitreverse-zbkb.c2a6c85896.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/bitreverse-zbkb.ll">bitreverse-zbkb.ll</a><span class="dim">)</span></td><td class="l">bitreverse_i8_plain_arg</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">bswap-bitreverse.b4ba7f8d02.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bswap_bitreverse_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

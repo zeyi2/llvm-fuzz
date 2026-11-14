@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x s32&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 929 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-i2fp.d674998055.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span> @ui2fp_v8i32_v8f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Yjz64c8s7">https://godbolt.org/z/Yjz64c8s7</a> (llc-assertions-trunk, checked 2026-11-13 14:00 UTC): <a href="https://godbolt.org/z/Yjz64c8s7">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x float&gt;
+@G.2 = external global i64
+
+define void @ui2fp_v8i32_v8f32(ptr %x, ptr %y) {
+  %A = alloca &lt;4 x float&gt;, align 16
+  store &lt;4 x float&gt; poison, ptr %A, align 16
+  %LGV1 = load i64, ptr @G.2, align 4
+  %LGV = load &lt;4 x float&gt;, ptr @G.1, align 16
+  %a = load &lt;8 x i32&gt;, ptr %x, align 32
+  %d = uitofp &lt;8 x i32&gt; %a to &lt;8 x float&gt;
+  %I = insertelement &lt;4 x float&gt; %LGV, float 1.000000e+00, i64 %LGV1
+  store &lt;8 x float&gt; %d, ptr %y, align 32
+  store &lt;4 x float&gt; %I, ptr %A, align 16
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>23</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %6:_, %11:_(s32), %12:_(s32) (in function: ui2fp_v8i32_v8f32)<br>warning: Instruction selection used fallback path for ui2fp_v8i32_v8f32</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O1 -global-isel=0</code></td><td>0</td><td>23</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %10:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %6:_, %11:_(s32), %12:_(s32) (in function: ui2fp_v8i32_v8f32)
+warning: Instruction selection used fallback path for ui2fp_v8i32_v8f32</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-i2fp.d674998055.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">ui2fp_v8i32_v8f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d -O1</code></td></tr><tr><td class="l">fp128.35cd195071.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fptosi_i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">half-zfa.451e2653d5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/half-zfa.ll">half-zfa.ll</a><span class="dim">)</span></td><td class="l">ffloor</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfa,+zfh,+zve32x,+d -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">sf_vqmaccus_4x8x4.3b8eb785ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/sf_vqmaccus_4x8x4.ll">sf_vqmaccus_4x8x4.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vqmaccus_4x8x4_tu_i32m1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+xsfvqmaccqoq -O1</code></td></tr><tr><td class="l">vrgatherei16.33d35154af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vrgatherei16.ll">vrgatherei16.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vrgatherei16_mask_vv_nxv32i16_nxv32i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin -O0 -code-model=medium</code></td></tr><tr><td class="l">xtheadvdot-vmaqa.56022e32a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/xtheadvdot-vmaqa.ll">xtheadvdot-vmaqa.ll</a><span class="dim">)</span></td><td class="l">intrinsic_th_vmaqa_mask_vx_nxv4i32_i8_nxv16i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadvdot -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

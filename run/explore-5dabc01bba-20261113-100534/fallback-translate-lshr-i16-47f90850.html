@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: lshr i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: lshr i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: lshr i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 29 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zicond-fp-select-zfinx.3f63ff3dbc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/zicond-fp-select-zfinx.ll">zicond-fp-select-zfinx.ll</a><span class="dim">)</span> @select_half_i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+zicond -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define dso_local noundef half @select_half_i1(i1 %cond, half %a, half %b) #0 {
+entry:
+  %B = lshr i16 0, 256
+  %sel = select i1 %cond, half %a, half %b
+  store i16 %B, ptr poison, align 2
+  ret half %sel
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+zicond -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+zicond -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: lshr: &#x27;  %B = lshr i16 0, 256&#x27; (in function: select_half_i1)
+warning: Instruction selection used fallback path for select_half_i1</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">div-by-constant.66019e781e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/div-by-constant.ll">div-by-constant.ll</a><span class="dim">)</span></td><td class="l">sdiv16_constant_srai</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zbb,+zhinx,+zve32x -O2</code></td></tr><tr><td class="l">fp128.296fcadad1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">uitofp_i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zcb,+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">idiv_large.07052aa0.ac4c646119.ll <span class="dim">(mutant of</span> idiv_large.07052aa0.ll<span class="dim">)</span></td><td class="l">udiv_i129</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zhinx -O1 -code-model=medium</code></td></tr><tr><td class="l">memcpy-inline.7befc59ece.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">zicond-fp-select-zfinx.3f63ff3dbc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/zicond-fp-select-zfinx.ll">zicond-fp-select-zfinx.ll</a><span class="dim">)</span></td><td class="l">select_half_i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+zicond -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

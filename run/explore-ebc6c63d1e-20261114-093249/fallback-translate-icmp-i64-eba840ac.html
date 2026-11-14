@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">32 in 27 configs, 24 test files, 395 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">iabs.caf0779693.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span> @select_abs64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr,+zdinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+
+define i64 @select_abs64(i64 %x) {
+  %1 = icmp slt i64 %x, 0
+  %B = mul i64 %x, 0
+  %2 = sub nsw i64 0, %x
+  %3 = select i1 %1, i64 %2, i64 %x
+  store i64 %B, ptr @G, align 4
+  ret i64 %3
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr,+zdinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr,+zdinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %1 = icmp slt i64 %x, 0&#x27; (in function: select_abs64)
+warning: Instruction selection used fallback path for select_abs64</pre>
+<h4>Occurrences (32) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.1194d6ec57.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_cmp_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">avgceilu.8ab4f855df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/avgceilu.ll">avgceilu.ll</a><span class="dim">)</span></td><td class="l">test_fixed_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+xtheadba -O0 -code-model=medium</code></td></tr><tr><td class="l">bswap-bitreverse.54c037ce2a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_bswap_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">bswap-bitreverse.bd2eb0dee2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bswap_bitreverse_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+experimental-p,+zba,+zfinx -O2</code></td></tr><tr><td class="l">clmul.4025592480.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zfinx -O1</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.5bb12064d0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_ctlz_i64_zero_poison</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+c,+zdinx -O2</code></td></tr><tr><td class="l">div-by-constant.42bd74cb43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/div-by-constant.ll">div-by-constant.ll</a><span class="dim">)</span></td><td class="l">udiv64_constant_add</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx,+a -O2</code></td></tr><tr><td class="l">double-convert-strict.1fe9f374a6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_lu</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64 -mattr=+zdinx,+zicond -O1</code></td></tr><tr><td class="l">fastcc-without-f-reg.30327e999f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_half_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fastcc-without-f-reg.d9bdcabc34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_float_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-select-int.720f6de7ef.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-int.ll">fixed-vectors-select-int.ll</a><span class="dim">)</span></td><td class="l">selectcc_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-select-int.720f6de7ef.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-int.ll">fixed-vectors-select-int.ll</a><span class="dim">)</span></td><td class="l">selectcc_v16i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fold-mem-offset.9563a97a1d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/fold-mem-offset.ll">fold-mem-offset.ll</a><span class="dim">)</span></td><td class="l">test_minsize</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">half-convert.ffa47be93e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_l</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinx -O1</code></td></tr><tr><td class="l">iabs.caf0779693.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/iabs.ll">iabs.ll</a><span class="dim">)</span></td><td class="l">select_abs64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr,+zdinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

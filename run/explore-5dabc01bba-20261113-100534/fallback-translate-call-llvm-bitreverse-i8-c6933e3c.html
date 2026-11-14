@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.bitreverse.i8~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.bitreverse.i8~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.bitreverse.i8~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">bswap-bitreverse.505ece2e4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span> @test_bitreverse_i7 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zbb,+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define i7 @test_bitreverse_i7(i7 %a) #0 {
+  %tmp = call i7 @llvm.bitreverse.i7(i7 %a)
+  %C = icmp ugt i7 %a, 63
+  %C1 = icmp sge i7 %a, 8
+  store i1 %C, ptr @G, align 1
+  store i1 %C1, ptr poison, align 1
+  ret i7 %tmp
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i7 @llvm.bitreverse.i7(i7) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zbb,+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zbb,+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.bitreverse.i7: &#x27;  %tmp = call i7 @llvm.bitreverse.i7(i7 %a)&#x27; (in function: test_bitreverse_i7)
+warning: Instruction selection used fallback path for test_bitreverse_i7</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bswap-bitreverse.505ece2e4a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_i7</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zbb,+zdinx -O0</code></td></tr><tr><td class="l">clmulh.4f2854500e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i4_bitreverse</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbc,+zdinx -O0</code></td></tr><tr><td class="l">clmulr.09f6c2e0d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i4_bitreverse</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

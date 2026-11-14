@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fcmp fp128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fcmp fp128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fcmp fp128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 7 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.88c7e5f213.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span> @fcvt_h_q via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin,+zhinx,+zihintpause -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+; Function Attrs: nounwind
+define void @fcvt_h_q(fp128 %x, ptr %y) #0 {
+  %C = fcmp oge fp128 %x, 1.000000e+00
+  %a = fptrunc fp128 %x to half
+  store half %a, ptr %y, align 2
+  store i1 %C, ptr @G.1, align 1
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin,+zhinx,+zihintpause -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin,+zhinx,+zihintpause -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fcmp: &#x27;  %C = fcmp oge fp128 %x, 1.000000e+00&#x27; (in function: fcvt_h_q)
+warning: Instruction selection used fallback path for fcvt_h_q</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-intrinsics.86272a5594.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">isnan_q_fpclass</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.0136564d7d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">minnum</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O1 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.7bf045420d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">cosh</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zvkb -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.b8d80d69e6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">modf</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+zhinx -O0 -code-model=small</code></td></tr><tr><td class="l">fp128.c3861b2dda.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fptrunc_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">half-convert.88c7e5f213.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_q</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin,+zhinx,+zihintpause -O0</code></td></tr><tr><td class="l">llvm.sincos.953fde4876.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/llvm.sincos.ll">llvm.sincos.ll</a><span class="dim">)</span></td><td class="l">test_sincos_f128</td><td class="l"><code>-mtriple=riscv32-linux-gnu -mattr=+zfinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">lrint-llrint.b2fcbd60e2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/lrint-llrint.ll">lrint-llrint.ll</a><span class="dim">)</span></td><td class="l">llrint_f128</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zihintpause -O1 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.c0f656fc8f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_two_indirect</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx,+zihintpause -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CLMULH s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CLMULH s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CLMULH s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 4 configs, 3 test files, 73 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmul-rv64.b9712c375e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/clmul-rv64.ll">clmul-rv64.ll</a><span class="dim">)</span> @clmulh_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.riscv.clmulh.i32(i32, i32) #0
+
+define signext i32 @clmulh_i32(i32 signext %a, i32 signext %b) {
+  %r = call i32 @llvm.riscv.clmulh.i32(i32 %a, i32 %b)
+  %B = xor i32 %a, %a
+  store i32 %B, ptr @G, align 4
+  ret i32 %r
+}
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(s32) = G_CLMULH %0:_, %1:_ (in function: clmulh_i32)
+warning: Instruction selection used fallback path for clmulh_i32</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul-rv32.c0fcc4396e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/clmul-rv32.ll">clmul-rv32.ll</a><span class="dim">)</span></td><td class="l">clmulh_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadba -O1 -code-model=medium</code></td></tr><tr><td class="l">clmul-rv64.5b34186208.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/clmul-rv64.ll">clmul-rv64.ll</a><span class="dim">)</span></td><td class="l">clmulh_i32_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1 -code-model=medium</code></td></tr><tr><td class="l">clmul-rv64.b9712c375e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/clmul-rv64.ll">clmul-rv64.ll</a><span class="dim">)</span></td><td class="l">clmulh_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O2</code></td></tr><tr><td class="l">rv64zbc-zbkc-intrinsic.4e0a2e0f81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64zbc-zbkc-intrinsic.ll">rv64zbc-zbkc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul32h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64d -O0 -code-model=small</code></td></tr><tr><td class="l">rv64zbc-zbkc-intrinsic.4e0a2e0f81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64zbc-zbkc-intrinsic.ll">rv64zbc-zbkc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul32h_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64d -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

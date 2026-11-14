@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_VECREDUCE_AND s8,&lt;N x s8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_VECREDUCE_AND s8,&lt;N x s8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_VECREDUCE_AND s8,&lt;N x s8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 2 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-int-vp.7782147cf1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int-vp.ll">fixed-vectors-reduction-int-vp.ll</a><span class="dim">)</span> @vpreduce_and_v2i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define signext i8 @vpreduce_and_v2i8(i8 signext %s, &lt;2 x i8&gt; %v, &lt;2 x i1&gt; %m, i32 zeroext %evl) {
+  %S = shufflevector &lt;2 x i1&gt; %m, &lt;2 x i1&gt; %m, &lt;2 x i32&gt; poison
+  %r = call i8 @llvm.vp.reduce.and.v2i8(i8 %s, &lt;2 x i8&gt; %v, &lt;2 x i1&gt; %m, i32 %evl)
+  store &lt;2 x i1&gt; %S, ptr poison, align 1
+  ret i8 %r
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i8 @llvm.vp.reduce.and.v2i8(i8, &lt;2 x i8&gt;, &lt;2 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %26:_(s8) = G_VECREDUCE_AND %23:_(&lt;2 x s8&gt;) (in function: vpreduce_and_v2i8)
+warning: Instruction selection used fallback path for vpreduce_and_v2i8</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-int-vp.7782147cf1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int-vp.ll">fixed-vectors-reduction-int-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_and_v2i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O1</code></td></tr><tr><td class="l">fixed-vectors-reduction-int-vp.f7a9777e11.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int-vp.ll">fixed-vectors-reduction-int-vp.ll</a><span class="dim">)</span></td><td class="l">front_ele_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O3</code></td></tr><tr><td class="l">fixed-vectors-reduction-int.109eb1acd9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int.ll">fixed-vectors-reduction-int.ll</a><span class="dim">)</span></td><td class="l">vreduce_and_v2i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zve64d -O1</code></td></tr><tr><td class="l">fixed-vectors-reduction-int.109eb1acd9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int.ll">fixed-vectors-reduction-int.ll</a><span class="dim">)</span></td><td class="l">vreduce_and_v3i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zve64d -O1</code></td></tr><tr><td class="l">fixed-vectors-reduction-int.7f69648aa6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int.ll">fixed-vectors-reduction-int.ll</a><span class="dim">)</span></td><td class="l">vreduce_and_v128i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v -O2 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-reduction-int.ec7d2c1541.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int.ll">fixed-vectors-reduction-int.ll</a><span class="dim">)</span></td><td class="l">vreduce_and_v3i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zicond -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

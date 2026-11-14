@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 9 test files, 53 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-widening-convert.809396b066.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-widening-convert.ll">rvp-widening-convert.ll</a><span class="dim">)</span> @test_pwcvtu_v4i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+a -O1 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i16&gt; @test_pwcvtu_v4i8(&lt;4 x i8&gt; %a) {
+  %A = alloca &lt;4 x i16&gt;, align 8
+  store &lt;4 x i16&gt; poison, ptr %A, align 8
+  %res = zext &lt;4 x i8&gt; %a to &lt;4 x i16&gt;
+  %B = srem &lt;4 x i16&gt; %res, zeroinitializer
+  store &lt;4 x i16&gt; %B, ptr %A, align 8
+  ret &lt;4 x i16&gt; %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+a -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+a -O1 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca &lt;4 x i16&gt;, align 8&#x27; (in function: test_pwcvtu_v4i8)
+warning: Instruction selection used fallback path for test_pwcvtu_v4i8</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bswap-vp.03c1534e.fe573c03a2.ll <span class="dim">(mutant of</span> fixed-vectors-bswap-vp.03c1534e.ll<span class="dim">)</span></td><td class="l">vp_bswap_v128i16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+zhinx,+zvbb -O0</code></td></tr><tr><td class="l">fixed-vectors-interleaved-access.3c71de8f.0a7b0048f2.ll <span class="dim">(mutant of</span> fixed-vectors-interleaved-access.3c71de8f.ll<span class="dim">)</span></td><td class="l">vpstore_factor7_masked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O2</code></td></tr><tr><td class="l">fixed-vectors-interleaved-access.3c71de8f.a62f5453d8.ll <span class="dim">(mutant of</span> fixed-vectors-interleaved-access.3c71de8f.ll<span class="dim">)</span></td><td class="l">vpstore_factor7_masked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vaadd.12eccb2a9c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaadd.ll">fixed-vectors-vaadd.ll</a><span class="dim">)</span></td><td class="l">vaadd_vx_v8i16_ceil</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vaadd.9b23e4386a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaadd.ll">fixed-vectors-vaadd.ll</a><span class="dim">)</span></td><td class="l">vaadd_vv_v8i8_floor_ashr2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">rvp-bitreverse-zbkb.f366ae1d.130d8ff49d.ll <span class="dim">(mutant of</span> rvp-bitreverse-zbkb.f366ae1d.ll<span class="dim">)</span></td><td class="l">test_bitreverse_v4i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbkb,+a,+zhinx -O1</code></td></tr><tr><td class="l">rvp-narrowing-clip.49a51bfd54.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-narrowing-clip.ll">rvp-narrowing-clip.ll</a><span class="dim">)</span></td><td class="l">pnclipru_v4i8_17</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+zhinx,+zve32x -O3 -code-model=medium</code></td></tr><tr><td class="l">rvp-narrowing-zip.69c4e23074.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-narrowing-zip.ll">rvp-narrowing-zip.ll</a><span class="dim">)</span></td><td class="l">test_pnziph_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbs,+zfinx -O3</code></td></tr><tr><td class="l">rvp-simd-32.9a02ece42f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_pm2add_v2i16_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+c -O0</code></td></tr><tr><td class="l">rvp-widening-convert.809396b066.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-widening-convert.ll">rvp-widening-convert.ll</a><span class="dim">)</span></td><td class="l">test_pwcvtu_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx,+a -O1 -code-model=medium</code></td></tr><tr><td class="l">rvp-widening-shift.53e2e9d2da.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a><span class="dim">)</span></td><td class="l">pwslai_v4i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+zvkb,+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

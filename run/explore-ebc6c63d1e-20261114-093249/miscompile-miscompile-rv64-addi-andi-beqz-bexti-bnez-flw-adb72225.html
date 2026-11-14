@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,beqz,bexti,bnez,flw</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,beqz,bexti,bnez,flw</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,beqz,bexti,bnez,flw <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.1aa797a9.e843a3875c.ll <span class="dim">(mutant of</span> stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.1aa797a9.ll<span class="dim">)</span> @two_float_rotate via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+f,+zfh -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+@G.3 = external global float
+@G.4 = external global i64
+@G.5 = external global i1
+
+declare void @g()
+
+define void @two_float_rotate(ptr %p, ptr %q) {
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %p0 = getelementptr i8, ptr %p, i64 0
+  %p1 = getelementptr i8, ptr %p, i64 4
+  %x0 = load float, ptr %p0, align 8
+  %x1 = load float, ptr %p1, align 4
+  %C6 = fcmp oeq float %x1, %x0
+  call void @g()
+  %q0 = getelementptr i8, ptr %q, i64 0
+  %C = fcmp une float %x1, %x1
+  %L = load i1, ptr %q0, align 1
+  store float %x1, ptr %q0, align 8
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F
+  %LGV5 = load i64, ptr @G.4, align 4
+  %G = getelementptr ptr, ptr %p, i8 -1
+  %L4 = load i64, ptr %G, align 4
+  %C7 = icmp ule i64 %L4, %LGV5
+  store i1 %C7, ptr @G.5, align 1
+  br i1 %B, label %T3, label %F4
+
+BB2:                                              ; preds = %BB1, %T3
+  store float %x0, ptr %G, align 4
+  %G2 = getelementptr ptr, ptr %p0, i1 %C
+  store ptr %G2, ptr %p0, align 8
+  ret void
+
+T:                                                ; preds = %0
+  %G3 = getelementptr &lt;8 x i8&gt;, ptr %p, i1 %C
+  store ptr %G3, ptr %p0, align 8
+  ret void
+
+F:                                                ; preds = %0
+  %B = lshr i1 %L, true
+  store i1 %B, ptr %p0, align 1
+  store i1 %C6, ptr @G.2, align 1
+  br label %BB
+
+T3:                                               ; preds = %T3, %BB
+  %LGV = load float, ptr @G.3, align 4
+  %C4 = fcmp uno float %x1, %LGV
+  %C3 = icmp slt i1 %C4, %C4
+  store i1 %C3, ptr poison, align 1
+  br i1 %C4, label %BB2, label %T3
+
+F4:                                               ; preds = %BB
+  %L5 = load i1, ptr %A, align 1
+  br i1 %L5, label %T2, label %F3
+
+BB1:                                              ; preds = %F3, %T2
+  br label %BB2
+
+T2:                                               ; preds = %F4
+  br label %BB1
+
+F3:                                               ; preds = %F4
+  br label %BB1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+f,+zfh -O0&#x27; --funcs two_float_rotate snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">62 of 64 inputs differ (first: #0)
+SelectionDAG hash fd70be306b72d7e8, GlobalISel hash 41fc3a904392f4cd
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+f,+zfh -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+f,+zfh -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+f,+zfh -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.1aa797a9.e843a3875c.ll <span class="dim">(mutant of</span> stores-of-loads-merging.3d4a7af7.050a5da2.7f59baa0.1aa797a9.ll<span class="dim">)</span></td><td class="l">two_float_rotate</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+b,+f,+zfh -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 27 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomicrmw-max-min-umax-umin.1d9be15334.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-max-min-umax-umin.ll">atomicrmw-max-min-umax-umin.ll</a><span class="dim">)</span> @atomicrmw_umax_i8_monotonic via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zdinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global ptr
+
+; Function Attrs: nounwind
+define i8 @atomicrmw_umax_i8_monotonic(ptr %ptr, i8 %val) #0 {
+  %B = add i8 -128, %val
+  %res = atomicrmw umax ptr %ptr, i8 %val monotonic, align 1
+  %G = getelementptr i8, ptr %ptr, i8 %res
+  store ptr %G, ptr @G, align 8
+  ret i8 %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+a,+zdinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+a,+zdinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %B = add i8 -128, %val&#x27; (in function: atomicrmw_umax_i8_monotonic)
+warning: Instruction selection used fallback path for atomicrmw_umax_i8_monotonic</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomicrmw-max-min-umax-umin.1d9be15334.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-max-min-umax-umin.ll">atomicrmw-max-min-umax-umin.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_umax_i8_monotonic</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">double-convert-strict.f9f1a7a4d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32 -mattr=+zdinx -O0</code></td></tr><tr><td class="l">float-intrinsics.236c8dd2fe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">acos_f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

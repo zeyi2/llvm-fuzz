@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 6 test files, 150 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rotl-rotr.b5e1b83b1d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span> @rotr_64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zihintpause,+zdinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+; Function Attrs: nounwind
+define i64 @rotr_64(i64 %x, i64 %y) #0 {
+  %z = sub i64 64, %y
+  %b = lshr i64 %x, %y
+  %C = icmp uge i16 -32768, 1
+  %c = shl i64 %x, %z
+  %d = or i64 %b, %c
+  store i1 %C, ptr @G.2, align 1
+  ret i64 %d
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zihintpause,+zdinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zihintpause,+zdinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %z = sub i64 64, %y&#x27; (in function: rotr_64)
+warning: Instruction selection used fallback path for rotr_64</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu.5816e56381.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/abdu.ll">abdu.ll</a><span class="dim">)</span></td><td class="l">abd_cmp_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">atomic-rmw-sub.8fcf9defd0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/atomic-rmw-sub.ll">atomic-rmw-sub.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_sub_i64_neg</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zfinx -O3 -code-model=medium</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.1689d5bc0a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_cttz_i32_zero_poison</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1 -code-model=medium</code></td></tr><tr><td class="l">double-intrinsics.f116e464e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">test_modf_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zfinx -O0</code></td></tr><tr><td class="l">neg-abs.31feeedd3c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/neg-abs.ll">neg-abs.ll</a><span class="dim">)</span></td><td class="l">expanded_neg_inv_abs64_unsigned</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zfinx -O0</code></td></tr><tr><td class="l">rotl-rotr.0360331f79.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask_or_128_or_64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+zdinx -O3 -code-model=medium</code></td></tr><tr><td class="l">rotl-rotr.7c7cdcc114.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zdinx -O3</code></td></tr><tr><td class="l">rotl-rotr.b5e1b83b1d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zihintpause,+zdinx -O3</code></td></tr><tr><td class="l">rotl-rotr.fae49b63f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_64_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -enable-legalize-types-checking -mattr=+zdinx,+zbs -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

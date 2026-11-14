@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 77 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">add-imm64-to-sub.ea77c4a177.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/add-imm64-to-sub.ll">add-imm64-to-sub.ll</a><span class="dim">)</span> @reuse_neg_const_chain via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbb,+zbs,+zdinx,+zve32x -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i8
+
+define i64 @reuse_neg_const_chain(i64 %ctrl, i8 zeroext %h) {
+  %conv = zext i8 %h to i64
+  %mul = mul nuw i64 %conv, 72340172838076673
+  %xor = xor i64 %mul, %ctrl
+  %sub = add i64 %xor, -72340172838076673
+  %not = and i64 %xor, -9187201950435737472
+  %and = xor i64 %not, -9187201950435737472
+  %B = lshr i8 %h, %h
+  %and1 = and i64 %and, %sub
+  store i8 %B, ptr @G.2, align 1
+  ret i64 %and1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+zbb,+zbs,+zdinx,+zve32x -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+zbb,+zbs,+zdinx,+zve32x -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %conv = zext i8 %h to i64&#x27; (in function: reuse_neg_const_chain)
+warning: Instruction selection used fallback path for reuse_neg_const_chain</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.15e12d0448.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">add-imm64-to-sub.ea77c4a177.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/add-imm64-to-sub.ll">add-imm64-to-sub.ll</a><span class="dim">)</span></td><td class="l">reuse_neg_const_chain</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbb,+zbs,+zdinx,+zve32x -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">clmulh.d31b70e018.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zdinx -O3</code></td></tr><tr><td class="l">machine-sink-load-immediate.5f0574e306.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/machine-sink-load-immediate.ll">machine-sink-load-immediate.ll</a><span class="dim">)</span></td><td class="l">switch_dispatch</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">simplify-condbr.d1d06aa090.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/simplify-condbr.ll">simplify-condbr.ll</a><span class="dim">)</span></td><td class="l">S_regrepeat</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: add,addi,andi,call,flw,fmv.w.x</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: add,addi,andi,call,flw,fmv.w.x</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: add,addi,andi,call,flw,fmv.w.x <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-fclass.c32dc663.6931ad9893.ll <span class="dim">(mutant of</span> float-fclass.c32dc663.ll<span class="dim">)</span> @fpclass via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+f -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+@G.2 = external global i32
+
+define i1 @fpclass(ptr %x) {
+  %A5 = alloca i128, align 8
+  store i128 poison, ptr %A5, align 4
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %B = or i32 0, 1
+  %B1 = add i32 %B, %B
+  %G = getelementptr ptr, ptr %x, i32 %B
+  %B4 = or i128 -170141183460469231731687303715884105728, 0
+  %G8 = getelementptr float, ptr %A5, i16 -32768
+  %L4 = load i1, ptr %A, align 1
+  store i128 %B4, ptr %A5, align 4
+  br i1 %L4, label %T, label %F
+
+BB:                                               ; preds = %T
+  %L2 = load i1, ptr %G, align 1
+  %a = load float, ptr %G, align 4
+  %C = fcmp ogt float %a, 0.000000e+00
+  %cmp = call i1 @llvm.is.fpclass.f32(float %a, /* (nan inf zero nsub nnorm) */ i32 639)
+  %G3 = getelementptr i8, ptr %x, i1 %L2
+  store i32 %B, ptr %G3, align 4
+  store i32 %B1, ptr %G, align 4
+  store ptr %G8, ptr %A, align 8
+  store i1 %C, ptr %G3, align 1
+  ret i1 %cmp
+
+T:                                                ; preds = %0
+  %B8 = srem i16 -1, 0
+  store i16 %B8, ptr %A, align 2
+  br label %BB
+
+F:                                                ; preds = %0
+  %LGV9 = load i32, ptr @G.2, align 4
+  %B10 = ashr i32 %B1, %LGV9
+  %LGV = load i1, ptr @G.1, align 1
+  store i32 %B10, ptr poison, align 4
+  ret i1 %LGV
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i1 @llvm.is.fpclass.f32(float, i32 immarg) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -mattr=+f -O0&#x27; --funcs fpclass snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">62 of 64 inputs differ (first: #1)
+SelectionDAG hash ca96f5202b11243b, GlobalISel hash c34839b7401e38b3
+b0: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+f -O0 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+f -O2 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+f -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-fclass.c32dc663.6931ad9893.ll <span class="dim">(mutant of</span> float-fclass.c32dc663.ll<span class="dim">)</span></td><td class="l">fpclass</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+f -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

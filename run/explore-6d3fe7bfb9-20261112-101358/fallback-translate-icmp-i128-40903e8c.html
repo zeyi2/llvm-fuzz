@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">13 in 12 configs, 13 test files, 163 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fp-fcanonicalize.64d9aa2e05.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span> @fcanonicalize_v2f64_nnan via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x double&gt; @fcanonicalize_v2f64_nnan(&lt;2 x double&gt; %x) {
+  %C = icmp eq i128 18446744073709551616, 18446744073709551616
+  %z = call nnan &lt;2 x double&gt; @llvm.canonicalize.v2f64(&lt;2 x double&gt; %x)
+  store i1 %C, ptr poison, align 1
+  ret &lt;2 x double&gt; %z
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x double&gt; @llvm.canonicalize.v2f64(&lt;2 x double&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp eq i128 18446744073709551616, 18446744073709551616&#x27; (in function: fcanonicalize_v2f64_nnan)
+warning: Instruction selection used fallback path for fcanonicalize_v2f64_nnan</pre>
+<h4>Occurrences (13):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul.d40f2b306a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i128</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zicsr -O2</code></td></tr><tr><td class="l">double-intrinsics-strict.6ba400d09f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/double-intrinsics-strict.ll">double-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">sin_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64 -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-cttz-vp.5c1b8463.49e4f6d2d3.ll <span class="dim">(mutant of</span> fixed-vectors-cttz-vp.5c1b8463.ll<span class="dim">)</span></td><td class="l">vp_cttz_v16i64_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+zhinx,+zihintpause -O3</code></td></tr><tr><td class="l">fixed-vectors-mask-buildvec.8a1b10d18e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-mask-buildvec.ll">fixed-vectors-mask-buildvec.ll</a><span class="dim">)</span></td><td class="l">buildvec_mask_v128i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vsaddu-vp.e3f03bde14.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vsaddu-vp.ll">fixed-vectors-vsaddu-vp.ll</a><span class="dim">)</span></td><td class="l">vsaddu_vv_v4i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">fp-fcanonicalize.64d9aa2e05.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f64_nnan</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbb -O1</code></td></tr><tr><td class="l">rv64-float-convert-strict.36ae286584.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64-float-convert-strict.ll">rv64-float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -disable-strictnode-mutation -mattr=+zfinx -O0 -code-model=medium</code></td></tr><tr><td class="l">rv64d-double-convert-strict.fd6590eac6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64d-double-convert-strict.ll">rv64d-double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">uitofp_aext_i32_to_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -disable-strictnode-mutation -mattr=+zdinx,+a,+zba -O1</code></td></tr><tr><td class="l">scmp.637cb22459.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.32.32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx,+xtheadba -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">shifts.cbe8840ef4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/shifts.ll">shifts.ll</a><span class="dim">)</span></td><td class="l">lshr128</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">short-forward-branch-opt-load-atomic-acquire-seq_cst.22c4584c94.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/short-forward-branch-opt-load-atomic-acquire-seq_cst.ll">short-forward-branch-opt-load-atomic-acquire-seq_cst.ll</a><span class="dim">)</span></td><td class="l">test_i8_s_store_4</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+a,+short-forward-branch-ialu,+zdinx -O3</code></td></tr><tr><td class="l">xaluo.a1dd6ba3d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">smulo.select.i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zdinx -O1</code></td></tr><tr><td class="l">xandesvsinload-vlnu8.b4ee8c37.b86c66af6d.ll <span class="dim">(mutant of</span> xandesvsinload-vlnu8.b4ee8c37.ll<span class="dim">)</span></td><td class="l">intrinsic_nds_vlnu_v_nxv2i8_nxv2i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zve64x,+xandesvsintload,+zdinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

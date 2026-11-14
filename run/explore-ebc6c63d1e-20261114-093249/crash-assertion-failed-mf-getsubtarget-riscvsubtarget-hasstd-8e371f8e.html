@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vfadd.a7476a8ae4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vfadd.ll">vfadd.ll</a><span class="dim">)</span> @intrinsic_vfadd_mask_vv_nxv2f32_nxv2f32_nxv2f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zvfh,+zbs -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/sbrjTPxc4">https://godbolt.org/z/sbrjTPxc4</a> (llc-assertions-trunk, checked 2026-11-14 13:31 UTC): <a href="https://godbolt.org/z/sbrjTPxc4">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 2 x float&gt; @intrinsic_vfadd_mask_vv_nxv2f32_nxv2f32_nxv2f32(&lt;vscale x 2 x float&gt; %0, &lt;vscale x 2 x float&gt; %1, &lt;vscale x 2 x float&gt; %2, &lt;vscale x 2 x i1&gt; %3, i32 %4) #0 {
+entry:
+  switch i32 %4, label %SW_D [
+    i32 1612577238, label %SW_C
+    i32 -443676776, label %SW_C1
+    i32 46305290, label %SW_C2
+  ]
+
+BB:                                               ; preds = %SW_C2, %SW_C, %SW_D
+  %a = call &lt;vscale x 2 x float&gt; @llvm.riscv.vfadd.mask.nxv2f32.nxv2f32.i32(&lt;vscale x 2 x float&gt; %0, &lt;vscale x 2 x float&gt; %1, &lt;vscale x 2 x float&gt; %2, &lt;vscale x 2 x i1&gt; %3, i32 0, i32 %4, i32 1)
+  ret &lt;vscale x 2 x float&gt; %a
+
+SW_D:                                             ; preds = %entry
+  br label %BB
+
+SW_C:                                             ; preds = %entry
+  br label %BB
+
+SW_C1:                                            ; preds = %entry
+  ret &lt;vscale x 2 x float&gt; splat (float 4.200000e+01)
+
+SW_C2:                                            ; preds = %entry
+  br label %BB
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 2 x float&gt; @llvm.riscv.vfadd.mask.nxv2f32.nxv2f32.i32(&lt;vscale x 2 x float&gt;, &lt;vscale x 2 x float&gt;, &lt;vscale x 2 x float&gt;, &lt;vscale x 2 x i1&gt;, i32 immarg, i32, i32 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zvfh,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">note: hard-float &#x27;d&#x27; ABI can&#x27;t be used for a target that doesn&#x27;t support the D instruction set extension (ignoring target-abi)<br>llc: /root/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVRegisterBankInfo.cpp:569: virtual const llvm::RegisterBankInfo::InstructionMapping&amp; llvm::RISCVRegisterBankInfo::getInstrMapping(const llvm::MachineInstr&amp;) const: Assertion `MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zvfh,+zbs -O2 -global-isel=0</code></td><td>0</td><td>12</td><td class="msg err">note: hard-float &#x27;d&#x27; ABI can&#x27;t be used for a target that doesn&#x27;t support the D instruction set extension (ignoring target-abi)</td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zvfh,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zvfh,+zbs -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">note: hard-float &#x27;d&#x27; ABI can&#x27;t be used for a target that doesn&#x27;t support the D instruction set extension (ignoring target-abi)
+llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVRegisterBankInfo.cpp:569: virtual const RegisterBankInfo::InstructionMapping &amp;llvm::RISCVRegisterBankInfo::getInstrMapping(const MachineInstr &amp;) const: Assertion `MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zvfh,+zbs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RegBankSelect&#x27; on function &#x27;@intrinsic_vfadd_mask_vv_nxv2f32_nxv2f32_nxv2f32&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055b60563de5b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055b60563ad01 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055b60563e8db
+3  libc.so.6 0x00007fa9e4c45330
+4  libc.so.6 0x00007fa9e4c9ec0c pthread_kill + 284
+5  libc.so.6 0x00007fa9e4c4527e gsignal + 30
+6  libc.so.6 0x00007fa9e4c288ff abort + 223
+7  libc.so.6 0x00007fa9e4c2881b
+8  libc.so.6 0x00007fa9e4c3b517
+9  llc       0x000055b6068bfe5b
+10 llc       0x000055b607825327
+11 llc       0x000055b607824745 llvm::RegBankSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 197
+12 llc       0x000055b605c14c01 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+13 llc       0x000055b60599a807 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x000055b6059a2d22 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x000055b60599b5b0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x000055b6056458d4
+17 llc       0x000055b605642c21 llcMain + 1665
+18 llc       0x000055b60557f0af main + 63
+19 libc.so.6 0x00007fa9e4c2a1ca
+20 libc.so.6 0x00007fa9e4c2a28b __libc_start_main + 139
+21 llc       0x000055b60557efa5 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vfadd.a7476a8ae4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vfadd.ll">vfadd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zvfh,+zbs -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

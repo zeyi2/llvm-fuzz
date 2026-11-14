@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 21 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stack-realignment.fcbc0da351.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/stack-realignment.ll">stack-realignment.ll</a><span class="dim">)</span> @caller_no_realign16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+m,+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare void @callee(ptr)
+
+define void @caller_no_realign16() #0 {
+  %B = mul &lt;2 x i64&gt; zeroinitializer, splat (i64 1)
+  %1 = alloca i8, align 16
+  call void @callee(ptr %1)
+  store &lt;2 x i64&gt; %B, ptr %1, align 16
+  ret void
+}
+
+attributes #0 = { &quot;no-realign-stack&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+m,+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+m,+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %B = mul &lt;2 x i64&gt; zeroinitializer, splat (i64 1)&#x27; (in function: caller_no_realign16)
+warning: Instruction selection used fallback path for caller_no_realign16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-zext.5e2b42e825.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/atomic-load-zext.ll">atomic-load-zext.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i1_seq_cst</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zdinx,+zbkb -O3</code></td></tr><tr><td class="l">reserved-regs.756574c705.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/reserved-regs.ll">reserved-regs.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+reserve-x25,+zhinx -O2</code></td></tr><tr><td class="l">rv64zbb.f0d4923951.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">ctpop_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zcb -O3</code></td></tr><tr><td class="l">stack-realignment.fcbc0da351.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/stack-realignment.ll">stack-realignment.ll</a><span class="dim">)</span></td><td class="l">caller_no_realign16</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+m,+zdinx -O0</code></td></tr><tr><td class="l">umulh.6a75bda1e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_v2i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zba,+zhinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

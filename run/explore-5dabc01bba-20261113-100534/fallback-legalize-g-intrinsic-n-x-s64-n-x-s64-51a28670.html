@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;N x s64&gt;,&lt;N x s64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;N x s64&gt;,&lt;N x s64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;N x s64&gt;,&lt;N x s64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 1 test files, 39 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-zvdot4a8i-i64.e30829d105.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i-i64.ll">fixed-vectors-zvdot4a8i-i64.ll</a><span class="dim">)</span> @vdot4a_v2i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zvfh -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i64&gt; @vdot4a_v2i64(&lt;2 x i64&gt; %acc, &lt;16 x i8&gt; %a, &lt;16 x i8&gt; %b) {
+entry:
+  %A = alloca i8, align 1
+  store i8 poison, ptr %A, align 1
+  %E = extractelement &lt;16 x i8&gt; %a, i8 -1
+  %a.sext = sext &lt;16 x i8&gt; %a to &lt;16 x i64&gt;
+  %b.sext = sext &lt;16 x i8&gt; %b to &lt;16 x i64&gt;
+  %mul = mul &lt;16 x i64&gt; %a.sext, %b.sext
+  %res = call &lt;2 x i64&gt; @llvm.vector.partial.reduce.add.v2i64.v16i64(&lt;2 x i64&gt; %acc, &lt;16 x i64&gt; %mul)
+  store i8 %E, ptr %A, align 1
+  ret &lt;2 x i64&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i64&gt; @llvm.vector.partial.reduce.add.v2i64.v16i64(&lt;2 x i64&gt;, &lt;16 x i64&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zvfh -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zvfh -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %14:_(&lt;2 x s64&gt;) = G_INTRINSIC intrinsic(@llvm.vector.partial.reduce.add), %0:_(&lt;2 x s64&gt;), %13:_(&lt;16 x s64&gt;) (in function: vdot4a_v2i64)
+warning: Instruction selection used fallback path for vdot4a_v2i64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-zvdot4a8i-i64.1e1b3f3ffb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i-i64.ll">fixed-vectors-zvdot4a8i-i64.ll</a><span class="dim">)</span></td><td class="l">vdot4asu_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d -O1</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i-i64.e30829d105.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i-i64.ll">fixed-vectors-zvdot4a8i-i64.ll</a><span class="dim">)</span></td><td class="l">vdot4a_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zvfh -O0</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i-i64.e30829d105.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i-i64.ll">fixed-vectors-zvdot4a8i-i64.ll</a><span class="dim">)</span></td><td class="l">vdot4au_v4i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zvfh -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

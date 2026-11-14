@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.memcpy.p0.p0.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.memcpy.p0.p0.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.memcpy.p0.p0.i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 5 configs, 1 test files, 14 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memcpy.cf5fbdf3fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span> @unaligned_memcpy2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global i8
+
+; Function Attrs: nounwind
+define void @unaligned_memcpy2(ptr captures(none) %dest, ptr %src) #0 {
+entry:
+  tail call void @llvm.memcpy.p0.p0.i64(ptr %dest, ptr %src, i64 2, i1 false)
+  %B = or i8 1, 0
+  store i8 %B, ptr @G.6, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.memcpy.p0.p0.i64: &#x27;  tail call void @llvm.memcpy.p0.p0.i64(ptr align 1 %dest, ptr align 1 %src, i64 2, i1 false)&#x27; (in function: unaligned_memcpy2)
+warning: Instruction selection used fallback path for unaligned_memcpy2</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memcpy.2a8420476c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy2</td><td class="l"><code>-mtriple=riscv64 -mattr=+unaligned-scalar-mem,+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.b04a3dd4f1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy15</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.b04a3dd4f1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy31</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.cf5fbdf3fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy2</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.cf5fbdf3fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy31</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.cf5fbdf3fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.efd1ca977b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">unaligned_memcpy15</td><td class="l"><code>-mtriple=riscv64 -mattr=+unaligned-scalar-mem,+zvkb,+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.f26fb8680d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy31</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx,+zcb -O2 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">memcpy.f26fb8680d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">memcpy_i64_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx,+zcb -O2 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

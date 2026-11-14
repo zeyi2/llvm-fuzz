@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 10 configs, 10 test files, 110 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">roundeven-vp.19cdfe0dc0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/roundeven-vp.ll">roundeven-vp.ll</a><span class="dim">)</span> @vp_roundeven_nxv16f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 16 x float&gt; @vp_roundeven_nxv16f32(&lt;vscale x 16 x float&gt; %va, &lt;vscale x 16 x i1&gt; %m, i32 zeroext %evl) {
+  %A = alloca &lt;vscale x 16 x i1&gt;, align 2
+  store &lt;vscale x 16 x i1&gt; poison, ptr %A, align 2
+  %B = sdiv &lt;vscale x 16 x i1&gt; %m, %m
+  %v = call &lt;vscale x 16 x float&gt; @llvm.roundeven.nxv16f32(&lt;vscale x 16 x float&gt; %va)
+  store &lt;vscale x 16 x i1&gt; %B, ptr %A, align 2
+  ret &lt;vscale x 16 x float&gt; %v
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 16 x float&gt; @llvm.roundeven.nxv16f32(&lt;vscale x 16 x float&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv &lt;vscale x 16 x i1&gt; %m, %m&#x27; (in function: vp_roundeven_nxv16f32)
+warning: Instruction selection used fallback path for vp_roundeven_nxv16f32</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">roundeven-vp.19cdfe0dc0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/roundeven-vp.ll">roundeven-vp.ll</a><span class="dim">)</span></td><td class="l">vp_roundeven_nxv16f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+v -O2</code></td></tr><tr><td class="l">strided-vpload.34fed32aa0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/strided-vpload.ll">strided-vpload.ll</a><span class="dim">)</span></td><td class="l">strided_vpload_nxv1i8_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+optimized-zero-stride-load -O0</code></td></tr><tr><td class="l">vfncvt-x-bf.7771e4e429.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vfncvt-x-bf.ll">vfncvt-x-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvt_mask_x.f.w_nxv8i8_nxv8bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa,+zihintpause,+zicond -O0</code></td></tr><tr><td class="l">vfwnmsac-bf.2450b7e6c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vfwnmsac-bf.ll">vfwnmsac-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwnmsac_mask_vv_nxv2f32_nxv2bf16_nxv2bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa -O0</code></td></tr><tr><td class="l">vfwsub.w.2bdb828354.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vfwsub.w.ll">vfwsub.w.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwsub.w_mask_wv_tie_nxv4f32_nxv4f32_nxv4f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfh -O3</code></td></tr><tr><td class="l">vleff.2871407523.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vleff.ll">vleff.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vleff_mask_v_nxv8i64_nxv8i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfhmin,+zvfbfmin -O3</code></td></tr><tr><td class="l">vmsgt.462aa4c3fe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vmsgt.ll">vmsgt.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmsgt_vv_nxv2i64_nxv2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O0 -code-model=medium</code></td></tr><tr><td class="l">vpmerge-sdnode.b27701d4fe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vi_nxv32i16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfhmin,+v,+m -O2</code></td></tr><tr><td class="l">vpstore.e74d54fa89.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vpstore.ll">vpstore.ll</a><span class="dim">)</span></td><td class="l">vpstore_nxv1i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v -O0</code></td></tr><tr><td class="l">vreductions-mask.a62d2769a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/vreductions-mask.ll">vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_xor_nxv512i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+zvbb -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem &lt;N x bfloat&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem &lt;N x bfloat&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem &lt;N x bfloat&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 70 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-lrint.c79393385a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-lrint.ll">fixed-vectors-lrint.ll</a><span class="dim">)</span> @lrint_v4bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zicsr,+zfh -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i64&gt; @lrint_v4bf16(&lt;4 x bfloat&gt; %x) {
+  %B = frem &lt;4 x bfloat&gt; %x, splat (bfloat +inf)
+  %a = call &lt;4 x i64&gt; @llvm.lrint.v4i64.v4bf16(&lt;4 x bfloat&gt; %B)
+  ret &lt;4 x i64&gt; %a
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x i64&gt; @llvm.lrint.v4i64.v4bf16(&lt;4 x bfloat&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zicsr,+zfh -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zicsr,+zfh -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem &lt;4 x bfloat&gt; %x, splat (bfloat +inf)&#x27; (in function: lrint_v4bf16)
+warning: Instruction selection used fallback path for lrint_v4bf16</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fmaximum.d48ce41e87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fmaximum.ll">fixed-vectors-fmaximum.ll</a><span class="dim">)</span></td><td class="l">vfmax_v4bf16_vv</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin -O1</code></td></tr><tr><td class="l">fixed-vectors-fp-buildvec-bf16.95c5ca1136.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp-buildvec-bf16.ll">fixed-vectors-fp-buildvec-bf16.ll</a><span class="dim">)</span></td><td class="l">splat_idx_v4bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfbfmin,+f,+d,+zfa -O0</code></td></tr><tr><td class="l">fixed-vectors-lrint.c79393385a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-lrint.ll">fixed-vectors-lrint.ll</a><span class="dim">)</span></td><td class="l">lrint_v4bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+f,+d,+zvfhmin,+zvfbfmin,+zicsr,+zfh -O1</code></td></tr><tr><td class="l">fixed-vectors-scalarized.147d52d39f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-scalarized.ll">fixed-vectors-scalarized.ll</a><span class="dim">)</span></td><td class="l">fpext_v8bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbkb -O1</code></td></tr><tr><td class="l">fixed-vectors-vfclass.498cf96e0a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfclass.ll">fixed-vectors-vfclass.ll</a><span class="dim">)</span></td><td class="l">isinf_v4bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+experimental-zvfbfa,+v -O2</code></td></tr><tr><td class="l">fixed-vectors-vfpext-constrained-sdnode.ad9741edf9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfpext-constrained-sdnode.ll">fixed-vectors-vfpext-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfpext_v2bf16_v2f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zvfbfmin -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

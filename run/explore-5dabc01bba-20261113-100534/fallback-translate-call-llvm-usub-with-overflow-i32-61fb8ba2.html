@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.usub.with.overflow.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.usub.with.overflow.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.usub.with.overflow.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 1 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xaluo.dc444a0969.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span> @usubo.not.i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.8 = external global { i32, i1 }
+
+define i1 @usubo.not.i32(i32 signext %v1, i32 signext %v2) {
+entry:
+  %t = call { i32, i1 } @llvm.usub.with.overflow.i32(i32 %v1, i32 %v2)
+  %I = insertvalue { i32, i1 } %t, i32 -1, 0
+  %obit = extractvalue { i32, i1 } %t, 1
+  %ret = xor i1 %obit, true
+  store { i32, i1 } %I, ptr @G.8, align 4
+  ret i1 %ret
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare { i32, i1 } @llvm.usub.with.overflow.i32(i32, i32) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.usub.with.overflow.i32: &#x27;  %t = call { i32, i1 } @llvm.usub.with.overflow.i32(i32 %v1, i32 %v2)&#x27; (in function: usubo.not.i32)
+warning: Instruction selection used fallback path for usubo.not.i32</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">xaluo.643f363499.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">usubo.br.i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zba,+zfinx -O1</code></td></tr><tr><td class="l">xaluo.684570c057.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">usubo.br.i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx,+zve32x -O0</code></td></tr><tr><td class="l">xaluo.8e74e7df69.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">usubo.not.i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zicond,+zbb,+zhinx -O2</code></td></tr><tr><td class="l">xaluo.92745b6c9a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">usubo.i32.constant.rhs</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zicond,+zhinx -O2</code></td></tr><tr><td class="l">xaluo.dc444a0969.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">usubo.not.i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

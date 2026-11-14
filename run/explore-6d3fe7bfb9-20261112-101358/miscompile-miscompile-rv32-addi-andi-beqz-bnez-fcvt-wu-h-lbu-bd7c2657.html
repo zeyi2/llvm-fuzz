@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,andi,beqz,bnez,fcvt.wu.h,lbu</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,andi,beqz,bnez,fcvt.wu.h,lbu</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,andi,beqz,bnez,fcvt.wu.h,lbu <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.2ef2ba22.c94ff715.bb04bf37d9.ll <span class="dim">(mutant of</span> half-convert.2ef2ba22.c94ff715.ll<span class="dim">)</span> @fcvt_wu_s_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+d,+zfh -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i32
+@G.3 = external global i32
+@G.4 = external global i1
+@G.7 = external global i16
+
+; Function Attrs: nounwind
+define zeroext i16 @fcvt_wu_s_i16(half %a) #0 {
+  %A1 = alloca i1, align 1
+  store i1 false, ptr %A1, align 1
+  %G6 = getelementptr ptr, ptr %A1, i16 -1
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %LGV1 = load i32, ptr @G.3, align 4
+  %L = load i1, ptr %A, align 1
+  store ptr %G6, ptr %A, align 8
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %BB7
+  %LGV = load i32, ptr @G.2, align 4
+  %C = icmp sge i32 %LGV, %LGV1
+  %1 = fptoui half %a to i16
+  store i1 %C, ptr @G.4, align 1
+  %G = getelementptr i32, ptr %A, i8 0
+  store ptr %G, ptr %A1, align 8
+  ret i16 %1
+
+T:                                                ; preds = %BB7, %0
+  %L2 = load i1, ptr %A1, align 1
+  switch i1 %L2, label %SW_D [
+    i1 false, label %SW_C
+  ]
+
+BB7:                                              ; preds = %SW_D
+  br i1 %L2, label %T, label %BB
+
+F:                                                ; preds = %0
+  br label %BB
+
+SW_D:                                             ; preds = %T
+  br label %BB7
+
+SW_C:                                             ; preds = %T
+  %LGV8 = load i16, ptr @G.7, align 2
+  ret i16 %LGV8
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+d,+zfh -O1&#x27; --funcs fcvt_wu_s_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #12)
+SelectionDAG hash c7c80994735a01b2, GlobalISel hash 66d231c65aa03761
+b0: llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+d,+zfh -O1 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+d,+zfh -O0 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+d,+zfh -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-convert.2ef2ba22.c94ff715.bb04bf37d9.ll <span class="dim">(mutant of</span> half-convert.2ef2ba22.c94ff715.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32d -mattr=+d,+zfh -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

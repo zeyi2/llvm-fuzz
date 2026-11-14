@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shl i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shl i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shl i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 40 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xqcibm-extract.68c4c6abf7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/xqcibm-extract.ll">xqcibm-extract.ll</a><span class="dim">)</span> @c_extu_no_hints via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @c_extu_no_hints(i32 %x, i8 %y, i32 %z) {
+  %B = shl i16 32767, 0
+  %sext = sext i8 %y to i32
+  %ashr = ashr i32 %sext, 5
+  %add = add i32 %ashr, 3333
+  store i16 %B, ptr poison, align 2
+  ret i32 %add
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shl: &#x27;  %B = shl i16 32767, 0&#x27; (in function: c_extu_no_hints)
+warning: Instruction selection used fallback path for c_extu_no_hints</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">div.60af76bdec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/div.ll">div.ll</a><span class="dim">)</span></td><td class="l">sdiv16_constant_lhs</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+a,+zdinx -O2</code></td></tr><tr><td class="l">double-convert.859b9f014e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_w_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">lack-of-signed-truncation-check.3584f0390d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/lack-of-signed-truncation-check.ll">lack-of-signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ugecmp_bad_i16_i8_add</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbb.02a395bb92.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">srai_slli2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zfinx -O3 -code-model=medium</code></td></tr><tr><td class="l">rv64zbb.f2aa006865.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">srai_slli</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">rvp-widening-shift.53e2e9d2da.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-widening-shift.ll">rvp-widening-shift.ll</a><span class="dim">)</span></td><td class="l">pwslli_v4i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+zvkb,+zfinx -O2</code></td></tr><tr><td class="l">xqcibm-extract.68c4c6abf7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/xqcibm-extract.ll">xqcibm-extract.ll</a><span class="dim">)</span></td><td class="l">c_extu_no_hints</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

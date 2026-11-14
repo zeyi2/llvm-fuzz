@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem &lt;vscale x N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem &lt;vscale x N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem &lt;vscale x N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 35 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vxor-vp.c588009af7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vxor-vp.ll">fixed-vectors-vxor-vp.ll</a><span class="dim">)</span> @vxor_vv_v2i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O0 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x i32&gt; @vxor_vv_v2i32(&lt;2 x i32&gt; %va, &lt;2 x i32&gt; %b, &lt;2 x i1&gt; %m, i32 zeroext %evl) {
+  %A = alloca &lt;vscale x 2 x float&gt;, align 8
+  store &lt;vscale x 2 x float&gt; poison, ptr %A, align 8
+  %B = frem &lt;vscale x 2 x float&gt; splat (float 1.000000e+00), zeroinitializer
+  %v = xor &lt;2 x i32&gt; %va, %b
+  store &lt;vscale x 2 x float&gt; %B, ptr %A, align 8
+  ret &lt;2 x i32&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+v -O0 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem &lt;vscale x 2 x float&gt; splat (float 1.000000e+00), zeroinitializer&#x27; (in function: vxor_vv_v2i32)
+warning: Instruction selection used fallback path for vxor_vv_v2i32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vxor-vp.c588009af7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vxor-vp.ll">fixed-vectors-vxor-vp.ll</a><span class="dim">)</span></td><td class="l">vxor_vv_v2i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O0 -code-model=medium</code></td></tr><tr><td class="l">vfslide1down.a9d91c4357.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vfslide1down.ll">vfslide1down.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfslide1down_mask_vf_nxv1f32_nxv1f32_f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+zvkb -O3</code></td></tr><tr><td class="l">vrgatherei16.c09aee4f5a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rvv/vrgatherei16.ll">vrgatherei16.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vrgatherei16_mask_vv_nxv8i16_nxv8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+d,+zvfhmin,+zvfbfmin,+zvbb -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

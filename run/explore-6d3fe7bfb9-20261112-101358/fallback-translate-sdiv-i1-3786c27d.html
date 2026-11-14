@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 19 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64zfhmin-half-convert.93c18d8113.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zfhmin-half-convert.ll">rv64zfhmin-half-convert.ll</a><span class="dim">)</span> @zext_fptosi via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinxmin -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define zeroext i32 @zext_fptosi(half %a) #0 {
+  %B = sdiv i1 true, false
+  %1 = fptosi half %a to i32
+  store i1 %B, ptr @G, align 1
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinxmin -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinxmin -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv i1 true, false&#x27; (in function: zext_fptosi)
+warning: Instruction selection used fallback path for zext_fptosi</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-intrinsics-strict.1dcdce8228.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/double-intrinsics-strict.ll">double-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">asin_f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32 -mattr=+zdinx -O3</code></td></tr><tr><td class="l">rv64p.6e31416cdd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/GlobalISel/rv64p.ll">rv64p.ll</a><span class="dim">)</span></td><td class="l">cls_i16_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zhinx -O2 -code-model=small</code></td></tr><tr><td class="l">rv64zfhmin-half-convert.93c18d8113.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64zfhmin-half-convert.ll">rv64zfhmin-half-convert.ll</a><span class="dim">)</span></td><td class="l">zext_fptosi</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinxmin -O2</code></td></tr><tr><td class="l">select-bare.0711407863.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/select-bare.ll">select-bare.ll</a><span class="dim">)</span></td><td class="l">bare_select_float</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">xqcia.f9603c667a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/xqcia.ll">xqcia.ll</a><span class="dim">)</span></td><td class="l">addusat</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

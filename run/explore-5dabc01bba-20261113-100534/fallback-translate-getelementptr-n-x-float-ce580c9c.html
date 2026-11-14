@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: getelementptr &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: getelementptr &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: getelementptr &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 24 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memcpy-inline.271b82fbf5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span> @test_memcpy_inline_2bytes via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zbb -O0 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @test_memcpy_inline_2bytes(ptr %dst, ptr readonly %src) {
+  %G = getelementptr &lt;4 x float&gt;, ptr %dst, i64 1
+  call void %G(ptr %dst, ptr %src, i64 2, i1 false)
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zfinx,+zbb -O0 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zfinx,+zbb -O0 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: getelementptr: &#x27;  %G = getelementptr &lt;4 x float&gt;, ptr %dst, i64 1&#x27; (in function: test_memcpy_inline_2bytes)
+warning: Instruction selection used fallback path for test_memcpy_inline_2bytes</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memcpy-inline.271b82fbf5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span></td><td class="l">test_memcpy_inline_2bytes</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zbb -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">prefetch.1626c842eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/GlobalISel/prefetch.ll">prefetch.ll</a><span class="dim">)</span></td><td class="l">test_prefetch_offsetable_2</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">zilx.2b4c914589.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/zilx.ll">zilx.ll</a><span class="dim">)</span></td><td class="l">lxsuww_shl_too_large</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

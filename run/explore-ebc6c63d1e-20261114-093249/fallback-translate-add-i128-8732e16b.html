@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">mask-variable-shift.b85285d76d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/mask-variable-shift.ll">mask-variable-shift.ll</a><span class="dim">)</span> @mask_pair_128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-none-elf -verify-machineinstrs -mattr=+zdinx,+a -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+
+define i128 @mask_pair_128(i128 %x, i128 %y) {
+  %B = add i128 %x, %y
+  %shl = shl nsw i128 -1, %y
+  %and = and i128 %shl, %x
+  store i128 %B, ptr @G.1, align 4
+  ret i128 %and
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-none-elf -verify-machineinstrs -mattr=+zdinx,+a -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-none-elf -verify-machineinstrs -mattr=+zdinx,+a -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %B = add i128 %x, %y&#x27; (in function: mask_pair_128)
+warning: Instruction selection used fallback path for mask_pair_128</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">add-before-shl.903dcf8a3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/add-before-shl.ll">add-before-shl.ll</a><span class="dim">)</span></td><td class="l">add_wide_operand</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -M no-aliases -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">half-convert-strict.37a77aed36.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_q</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zdinx,+zhinxmin -O2</code></td></tr><tr><td class="l">mask-variable-shift.b85285d76d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/mask-variable-shift.ll">mask-variable-shift.ll</a><span class="dim">)</span></td><td class="l">mask_pair_128</td><td class="l"><code>-mtriple=riscv64-none-elf -verify-machineinstrs -mattr=+zdinx,+a -O2</code></td></tr><tr><td class="l">rv64d-double-convert-strict.c6a06cf068.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rv64d-double-convert-strict.ll">rv64d-double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">sitofp_sext_i32_to_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -disable-strictnode-mutation -mattr=+zdinx,+xtheadba,+zve32x -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

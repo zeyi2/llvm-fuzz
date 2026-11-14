@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 8 configs, 7 test files, 209 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xtheadmac.4b31a544d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span> @mulaw_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadmac,+xtheadba,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+define i64 @mulaw_i64(i32 %a, i32 %b, i32 %c) {
+  %d = mul i32 %b, %c
+  %e = add i32 %a, %d
+  %f = sext i32 %e to i64
+  %B = srem i32 %d, %b
+  store i32 %B, ptr @G, align 4
+  ret i64 %f
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadmac,+xtheadba,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadmac,+xtheadba,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %d = mul i32 %b, %c&#x27; (in function: mulaw_i64)
+warning: Instruction selection used fallback path for mulaw_i64</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">mul.63163ec3a8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/mul.ll">mul.ll</a><span class="dim">)</span></td><td class="l">muli32_p34</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+a -O3</code></td></tr><tr><td class="l">prefer-w-inst.30bb7cc30d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/prefer-w-inst.ll">prefer-w-inst.ll</a><span class="dim">)</span></td><td class="l">mulw</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O2</code></td></tr><tr><td class="l">rv32zbb.15b2766941.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a><span class="dim">)</span></td><td class="l">sub_if_uge_multiuse_cmp_store_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zihintpause,+zfinx -O1</code></td></tr><tr><td class="l">rv32zknh-intrinsic.b2fc5eaf34.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/rv32zknh-intrinsic.ll">rv32zknh-intrinsic.ll</a><span class="dim">)</span></td><td class="l">sha256sum1_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zknh,+zhinx -O3</code></td></tr><tr><td class="l">ssub_sat_plus.14865f0ff6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/ssub_sat_plus.ll">ssub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zfinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">ssub_sat_plus.61d907c264.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/ssub_sat_plus.ll">ssub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">xcvbitmanip.5fd3ba4a0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xcvbitmanip.ll">xcvbitmanip.ll</a><span class="dim">)</span></td><td class="l">test.cv.bset</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xcvbitmanip,+zdinx -O0</code></td></tr><tr><td class="l">xtheadmac.4b31a544d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span></td><td class="l">mulaw_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadmac,+xtheadba,+zhinx -O0</code></td></tr><tr><td class="l">xtheadmac.4b31a544d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span></td><td class="l">commutative3</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadmac,+xtheadba,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

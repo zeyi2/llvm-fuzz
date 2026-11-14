@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shufflevector &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shufflevector &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shufflevector &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 17 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-without-f-reg.608b52e86c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span> @callee_float_32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define fastcc float @callee_float_32(&lt;32 x float&gt; %A) #0 {
+  %S = shufflevector &lt;32 x float&gt; %A, &lt;32 x float&gt; zeroinitializer, &lt;32 x i32&gt; poison
+  %B = extractelement &lt;32 x float&gt; %A, i32 0
+  store &lt;32 x float&gt; %S, ptr poison, align 128
+  ret float %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shufflevector: &#x27;  %S = shufflevector &lt;32 x float&gt; %A, &lt;32 x float&gt; zeroinitializer, &lt;32 x i32&gt; poison&#x27; (in function: callee_float_32)
+warning: Instruction selection used fallback path for callee_float_32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fastcc-without-f-reg.608b52e86c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_float_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">rvp-simd-32.e1d08bd8.6499fdc109.ll <span class="dim">(mutant of</span> rvp-simd-32.e1d08bd8.ll<span class="dim">)</span></td><td class="l">test_pmq2adda_v2i16_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbkb,+zdinx -O1</code></td></tr><tr><td class="l">zibi.4b4fef2cff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/zibi.ll">zibi.ll</a><span class="dim">)</span></td><td class="l">test_select_beq_neg</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zibi,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

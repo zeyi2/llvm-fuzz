@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 18 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fold-mem-offset.be0f30619b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/fold-mem-offset.ll">fold-mem-offset.ll</a><span class="dim">)</span> @pr228053_frameindex_crash via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba,+zdinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">%union.u0 = type { [0 x i8] }
+
+@G = external global ptr
+
+declare void @f4()
+
+define ptr @pr228053_frameindex_crash() {
+entry:
+  %un18 = alloca %union.u0, align 1
+  %L1 = load i16, ptr %un18, align 2
+  %arrayidx1 = getelementptr i8, ptr %un18, i64 ptrtoint (ptr @f4 to i64)
+  %G = getelementptr &lt;8 x i8&gt;, ptr %un18, i16 %L1
+  store ptr %G, ptr @G, align 8
+  ret ptr %arrayidx1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zba,+zdinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zba,+zdinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %un18 = alloca %union.u0, align 1&#x27; (in function: pr228053_frameindex_crash)
+warning: Instruction selection used fallback path for pr228053_frameindex_crash</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fold-mem-offset.be0f30619b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/fold-mem-offset.ll">fold-mem-offset.ll</a><span class="dim">)</span></td><td class="l">pr228053_frameindex_crash</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">ipra.547c57c71d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/ipra.ll">ipra.ll</a><span class="dim">)</span></td><td class="l">foobar</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -enable-ipra -mattr=+zdinx,+zba -O2 -code-model=small</code></td></tr><tr><td class="l">ipra.f57e8f31e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/ipra.ll">ipra.ll</a><span class="dim">)</span></td><td class="l">foobar</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -enable-ipra -mattr=+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

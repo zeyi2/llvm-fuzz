@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.round.v8f64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.round.v8f64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.round.v8f64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fround-constrained-sdnode.ea3d11533e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fround-constrained-sdnode.ll">fixed-vectors-fround-constrained-sdnode.ll</a><span class="dim">)</span> @round_v8f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;8 x i1&gt;
+
+; Function Attrs: strictfp
+define &lt;8 x double&gt; @round_v8f64(&lt;8 x double&gt; %x) #0 {
+  %C = fcmp ult &lt;8 x double&gt; %x, %x
+  %a = call &lt;8 x double&gt; @llvm.experimental.constrained.round.v8f64(&lt;8 x double&gt; %x, metadata !&quot;fpexcept.strict&quot;)
+  store &lt;8 x i1&gt; %C, ptr @G, align 1
+  ret &lt;8 x double&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;8 x double&gt; @llvm.experimental.constrained.round.v8f64(&lt;8 x double&gt;, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.round.v8f64: &#x27;  %a = call &lt;8 x double&gt; @llvm.experimental.constrained.round.v8f64(&lt;8 x double&gt; %x, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: round_v8f64)
+warning: Instruction selection used fallback path for round_v8f64</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fround-constrained-sdnode.59b66c0344.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fround-constrained-sdnode.ll">fixed-vectors-fround-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">round_v8f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zicond -O0</code></td></tr><tr><td class="l">fixed-vectors-fround-constrained-sdnode.8a0141352e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fround-constrained-sdnode.ll">fixed-vectors-fround-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">round_v8f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh -O2</code></td></tr><tr><td class="l">fixed-vectors-fround-constrained-sdnode.d4dc2547c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fround-constrained-sdnode.ll">fixed-vectors-fround-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">round_v8f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v -O3</code></td></tr><tr><td class="l">fixed-vectors-fround-constrained-sdnode.ea3d11533e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fround-constrained-sdnode.ll">fixed-vectors-fround-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">round_v8f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

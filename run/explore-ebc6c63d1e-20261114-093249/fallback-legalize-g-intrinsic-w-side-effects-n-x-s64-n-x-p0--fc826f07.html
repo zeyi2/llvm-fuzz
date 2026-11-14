@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s64&gt;,&lt;N x p0&gt;,&lt;N x s1&gt;,s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s64&gt;,&lt;N x p0&gt;,&lt;N x s1&gt;,s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-ebc6c63d1e-20261114-093249.html">explore-ebc6c63d1e-20261114-093249</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x s64&gt;,&lt;N x p0&gt;,&lt;N x s1&gt;,s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 6 configs, 1 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vpscatter.ed22b5340c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span> @vpscatter_baseidx_v8i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+m,+zicond -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at ebc6c63d1e</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global ptr
+
+define void @vpscatter_baseidx_v8i64(&lt;8 x i64&gt; %val, ptr %base, &lt;8 x i64&gt; %idxs, &lt;8 x i1&gt; %m, i32 zeroext %evl) {
+  %ptrs = getelementptr inbounds i64, ptr %base, &lt;8 x i64&gt; %idxs
+  call void @llvm.vp.scatter.v8i64.v8p0(&lt;8 x i64&gt; %val, &lt;8 x ptr&gt; %ptrs, &lt;8 x i1&gt; %m, i32 %evl)
+  %E = extractelement &lt;8 x ptr&gt; %ptrs, i16 -1
+  store ptr %E, ptr @G, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare void @llvm.vp.scatter.v8i64.v8p0(&lt;8 x i64&gt;, &lt;8 x ptr&gt;, &lt;8 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+m,+zicond -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+m,+zicond -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.vp.scatter), %0:_(&lt;8 x s64&gt;), %13:_(&lt;8 x p0&gt;), %3:_(&lt;8 x s1&gt;), %4:_(s32) (in function: vpscatter_baseidx_v8i64)
+warning: Instruction selection used fallback path for vpscatter_baseidx_v8i64</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vpscatter.279cb8a32b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span></td><td class="l">vpscatter_baseidx_zext_v8i16_v8i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zvbb -O0</code></td></tr><tr><td class="l">fixed-vectors-vpscatter.867b815a02.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span></td><td class="l">vpscatter_baseidx_sext_v8i32_v8i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zfhmin -O3</code></td></tr><tr><td class="l">fixed-vectors-vpscatter.9e24801cb8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span></td><td class="l">vpscatter_baseidx_sext_v8i32_v8i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zicsr -O2</code></td></tr><tr><td class="l">fixed-vectors-vpscatter.d27b54baff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span></td><td class="l">vpscatter_baseidx_v8i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+zfh,+f -O1</code></td></tr><tr><td class="l">fixed-vectors-vpscatter.ed22b5340c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span></td><td class="l">vpscatter_baseidx_v8i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v,+m,+zicond -O2</code></td></tr><tr><td class="l">fixed-vectors-vpscatter.f27a8596c8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span></td><td class="l">vpscatter_baseidx_v8i16_v8f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zfhmin -O2</code></td></tr><tr><td class="l">fixed-vectors-vpscatter.f27a8596c8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/ebc6c63d1e2c3cf320cb31c44304d265cc5cb0bc/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vpscatter.ll">fixed-vectors-vpscatter.ll</a><span class="dim">)</span></td><td class="l">vpscatter_baseidx_sext_v8i32_v8f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zfhmin -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add i32~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add i32~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5dabc01bba-20261113-100534.html">explore-5dabc01bba-20261113-100534</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add i32~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">signed-truncation-check.62921cef10.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span> @add_ultcmp_bad_i24_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32-unknown-linux-gnu -mattr=+zbb,+zdinx,+zicsr -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5dabc01bba</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i1 @add_ultcmp_bad_i24_i8(i24 %x) #0 {
+  %tmp0 = add i24 %x, 128
+  %tmp1 = icmp ult i24 %tmp0, 256
+  %B = srem i24 %x, %tmp0
+  store i24 %B, ptr poison, align 4
+  ret i1 %tmp1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32-unknown-linux-gnu -mattr=+zbb,+zdinx,+zicsr -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32-unknown-linux-gnu -mattr=+zbb,+zdinx,+zicsr -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %tmp0 = add i24 %x, 128&#x27; (in function: add_ultcmp_bad_i24_i8)
+warning: Instruction selection used fallback path for add_ultcmp_bad_i24_i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">add-before-shl.195713aa99.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/add-before-shl.ll">add-before-shl.ll</a><span class="dim">)</span></td><td class="l">add_non_machine_type</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -M no-aliases -mattr=+zhinx -O2</code></td></tr><tr><td class="l">add-before-shl.e45ef09559.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/add-before-shl.ll">add-before-shl.ll</a><span class="dim">)</span></td><td class="l">add_non_machine_type</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -M no-aliases -mattr=+zdinx -O3</code></td></tr><tr><td class="l">signed-truncation-check.62921cef10.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5dabc01bba1df10de6fb3c32fcf9db4aafe78f38/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ultcmp_bad_i24_i8</td><td class="l"><code>-mtriple=riscv32-unknown-linux-gnu -mattr=+zbb,+zdinx,+zicsr -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 20 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">srem-vector-lkk.fc17a68a1d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/srem-vector-lkk.ll">srem-vector-lkk.ll</a><span class="dim">)</span> @dont_fold_srem_one via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+@G.3 = external global &lt;4 x i1&gt;
+
+; Function Attrs: nounwind
+define &lt;4 x i16&gt; @dont_fold_srem_one(&lt;4 x i16&gt; %x) #0 {
+  %C = icmp ugt &lt;4 x i16&gt; %x, %x
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load i1, ptr @G.2, align 1
+  %1 = srem &lt;4 x i16&gt; %x, &lt;i16 1, i16 654, i16 23, i16 5423&gt;
+  %B = srem i1 true, %LGV
+  store i1 %B, ptr %A, align 1
+  store &lt;4 x i1&gt; %C, ptr @G.3, align 1
+  ret &lt;4 x i16&gt; %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp ugt &lt;4 x i16&gt; %x, %x&#x27; (in function: dont_fold_srem_one)
+warning: Instruction selection used fallback path for dont_fold_srem_one</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bitreverse-vp.c68daf49.70d4ba2da6.ll <span class="dim">(mutant of</span> fixed-vectors-bitreverse-vp.c68daf49.ll<span class="dim">)</span></td><td class="l">vp_bitreverse_v8i16_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+zdinx,+zfinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vsaddu-vp.f7da76d4.92b8dcb3c3.ll <span class="dim">(mutant of</span> fixed-vectors-vsaddu-vp.f7da76d4.ll<span class="dim">)</span></td><td class="l">vsaddu_vv_v2i16_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zicsr -O1</code></td></tr><tr><td class="l">fixed-vectors-vssub-vp.7699e138.193547f390.ll <span class="dim">(mutant of</span> fixed-vectors-vssub-vp.7699e138.ll<span class="dim">)</span></td><td class="l">vssub_vv_v16i16_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">rvp-simd-32.a5f36289e5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_psshar_s_i16x2_imm</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+a,+zfinx -O2</code></td></tr><tr><td class="l">smulh.c674d8b984.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_v4i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zhinx,+zihintpause -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">smulh.d775944c2a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_v8i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">srem-vector-lkk.fc17a68a1d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/srem-vector-lkk.ll">srem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_srem_one</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>

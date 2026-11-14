@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: lshr i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: lshr i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6d3fe7bfb9-20261112-101358.html">explore-6d3fe7bfb9-20261112-101358</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: lshr i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 21 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64-double-convert.3c20583fb6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64-double-convert.ll">rv64-double-convert.ll</a><span class="dim">)</span> @uitofp_i128_to_f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zcb -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6d3fe7bfb9</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+define double @uitofp_i128_to_f64(i128 %a) #0 {
+  %B = lshr i128 %a, 0
+  %1 = uitofp i128 %a to double
+  store i128 %B, ptr @G, align 4
+  ret double %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zcb -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zcb -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: lshr: &#x27;  %B = lshr i128 %a, 0&#x27; (in function: uitofp_i128_to_f64)
+warning: Instruction selection used fallback path for uitofp_i128_to_f64</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-convert-strict.544bf576df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_si_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zdinx,+zhinx -O2</code></td></tr><tr><td class="l">rv64-double-convert.3c20583fb6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64-double-convert.ll">rv64-double-convert.ll</a><span class="dim">)</span></td><td class="l">uitofp_i128_to_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zcb -O2</code></td></tr><tr><td class="l">rv64-float-convert-strict.7619e1601b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/rv64-float-convert-strict.ll">rv64-float-convert-strict.ll</a><span class="dim">)</span></td><td class="l">sitofp_i128_to_f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -disable-strictnode-mutation -mattr=+zfinx -O0</code></td></tr><tr><td class="l">rvp-bitreverse-zbkb.f366ae1d.3712bb5008.ll <span class="dim">(mutant of</span> rvp-bitreverse-zbkb.f366ae1d.ll<span class="dim">)</span></td><td class="l">test_bitreverse_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbkb,+a,+zhinx -O2</code></td></tr><tr><td class="l">shifts.b29e9ec45c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6d3fe7bfb918823e539549e5ed1f4a3af6a4fb36/llvm/test/CodeGen/RISCV/shifts.ll">shifts.ll</a><span class="dim">)</span></td><td class="l">ashr64_minsize</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-14 13:32 UTC.</p>
