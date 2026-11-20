@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: insertelement &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: insertelement &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: insertelement &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 3 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vwmulsu.7838887ea4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwmulsu.ll">fixed-vectors-vwmulsu.ll</a><span class="dim">)</span> @vwmulsu_vx_v16i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;16 x i32&gt; @vwmulsu_vx_v16i32(ptr %x, i16 %y) {
+  %b = insertelement &lt;16 x i16&gt; poison, i16 %y, i32 0
+  %a = load &lt;16 x i16&gt;, ptr %x, align 32
+  %d = sext &lt;16 x i16&gt; %a to &lt;16 x i32&gt;
+  %c = shufflevector &lt;16 x i16&gt; %b, &lt;16 x i16&gt; poison, &lt;16 x i32&gt; zeroinitializer
+  %e = zext &lt;16 x i16&gt; %c to &lt;16 x i32&gt;
+  %f = mul &lt;16 x i32&gt; %d, %e
+  ret &lt;16 x i32&gt; %f
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: insertelement: &#x27;  %b = insertelement &lt;16 x i16&gt; poison, i16 %y, i32 0&#x27; (in function: vwmulsu_vx_v16i32)
+warning: Instruction selection used fallback path for vwmulsu_vx_v16i32</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vmin-vp.e90ad73c93.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmin-vp.ll">fixed-vectors-vmin-vp.ll</a><span class="dim">)</span></td><td class="l">vmin_vx_v4i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vminu-vp.9e3da176ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vminu-vp.ll">fixed-vectors-vminu-vp.ll</a><span class="dim">)</span></td><td class="l">vminu_vx_v2i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vwmulsu.7838887ea4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwmulsu.ll">fixed-vectors-vwmulsu.ll</a><span class="dim">)</span></td><td class="l">vwmulsu_vx_v16i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

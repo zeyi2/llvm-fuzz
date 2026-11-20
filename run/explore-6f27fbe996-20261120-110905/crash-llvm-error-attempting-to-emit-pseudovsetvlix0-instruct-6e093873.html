@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Attempting to emit PseudoVSETVLIX0 instruction but the Feature_HasVInstructions predicate(s) are not met</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Attempting to emit PseudoVSETVLIX0 instruction but the Feature_HasVInstructions predicate(s) are not met</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Attempting to emit PseudoVSETVLIX0 instruction but the Feature_HasVInstructions predicate(s) are not met <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vsetvli-intrinsics.f90cf73e72.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vsetvli-intrinsics.ll">vsetvli-intrinsics.ll</a><span class="dim">)</span> @test_vsetvlimax_e32m2_nouse via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/hWcbf1GY9">https://godbolt.org/z/hWcbf1GY9</a> (llc-assertions-trunk, checked 2026-11-20 14:38 UTC): <a href="https://godbolt.org/z/hWcbf1GY9">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @test_vsetvlimax_e32m2_nouse() #0 {
+  %1 = call i32 @llvm.riscv.vsetvlimax.i32(i32 2, i32 1)
+  %B = sdiv i32 %1, %1
+  store i32 %B, ptr poison, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare i32 @llvm.riscv.vsetvlimax.i32(i32 immarg, i32 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">LLVM ERROR: Attempting to emit PseudoVSETVLIX0 instruction but the Feature_HasVInstructions predicate(s) are not met<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O2 -global-isel=0</code></td><td>0</td><td>3</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: Attempting to emit PseudoVSETVLIX0 instruction but the Feature_HasVInstructions predicate(s) are not met
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISC-V Assembly Printer&#x27; on function &#x27;@test_vsetvlimax_e32m2_nouse&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000558e4899e0fb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000558e4899afa1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000558e4899eb7b
+3  libc.so.6 0x00007f8e5fc45330
+4  libc.so.6 0x00007f8e5fc9ebec pthread_kill + 284
+5  libc.so.6 0x00007f8e5fc4527e gsignal + 30
+6  libc.so.6 0x00007f8e5fc288ff abort + 223
+7  llc       0x0000558e488df54d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x0000558e488df396
+9  llc       0x0000558e4974610e
+10 llc       0x0000558e49c8f50b
+11 llc       0x0000558e49ca1155 llvm::AsmPrinter::emitFunctionBody() + 5733
+12 llc       0x0000558e49c8d107
+13 llc       0x0000558e48f787f1 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+14 llc       0x0000558e48cfc4b7 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x0000558e48d049d2 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x0000558e48cfd260 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x0000558e489a5c99
+18 llc       0x0000558e489a2ec1 llcMain + 1665
+19 llc       0x0000558e488defaf main + 63
+20 libc.so.6 0x00007f8e5fc2a1ca
+21 libc.so.6 0x00007f8e5fc2a28b __libc_start_main + 139
+22 llc       0x0000558e488deea5 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vsetvli-intrinsics.f90cf73e72.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vsetvli-intrinsics.ll">vsetvli-intrinsics.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: phi &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: phi &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: phi &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 38 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">riscv-codegenprepare-asm.d97131e339.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a><span class="dim">)</span> @widen_anyof_rdx_use_in_loop via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zve32x,+d -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i1 @widen_anyof_rdx_use_in_loop(ptr %p, i64 %n) {
+entry:
+  %G1 = getelementptr ptr, ptr %p, i8 0
+  store ptr %G1, ptr poison, align 8
+  br label %loop
+
+loop:                                             ; preds = %loop, %entry
+  %iv = phi i64 [ 0, %entry ], [ %iv.next, %loop ]
+  %phi = phi &lt;vscale x 4 x i1&gt; [ zeroinitializer, %entry ], [ %rec, %loop ]
+  %B = add i1 false, true
+  %avl = sub i64 %n, %iv
+  %evl = call i32 @llvm.experimental.get.vector.length.i64(i64 %avl, i32 4, i1 true)
+  %gep = getelementptr i32, ptr %p, i64 %iv
+  %L = load i64, ptr %gep, align 4
+  %x = call &lt;vscale x 4 x i32&gt; @llvm.vp.load.nxv4i32.p0(ptr %gep, &lt;vscale x 4 x i1&gt; splat (i1 true), i32 %evl)
+  %G = getelementptr i64, ptr %p, i64 %L
+  %cmp = icmp ne &lt;vscale x 4 x i32&gt; %x, zeroinitializer
+  %rec = call &lt;vscale x 4 x i1&gt; %G(&lt;vscale x 4 x i1&gt; %cmp, &lt;vscale x 4 x i1&gt; splat (i1 true), &lt;vscale x 4 x i1&gt; %phi, i32 %evl)
+  store &lt;vscale x 4 x i1&gt; %rec, ptr %gep, align 1
+  %evl.zext = zext i32 %evl to i64
+  %iv.next = add i64 %iv, %evl.zext
+  %done = icmp sge i64 %iv.next, %n
+  br i1 %done, label %exit, label %loop
+
+exit:                                             ; preds = %loop
+  ret i1 %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.experimental.get.vector.length.i64(i64, i32 immarg, i1 immarg) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;vscale x 4 x i32&gt; @llvm.vp.load.nxv4i32.p0(ptr captures(none), &lt;vscale x 4 x i1&gt;, i32) #1
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+zve32x,+d -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+zve32x,+d -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: phi: &#x27;  %phi = phi &lt;vscale x 4 x i1&gt; [ zeroinitializer, %entry ], [ %rec, %loop ]&#x27; (in function: widen_anyof_rdx_use_in_loop)
+warning: Instruction selection used fallback path for widen_anyof_rdx_use_in_loop</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">riscv-codegenprepare-asm.7a1e25cba3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a><span class="dim">)</span></td><td class="l">widen_anyof_rdx_use_in_loop</td><td class="l"><code>-mtriple=riscv64 -mattr=+v -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">riscv-codegenprepare-asm.a94418b75d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a><span class="dim">)</span></td><td class="l">widen_anyof_rdx_use_in_loop</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zfa -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">riscv-codegenprepare-asm.d97131e339.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/riscv-codegenprepare-asm.ll">riscv-codegenprepare-asm.ll</a><span class="dim">)</span></td><td class="l">widen_anyof_rdx_use_in_loop</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zve32x,+d -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

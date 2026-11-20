@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x f32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x f32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x f32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 549 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xqcisls.b8552fc03e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/xqcisls.ll">xqcisls.ll</a><span class="dim">)</span> @lrbu via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/78E1e7Yo3">https://godbolt.org/z/78E1e7Yo3</a> (llc-assertions-trunk, checked 2026-11-20 14:38 UTC): <a href="https://godbolt.org/z/78E1e7Yo3">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;4 x float&gt;
+
+define i32 @lrbu(ptr %a, i32 %b) {
+  %I = insertelement &lt;4 x float&gt; splat (float 4.200000e+01), float 1.000000e+00, i16 256
+  %1 = getelementptr i8, ptr %a, i32 %b
+  %2 = load i8, ptr %1, align 1
+  %3 = zext i8 %2 to i32
+  %4 = add i32 %3, %3
+  store &lt;4 x float&gt; %I, ptr @G.2, align 16
+  ret i32 %4
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>4</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(&lt;4 x f32&gt;) = G_INSERT_VECTOR_ELT %3:_, %5:_(f32), %6:_(i32) (in function: lrbu)<br>warning: Instruction selection used fallback path for lrbu</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O0 -global-isel=0</code></td><td>0</td><td>4</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %2:_(&lt;4 x f32&gt;) = G_INSERT_VECTOR_ELT %3:_, %5:_(f32), %6:_(i32) (in function: lrbu)
+warning: Instruction selection used fallback path for lrbu</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.7c0e3e30.2788be3253.ll <span class="dim">(mutant of</span> float-convert.7c0e3e30.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_multiple_use</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zfhmin,+zbb -O3</code></td></tr><tr><td class="l">half-fcmp.e1e0b36e42.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-fcmp.ll">half-fcmp.ll</a><span class="dim">)</span></td><td class="l">fcmp_oeq</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zfh -O3 -code-model=medium</code></td></tr><tr><td class="l">store-fp-zero-to-x0.14691757cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/store-fp-zero-to-x0.ll">store-fp-zero-to-x0.ll</a><span class="dim">)</span></td><td class="l">zero_v4f64</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+xtheadba -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcibm-insbi.ccf221f168.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/xqcibm-insbi.ll">xqcibm-insbi.ll</a><span class="dim">)</span></td><td class="l">insb_and_multiple</td><td class="l"><code>-mtriple=riscv32 --verify-machineinstrs -mattr=+zvkb -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcisls.b8552fc03e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/xqcisls.ll">xqcisls.ll</a><span class="dim">)</span></td><td class="l">lrbu</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

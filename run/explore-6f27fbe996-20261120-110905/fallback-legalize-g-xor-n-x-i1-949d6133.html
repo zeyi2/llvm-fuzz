@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_XOR &lt;N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_XOR &lt;N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_XOR &lt;N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">mask-exts-not.ac5c18d727.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/mask-exts-not.ll">mask-exts-not.ll</a><span class="dim">)</span> @mask_zext_xor_v8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i8&gt; @mask_zext_xor_v8i8(&lt;8 x i1&gt; %m) {
+  %xor = xor &lt;8 x i1&gt; &lt;i1 true, i1 false, i1 true, i1 false, i1 true, i1 false, i1 true, i1 false&gt;, %m
+  %ext = zext &lt;8 x i1&gt; %xor to &lt;8 x i8&gt;
+  ret &lt;8 x i8&gt; %ext
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(&lt;8 x i1&gt;) = G_XOR %0:_, %3:_ (in function: mask_zext_xor_v8i8)
+warning: Instruction selection used fallback path for mask_zext_xor_v8i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">mask-exts-not.a67724ee86.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/mask-exts-not.ll">mask-exts-not.ll</a><span class="dim">)</span></td><td class="l">mask_sext_not_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zihintpause -O2</code></td></tr><tr><td class="l">mask-exts-not.ac5c18d727.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/mask-exts-not.ll">mask-exts-not.ll</a><span class="dim">)</span></td><td class="l">mask_zext_xor_v8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr><tr><td class="l">mask-exts-not.db9273c106.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/mask-exts-not.ll">mask-exts-not.ll</a><span class="dim">)</span></td><td class="l">mask_sext_not_v8i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

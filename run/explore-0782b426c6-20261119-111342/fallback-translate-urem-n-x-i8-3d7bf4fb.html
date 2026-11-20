@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-round-conv.02d2cf343c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/double-round-conv.ll">double-round-conv.ll</a><span class="dim">)</span> @test_floor_si64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i64 @test_floor_si64(double %x) {
+  %B = urem &lt;8 x i8&gt; splat (i8 -128), splat (i8 1)
+  %a = call double @llvm.floor.f64(double %x)
+  %b = fptosi double %a to i64
+  store &lt;8 x i8&gt; %B, ptr poison, align 8
+  ret i64 %b
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare double @llvm.floor.f64(double) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %B = urem &lt;8 x i8&gt; splat (i8 -128), splat (i8 1)&#x27; (in function: test_floor_si64)
+warning: Instruction selection used fallback path for test_floor_si64</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-round-conv.02d2cf343c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/double-round-conv.ll">double-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_floor_si64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1</code></td></tr><tr><td class="l">inline-asm-rv32-zdinx-constraint-R.6065ba24fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/inline-asm-rv32-zdinx-constraint-R.ll">inline-asm-rv32-zdinx-constraint-R.ll</a><span class="dim">)</span></td><td class="l">constraint_R_double</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">memcpy.bc484e9aa5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy3</td><td class="l"><code>-mtriple=riscv32 -mattr=+unaligned-scalar-mem,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-bitreverse-zbkb.5fb23a9851.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvp-bitreverse-zbkb.ll">rvp-bitreverse-zbkb.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_v4i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbb,+zbkb,+zhinx -O0</code></td></tr><tr><td class="l">umulh.56efd22643.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_v8i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O3 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

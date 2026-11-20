@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-af3fdf3912-20261118-103626.html">main-af3fdf3912-20261118-103626</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">store-bf16.514036adf3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/store-bf16.ll">store-bf16.ll</a><span class="dim">)</span> @store_nxv16bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfbfmin -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global bfloat
+
+define void @store_nxv16bf16(&lt;vscale x 16 x bfloat&gt; %v, ptr %p) {
+  %LGV = load bfloat, ptr @G.1, align 2
+  %I = insertelement &lt;vscale x 16 x bfloat&gt; %v, bfloat %LGV, i64 -9223372036854775808
+  store &lt;vscale x 16 x bfloat&gt; %v, ptr %p, align 32
+  store &lt;vscale x 16 x bfloat&gt; %I, ptr poison, align 32
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+zvfbfmin -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+zvfbfmin -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %4:vrm4(&lt;vscale x 16 x bf16&gt;) = G_INSERT_VECTOR_ELT %0:vrm4, %2:gprb(bf16), %5:gprb(i32) (in function: store_nxv16bf16)
+warning: Instruction selection used fallback path for store_nxv16bf16</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">store-bf16.514036adf3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/store-bf16.ll">store-bf16.ll</a><span class="dim">)</span></td><td class="l">store_nxv16bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">store-bf16.b9db69dfc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/store-bf16.ll">store-bf16.ll</a><span class="dim">)</span></td><td class="l">store_nxv16bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfbfmin -verify-machineinstrs</code></td></tr><tr><td class="l">vfncvt-rod-bf-f.cc853ecca7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vfncvt-rod-bf-f.ll">vfncvt-rod-bf-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvt_mask_rod.f.f.w_nxv16bf16_nxv16f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+experimental-zvfbfa -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l">vfncvt-rod-bf-f.f7801d4789.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vfncvt-rod-bf-f.ll">vfncvt-rod-bf-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvt_mask_rod.f.f.w_nxv16bf16_nxv16f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+experimental-zvfbfa -verify-machineinstrs -target-abi=lp64d</code></td></tr><tr><td class="l">vfncvtbf16-f-f.056dee5fbf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vfncvtbf16-f-f.ll">vfncvtbf16-f-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvtbf16_mask_f.f.w_nxv16bf16_nxv16f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfbfmin -verify-machineinstrs -target-abi=ilp32d</code></td></tr><tr><td class="l">vfncvtbf16-f-f.25a114abe2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vfncvtbf16-f-f.ll">vfncvtbf16-f-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfncvtbf16_mask_f.f.w_nxv16bf16_nxv16f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfbfmin -verify-machineinstrs -target-abi=lp64d</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

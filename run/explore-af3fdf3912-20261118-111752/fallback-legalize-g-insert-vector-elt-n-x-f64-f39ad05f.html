@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x f64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x f64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x f64&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 3 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fp-conv.dade7d06e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp-conv.ll">fixed-vectors-fp-conv.ll</a><span class="dim">)</span> @fpext_v2f16_v2f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+f,+d -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @fpext_v2f16_v2f64(ptr %x, ptr %y) {
+  %a = load &lt;2 x half&gt;, ptr %x, align 4
+  %d = fpext &lt;2 x half&gt; %a to &lt;2 x double&gt;
+  store &lt;2 x double&gt; %d, ptr %y, align 16
+  %I = insertelement &lt;2 x double&gt; %d, double 4.200000e+01, i32 0
+  store &lt;2 x double&gt; %I, ptr poison, align 16
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+f,+d -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+f,+d -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(&lt;2 x f64&gt;) = G_INSERT_VECTOR_ELT %3:_, %5:_(f64), %6:_(i32) (in function: fpext_v2f16_v2f64)
+warning: Instruction selection used fallback path for fpext_v2f16_v2f64</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">combine-storetomstore.314579a79e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/combine-storetomstore.ll">combine-storetomstore.ll</a><span class="dim">)</span></td><td class="l">test_masked_store_success_v8f64</td><td class="l"><code>-mtriple=riscv64-- -mattr=+m,+f,+d -O2 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">combine-storetomstore.aee40eff4f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/combine-storetomstore.ll">combine-storetomstore.ll</a><span class="dim">)</span></td><td class="l">test_masked_store_success_v8f64</td><td class="l"><code>-mtriple=riscv64-- -mattr=+v,+f -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fp-conv.dade7d06e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp-conv.ll">fixed-vectors-fp-conv.ll</a><span class="dim">)</span></td><td class="l">fpext_v2f16_v2f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+f,+d -O2</code></td></tr><tr><td class="l">vector-interleave-fixed.8dbbe60c86.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_v4f64_v2f64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvbb,+zvfh,+zvfbfmin,+experimental-zvzip,+a -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

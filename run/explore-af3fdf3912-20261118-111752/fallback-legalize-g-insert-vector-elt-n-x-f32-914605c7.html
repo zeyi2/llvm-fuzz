@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x f32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x f32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x f32&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 4 test files, 487 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">phi.800f7f6cfa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/phi.ll">phi.ll</a><span class="dim">)</span> @phi_i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -O0 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/9nfj87hcP">https://godbolt.org/z/9nfj87hcP</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/9nfj87hcP">G</a> <span class="fp">falls back differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;4 x float&gt;
+
+define i1 @phi_i1(i1 %cnd, i1 %a, i1 %b) {
+entry:
+  %B = sub i16 256, 0
+  %A = alloca &lt;4 x float&gt;, align 16
+  store &lt;4 x float&gt; poison, ptr %A, align 16
+  store i16 %B, ptr %A, align 2
+  br i1 %cnd, label %cond.end, label %cond.false
+
+cond.false:                                       ; preds = %entry
+  %LGV = load &lt;4 x float&gt;, ptr @G.2, align 16
+  %I = insertelement &lt;4 x float&gt; %LGV, float f0x7F7FFFFF, i1 %b
+  store &lt;4 x float&gt; %I, ptr %A, align 16
+  br label %cond.end
+
+cond.end:                                         ; preds = %cond.false, %entry
+  %cond = phi i1 [ %b, %cond.false ], [ %a, %entry ]
+  ret i1 %cond
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -O0 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>38</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %13:_(&lt;4 x s32&gt;) = G_INSERT_VECTOR_ELT %11:_, %14:_(s32), %15:_(s32) (in function: phi_i1)<br>warning: Instruction selection used fallback path for phi_i1</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -O0 -code-model=small -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>38</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+f -O0 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+f -O0 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %13:_(&lt;4 x f32&gt;) = G_INSERT_VECTOR_ELT %11:_, %14:_(f32), %15:_(i32) (in function: phi_i1)
+warning: Instruction selection used fallback path for phi_i1</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-shuffle-exact-vlen.90483a16.33ff1758.e7471e1a.da8bd952.414e1dada0.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.90483a16.33ff1758.e7471e1a.da8bd952.ll<span class="dim">)</span></td><td class="l">extract_any_extend_vector_inreg_v16i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zbb,+f,+m,+a -O2 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-shuffle-exact-vlen.90483a16.33ff1758.e7471e1a.da8bd952.f2277dda52.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.90483a16.33ff1758.e7471e1a.da8bd952.ll<span class="dim">)</span></td><td class="l">extract_any_extend_vector_inreg_v16i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zbb,+f,+m,+a -O2</code></td></tr><tr><td class="l">fixed-vectors-vfadd-constrained-sdnode.20fa58046b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfadd-constrained-sdnode.ll">fixed-vectors-vfadd-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfadd_vv_v16f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfhmin,+zvfhmin,+experimental-zvfbfa,+f -O1 -code-model=small</code></td></tr><tr><td class="l">fold-binary-reduce.54d907ef7a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fold-binary-reduce.ll">fold-binary-reduce.ll</a><span class="dim">)</span></td><td class="l">two_reduce_scalar_bypass</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbb -O0</code></td></tr><tr><td class="l">phi.800f7f6cfa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/phi.ll">phi.ll</a><span class="dim">)</span></td><td class="l">phi_i1</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -O0 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

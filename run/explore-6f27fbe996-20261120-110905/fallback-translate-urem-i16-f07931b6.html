@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 19 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.863123a891.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span> @fcvt_h_ui_zeroext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define half @fcvt_h_ui_zeroext(i16 zeroext %a) #0 {
+  %B = urem i16 %a, %a
+  %1 = uitofp i16 %B to half
+  ret half %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %B = urem i16 %a, %a&#x27; (in function: fcvt_h_ui_zeroext)
+warning: Instruction selection used fallback path for fcvt_h_ui_zeroext</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.42abeb3836.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_minmax_i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zdinx,+zba -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">double-intrinsics.a1a88e15bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">trunc_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zihintpause -O3</code></td></tr><tr><td class="l">half-convert.863123a891.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_ui_zeroext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin -O2</code></td></tr><tr><td class="l">half-maximum-minimum.1c1f2fe4e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-maximum-minimum.ll">half-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_attr_f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinx -O2</code></td></tr><tr><td class="l">rem.f5230200e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rem.ll">rem.ll</a><span class="dim">)</span></td><td class="l">urem16_constant_lhs</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx,+a -O1</code></td></tr><tr><td class="l">smulh.ec5cde102c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_v8i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zcb -O2 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

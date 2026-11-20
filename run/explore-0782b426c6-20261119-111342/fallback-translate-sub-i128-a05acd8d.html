@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-rmw-minmax.40f0aa8500.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/atomic-rmw-minmax.ll">atomic-rmw-minmax.ll</a><span class="dim">)</span> @atomicrmw_umax_i32_seq_cst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+permissive-zalrsc,+zhinx -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @atomicrmw_umax_i32_seq_cst(ptr %a, i32 %b) #0 {
+  %B = sub i128 1, 42
+  %1 = atomicrmw umax ptr %a, i32 %b seq_cst, align 4
+  store i128 %B, ptr poison, align 4
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+permissive-zalrsc,+zhinx -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+permissive-zalrsc,+zhinx -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %B = sub i128 1, 42&#x27; (in function: atomicrmw_umax_i32_seq_cst)
+warning: Instruction selection used fallback path for atomicrmw_umax_i32_seq_cst</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-rmw-minmax.40f0aa8500.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/atomic-rmw-minmax.ll">atomic-rmw-minmax.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_umax_i32_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+b,+zalrsc,+permissive-zalrsc,+zhinx -O0 -code-model=small</code></td></tr><tr><td class="l">half-convert.337523204b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_w_h_sat_sext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinxmin,+zbs -O3 -code-model=medium</code></td></tr><tr><td class="l">memset-pattern.9a1877239d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/memset-pattern.ll">memset-pattern.ll</a><span class="dim">)</span></td><td class="l">memset_1</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zfinx -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

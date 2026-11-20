@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fcmp &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fcmp &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fcmp &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">13 in 13 configs, 13 test files, 123 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-load-store.7584430404.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span> @atomic_store_i64_seq_cst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zvkb,+zdinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;4 x i1&gt;
+
+; Function Attrs: nounwind
+define void @atomic_store_i64_seq_cst(ptr %a, i64 %b) #0 {
+  %C = fcmp ogt &lt;4 x float&gt; zeroinitializer, zeroinitializer
+  store atomic i64 %b, ptr %a seq_cst, align 8
+  store &lt;4 x i1&gt; %C, ptr @G.2, align 1
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zvkb,+zdinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zvkb,+zdinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fcmp: &#x27;  %C = fcmp ogt &lt;4 x float&gt; zeroinitializer, zeroinitializer&#x27; (in function: atomic_store_i64_seq_cst)
+warning: Instruction selection used fallback path for atomic_store_i64_seq_cst</pre>
+<h4>Occurrences (13):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.7584430404.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_store_i64_seq_cst</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zvkb,+zdinx -O3</code></td></tr><tr><td class="l">atomic-rmw.eb7f22c790.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-rmw.ll">atomic-rmw.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_xchg_minus_1_i8_acq_rel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zabha,+zcb,+zdinx -O2 -code-model=medium</code></td></tr><tr><td class="l">bswap-bitreverse.3ecd786d81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bswap_bitreverse_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+c,+zhinx -O3</code></td></tr><tr><td class="l">codemodel-lowering.f0edada655.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a><span class="dim">)</span></td><td class="l">lower_constantpool</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx,+zhinx -O2</code></td></tr><tr><td class="l">fixed-vectors-int-buildvec.f75d343d04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-buildvec.ll">fixed-vectors-int-buildvec.ll</a><span class="dim">)</span></td><td class="l">buildvec_no_vid_v4i8_0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+zvl128b,+zhinx -O2</code></td></tr><tr><td class="l">fp-fcanonicalize.1f20cd8c17.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0 -code-model=small</code></td></tr><tr><td class="l">half-intrinsics.e1b05f2612.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">fabs_f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zdinx,+zba,+zhinx -O1</code></td></tr><tr><td class="l">llvm.exp10.c0bcc38269.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/llvm.exp10.ll">llvm.exp10.ll</a><span class="dim">)</span></td><td class="l">exp10_v2f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+zfinx -O2</code></td></tr><tr><td class="l">memcpy.49c8f50608.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvkb,+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">prefetch.9abe5854f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/prefetch.ll">prefetch.ll</a><span class="dim">)</span></td><td class="l">test_prefetch_frameindex_0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicbop,+zhinx -O0</code></td></tr><tr><td class="l">rv64-stackmap.f11d3a410e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv64-stackmap.ll">rv64-stackmap.ll</a><span class="dim">)</span></td><td class="l">propertyWrite</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">short-forward-branch-opt-min-max.556614e484.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/short-forward-branch-opt-min-max.ll">short-forward-branch-opt-min-max.ll</a><span class="dim">)</span></td><td class="l">select_example_smin_1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+short-forward-branch-ialu,+zfinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">ssub_sat.ff58a6f911.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/ssub_sat.ll">ssub_sat.ll</a><span class="dim">)</span></td><td class="l">func16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zfinx,+zvbb -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

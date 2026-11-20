@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">12 in 12 configs, 9 test files, 110 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">condbinops.0beab8d331.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/condbinops.ll">condbinops.ll</a><span class="dim">)</span> @or32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+define i32 @or32(i32 %x, i32 %y, i1 %c) {
+  %binop = or i32 %x, %y
+  %C = icmp ule i32 %y, %binop
+  %select_ = select i1 %c, i32 %binop, i32 %x
+  store i1 %C, ptr @G.1, align 1
+  ret i32 %select_
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %binop = or i32 %x, %y&#x27; (in function: or32)
+warning: Instruction selection used fallback path for or32</pre>
+<h4>Occurrences (12):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">add_shl_constant.7a0b1271b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/add_shl_constant.ll">add_shl_constant.ll</a><span class="dim">)</span></td><td class="l">add_shl_moreOneUse_sh1add</td><td class="l"><code>-mtriple=riscv32 -mattr=+xandesperf,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">calllowering-zfinx-zhinx.cc5cf7b231.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/calllowering-zfinx-zhinx.ll">calllowering-zfinx-zhinx.ll</a><span class="dim">)</span></td><td class="l">callee_fastcc_float</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">condbinops.0beab8d331.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/condbinops.ll">condbinops.ll</a><span class="dim">)</span></td><td class="l">or32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">half-select-icmp.cb5f9fe4b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-select-icmp.ll">half-select-icmp.ll</a><span class="dim">)</span></td><td class="l">select_icmp_ule</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zhinxmin,+zvkb,+m -O2</code></td></tr><tr><td class="l">rotl-rotr.84f3f060ef.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotl_32_mask_or_64_or_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+zdinx,+zicsr -O1</code></td></tr><tr><td class="l">rotl-rotr.b28ad8846f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_32_mask_or_64_or_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zfinx -O3</code></td></tr><tr><td class="l">rotl-rotr.ca04b84d52.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_32_mask_or_64_or_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+a,+zdinx -O1</code></td></tr><tr><td class="l">rotl-rotr.ff229c1ecf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotr_32_mask_or_64_or_32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadbb,+zcb,+zhinx -O2 -code-model=medium</code></td></tr><tr><td class="l">rv32zimop-intrinsic.4edfe1c001.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32zimop-intrinsic.ll">rv32zimop-intrinsic.ll</a><span class="dim">)</span></td><td class="l">moprr0_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zimop,+zvbb,+zhinx -O0</code></td></tr><tr><td class="l">rv64zbb-zbkb.42f4507896.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">disjoint_or_xnor_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">rv64zknh-intrinsic.71a90f6b77.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv64zknh-intrinsic.ll">rv64zknh-intrinsic.ll</a><span class="dim">)</span></td><td class="l">sha256sum0_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zknh,+zhinx,+zvbb -O0</code></td></tr><tr><td class="l">xqcics.3837a7416f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/xqcics.ll">xqcics.ll</a><span class="dim">)</span></td><td class="l">select_cc_example_eq1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

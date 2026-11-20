@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: insertelement &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: insertelement &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: insertelement &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 8 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vaaddu.aa9dac06b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaaddu.ll">fixed-vectors-vaaddu.ll</a><span class="dim">)</span> @vaaddu_vx_v8i64_floor via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i64&gt; @vaaddu_vx_v8i64_floor(&lt;8 x i64&gt; %x, i64 %y) {
+  %yhead = insertelement &lt;8 x i64&gt; poison, i64 %y, i64 0
+  %ysplat = shufflevector &lt;8 x i64&gt; %yhead, &lt;8 x i64&gt; poison, &lt;8 x i32&gt; zeroinitializer
+  %B = sub &lt;8 x i64&gt; %ysplat, zeroinitializer
+  ret &lt;8 x i64&gt; %B
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: insertelement: &#x27;  %yhead = insertelement &lt;8 x i64&gt; poison, i64 %y, i64 0&#x27; (in function: vaaddu_vx_v8i64_floor)
+warning: Instruction selection used fallback path for vaaddu_vx_v8i64_floor</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-arith.09c164990b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/double-arith.ll">double-arith.ll</a><span class="dim">)</span></td><td class="l">fnmsub_d</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-int-splat.0da245fa42.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-splat.ll">fixed-vectors-int-splat.ll</a><span class="dim">)</span></td><td class="l">splat_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vaaddu.aa9dac06b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaaddu.ll">fixed-vectors-vaaddu.ll</a><span class="dim">)</span></td><td class="l">vaaddu_vx_v8i64_floor</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vmin-vp.e90ad73c93.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmin-vp.ll">fixed-vectors-vmin-vp.ll</a><span class="dim">)</span></td><td class="l">vmin_vx_v16i64_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vrem-vp.2b10d5e915.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vrem-vp.ll">fixed-vectors-vrem-vp.ll</a><span class="dim">)</span></td><td class="l">vrem_vx_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vssubu-vp.5e40b0c797.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vssubu-vp.ll">fixed-vectors-vssubu-vp.ll</a><span class="dim">)</span></td><td class="l">vssubu_vx_v8i64_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">inline-asm-mem-constraint.8138ccdb4b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_o_with_extern_weak_global_1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -no-integrated-as -mattr=+zdinx -O1</code></td></tr><tr><td class="l">memcpy-inline.c736ed7d5a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy0</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

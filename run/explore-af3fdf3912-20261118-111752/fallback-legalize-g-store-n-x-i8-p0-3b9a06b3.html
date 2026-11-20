@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE &lt;N x i8~&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE &lt;N x i8~&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE &lt;N x i8~&gt;,p0 <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 3 test files, 38 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-bitextract.2c7904ddfb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span> @test_bitextract_v16i4_var via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;16 x b8&gt;
+
+define &lt;16 x i4&gt; @test_bitextract_v16i4_var(&lt;16 x b8&gt; %src, &lt;16 x i32&gt; %off) {
+  %LGV = load &lt;16 x b8&gt;, ptr @G.1, align 16
+  %S = shufflevector &lt;16 x b8&gt; %src, &lt;16 x b8&gt; %LGV, &lt;16 x i32&gt; poison
+  %result = bitextract &lt;16 x i4&gt;, &lt;16 x b8&gt; %src, &lt;16 x i32&gt; %off
+  store &lt;16 x b8&gt; %S, ptr poison, align 16
+  ret &lt;16 x i4&gt; %result
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zvfh -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zvfh -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %8:_(&lt;16 x i4&gt;), %2:_(p0) :: (store (&lt;16 x i4&gt;)) (in function: test_bitextract_v16i4_var)
+warning: Instruction selection used fallback path for test_bitextract_v16i4_var</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bitextract.2c7904ddfb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v16i4_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-bitextract.76a6923243.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v16i4_var</td><td class="l"><code>-mtriple=riscv64 -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-bitextract.8c476cff0c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v16i4_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+zcb -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-bitextract.ad7675bbd3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v16i4_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-bitinsert.b3eb8fde81.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitinsert.ll">fixed-vectors-bitinsert.ll</a><span class="dim">)</span></td><td class="l">test_bitinsert_v16i4_var</td><td class="l"><code>-mtriple=riscv64 -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptosi-vp.04be46bcee.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptosi-vp.ll">fixed-vectors-fptosi-vp.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh -O3 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptosi-vp.79b4a1c854.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptosi-vp.ll">fixed-vectors-fptosi-vp.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfhmin -O2 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

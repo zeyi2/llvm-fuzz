@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shl i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shl i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shl i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 9 test files, 89 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64f-float-convert.4813dfae92.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv64f-float-convert.ll">rv64f-float-convert.ll</a><span class="dim">)</span> @sitofp_zext_i32_to_f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx,+zbkb,+a -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define float @sitofp_zext_i32_to_f32(i32 zeroext %a) #0 {
+  %B = shl i32 -1, -2147483648
+  %1 = sitofp i32 %a to float
+  store i32 %B, ptr poison, align 4
+  ret float %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx,+zbkb,+a -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx,+zbkb,+a -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shl: &#x27;  %B = shl i32 -1, -2147483648&#x27; (in function: sitofp_zext_i32_to_f32)
+warning: Instruction selection used fallback path for sitofp_zext_i32_to_f32</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.bab0a3b8de.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv32 -mattr=+smaia,+zcb,+zdinx -O2 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">double-convert.0194699731.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_wu</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1</code></td></tr><tr><td class="l">double-intrinsics-strict.cf5849e2b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/double-intrinsics-strict.ll">double-intrinsics-strict.ll</a><span class="dim">)</span></td><td class="l">tan_f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32 -mattr=+zdinx,+zcb -O0</code></td></tr><tr><td class="l">rv32zbb-zbkb.ae8f544abb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">not_shl_one_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zhinx -O2</code></td></tr><tr><td class="l">rv64f-float-convert.4813dfae92.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv64f-float-convert.ll">rv64f-float-convert.ll</a><span class="dim">)</span></td><td class="l">sitofp_zext_i32_to_f32</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx,+zbkb,+a -O0 -code-model=small</code></td></tr><tr><td class="l">select.cfd0c59afe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/select.ll">select.ll</a><span class="dim">)</span></td><td class="l">select_shl_1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx,+xtheadba -O0</code></td></tr><tr><td class="l">short-forward-branch-opt-with-branch-with-immediates_48_ne.e3a666b679.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/short-forward-branch-opt-with-branch-with-immediates_48_ne.ll">short-forward-branch-opt-with-branch-with-immediates_48_ne.ll</a><span class="dim">)</span></td><td class="l">branch_with_immSFB_mv_minusOnefalsev_swapped</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+xqci,+short-forward-branch-ialu,+short-forward-branch-imul,+short-forward-branch-iload,+m,+zfinx,+zbkb -O1</code></td></tr><tr><td class="l">short-forward-branch-opt-with-branch-with-immediates_48_ult.01d99b7656.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/short-forward-branch-opt-with-branch-with-immediates_48_ult.ll">short-forward-branch-opt-with-branch-with-immediates_48_ult.ll</a><span class="dim">)</span></td><td class="l">branch_with_immSFB_ori</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+xqci,+short-forward-branch-ialu,+short-forward-branch-imul,+short-forward-branch-iload,+m,+zhinx,+zba -O3</code></td></tr><tr><td class="l">vwabdau.85f7fdfd23.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/vwabdau.ll">vwabdau.ll</a><span class="dim">)</span></td><td class="l">vwabdau_vx_i8mf4</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-zvabd,+zfinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

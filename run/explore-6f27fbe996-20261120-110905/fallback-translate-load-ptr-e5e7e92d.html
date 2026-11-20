@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load ptr <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-inttoptr-ptrtoint.e9b6eeec.c2d9a15817.ll <span class="dim">(mutant of</span> fixed-vectors-inttoptr-ptrtoint.e9b6eeec.ll<span class="dim">)</span> @inttoptr_v4p0_v4i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zicsr -O3 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global double
+@G.6 = external global float
+@G.7 = external global ptr
+@G.8 = external global &lt;4 x ptr&gt;
+
+define &lt;4 x ptr&gt; @inttoptr_v4p0_v4i64(&lt;4 x i64&gt; %va, &lt;4 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV2 = load ptr, ptr @G.7, align 8
+  %E = extractelement &lt;4 x float&gt; splat (float +qnan), i64 0
+  %LGV1 = load double, ptr @G.2, align 8
+  %B = fsub contract double %LGV1, %LGV1
+  %v = inttoptr &lt;4 x i64&gt; %va to &lt;4 x ptr&gt;
+  %C = fcmp uge double %B, %LGV1
+  %I = insertelement &lt;4 x ptr&gt; %v, ptr %LGV2, i32 %evl
+  store i1 %C, ptr poison, align 1
+  store float %E, ptr @G.6, align 4
+  store &lt;4 x ptr&gt; %I, ptr @G.8, align 32
+  ret &lt;4 x ptr&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zicsr -O3 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zicsr -O3 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV2 = load ptr, ptr @G.7, align 8&#x27; (in function: inttoptr_v4p0_v4i64)
+warning: Instruction selection used fallback path for inttoptr_v4p0_v4i64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">blockaddress.e4eb34aa29.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/blockaddress.ll">blockaddress.ll</a><span class="dim">)</span></td><td class="l">test_blockaddress</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">fixed-vectors-inttoptr-ptrtoint.e9b6eeec.c2d9a15817.ll <span class="dim">(mutant of</span> fixed-vectors-inttoptr-ptrtoint.e9b6eeec.ll<span class="dim">)</span></td><td class="l">inttoptr_v4p0_v4i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zicsr -O3 -code-model=small</code></td></tr><tr><td class="l">split-offsets.3057046822.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/split-offsets.ll">split-offsets.ll</a><span class="dim">)</span></td><td class="l">test2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

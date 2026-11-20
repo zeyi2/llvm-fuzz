@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 23 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">frint-sdnode.933c34e5b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/frint-sdnode.ll">frint-sdnode.ll</a><span class="dim">)</span> @rint_nxv8bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfh,+zfbfmin,+zvfbfmin,+v -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i8
+
+define &lt;vscale x 8 x bfloat&gt; @rint_nxv8bf16(&lt;vscale x 8 x bfloat&gt; %x) {
+  %LGV = load i8, ptr @G.3, align 1
+  %I = insertelement &lt;vscale x 8 x bfloat&gt; %x, bfloat 0.000000e+00, i8 %LGV
+  ret &lt;vscale x 8 x bfloat&gt; %I
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfh,+zfbfmin,+zvfbfmin,+v -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfh,+zfbfmin,+zvfbfmin,+v -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %3:vrb(&lt;vscale x 8 x bf16&gt;) = G_INSERT_VECTOR_ELT %0:vrb, %4:gprb(bf16), %5:gprb(i32) (in function: rint_nxv8bf16)
+warning: Instruction selection used fallback path for rint_nxv8bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">frint-sdnode.933c34e5b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/frint-sdnode.ll">frint-sdnode.ll</a><span class="dim">)</span></td><td class="l">rint_nxv8bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfh,+zfbfmin,+zvfbfmin,+v -O2</code></td></tr><tr><td class="l">vfmv-s-bf.4b9f95d7df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/vfmv-s-bf.ll">vfmv-s-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfmv.s.f_f_zero_nxv32bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa -O3</code></td></tr><tr><td class="l">vfwmul-bf.dd71acf163.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/vfwmul-bf.ll">vfwmul-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwmul_mask_vv_nxv8f32_nxv8bf16_nxv8bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

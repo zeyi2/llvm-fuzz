@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 32 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 32 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 32 machine code errors. <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fastcc-bf16.ef15dc7e45.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/fastcc-bf16.ll">fastcc-bf16.ll</a><span class="dim">)</span> @caller via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+d -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/j1aGoT9do">https://godbolt.org/z/j1aGoT9do</a> (llc-assertions-trunk, checked 2026-11-19 14:52 UTC): <a href="https://godbolt.org/z/j1aGoT9do">G</a> <span class="fp">no crash on trunk</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+; Function Attrs: nounwind
+declare fastcc bfloat @callee(&lt;32 x bfloat&gt;) #0
+
+; Function Attrs: nounwind
+define bfloat @caller(&lt;32 x bfloat&gt; %A) #0 {
+  %LGV = load i64, ptr @G.1, align 4
+  %C = call fastcc bfloat @callee(&lt;32 x bfloat&gt; %A)
+  %B = urem i64 -9223372036854775808, %LGV
+  store i64 %B, ptr poison, align 4
+  ret bfloat %C
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+d -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>140</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call: &#x27;  %C = call fastcc bfloat @callee(&lt;32 x bfloat&gt; %A)&#x27; (in function: caller)<br>warning: Instruction selection used fallback path for caller</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+d -O1 -global-isel=0</code></td><td>0</td><td>140</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+d -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+d -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After Legalizer
+# Machine code for function caller: IsSSA, TracksLiveness, Legalized
+Frame Objects:
+  fi#-24: size=4, align=4, fixed, at location [SP+92]
+  fi#-23: size=4, align=8, fixed, at location [SP+88]
+  fi#-22: size=4, align=4, fixed, at location [SP+84]
+  fi#-21: size=4, align=16, fixed, at location [SP+80]
+  fi#-20: size=4, align=4, fixed, at location [SP+76]
+  fi#-19: size=4, align=8, fixed, at location [SP+72]
+  fi#-18: size=4, align=4, fixed, at location [SP+68]
+  fi#-17: size=4, align=16, fixed, at location [SP+64]
+  fi#-16: size=4, align=4, fixed, at location [SP+60]
+  fi#-15: size=4, align=8, fixed, at location [SP+56]
+  fi#-14: size=4, align=4, fixed, at location [SP+52]
+  fi#-13: size=4, align=16, fixed, at location [SP+48]
+  fi#-12: size=4, align=4, fixed, at location [SP+44]
+  fi#-11: size=4, align=8, fixed, at location [SP+40]
+  fi#-10: size=4, align=4, fixed, at location [SP+36]
+  fi#-9: size=4, align=16, fixed, at location [SP+32]
+  fi#-8: size=4, align=4, fixed, at location [SP+28]
+  fi#-7: size=4, align=8, fixed, at location [SP+24]
+  fi#-6: size=4, align=4, fixed, at location [SP+20]
+  fi#-5: size=4, align=16, fixed, at location [SP+16]
+  fi#-4: size=4, align=4, fixed, at location [SP+12]
+  fi#-3: size=4, align=8, fixed, at location [SP+8]
+  fi#-2: size=4, align=4, fixed, at location [SP+4]
+  fi#-1: size=4, align=16, fixed, at location [SP]
+save/restore points:
+save points are empty
+restore points are empty
+Function Live Ins: $x10, $x11, $x12, $x13, $x14, $x15, $x16, $x17
+bb.1 (%ir-block.0):
+  liveins: $x10, $x11, $x12, $x13, $x14, $x15, $x16, $x17
+  %1:_(i32) = COPY $x10
+  %2:_(i32) = COPY $x11
+  %3:_(i32) = COPY $x12
+  %4:_(i32) = COPY $x13
+  %5:_(i32) = COPY $x14
+  %6:_(i32) = COPY $x15
+  %7:_(i32) = COPY $x16
+  %8:_(i32) = COPY $x17
+  %33:_(p0) = G_FRAME_INDEX %fixed-stack.23
+  %9:_(i32) = G_LOAD %33:_(p0) :: (load (f32) from %fixed-stack.23, align 16)
+  %34:_(p0) = G_FRAME_INDEX %fixed-stack.22
+  %10:_(i32) = G_LOAD %34:_(p0) :: (load (f32) from %fixed-stack.22)
+  %35:_(p0) = G_FRAME_INDEX %fixed-stack.21
+  %11:_(i32) = G_LOAD %35:_(p0) :: (load (f32) from %fixed-stack.21, align 8)
+  %36:_(p0) = G_FRAME_INDEX %fixed-stack.20
+  %12:_(i32) = G_LOAD %36:_(p0) :: (load (f32) from %fixed-stack.20)
+  %37:_(p0) = G_FRAME_INDEX %fixed-stack.19
+  %13:_(i32) = G_LOAD %37:_(p0) :: (load (f32) from %fixed-stack.19, align 16)
+  %38:_(p0) = G_FRAME_INDEX %fixed-stack.18
+  %14:_(i32) = G_LOAD %38:_(p0) :: (load (f32) from %fixed-stack.18)
+  %39:_(p0) = G_FRAME_INDEX %fixed-stack.17
+  %15:_(i32) = G_LOAD %39:_(p0) :: (load (f32) from %fixed-stack.17, align 8)
+  %40:_(p0) = G_FRAME_INDEX %fixed-stack.16
+  %16:_(i32) = G_LOAD %40:_(p0) :: (load (f32) from %fixed-stack.16)
+  %41:_(p0) = G_FRAME_INDEX %fixed-stack.15
+  %17:_(i32) = G_LOAD %41:_(p0) :: (load (f32) from %fixed-stack.15, align 16)
+  %42:_(p0) = G_FRAME_INDEX %fixed-stack.14
+  %18:_(i32) = G_LOAD %42:_(p0) :: (load (f32) from %fixed-stack.14)
+  %43:_(p0) = G_FRAME_INDEX %fixed-stack.13
+  %19:_(i32) = G_LOAD %43:_(p0) :: (load (f32) from %fixed-stack.13, align 8)
+  %44:_(p0) = G_FRAME_INDEX %fixed-stack.12
+  %20:_(i32) = G_LOAD %44:_(p0) :: (load (f32) from %fixed-stack.12)
+  %45:_(p0) = G_FRAME_INDEX %fixed-stack.11
+  %21:_(i32) = G_LOAD %45:_(p0) :: (load (f32) from %fixed-stack.11, align 16)
+  %46:_(p0) = G_FRAME_INDEX %fixed-stack.10
+  %22:_(i32) = G_LOAD %46:_(p0) :: (load (f32) from %fixed-stack.10)
+  %47:_(p0) = G_FRAME_INDEX %fixed-stack.9
+  %23:_(i32) = G_LOAD %47:_(p0) :: (load (f32) from %fixed-stack.9, align 8)
+  %48:_(p0) = G_FRAME_INDEX %fixed-stack.8
+  %24:_(i32) = G_LOAD %48:_(p0) :: (load (f32) from %fixed-stack.8)
+  %49:_(p0) = G_FRAME_INDEX %fixed-stack.7
+  %25:_(i32) = G_LOAD %49:_(p0) :: (load (f32) from %fixed-stack.7, align 16)
+  %50:_(p0) = G_FRAME_INDEX %fixed-stack.6
+  %26:_(i32) = G_LOAD %50:_(p0) :: (load (f32) from %fixed-stack.6)
+  %51:_(p0) = G_FRAME_INDEX %fixed-stack.5
+  %27:_(i32) = G_LOAD %51:_(p0) :: (load (f32) from </pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fastcc-bf16.ef15dc7e45.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/fastcc-bf16.ll">fastcc-bf16.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+d -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

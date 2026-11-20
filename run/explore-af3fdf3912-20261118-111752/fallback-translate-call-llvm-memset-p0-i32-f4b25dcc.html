@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.memset.p0.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.memset.p0.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.memset.p0.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memset.d719e72c8f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/memset.ll">memset.ll</a><span class="dim">)</span> @memset_i32_var via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global i8
+
+; Function Attrs: nounwind
+define void @memset_i32_var(ptr %dest, i8 %val, i32 %n) #0 {
+entry:
+  call void @llvm.memset.p0.i32(ptr %dest, i8 %val, i32 %n, i1 false)
+  %B = and i8 %val, 0
+  store i8 %B, ptr @G.6, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.memset.p0.i32(ptr writeonly captures(none), i8, i32, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zfinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zfinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.memset.p0.i32: &#x27;  call void @llvm.memset.p0.i32(ptr align 1 %dest, i8 %val, i32 %n, i1 false)&#x27; (in function: memset_i32_var)
+warning: Instruction selection used fallback path for memset_i32_var</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memset.d719e72c8f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/memset.ll">memset.ll</a><span class="dim">)</span></td><td class="l">memset_i32_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcilsm-memset.2cd44b5fe8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l">test2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm,+zhinx -O3</code></td></tr><tr><td class="l">xqcilsm-memset.bb35254b39.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l">test15a</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">xqcilsm-memset.c9cc388104.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l">test2a</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zba -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

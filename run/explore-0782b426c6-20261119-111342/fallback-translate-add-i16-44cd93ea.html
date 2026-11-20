@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 7 test files, 38 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">signed-truncation-check.07809d4d3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span> @add_ulecmp_i16_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i1 @add_ulecmp_i16_i8(i16 %x) #0 {
+  %tmp0 = add i16 %x, 128
+  %tmp1 = icmp ule i16 %tmp0, 255
+  %C = icmp ult i16 %x, %x
+  store i1 %C, ptr poison, align 1
+  ret i1 %tmp1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %tmp0 = add i16 %x, 128&#x27; (in function: add_ulecmp_i16_i8)
+warning: Instruction selection used fallback path for add_ulecmp_i16_i8</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.5a677d4a11.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_cmp_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zdinx,+zba -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">blockaddress.8abe965ca2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/blockaddress.ll">blockaddress.ll</a><span class="dim">)</span></td><td class="l">test_blockaddress</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">bswap-bitreverse.47aae7647c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_bswap_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbkb,+zbb,+zhinx -O3</code></td></tr><tr><td class="l">float-select-fcmp.1ac46bf011.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/float-select-fcmp.ll">float-select-fcmp.ll</a><span class="dim">)</span></td><td class="l">select_fcmp_ugt</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zfinx -O1 -code-model=medium</code></td></tr><tr><td class="l">lack-of-signed-truncation-check.975711ae05.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/lack-of-signed-truncation-check.ll">lack-of-signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ugecmp_i16_i8</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">overflow-intrinsics.5486b5f6a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/overflow-intrinsics.ll">overflow-intrinsics.ll</a><span class="dim">)</span></td><td class="l">usubo_ult_constant_op1_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O2 -code-model=medium</code></td></tr><tr><td class="l">signed-truncation-check.07809d4d3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ulecmp_i16_i8</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">signed-truncation-check.b266b6b464.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ultcmp_bad_i16_i8_c0notpoweroftwo</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zfinx -O1 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

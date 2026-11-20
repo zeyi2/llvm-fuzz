@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (hiBit &lt;= BitWidth &amp;&amp; &quot;hiBit out of range&quot;), function setBits, file APInt.h</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (hiBit &lt;= BitWidth &amp;&amp; &quot;hiBit out of range&quot;), function setBits, file APInt.h</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (hiBit &lt;= BitWidth &amp;&amp; &quot;hiBit out of range&quot;), function setBits, file APInt.h <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-bitextract.5f3b6171c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span> @test_bitextract_v4i8_const via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zicond,+zbkb -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/Kchbze6eP">https://godbolt.org/z/Kchbze6eP</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/Kchbze6eP">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;4 x i8&gt; @test_bitextract_v4i8_const(&lt;4 x b32&gt; %src) {
+  %result = bitextract &lt;4 x i8&gt;, &lt;4 x b32&gt; %src, &lt;4 x i32&gt; splat (i32 8)
+  %B = lshr &lt;4 x i8&gt; %result, splat (i8 16)
+  ret &lt;4 x i8&gt; %B
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zicond,+zbkb -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/include/llvm/ADT/APInt.h:1388: void llvm::APInt::setBits(unsigned int, unsigned int): Assertion `hiBit &lt;= BitWidth &amp;&amp; &quot;hiBit out of range&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zicond,+zbkb -O3 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>1</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+v,+zicond,+zbkb -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+v,+zicond,+zbkb -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/include/llvm/ADT/APInt.h:1388: void llvm::APInt::setBits(unsigned int, unsigned int): Assertion `hiBit &lt;= BitWidth &amp;&amp; &quot;hiBit out of range&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -mattr=+v,+zicond,+zbkb -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISCVPreLegalizerCombiner&#x27; on function &#x27;@test_bitextract_v4i8_const&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x00005575b38d9e3b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x00005575b38d6ce1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x00005575b38da8bb
+3  libc.so.6 0x00007f6892445330
+4  libc.so.6 0x00007f689249ec0c pthread_kill + 284
+5  libc.so.6 0x00007f689244527e gsignal + 30
+6  libc.so.6 0x00007f68924288ff abort + 223
+7  libc.so.6 0x00007f689242881b
+8  libc.so.6 0x00007f689243b517
+9  llc       0x00005575b59f29cd llvm::CombinerHelper::applyLshrOfTruncOfLshr(llvm::MachineInstr&amp;, llvm::LshrOfTruncOfLshr&amp;) const + 813
+10 llc       0x00005575b4634d1c
+11 llc       0x00005575b4642763
+12 llc       0x00005575b46363ab
+13 llc       0x00005575b59e232d llvm::Combiner::combineMachineInstrs() + 2301
+14 llc       0x00005575b462b3c1
+15 llc       0x00005575b462b5f6
+16 llc       0x00005575b3eb1c81 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+17 llc       0x00005575b3c37467 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+18 llc       0x00005575b3c3f982 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+19 llc       0x00005575b3c38210 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+20 llc       0x00005575b38e19d9
+21 llc       0x00005575b38dec01 llcMain + 1665
+22 llc       0x00005575b381b16f main + 63
+23 libc.so.6 0x00007f689242a1ca
+24 libc.so.6 0x00007f689242a28b __libc_start_main + 139
+25 llc       0x00005575b381b065 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bitextract.5f3b6171c7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zicond,+zbkb -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x bf16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x bf16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT &lt;N x bf16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 69 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-extract.f4fac4fd3d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract.ll">fixed-vectors-extract.ll</a><span class="dim">)</span> @extractelt_v16bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+f,+d,+m -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define bfloat @extractelt_v16bf16(&lt;16 x bfloat&gt; %a) #0 {
+  %C = fcmp uge half 0.000000e+00, 0.000000e+00
+  %b = extractelement &lt;16 x bfloat&gt; %a, i32 7
+  store i1 %C, ptr poison, align 1
+  ret bfloat %b
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+f,+d,+m -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+f,+d,+m -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(bf16) = G_EXTRACT_VECTOR_ELT %0:_(&lt;16 x bf16&gt;), %5:_(i32) (in function: extractelt_v16bf16)
+warning: Instruction selection used fallback path for extractelt_v16bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-extract.9143b96631.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract.ll">fixed-vectors-extract.ll</a><span class="dim">)</span></td><td class="l">extractelt_v8bf16_idx</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+d,+m -O2</code></td></tr><tr><td class="l">fixed-vectors-extract.f4fac4fd3d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract.ll">fixed-vectors-extract.ll</a><span class="dim">)</span></td><td class="l">extractelt_v16bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+f,+d,+m -O2</code></td></tr><tr><td class="l">fixed-vectors-llrint.985e2c0e.9d76496689.ll <span class="dim">(mutant of</span> fixed-vectors-llrint.985e2c0e.ll<span class="dim">)</span></td><td class="l">llrint_v2i64_v2bf16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+f,+d,+zvfbfmin -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

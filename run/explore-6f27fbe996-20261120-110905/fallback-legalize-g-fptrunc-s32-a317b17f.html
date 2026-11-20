@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTRUNC s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTRUNC s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTRUNC s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 537 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fp2i.20723b1782.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span> @fp2si_v2f32_v2i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/PYqa4xr7x">https://godbolt.org/z/PYqa4xr7x</a> (llc-assertions-trunk, checked 2026-11-20 14:38 UTC): <a href="https://godbolt.org/z/PYqa4xr7x">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global bfloat
+
+define void @fp2si_v2f32_v2i64(ptr %x, ptr %y) {
+  %A = alloca bfloat, align 2
+  store bfloat poison, ptr %A, align 2
+  %LGV = load bfloat, ptr @G, align 2
+  %a = load &lt;2 x float&gt;, ptr %x, align 8
+  %d = fptosi &lt;2 x float&gt; %a to &lt;2 x i64&gt;
+  store &lt;2 x i64&gt; %d, ptr %y, align 16
+  %B = frem bfloat %LGV, 4.200000e+01
+  store bfloat %B, ptr %A, align 2
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>21</td><td class="msg err">note: hard-float &#x27;d&#x27; ABI can&#x27;t be used for a target that doesn&#x27;t support the D instruction set extension (ignoring target-abi)<br>remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(bf16) = G_FPTRUNC %12:_(s32) (in function: fp2si_v2f32_v2i64)<br>warning: Instruction selection used fallback path for fp2si_v2f32_v2i64</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f -O2 -global-isel=0</code></td><td>0</td><td>21</td><td class="msg err">note: hard-float &#x27;d&#x27; ABI can&#x27;t be used for a target that doesn&#x27;t support the D instruction set extension (ignoring target-abi)</td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(bf16) = G_FPTRUNC %12:_(s32) (in function: fp2si_v2f32_v2i64)
+warning: Instruction selection used fallback path for fp2si_v2f32_v2i64</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">align.872d1485e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/align.ll">align.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">fixed-vectors-compress-fp.4ee7d78f05.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-compress-fp.ll">fixed-vectors-compress-fp.ll</a><span class="dim">)</span></td><td class="l">vector_compress_v2f16_passthru</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+m,+f,+d,+zvfh,+zvfbfmin -O1</code></td></tr><tr><td class="l">fixed-vectors-fp2i.20723b1782.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2si_v2f32_v2i64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f -O2</code></td></tr><tr><td class="l">short-forward-branch-load-imm.d553d46946.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/short-forward-branch-load-imm.ll">short-forward-branch-load-imm.ll</a><span class="dim">)</span></td><td class="l">select_example_1</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+short-forward-branch-ialu -O2 -code-model=small</code></td></tr><tr><td class="l">vararg.27050e17b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/vararg.ll">vararg.ll</a><span class="dim">)</span></td><td class="l">va1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 27 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xqccmp-callee-saved-gprs.883d94c0c2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/xqccmp-callee-saved-gprs.ll">xqccmp-callee-saved-gprs.ll</a><span class="dim">)</span> @callee via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -mattr=+zfinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var = external global [32 x i32]
+@G = external global i8
+
+define void @callee() {
+  %B = add i8 1, -128
+  %val = load [32 x i32], ptr @var, align 4
+  store volatile [32 x i32] %val, ptr @var, align 4
+  store i8 %B, ptr @G, align 1
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -mattr=+zfinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -mattr=+zfinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %B = add i8 1, -128&#x27; (in function: callee)
+warning: Instruction selection used fallback path for callee</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">forced-atomics.e3bc358ac2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/forced-atomics.ll">forced-atomics.ll</a><span class="dim">)</span></td><td class="l">rmw32_add_monotonic</td><td class="l"><code>-mtriple=riscv64 -mattr=+forced-atomics,+no-trailing-seq-cst-fence,+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64xtheadbb.87bb99cdc0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">ctlz_i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">xqccmp-callee-saved-gprs.883d94c0c2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/xqccmp-callee-saved-gprs.ll">xqccmp-callee-saved-gprs.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -frame-pointer=all -mattr=+zfinx -O3</code></td></tr><tr><td class="l">xqcisls.45a3028239.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/xqcisls.ll">xqcisls.ll</a><span class="dim">)</span></td><td class="l">srb</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+xqcisls,+zdinx,+zicond -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

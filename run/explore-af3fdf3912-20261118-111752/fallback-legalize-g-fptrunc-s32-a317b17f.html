@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTRUNC s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTRUNC s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTRUNC s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 492 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xqcisls.ec6acf0ae6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xqcisls.ll">xqcisls.ll</a><span class="dim">)</span> @srh via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/rssE7qo4M">https://godbolt.org/z/rssE7qo4M</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/rssE7qo4M">G</a> <span class="fp">falls back differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global ptr
+@G.1 = external global bfloat
+
+define void @srh(ptr %a, i32 %b, i16 %c) {
+  %LGV = load bfloat, ptr @G.1, align 2
+  %B = frem bfloat +inf, %LGV
+  %1 = add i16 %c, %c
+  %2 = getelementptr i16, ptr %a, i32 %b
+  store i16 %1, ptr %2, align 2
+  store ptr %2, ptr @G, align 8
+  store bfloat %B, ptr %2, align 2
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>26</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem bfloat +inf, %LGV&#x27; (in function: srh)<br>warning: Instruction selection used fallback path for srh</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O2 -global-isel=0</code></td><td>0</td><td>26</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(bf16) = G_FPTRUNC %18:_(s32) (in function: srh)
+warning: Instruction selection used fallback path for srh</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">load-store-pair.03a19f005b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/load-store-pair.ll">load-store-pair.ll</a><span class="dim">)</span></td><td class="l">testi</td><td class="l"><code>-mtriple=riscv64 -riscv-mips-load-store-pairs=1 -verify-machineinstrs -mattr=+zicsr -O3</code></td></tr><tr><td class="l">vfmin-bf.f5f3b0f6c2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vfmin-bf.ll">vfmin-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfmin_vv_nxv4bf16_nxv4bf16_nxv4bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa,+zbkb,+zfh -O1</code></td></tr><tr><td class="l">xqcisls.ec6acf0ae6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xqcisls.ll">xqcisls.ll</a><span class="dim">)</span></td><td class="l">srh</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

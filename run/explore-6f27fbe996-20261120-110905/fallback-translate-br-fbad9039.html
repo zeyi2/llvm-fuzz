@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: br</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: br</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: br <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 7 configs, 6 test files, 101 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-cmpxchg-branch-on-result.11b275def2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-cmpxchg-branch-on-result.ll">atomic-cmpxchg-branch-on-result.ll</a><span class="dim">)</span> @cmpxchg_masked_and_branch1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zabha,+zfinx,+zihintpause -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define void @cmpxchg_masked_and_branch1(ptr %ptr, i8 signext %cmp, i8 signext %val) #0 {
+entry:
+  br label %do_cmpxchg
+
+do_cmpxchg:                                       ; preds = %do_cmpxchg, %entry
+  %C = icmp eq i8 %val, %cmp
+  %0 = cmpxchg ptr %ptr, i8 %cmp, i8 %val seq_cst seq_cst, align 1
+  %1 = extractvalue { i8, i1 } %0, 1
+  store i1 %C, ptr @G, align 1
+  br i1 %1, label %exit, label %do_cmpxchg
+
+exit:                                             ; preds = %do_cmpxchg
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zabha,+zfinx,+zihintpause -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zabha,+zfinx,+zihintpause -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: br: &#x27;  br label %do_cmpxchg&#x27; (in function: cmpxchg_masked_and_branch1)
+warning: Instruction selection used fallback path for cmpxchg_masked_and_branch1</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-cmpxchg-branch-on-result.11b275def2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-cmpxchg-branch-on-result.ll">atomic-cmpxchg-branch-on-result.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_masked_and_branch1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zabha,+zfinx,+zihintpause -O3</code></td></tr><tr><td class="l">atomic-cmpxchg-branch-on-result.56728ef764.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-cmpxchg-branch-on-result.ll">atomic-cmpxchg-branch-on-result.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_and_branch2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zabha,+zdinx,+zba -O2</code></td></tr><tr><td class="l">atomic-cmpxchg-branch-on-result.56728ef764.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-cmpxchg-branch-on-result.ll">atomic-cmpxchg-branch-on-result.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_masked_and_branch2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zacas,+zabha,+zdinx,+zba -O2</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.a574ca5bc0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_cttz_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx -O0</code></td></tr><tr><td class="l">half-convert-strict.e9dcfeeae3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_si_signext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zdinx,+zhinx,+zve32x -O1</code></td></tr><tr><td class="l">lsr-legaladdimm.e191623eae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/lsr-legaladdimm.ll">lsr-legaladdimm.ll</a><span class="dim">)</span></td><td class="l">main</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">machinelicm-address-pseudos.3c917dca37.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/machinelicm-address-pseudos.ll">machinelicm-address-pseudos.ll</a><span class="dim">)</span></td><td class="l">test_la</td><td class="l"><code>-mtriple=riscv32 -relocation-model=pic -verify-machineinstrs -mattr=+zbb,+zfinx -O3 -code-model=medium</code></td></tr><tr><td class="l">sextw-removal.af217db944.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">sext_i32_arg</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">sextw-removal.af217db944.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">anyext_i32_arg</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

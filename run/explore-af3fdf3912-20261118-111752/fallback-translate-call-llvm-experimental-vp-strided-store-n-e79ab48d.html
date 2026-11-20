@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.vp.strided.store.nxv1i8.p0.i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.vp.strided.store.nxv1i8.p0.i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.vp.strided.store.nxv1i8.p0.i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">11 in 11 configs, 2 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">strided-vpstore.5e118813bd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span> @strided_vpstore_nxv1i8_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+define void @strided_vpstore_nxv1i8_i64(&lt;vscale x 1 x i8&gt; %val, ptr %ptr, i64 signext %stride, &lt;vscale x 1 x i1&gt; %m, i32 zeroext %evl) {
+  call void @llvm.experimental.vp.strided.store.nxv1i8.p0.i64(&lt;vscale x 1 x i8&gt; %val, ptr %ptr, i64 %stride, &lt;vscale x 1 x i1&gt; %m, i32 %evl)
+  %B = and i64 %stride, 0
+  store i64 %B, ptr @G.1, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.experimental.vp.strided.store.nxv1i8.p0.i64(&lt;vscale x 1 x i8&gt;, ptr captures(none), i64, &lt;vscale x 1 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.vp.strided.store.nxv1i8.p0.i64: &#x27;  call void @llvm.experimental.vp.strided.store.nxv1i8.p0.i64(&lt;vscale x 1 x i8&gt; %val, ptr %ptr, i64 %stride, &lt;vscale x 1 x i1&gt; %m, i32 %evl)&#x27; (in function: strided_vpstore_nxv1i8_i64)
+warning: Instruction selection used fallback path for strided_vpstore_nxv1i8_i64</pre>
+<h4>Occurrences (11):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">nontemporal-vp-scalable.45f0c163e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_nxv1i8_S1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+c,+zbs -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.6733614a4b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_nxv1i8_P1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.a352458477.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_nxv1i8_ALL</td><td class="l"><code>-mtriple=riscv32 -mattr=+zihintntl,+f,+d,+zfh,+v,+c,+zvbb -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.a5d1cf8f22.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_nxv1i8_PALL</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">nontemporal-vp-scalable.c7400ae262.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/nontemporal-vp-scalable.ll">nontemporal-vp-scalable.ll</a><span class="dim">)</span></td><td class="l">test_nontemporal_vp_strided.store_nxv1i8_P1</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintntl,+f,+d,+zfh,+v,+c -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">strided-vpstore.4c7a77b267.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i8_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+xtheadba -O1</code></td></tr><tr><td class="l">strided-vpstore.59409a2d70.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i8_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -O2</code></td></tr><tr><td class="l">strided-vpstore.5abcf302ff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i8_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin -O0</code></td></tr><tr><td class="l">strided-vpstore.5e118813bd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i8_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -O0</code></td></tr><tr><td class="l">strided-vpstore.753375492f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i8_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin,+xtheadba,+zihintpause -O3</code></td></tr><tr><td class="l">strided-vpstore.bebeea3486.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/strided-vpstore.ll">strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_nxv1i8_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin,+zba -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

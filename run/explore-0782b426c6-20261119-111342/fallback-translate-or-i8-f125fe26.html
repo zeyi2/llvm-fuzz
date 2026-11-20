@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 11 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">hoist-global-addr-base.7a661e2ba1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span> @neg_offset via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba,+zhinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@bar = external global [0 x i8], align 1
+
+define ptr @neg_offset() {
+  %B = or i8 0, 0
+  store i8 %B, ptr poison, align 1
+  ret ptr getelementptr inbounds ([0 x i8], ptr @bar, i32 0, i32 -8191)
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zba,+zhinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zba,+zhinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B = or i8 0, 0&#x27; (in function: neg_offset)
+warning: Instruction selection used fallback path for neg_offset</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">hoist-global-addr-base.7a661e2ba1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">neg_offset</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba,+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">inline-asm-s-constraint.b2521159d5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/inline-asm-s-constraint.ll">inline-asm-s-constraint.ll</a><span class="dim">)</span></td><td class="l">test</td><td class="l"><code>-mtriple=riscv32 -relocation-model=static -mattr=+zfinx,+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">split-store.d60cbb0c56.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/split-store.ll">split-store.ll</a><span class="dim">)</span></td><td class="l">int32_int32_pair</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 99 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xtheadmac.c75f71312b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span> @commutative3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadmac,+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+define i32 @commutative3(i32 %A, i32 %B, i32 %C) {
+  %mul = mul nsw i32 %C, %A
+  %B1 = mul i32 %C, %A
+  %add = add i32 %mul, %B
+  store i32 %B1, ptr @G, align 4
+  ret i32 %add
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadmac,+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadmac,+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %mul = mul nsw i32 %C, %A&#x27; (in function: commutative3)
+warning: Instruction selection used fallback path for commutative3</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bitextract-mac.f79c849d6f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/bitextract-mac.ll">bitextract-mac.ll</a><span class="dim">)</span></td><td class="l">f</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr><tr><td class="l">clmulr-rv64.d79d5b0257.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/clmulr-rv64.ll">clmulr-rv64.ll</a><span class="dim">)</span></td><td class="l">clmulr_i32_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbc,+zcb,+zdinx -O0</code></td></tr><tr><td class="l">fixed-vectors-trunc-vp-mask.ace7ee88.bd7ae86cb3.ll <span class="dim">(mutant of</span> fixed-vectors-trunc-vp-mask.ace7ee88.ll<span class="dim">)</span></td><td class="l">vtrunc_v2i1_v2i64_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+a,+zfinx -O1</code></td></tr><tr><td class="l">neg-abs.b958363679.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/neg-abs.ll">neg-abs.ll</a><span class="dim">)</span></td><td class="l">expanded_neg_inv_abs32_unsigned</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zhinx -O3</code></td></tr><tr><td class="l">short-forward-branch-opt-mul.f2364297e2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/short-forward-branch-opt-mul.ll">short-forward-branch-opt-mul.ll</a><span class="dim">)</span></td><td class="l">select_example_mul_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zicond,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">xtheadmac.c75f71312b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/xtheadmac.ll">xtheadmac.ll</a><span class="dim">)</span></td><td class="l">commutative3</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadmac,+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

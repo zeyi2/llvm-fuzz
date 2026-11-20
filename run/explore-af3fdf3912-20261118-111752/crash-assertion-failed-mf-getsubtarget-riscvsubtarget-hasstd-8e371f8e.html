@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()), function getInstrMapping, file RISCVRegisterBankInfo.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vsplats-fp.587e67c97a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vsplats-fp.ll">vsplats-fp.ll</a><span class="dim">)</span> @vsplat_zero_nxv8f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/46rb5h3ea">https://godbolt.org/z/46rb5h3ea</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/46rb5h3ea">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+@G.1 = external global i1
+
+define &lt;vscale x 8 x float&gt; @vsplat_zero_nxv8f32() {
+  %LGV = load i8, ptr @G, align 1
+  %C = icmp ule i8 -128, %LGV
+  store i1 %C, ptr @G.1, align 1
+  ret &lt;vscale x 8 x float&gt; zeroinitializer
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVRegisterBankInfo.cpp:569: virtual const llvm::RegisterBankInfo::InstructionMapping&amp; llvm::RISCVRegisterBankInfo::getInstrMapping(const llvm::MachineInstr&amp;) const: Assertion `MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1 -global-isel=0</code></td><td>0</td><td>8</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVRegisterBankInfo.cpp:601: virtual const RegisterBankInfo::InstructionMapping &amp;llvm::RISCVRegisterBankInfo::getInstrMapping(const MachineInstr &amp;) const: Assertion `MF.getSubtarget&lt;RISCVSubtarget&gt;().hasStdExtD()&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RegBankSelect&#x27; on function &#x27;@vsplat_zero_nxv8f32&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000556e7b986e3b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000556e7b983ce1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000556e7b9878bb
+3  libc.so.6 0x00007f63b3445330
+4  libc.so.6 0x00007f63b349ec0c pthread_kill + 284
+5  libc.so.6 0x00007f63b344527e gsignal + 30
+6  libc.so.6 0x00007f63b34288ff abort + 223
+7  libc.so.6 0x00007f63b342881b
+8  libc.so.6 0x00007f63b343b517
+9  llc       0x0000556e7cc1116f
+10 llc       0x0000556e7db882b7
+11 llc       0x0000556e7db876d5 llvm::RegBankSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 197
+12 llc       0x0000556e7bf5ec81 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+13 llc       0x0000556e7bce4467 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x0000556e7bcec982 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x0000556e7bce5210 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x0000556e7b98e9d9
+17 llc       0x0000556e7b98bc01 llcMain + 1665
+18 llc       0x0000556e7b8c816f main + 63
+19 libc.so.6 0x00007f63b342a1ca
+20 libc.so.6 0x00007f63b342a28b __libc_start_main + 139
+21 llc       0x0000556e7b8c8065 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vsplats-fp.587e67c97a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vsplats-fp.ll">vsplats-fp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

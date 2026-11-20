@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: freeze i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: freeze i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: freeze i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zicond-fp-select-zfinx.e067f57649.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/zicond-fp-select-zfinx.ll">zicond-fp-select-zfinx.ll</a><span class="dim">)</span> @select_i1_f32_0 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zihintpause -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+@G.1 = external global i1
+@G.2 = external global i128
+
+; Function Attrs: nounwind
+define dso_local noundef float @select_i1_f32_0(i1 %cond, float %t) #0 {
+entry:
+  %B = urem i128 1, 170141183460469231731687303715884105727
+  %LGV = load i8, ptr @G, align 1
+  %sel = select i1 %cond, float %t, float 0.000000e+00
+  %C = icmp eq i8 0, %LGV
+  store i1 %C, ptr @G.1, align 1
+  store i128 %B, ptr @G.2, align 4
+  ret float %sel
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zihintpause -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zihintpause -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: freeze: &#x27;  %0 = freeze i128 1&#x27; (in function: select_i1_f32_0)
+warning: Instruction selection used fallback path for select_i1_f32_0</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">copysign-casts.bbf4f77e95.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/copysign-casts.ll">copysign-casts.ll</a><span class="dim">)</span></td><td class="l">fold_demote_h_s</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32f -mattr=+zhinx -O0</code></td></tr><tr><td class="l">float-arith-strict.5275fe984b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/float-arith-strict.ll">float-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fmin_s</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi=ilp32 -mattr=+zfinx -O2 -code-model=small</code></td></tr><tr><td class="l">zicond-fp-select-zfinx.e067f57649.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/zicond-fp-select-zfinx.ll">zicond-fp-select-zfinx.ll</a><span class="dim">)</span></td><td class="l">select_i1_f32_0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zihintpause -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

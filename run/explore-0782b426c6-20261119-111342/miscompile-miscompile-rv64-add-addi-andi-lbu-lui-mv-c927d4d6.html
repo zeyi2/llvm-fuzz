@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,lbu,lui,mv</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,lbu,lui,mv</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,lbu,lui,mv <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">mem64.7091674ca1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/mem64.ll">mem64.ll</a><span class="dim">)</span> @load_sext_zext_anyext_i1_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global ptr
+
+; Function Attrs: nounwind
+define dso_local i16 @load_sext_zext_anyext_i1_i16(ptr %a) #0 {
+  %1 = getelementptr i1, ptr %a, i32 1
+  %2 = load i1, ptr %1, align 1
+  %3 = sext i1 %2 to i16
+  %4 = getelementptr i1, ptr %a, i32 2
+  %5 = load i1, ptr %4, align 1
+  %6 = zext i1 %5 to i16
+  %7 = add i16 %3, %6
+  %8 = load volatile i1, ptr %a, align 1
+  store ptr %1, ptr @G.3, align 8
+  ret i16 %7
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -O0 -code-model=small&#x27; --funcs load_sext_zext_anyext_i1_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">32 of 64 inputs differ (first: #0)
+SelectionDAG hash f8b9494ba981e5fb, GlobalISel hash c57eb2c8a1b838bd
+b0: llc -mtriple=riscv64 -verify-machineinstrs -code-model=small -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -code-model=small -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -code-model=small -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">mem64.7091674ca1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/mem64.ll">mem64.ll</a><span class="dim">)</span></td><td class="l">load_sext_zext_anyext_i1_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

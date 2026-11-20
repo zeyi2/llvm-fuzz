@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: add i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: add i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: add i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 31 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.bd4f7eb5e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span> @bitcast_h_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zdinx,+zhinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i16
+
+; Function Attrs: nounwind
+define half @bitcast_h_i16(i16 %a) #0 {
+  %B = add i16 %a, 256
+  %1 = bitcast i16 %a to half
+  store i16 %B, ptr @G.3, align 2
+  ret half %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zdinx,+zhinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zdinx,+zhinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: add: &#x27;  %B = add i16 %a, 256&#x27; (in function: bitcast_h_i16)
+warning: Instruction selection used fallback path for bitcast_h_i16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-convert.bd4f7eb5e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">bitcast_h_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zdinx,+zhinx -O1</code></td></tr><tr><td class="l">inline-asm-zhinx-constraint-r.ffb5354bae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/inline-asm-zhinx-constraint-r.ll">inline-asm-zhinx-constraint-r.ll</a><span class="dim">)</span></td><td class="l">constraint_cr_half</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zhinx -O1</code></td></tr><tr><td class="l">lack-of-signed-truncation-check.e7e5798e76.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/lack-of-signed-truncation-check.ll">lack-of-signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ugecmp_bad_i16_i8_cmp</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+xtheadba,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64zbkb.0ad8b0c66b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv64zbkb.ll">rv64zbkb.ll</a><span class="dim">)</span></td><td class="l">pack_i32_allWUsers</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zve32x,+zdinx -O1</code></td></tr><tr><td class="l">smulh.23010239.d745aae1.4ae2d50e66.ll <span class="dim">(mutant of</span> smulh.23010239.d745aae1.ll<span class="dim">)</span></td><td class="l">smulh_i128</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zhinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

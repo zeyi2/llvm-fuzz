@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 15 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 15 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 15 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">callee-saved-fpr32s.4a7a98b1fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/callee-saved-fpr32s.ll">callee-saved-fpr32s.ll</a><span class="dim">)</span> @callee via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zihintpause,+zvbb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/5s5xYqq6r">https://godbolt.org/z/5s5xYqq6r</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/5s5xYqq6r">G</a> <span class="fp">no crash on trunk</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@var = external global [32 x float]
+@G = external global half
+@G.1 = external global i32
+
+; Function Attrs: nounwind
+define void @callee() #0 {
+  %LGV1 = load i32, ptr @G.1, align 4
+  switch i32 %LGV1, label %SW_D [
+    i32 -2066698753, label %SW_C
+  ]
+
+BB:                                               ; preds = %SW_C
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load half, ptr @G, align 2
+  %C = fcmp olt half 0.000000e+00, %LGV
+  %val = load [32 x float], ptr @var, align 4
+  store volatile [32 x float] %val, ptr @var, align 4
+  store i1 %C, ptr %A, align 1
+  ret void
+
+SW_D:                                             ; preds = %0
+  ret void
+
+SW_C:                                             ; preds = %0
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zihintpause,+zvbb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>101</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %13:_(s16) = G_FCONSTANT half 0.000000e+00 (in function: callee)<br>warning: Instruction selection used fallback path for callee</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zihintpause,+zvbb -O0 -global-isel=0</code></td><td>0</td><td>101</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zihintpause,+zvbb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zihintpause,+zvbb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After Prologue/Epilogue Insertion &amp; Frame Finalization
+# Machine code for function callee: NoPHIs, TracksLiveness, NoVRegs, Legalized, RegBankSelected, Selected, TiedOpsRewritten
+Frame Objects:
+  fi#0: variable sized, align=1, at location [SP-12]
+  fi#1: size=4, align=4, at location [SP-16]
+  fi#2: size=4, align=4, at location [SP-20]
+  fi#3: size=4, align=4, at location [SP-24]
+  fi#4: size=4, align=4, at location [SP-28]
+  fi#5: size=4, align=4, at location [SP-32]
+  fi#6: size=4, align=4, at location [SP-36]
+  fi#7: size=4, align=4, at location [SP-40]
+  fi#8: size=4, align=4, at location [SP-44]
+  fi#9: size=4, align=4, at location [SP-48]
+  fi#10: size=4, align=4, at location [SP-52]
+  fi#11: size=4, align=4, at location [SP-56]
+  fi#12: size=4, align=4, at location [SP-60]
+  fi#13: size=4, align=4, at location [SP-64]
+  fi#14: size=4, align=4, at location [SP-4]
+  fi#15: size=4, align=4, at location [SP-8]
+  fi#16: size=4, align=4, at location [SP-12]
+save/restore points:
+save points are empty
+restore points are empty
+bb.1 (%ir-block.0):
+  successors: %bb.4, %bb.3
+  liveins: $x1, $x9
+  $x2 = frame-setup ADDI $x2, -64
+  frame-setup SW killed $x1, $x2, 60 :: (store (s32) into %stack.14)
+  frame-setup SW killed $x8, $x2, 56 :: (store (s32) into %stack.15)
+  frame-setup SW killed $x9, $x2, 52 :: (store (s32) into %stack.16)
+  $x8 = frame-setup ADDI $x2, 64
+  $x2 = frame-setup ANDI $x2, -16
+  $x9 = frame-setup ADDI $x2, 0
+  renamable $x10 = LUI target-flags(riscv-hi) @G.1
+  renamable $x10 = ADDI killed renamable $x10, target-flags(riscv-lo) @G.1
+  renamable $x11 = LUI 544011
+  renamable $x11 = ADDI killed renamable $x11, -513
+  dead renamable $x12 = IMPLICIT_DEF
+  renamable $x12 = LUI target-flags(riscv-hi) @G
+  renamable $x12 = ADDI killed renamable $x12, target-flags(riscv-lo) @G
+  SW killed $x12, $x9, 44 :: (store (s32) into %stack.2)
+  renamable $x12 = LUI target-flags(riscv-hi) @var
+  renamable $x12 = ADDI killed renamable $x12, target-flags(riscv-lo) @var
+  SW killed $x12, $x9, 48 :: (store (s32) into %stack.1)
+  renamable $x10 = LW killed renamable $x10, 0 :: (load (i32) from @G.1)
+  BEQ killed renamable $x10, killed renamable $x11, %bb.4
+  PseudoBR %bb.3
+bb.2.BB:
+; predecessors: %bb.4
+  $x10 = LW $x9, 44 :: (load (s32) from %stack.2)
+  $x11 = LW $x9, 0 :: (load (s32) from %stack.13)
+  renamable $x13 = ADDI $x0, 4
+  renamable $x12 = COPY $x2
+  renamable $x12 = SUB killed renamable $x12, killed renamable $x13
+  SW $x12, $x9, 36 :: (store (s32) into %stack.4)
+  $x2 = COPY renamable $x12
+  renamable $x11 = ANDI killed renamable $x11, 1
+  renamable $x11 = ANDI killed renamable $x11, 1
+  SB killed renamable $x11, renamable $x12, 0 :: (store (i8) into %ir.A)
+  renamable $x10 = LH killed renamable $x10, 0 :: (load (f16) from @G)
+  SW $x10, $x9, 4 :: (store (s32) into %stack.12)
+  renamable $x10 = COPY $x0
+  renamable $f15_f = FMV_W_X killed renamable $x10
+  $x10 = COPY killed renamable $f15_f
+  PseudoCALL target-flags(riscv-call) &amp;__extendhfsf2, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x0_h $x1_h $x8_h $x9_h $x0_w $x1_w $x8_w $x9_w $x0_y $x8_x9&gt;, implicit-def dead $x1, implicit killed $x10, implicit-def $x10
+  renamable $x11 = COPY killed $x10
+  $x10 = LW $x9, 4 :: (load (s32) from %stack.12)
+  renamable $f15_f = FMV_W_X killed renamable $x11
+  FSW $f15_f, $x9, 8 :: (store (s32) into %stack.11)
+  renamable $f15_f = FMV_W_X killed renamable $x10
+  $x10 = COPY killed renamable $f15_f
+  PseudoCALL target-flags(riscv-call) &amp;__extendhfsf2, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x0_h $x1_h $x8_h $x9_h $x0_w $x1_w $x8_w $x9_w $x0_y $x8_x9&gt;, implicit-def dead $x1, implicit killed $x10, implicit-def $x10
+  $f15_f = FLW $x9, 8 :: (load (s32) from %stack.11)
+  $x11 = LW $x9, 48 :: (load (s32) from %stack.1)
+  renamable $f14_f = FMV_W_X killed renamable $x10
+  renamable $x10 = nofpexcept FLT_S killed renamable $f15_f, killed renamable $f14_f
+  SW $x10, $x9, 40 :: (store (s32) into %stack.3)
+  renamable $x10 = LW renamable $x11, 0 :: (load (f32) from</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">callee-saved-fpr32s.4a7a98b1fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/callee-saved-fpr32s.ll">callee-saved-fpr32s.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32e -verify-machineinstrs -mattr=+f,+zihintpause,+zvbb -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

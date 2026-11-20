@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 7 configs, 8 test files, 89 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">urem-lkk.4f61c6c40c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/urem-lkk.ll">urem-lkk.ll</a><span class="dim">)</span> @dont_fold_urem_power_of_two via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zicsr -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @dont_fold_urem_power_of_two(i32 %x) #0 {
+  %B = or i32 %x, 65536
+  %1 = urem i32 %B, 64
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zicsr -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zicsr -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B = or i32 %x, 65536&#x27; (in function: dont_fold_urem_power_of_two)
+warning: Instruction selection used fallback path for dont_fold_urem_power_of_two</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fold-masked-merge.492ce5b838.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fold-masked-merge.ll">fold-masked-merge.ll</a><span class="dim">)</span></td><td class="l">not_a_masked_merge2</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">rotl-rotr.d89ffab914.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotl_32_mask_or_64_or_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">rv32zbb-zbkb.e826bb6a28.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">disjoint_or_xnor_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">scmp.27fc11cfbb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.8.32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">select-cond.ad11fdf5a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/select-cond.ll">select-cond.ll</a><span class="dim">)</span></td><td class="l">select_i32_ult</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O2</code></td></tr><tr><td class="l">selectcc-to-shiftand.0409863cc1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/selectcc-to-shiftand.ll">selectcc-to-shiftand.ll</a><span class="dim">)</span></td><td class="l">pos_sel_variable_and_zero</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">urem-lkk.4f61c6c40c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/urem-lkk.ll">urem-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_urem_power_of_two</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zicsr -O2</code></td></tr><tr><td class="l">xandesvsinload-vlnu8.35b1ed936a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/xandesvsinload-vlnu8.ll">xandesvsinload-vlnu8.ll</a><span class="dim">)</span></td><td class="l">intrinsic_nds_vlnu_mask_v_nxv1i8_nxv1i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zve64x,+xandesvsintload,+zvbb,+zdinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

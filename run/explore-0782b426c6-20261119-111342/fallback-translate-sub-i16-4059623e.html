@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 17 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">attributes.252429e65b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span> @addi via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zkne,+zdinx,+m -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global double
+
+define i32 @addi(i32 %a) {
+  %B1 = sub i16 0, 0
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load double, ptr @G.2, align 8
+  %1 = add i32 %a, 1
+  %C = fcmp ueq double %LGV, f0x7FEFFFFFFFFFFFFF
+  %B = urem i32 %1, %a
+  store i32 %B, ptr poison, align 4
+  store i1 %C, ptr %A, align 1
+  store i16 %B1, ptr %A, align 2
+  ret i32 %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zkne,+zdinx,+m -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zkne,+zdinx,+m -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %B1 = sub i16 0, 0&#x27; (in function: addi)
+warning: Instruction selection used fallback path for addi</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.769db1400e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_subnsw_i16_undef</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">attributes.252429e65b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">addi</td><td class="l"><code>-mtriple=riscv32 -mattr=+zkne,+zdinx,+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64xtheadbb.8b9f4acf16.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">cttz_i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb,+zhinx,+m -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcibm-cto-clo-brev.1f96aea96f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/xqcibm-cto-clo-brev.ll">xqcibm-cto-clo-brev.ll</a><span class="dim">)</span></td><td class="l">test_cttz_i64_zero_poison</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zfinx,+zbkb -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

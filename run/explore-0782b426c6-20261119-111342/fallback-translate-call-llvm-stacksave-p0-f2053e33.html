@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.stacksave.p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.stacksave.p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.stacksave.p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">stacksave-stackrestore.5870625918.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/stacksave-stackrestore.ll">stacksave-stackrestore.ll</a><span class="dim">)</span> @test_scoped_alloca via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">declare void @use_addr(ptr)
+
+define void @test_scoped_alloca(i64 %n) {
+  %sp = call ptr @llvm.stacksave.p0()
+  %addr = alloca i8, i64 %n, align 1
+  call void @use_addr(ptr %addr)
+  call void @llvm.stackrestore.p0(ptr %sp)
+  %B1 = and i64 %n, -1
+  store i64 %B1, ptr poison, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare void @llvm.stackrestore.p0(ptr) #0
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare ptr @llvm.stacksave.p0() #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zhinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zhinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.stacksave.p0: &#x27;  %sp = call ptr @llvm.stacksave.p0()&#x27; (in function: test_scoped_alloca)
+warning: Instruction selection used fallback path for test_scoped_alloca</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">alloca.292563bc62.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/alloca.ll">alloca.ll</a><span class="dim">)</span></td><td class="l">scoped_alloca</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zhinx -O0</code></td></tr><tr><td class="l">stacksave-stackrestore.5870625918.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/stacksave-stackrestore.ll">stacksave-stackrestore.ll</a><span class="dim">)</span></td><td class="l">test_scoped_alloca</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">xqccmp-push-pop-popret.4dcd2c5556.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/xqccmp-push-pop-popret.ll">xqccmp-push-pop-popret.ll</a><span class="dim">)</span></td><td class="l">alloca</td><td class="l"><code>-mtriple=riscv32 -frame-pointer=all -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

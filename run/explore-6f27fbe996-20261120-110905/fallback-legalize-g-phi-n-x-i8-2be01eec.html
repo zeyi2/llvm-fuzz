@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 90 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fold-binop-into-select.77933b2921.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fold-binop-into-select.ll">fold-binop-into-select.ll</a><span class="dim">)</span> @fold_binop_into_select_3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintpause,+zfhmin -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i128
+@G.6 = external global &lt;8 x i8&gt;
+@G.7 = external global &lt;8 x i8&gt;
+@G.8 = external global &lt;8 x i8&gt;
+
+define i64 @fold_binop_into_select_3(i1 %c, i64 %x) {
+entry:
+  %LGV4 = load &lt;8 x i8&gt;, ptr @G.8, align 8
+  %LGV = load i128, ptr @G.3, align 4
+  %B6 = srem i1 %c, false
+  %B = lshr &lt;8 x i8&gt; splat (i8 -128), %LGV4
+  %select_ = select i1 %c, i64 2, i64 %x
+  switch i128 %LGV, label %SW_D [
+    i128 11533213069779837919, label %SW_C
+    i128 13686684307138104351, label %SW_C1
+  ]
+
+BB:                                               ; preds = %SW_C1, %SW_C, %SW_D
+  %0 = phi &lt;8 x i8&gt; [ %B, %SW_C1 ], [ %LGV3, %SW_C ], [ zeroinitializer, %SW_D ]
+  %res = sub i64 2, %select_
+  store &lt;8 x i8&gt; %0, ptr @G.7, align 8
+  ret i64 %res
+
+SW_D:                                             ; preds = %SW_D, %entry
+  br i1 %B6, label %SW_D, label %BB
+
+SW_C:                                             ; preds = %entry
+  %LGV3 = load &lt;8 x i8&gt;, ptr @G.6, align 8
+  br label %BB
+
+SW_C1:                                            ; preds = %entry
+  br label %BB
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zihintpause,+zfhmin -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zihintpause,+zfhmin -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %20:_(&lt;8 x i8&gt;) = G_PHI %11:_(&lt;8 x i8&gt;), %bb.5, %18:_(&lt;8 x i8&gt;), %bb.4, %23:_(&lt;8 x i8&gt;), %bb.3 (in function: fold_binop_into_select_3)
+warning: Instruction selection used fallback path for fold_binop_into_select_3</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-deinterleave-load.ee80b08b3d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-deinterleave-load.ll">fixed-vectors-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_factor3_no_extract</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh,+zvfbfmin,+zvbb -O1 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">fold-binop-into-select.77933b2921.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fold-binop-into-select.ll">fold-binop-into-select.ll</a><span class="dim">)</span></td><td class="l">fold_binop_into_select_3</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintpause,+zfhmin -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32-move-merge-crash.44eb96440e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv32-move-merge-crash.ll">rv32-move-merge-crash.ll</a><span class="dim">)</span></td><td class="l">test</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+xqccmp,+zfa,+d -O0</code></td></tr><tr><td class="l">rv64m-w-insts-legalization.53ecd5d4f3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv64m-w-insts-legalization.ll">rv64m-w-insts-legalization.ll</a><span class="dim">)</span></td><td class="l">mulw</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfh -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

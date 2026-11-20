@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: andi,beqz,bnez,xori</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: andi,beqz,bnez,xori</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: andi,beqz,bnez,xori <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">short-forward-branch-opt-load.d48dd71580.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/short-forward-branch-opt-load.ll">short-forward-branch-opt-load.ll</a><span class="dim">)</span> @test_i64_store_64_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+a,+m -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i64 @test_i64_store_64_2(ptr %base, i1 zeroext %x, i64 %b, ptr %base1, i64 %c) #0 {
+entry:
+  %addr = getelementptr i64, ptr %base, i64 4
+  %L = load i1, ptr %addr, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %T
+  %val = load atomic i64, ptr %addr monotonic, align 8
+  store i64 %c, ptr %base1, align 4
+  %res = select i1 %x, i64 %val, i64 %b
+  ret i64 %res
+
+T:                                                ; preds = %entry
+  br label %BB
+
+F:                                                ; preds = %entry
+  ret i64 -1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-verify-machineinstrs -mtriple=riscv64 -mattr=+a,+m -O1&#x27; --funcs test_i64_store_64_2 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash 45abe0df06a35828, GlobalISel hash d49d8e17f8dbcd7c
+b0: llc -verify-machineinstrs -mtriple=riscv64 -mattr=+a,+m -O1 -global-isel=0
+b1: llc -verify-machineinstrs -mtriple=riscv64 -mattr=+a,+m -O0 -global-isel=0
+b2: llc -verify-machineinstrs -mtriple=riscv64 -mattr=+a,+m -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">short-forward-branch-opt-load.d48dd71580.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/short-forward-branch-opt-load.ll">short-forward-branch-opt-load.ll</a><span class="dim">)</span></td><td class="l">test_i64_store_64_2</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+a,+m -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

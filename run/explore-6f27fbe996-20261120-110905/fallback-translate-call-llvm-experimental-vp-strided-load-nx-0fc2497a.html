@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.vp.strided.load.nxv1i16.p0.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.vp.strided.load.nxv1i16.p0.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.vp.strided.load.nxv1i16.p0.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">strided-vpload.7db8fe1b5c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/strided-vpload.ll">strided-vpload.ll</a><span class="dim">)</span> @strided_vpload_nxv1i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+optimized-zero-stride-load -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 1 x i16&gt; @strided_vpload_nxv1i16(ptr %ptr, i32 signext %stride, &lt;vscale x 1 x i1&gt; %m, i32 zeroext %evl) {
+  %load = call &lt;vscale x 1 x i16&gt; @llvm.experimental.vp.strided.load.nxv1i16.p0.i32(ptr %ptr, i32 signext %stride, &lt;vscale x 1 x i1&gt; %m, i32 %evl)
+  %B = sdiv i32 %stride, -1
+  store i32 %B, ptr poison, align 4
+  ret &lt;vscale x 1 x i16&gt; %load
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;vscale x 1 x i16&gt; @llvm.experimental.vp.strided.load.nxv1i16.p0.i32(ptr captures(none), i32, &lt;vscale x 1 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+optimized-zero-stride-load -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+optimized-zero-stride-load -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.vp.strided.load.nxv1i16.p0.i32: &#x27;  %load = call &lt;vscale x 1 x i16&gt; @llvm.experimental.vp.strided.load.nxv1i16.p0.i32(ptr %ptr, i32 signext %stride, &lt;vscale x 1 x i1&gt; %m, i32 %evl)&#x27; (in function: strided_vpload_nxv1i16)
+warning: Instruction selection used fallback path for strided_vpload_nxv1i16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">strided-vpload.52afa0ff02.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/strided-vpload.ll">strided-vpload.ll</a><span class="dim">)</span></td><td class="l">strided_vpload_nxv1i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+c -O3</code></td></tr><tr><td class="l">strided-vpload.7781ef2e0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/strided-vpload.ll">strided-vpload.ll</a><span class="dim">)</span></td><td class="l">strided_vpload_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -O0</code></td></tr><tr><td class="l">strided-vpload.7db8fe1b5c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/strided-vpload.ll">strided-vpload.ll</a><span class="dim">)</span></td><td class="l">strided_vpload_nxv1i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin,+optimized-zero-stride-load -O0</code></td></tr><tr><td class="l">strided-vpload.b37c3978d1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/strided-vpload.ll">strided-vpload.ll</a><span class="dim">)</span></td><td class="l">strided_vpload_nxv1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+d,+v,+zvfh,+zvfbfmin,+optimized-zero-stride-load -O1</code></td></tr><tr><td class="l">strided-vpload.f06ec83c20.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/strided-vpload.ll">strided-vpload.ll</a><span class="dim">)</span></td><td class="l">strided_vpload_nxv1i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+v,+zvfh,+zvfbfmin,+optimized-zero-stride-load -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

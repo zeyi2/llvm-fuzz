@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 68 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">urem-lkk.7faf8bb1cb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/urem-lkk.ll">urem-lkk.ll</a><span class="dim">)</span> @dont_fold_urem_power_of_two via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zvkb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define i32 @dont_fold_urem_power_of_two(i32 %x) #0 {
+  %1 = urem i32 %x, 64
+  %C = icmp sgt i32 %1, 2147483647
+  store i1 %C, ptr @G, align 1
+  ret i32 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zvkb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %1 = urem i32 %x, 64&#x27; (in function: dont_fold_urem_power_of_two)
+warning: Instruction selection used fallback path for dont_fold_urem_power_of_two</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">rv64xtheadbb.439a911a8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">ctlz_zero_poison_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb,+zhinx,+zba -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rv64xtheadbs.4f11a65914.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv64xtheadbs.ll">rv64xtheadbs.ll</a><span class="dim">)</span></td><td class="l">th_tst_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicsr,+zfinx -O3</code></td></tr><tr><td class="l">urem-lkk.7faf8bb1cb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/urem-lkk.ll">urem-lkk.ll</a><span class="dim">)</span></td><td class="l">dont_fold_urem_power_of_two</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx,+zvkb -O1</code></td></tr><tr><td class="l">usub_sat_plus.449bb660ba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/usub_sat_plus.ll">usub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zhinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

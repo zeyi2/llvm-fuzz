@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: ashr i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: ashr i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: ashr i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">add_shl_constant.7a0b1271b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/add_shl_constant.ll">add_shl_constant.ll</a><span class="dim">)</span> @add_shl_oneUse via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xandesperf,+zhinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i128
+
+; Function Attrs: nounwind
+define i32 @add_shl_oneUse(i32 %x, i32 %y) #0 {
+  %B = ashr i128 -170141183460469231731687303715884105728, 170141183460469231731687303715884105727
+  %add.0 = add i32 %x, 123
+  %shl = shl i32 %add.0, 3
+  %add.1 = add i32 %shl, %y
+  store i128 %B, ptr @G.3, align 4
+  ret i32 %add.1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xandesperf,+zhinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xandesperf,+zhinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: ashr: &#x27;  %B = ashr i128 -170141183460469231731687303715884105728, 170141183460469231731687303715884105727&#x27; (in function: add_shl_oneUse)
+warning: Instruction selection used fallback path for add_shl_oneUse</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">add_shl_constant.7a0b1271b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/add_shl_constant.ll">add_shl_constant.ll</a><span class="dim">)</span></td><td class="l">add_shl_oneUse</td><td class="l"><code>-mtriple=riscv32 -mattr=+xandesperf,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fp-fcanonicalize.863b804a33.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zdinx -O2</code></td></tr><tr><td class="l">half-convert.679742b3c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_w_s_sat_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zhinxmin -O0</code></td></tr><tr><td class="l">inline-asm-zhinx-constraint-r.73282d8e12.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/inline-asm-zhinx-constraint-r.ll">inline-asm-zhinx-constraint-r.ll</a><span class="dim">)</span></td><td class="l">constraint_f_half</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinx -O2</code></td></tr><tr><td class="l">rvp-scalar-rv64.6654a7b037.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvp-scalar-rv64.ll">rvp-scalar-rv64.ll</a><span class="dim">)</span></td><td class="l">sra_small_i128</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zfinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: srem i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: srem i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: srem i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 14 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">elf-preemption.9eb9a46f03.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/elf-preemption.ll">elf-preemption.ll</a><span class="dim">)</span> @get_dsolocal_var via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -relocation-model=static -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@dsolocal_var = external dso_local global i32
+
+; Function Attrs: nounwind
+define ptr @get_dsolocal_var() #0 {
+  %B = srem i1 false, false
+  store i1 %B, ptr poison, align 1
+  ret ptr @dsolocal_var
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -relocation-model=static -mattr=+zhinx -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -relocation-model=static -mattr=+zhinx -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: srem: &#x27;  %B = srem i1 false, false&#x27; (in function: get_dsolocal_var)
+warning: Instruction selection used fallback path for get_dsolocal_var</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-intrinsics.7e480a148e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">log10_f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O0 -code-model=small</code></td></tr><tr><td class="l">elf-preemption.9eb9a46f03.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/elf-preemption.ll">elf-preemption.ll</a><span class="dim">)</span></td><td class="l">get_dsolocal_var</td><td class="l"><code>-mtriple=riscv32 -relocation-model=static -mattr=+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">float-intrinsics.b67aae30b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/float-intrinsics.ll">float-intrinsics.ll</a><span class="dim">)</span></td><td class="l">exp_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fpenv-xlen.8a3f0681b5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/fpenv-xlen.ll">fpenv-xlen.ll</a><span class="dim">)</span></td><td class="l">func_reset_fpmode</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">rv32-move-merge.472f0dbfcb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32-move-merge.ll">rv32-move-merge.ll</a><span class="dim">)</span></td><td class="l">plui_h_pair_negative</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">zicond-fp-select-zfinx.014306628a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/zicond-fp-select-zfinx.ll">zicond-fp-select-zfinx.ll</a><span class="dim">)</span></td><td class="l">select_i1_f32_0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

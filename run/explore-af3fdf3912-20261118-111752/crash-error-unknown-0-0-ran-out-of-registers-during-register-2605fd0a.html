@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32_adjust_spill_slot&#x27;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32_adjust_spill_slot&#x27;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32_adjust_spill_slot&#x27; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">branch-relaxation-rv32e.0a89e780e6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/branch-relaxation-rv32e.ll">branch-relaxation-rv32e.ll</a><span class="dim">)</span> @relax_jal_spill_32_adjust_spill_slot via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/98x55zEE4">https://godbolt.org/z/98x55zEE4</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/98x55zEE4">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i64
+
+define void @relax_jal_spill_32_adjust_spill_slot() {
+  %LGV = load i64, ptr @G.1, align 4
+  %B = shl i64 -9223372036854775808, %LGV
+  %ra = call i32 asm sideeffect &quot;addi ra, x0, 1&quot;, &quot;={ra}&quot;()
+  %t0 = call i32 asm sideeffect &quot;addi t0, x0, 5&quot;, &quot;={t0}&quot;()
+  %t1 = call i32 asm sideeffect &quot;addi t1, x0, 6&quot;, &quot;={t1}&quot;()
+  %t2 = call i32 asm sideeffect &quot;addi t2, x0, 7&quot;, &quot;={t2}&quot;()
+  %s0 = call i32 asm sideeffect &quot;addi s0, x0, 8&quot;, &quot;={s0}&quot;()
+  %s1 = call i32 asm sideeffect &quot;addi s1, x0, 9&quot;, &quot;={s1}&quot;()
+  %a0 = call i32 asm sideeffect &quot;addi a0, x0, 10&quot;, &quot;={a0}&quot;()
+  %a1 = call i32 asm sideeffect &quot;addi a1, x0, 11&quot;, &quot;={a1}&quot;()
+  %a2 = call i32 asm sideeffect &quot;addi a2, x0, 12&quot;, &quot;={a2}&quot;()
+  %a3 = call i32 asm sideeffect &quot;addi a3, x0, 13&quot;, &quot;={a3}&quot;()
+  %a4 = call i32 asm sideeffect &quot;addi a4, x0, 14&quot;, &quot;={a4}&quot;()
+  %a5 = call i32 asm sideeffect &quot;addi a5, x0, 15&quot;, &quot;={a5}&quot;()
+  %cmp = icmp eq i32 %a4, %a5
+  store i64 %B, ptr @G.1, align 4
+  br i1 %cmp, label %branch_1, label %branch_2
+
+branch_1:                                         ; preds = %0
+  call void asm sideeffect &quot;.space 1048576&quot;, &quot;&quot;()
+  br label %branch_2
+
+branch_2:                                         ; preds = %branch_1, %0
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a0}&quot;(i32 %a0)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a4}&quot;(i32 %a4)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{s0}&quot;(i32 %s0)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{t2}&quot;(i32 %t2)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a1}&quot;(i32 %a1)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a5}&quot;(i32 %a5)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{t0}&quot;(i32 %t0)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{s1}&quot;(i32 %s1)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{t1}&quot;(i32 %t1)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a3}&quot;(i32 %a3)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{a2}&quot;(i32 %a2)
+  call void asm sideeffect &quot;# reg use $0&quot;, &quot;{ra}&quot;(i32 %ra)
+  ret void
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>1</td><td>0</td><td class="msg err">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32_adjust_spill_slot&#x27;</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e -O3 -global-isel=0</code></td><td>0</td><td>37</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+e -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+e -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;relax_jal_spill_32_adjust_spill_slot&#x27;</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">branch-relaxation-rv32e.0a89e780e6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/branch-relaxation-rv32e.ll">branch-relaxation-rv32e.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+e -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

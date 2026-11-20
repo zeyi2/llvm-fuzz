@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 4 test files, 54 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmulr.fff08fe9a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span> @clmulr_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+; Function Attrs: nounwind
+define i8 @clmulr_i8(i8 %a, i8 %b) #0 {
+  %a.ext = zext i8 %a to i16
+  %C = icmp sgt i32 0, 42
+  %b.ext = zext i8 %b to i16
+  %clmul = call i16 @llvm.clmul.i16(i16 %a.ext, i16 %b.ext)
+  %res.ext = lshr i16 %clmul, 7
+  %res = trunc i16 %res.ext to i8
+  store i1 %C, ptr @G.3, align 1
+  ret i8 %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i16 @llvm.clmul.i16(i16, i16) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %a.ext = zext i8 %a to i16&#x27; (in function: clmulr_i8)
+warning: Instruction selection used fallback path for clmulr_i8</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.633ec37440.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i8_undef</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx,+zba -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">abdu-neg.690448b8fa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i8_undef</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zve32x -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">clmulh.1de71cb04d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbs,+zfinx -O2</code></td></tr><tr><td class="l">clmulh.4b74f3a61a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbc,+zdinx -O0</code></td></tr><tr><td class="l">clmulh.6fe2c22778.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbs,+zhinx,+zdinx -O2</code></td></tr><tr><td class="l">clmulh.aaf2245cfb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbc,+zvkb,+zdinx -O3</code></td></tr><tr><td class="l">clmulr.2359a8b096.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulr_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O3</code></td></tr><tr><td class="l">clmulr.fff08fe9a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">csr-first-use-cost.5ce9c486ac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/csr-first-use-cost.ll">csr-first-use-cost.ll</a><span class="dim">)</span></td><td class="l">Perl_sv_setnv</td><td class="l"><code>-mtriple=riscv64 -regalloc-csr-first-time-cost=0 -mattr=+zfinx,+zvbb -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

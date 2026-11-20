@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 4 test files, 9 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">avgflooru.7b095e42b5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/avgflooru.ll">avgflooru.ll</a><span class="dim">)</span> @test_ext_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+xtheadba -O2 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define i64 @test_ext_i64(i64 %a0, i64 %a1) #0 {
+  %LGV = load i1, ptr @G, align 1
+  %x0 = zext i64 %a0 to i128
+  %x1 = zext i64 %a1 to i128
+  %sum = add i128 %x0, %x1
+  %shift = lshr i128 %sum, 1
+  br i1 %LGV, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %res = trunc i128 %shift to i64
+  ret i64 %res
+
+T:                                                ; preds = %0
+  br label %BB
+
+F:                                                ; preds = %0
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+xtheadba -O2 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+xtheadba -O2 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %x0 = zext i64 %a0 to i128&#x27; (in function: test_ext_i64)
+warning: Instruction selection used fallback path for test_ext_i64</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.1bdf8402f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i64_undef</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">abdu-neg.f5ce2fcfc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">abdu-neg.f5ce2fcfc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i64_undef</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">avgflooru.7b095e42b5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/avgflooru.ll">avgflooru.ll</a><span class="dim">)</span></td><td class="l">test_ext_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+xtheadba -O2 -code-model=medium</code></td></tr><tr><td class="l">clmul.862c51c2b5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i128_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx -O2</code></td></tr><tr><td class="l">rv64zbc-intrinsic.35587886fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rv64zbc-intrinsic.ll">rv64zbc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">llvm_clmulr_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbc,+zfinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

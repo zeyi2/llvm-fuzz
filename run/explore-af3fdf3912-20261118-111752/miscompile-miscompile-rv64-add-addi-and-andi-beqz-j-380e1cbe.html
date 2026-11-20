@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,and,andi,beqz,j</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,and,andi,beqz,j</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,and,andi,beqz,j <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr68855.ba8efbf8a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/pr68855.ll">pr68855.ll</a><span class="dim">)</span> @narrow_load via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfh -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.1 = external global ptr
+@G.2 = external global i128
+@G.3 = external global i1
+
+define i16 @narrow_load(ptr %p1, ptr %p2) {
+entry:
+  %LGV = load i128, ptr @G.2, align 4
+  %A = alloca ptr, align 8
+  %L = load i1, ptr %A, align 1
+  %G1 = getelementptr ptr, ptr %p2, i1 %L
+  store ptr poison, ptr %A, align 8
+  %G2 = getelementptr i1, ptr %p2, i1 %L
+  %bf.load = load i16, ptr %p1, align 2
+  %bf.clear = and i16 %bf.load, 8191
+  %not = xor i16 %bf.clear, -1
+  %conv1 = zext i16 %not to i32
+  store i32 %conv1, ptr %p2, align 4
+  %bf.load2 = load i16, ptr %p1, align 2
+  %C4 = icmp ult i128 0, %LGV
+  %G = getelementptr i16, ptr %p2, i16 %bf.load
+  %bf.clear3 = and i16 %bf.load2, 8191
+  %C = icmp ugt i16 %not, %bf.clear3
+  store ptr %G, ptr %A, align 8
+  store i1 %C, ptr @G, align 1
+  store ptr %G1, ptr @G.1, align 8
+  store ptr %G2, ptr %G, align 8
+  %C8 = icmp sge i128 18446744073709551616, 0
+  store i1 %C4, ptr @G.3, align 1
+  store i1 %C8, ptr @G.3, align 1
+  ret i16 %bf.clear3
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -mattr=+zfh -O1 -verify-machineinstrs&#x27; --funcs narrow_load snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">59 of 64 inputs differ (first: #2)
+SelectionDAG hash 07442a07f7633bcc, GlobalISel hash 9e39975535ffeafe
+b0: llc -mtriple=riscv64 -mattr=+zfh -verify-machineinstrs -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -mattr=+zfh -verify-machineinstrs -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -mattr=+zfh -verify-machineinstrs -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr68855.ba8efbf8a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/pr68855.ll">pr68855.ll</a><span class="dim">)</span></td><td class="l">narrow_load</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfh -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

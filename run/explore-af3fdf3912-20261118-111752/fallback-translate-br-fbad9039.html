@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: br</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: br</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: br <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 96 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">sextw-removal.de71dd60e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span> @sext_i32_arg via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx,+zicond -O0 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+declare signext i32 @bar(i32 signext)
+
+; Function Attrs: nounwind
+define void @sext_i32_arg(i32 signext %arg, i32 signext %arg1) #0 {
+bb:
+  br label %bb2
+
+bb2:                                              ; preds = %bb2, %bb
+  %i3 = phi i32 [ %arg, %bb ], [ %i5, %bb2 ]
+  %LGV = load i1, ptr @G.1, align 1
+  %i4 = tail call signext i32 @bar(i32 signext %i3)
+  %i5 = shl i32 %i3, %arg1
+  %i6 = icmp eq i32 %i4, 0
+  %B = ashr i1 %i6, %LGV
+  br i1 %B, label %bb7, label %bb2
+
+bb7:                                              ; preds = %bb2
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx,+zicond -O0 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx,+zicond -O0 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: br: &#x27;  br label %bb2&#x27; (in function: sext_i32_arg)
+warning: Instruction selection used fallback path for sext_i32_arg</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bswap-bitreverse.404bb25782.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/bswap-bitreverse.ll">bswap-bitreverse.ll</a><span class="dim">)</span></td><td class="l">test_bitreverse_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zfinx -O3</code></td></tr><tr><td class="l">float-round-conv-sat.73f9c7508c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/float-round-conv-sat.ll">float-round-conv-sat.ll</a><span class="dim">)</span></td><td class="l">test_ceil_si64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zfinx -O1</code></td></tr><tr><td class="l">machine-sink-jumptable-edge-split.8ba8f194f0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/machine-sink-jumptable-edge-split.ll">machine-sink-jumptable-edge-split.ll</a><span class="dim">)</span></td><td class="l">sink_through_jt</td><td class="l"><code>-mtriple=riscv64 -relocation-model=pic -mattr=+zba,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">memset-pattern.43db08df07.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/memset-pattern.ll">memset-pattern.ll</a><span class="dim">)</span></td><td class="l">memset_1</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+unaligned-scalar-mem,+zfinx,+xtheadba -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">reduce-unnecessary-extension.83c2618c50.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/reduce-unnecessary-extension.ll">reduce-unnecessary-extension.ll</a><span class="dim">)</span></td><td class="l">test_loop</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zhinx -O0</code></td></tr><tr><td class="l">sextw-removal.28bd79d27f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">anyext_i32_arg</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">sextw-removal.de71dd60e3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/sextw-removal.ll">sextw-removal.ll</a><span class="dim">)</span></td><td class="l">sext_i32_arg</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx,+zicond -O0 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

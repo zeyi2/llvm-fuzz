@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shufflevector &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shufflevector &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shufflevector &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">cmov-branch-opt.ab0cb7ecf3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/cmov-branch-opt.ll">cmov-branch-opt.ll</a><span class="dim">)</span> @select_or_1b via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;4 x i32&gt;
+
+define i32 @select_or_1b(i32 %A, i32 %B, i32 %cond) {
+entry:
+  %S = shufflevector &lt;4 x i32&gt; splat (i32 1), &lt;4 x i32&gt; splat (i32 1), &lt;4 x i32&gt; poison
+  %and = and i32 %cond, 1
+  %cmp10 = icmp ne i32 %and, 1
+  %0 = or i32 %B, %A
+  %1 = select i1 %cmp10, i32 %A, i32 %0
+  store &lt;4 x i32&gt; %S, ptr @G.2, align 16
+  ret i32 %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shufflevector: &#x27;  %S = shufflevector &lt;4 x i32&gt; splat (i32 1), &lt;4 x i32&gt; splat (i32 1), &lt;4 x i32&gt; poison&#x27; (in function: select_or_1b)
+warning: Instruction selection used fallback path for select_or_1b</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cmov-branch-opt.ab0cb7ecf3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/cmov-branch-opt.ll">cmov-branch-opt.ll</a><span class="dim">)</span></td><td class="l">select_or_1b</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+conditional-cmv-fusion,+c,+zicond,+zdinx -O0</code></td></tr><tr><td class="l">fixed-vectors-shuffle-concat.4a87fc65de.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-shuffle-concat.ll">fixed-vectors-shuffle-concat.ll</a><span class="dim">)</span></td><td class="l">concat_2xv16i32</td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=128 -verify-machineinstrs -mattr=+zfinx -O0</code></td></tr><tr><td class="l">short-forward-branch-opt-with-branch-with-immediates_32_ne.3d824b87a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/short-forward-branch-opt-with-branch-with-immediates_32_ne.ll">short-forward-branch-opt-with-branch-with-immediates_32_ne.ll</a><span class="dim">)</span></td><td class="l">branch_with_immSFB_add</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+zhinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

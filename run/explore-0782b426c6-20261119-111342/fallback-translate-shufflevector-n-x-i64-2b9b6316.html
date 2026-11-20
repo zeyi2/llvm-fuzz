@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shufflevector &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shufflevector &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shufflevector &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32-move-merge.2a45d71549.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32-move-merge.ll">rv32-move-merge.ll</a><span class="dim">)</span> @pli_h_pair via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define i64 @pli_h_pair() #0 {
+  %S = shufflevector &lt;2 x i64&gt; zeroinitializer, &lt;2 x i64&gt; zeroinitializer, &lt;2 x i32&gt; poison
+  store &lt;2 x i64&gt; %S, ptr @G.4, align 16
+  ret i64 11822129413226538
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shufflevector: &#x27;  %S = shufflevector &lt;2 x i64&gt; zeroinitializer, &lt;2 x i64&gt; zeroinitializer, &lt;2 x i32&gt; poison&#x27; (in function: pli_h_pair)
+warning: Instruction selection used fallback path for pli_h_pair</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmulh.3d796232ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvbc,+zdinx -O2</code></td></tr><tr><td class="l">codemodel-lowering.102a5677a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a><span class="dim">)</span></td><td class="l">lower_constantpool</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx,+zhinx,+zvkb -O3 -code-model=medium</code></td></tr><tr><td class="l">rv32-move-merge.2a45d71549.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32-move-merge.ll">rv32-move-merge.ll</a><span class="dim">)</span></td><td class="l">pli_h_pair</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">rv32zknh-intrinsic.aa42da7eea.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32zknh-intrinsic.ll">rv32zknh-intrinsic.ll</a><span class="dim">)</span></td><td class="l">sha256sig1_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zknh,+a,+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

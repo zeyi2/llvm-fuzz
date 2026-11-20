@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fcmp bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fcmp bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fcmp bfloat <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">14 in 13 configs, 14 test files, 135 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">narrow-shl-cst.bc44049472.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/narrow-shl-cst.ll">narrow-shl-cst.ll</a><span class="dim">)</span> @test14 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zbkb -O3 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define signext i32 @test14(i32 signext %x) #0 {
+  %C = fcmp one bfloat 0.000000e+00, 4.200000e+01
+  %or = shl i32 %x, 10
+  %shl = or i32 %or, 31741
+  store i1 %C, ptr poison, align 1
+  ret i32 %shl
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zfinx,+zbkb -O3 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zfinx,+zbkb -O3 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fcmp: &#x27;  %C = fcmp one bfloat 0.000000e+00, 4.200000e+01&#x27; (in function: test14)
+warning: Instruction selection used fallback path for test14</pre>
+<h4>Occurrences (14):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds.fab22ffbb3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/abds.ll">abds.ll</a><span class="dim">)</span></td><td class="l">abd_select_i128</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">calling-conv-lp64.a3695de495.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/calling-conv-lp64.ll">calling-conv-lp64.ll</a><span class="dim">)</span></td><td class="l">caller_tiny_scalar_ret</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -frame-pointer=all -mattr=+zicond,+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vmaxu-vp.34be9530.cfb2c4abfe.ll <span class="dim">(mutant of</span> fixed-vectors-vmaxu-vp.34be9530.ll<span class="dim">)</span></td><td class="l">vmaxu_vv_v16i16_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vminu-vp.9e3da176ab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vminu-vp.ll">fixed-vectors-vminu-vp.ll</a><span class="dim">)</span></td><td class="l">vminu_vv_v8i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">memcpy-inline.f24cb0a3b4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/memcpy-inline.ll">memcpy-inline.ll</a><span class="dim">)</span></td><td class="l">aligned_memcpy2</td><td class="l"><code>-mtriple=riscv32 -mattr=+unaligned-scalar-mem,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">narrow-shl-cst.bc44049472.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/narrow-shl-cst.ll">narrow-shl-cst.ll</a><span class="dim">)</span></td><td class="l">test14</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zbkb -O3 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">rv64-half-convert.5675f91718.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rv64-half-convert.ll">rv64-half-convert.ll</a><span class="dim">)</span></td><td class="l">fptosi_sat_f16_to_i128</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx -O1</code></td></tr><tr><td class="l">rv64zbkb.648b1d0269.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbkb.ll">rv64zbkb.ll</a><span class="dim">)</span></td><td class="l">pack_i64_imm</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zicond -O1</code></td></tr><tr><td class="l">scmp.ec2b3df6b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.8.128</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicond,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">shl-cttz.6ef018a246.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/shl-cttz.ll">shl-cttz.ll</a><span class="dim">)</span></td><td class="l">shl_cttz_constant_i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbb,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vdiv-sdnode.bcf49a649f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/vdiv-sdnode.ll">vdiv-sdnode.ll</a><span class="dim">)</span></td><td class="l">vdiv_vv_nxv2i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+a,+zhinx -O0</code></td></tr><tr><td class="l">xcvbitmanip.c411c70367.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/xcvbitmanip.ll">xcvbitmanip.ll</a><span class="dim">)</span></td><td class="l">test.llvm.bitrev</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xcvbitmanip,+zhinx,+zvkb -O0</code></td></tr><tr><td class="l">zfh-half-intrinsics.a12c4f0d63.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/zfh-half-intrinsics.ll">zfh-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">lrint_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx -O1</code></td></tr><tr><td class="l">zfhmin-half-intrinsics.4fc58ec234.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/zfhmin-half-intrinsics.ll">zfhmin-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">lrint_f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -mattr=+zdinx,+zvkb -O2 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

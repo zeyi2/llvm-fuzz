@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CTLZ &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CTLZ &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CTLZ &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 3 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-ctlz.45e067ff8b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a><span class="dim">)</span> @ctlz_v8i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+; Function Attrs: nounwind
+define void @ctlz_v8i16(ptr %x, ptr %y) #0 {
+  %LGV = load i1, ptr @G, align 1
+  %a = load &lt;8 x i16&gt;, ptr %x, align 16
+  %C = icmp sle i1 false, %LGV
+  %c = call &lt;8 x i16&gt; @llvm.ctlz.v8i16(&lt;8 x i16&gt; %a, i1 false)
+  store &lt;8 x i16&gt; %c, ptr %x, align 16
+  store i1 %C, ptr @G, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;8 x i16&gt; @llvm.ctlz.v8i16(&lt;8 x i16&gt;, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(&lt;8 x i16&gt;) = G_CTLZ %4:_(&lt;8 x i16&gt;) (in function: ctlz_v8i16)
+warning: Instruction selection used fallback path for ctlz_v8i16</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-ctlz.41d2796a8b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a><span class="dim">)</span></td><td class="l">ctlz_v8i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zve64f,+zvl128b,+f,+zbb -O0</code></td></tr><tr><td class="l">fixed-vectors-ctlz.45e067ff8b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a><span class="dim">)</span></td><td class="l">ctlz_v8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbb -O1</code></td></tr><tr><td class="l">fixed-vectors-ctlz.6211bd21fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a><span class="dim">)</span></td><td class="l">ctlz_v8i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zve64f,+zvl128b,+f,+zbb -O2</code></td></tr><tr><td class="l">fixed-vectors-ctlz.6211bd21fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a><span class="dim">)</span></td><td class="l">ctlz_v16i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zve64f,+zvl128b,+f,+zbb -O2</code></td></tr><tr><td class="l">fixed-vectors-ctlz.6211bd21fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-ctlz.ll">fixed-vectors-ctlz.ll</a><span class="dim">)</span></td><td class="l">ctlz_zero_poison_v8i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zve64f,+zvl128b,+f,+zbb -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

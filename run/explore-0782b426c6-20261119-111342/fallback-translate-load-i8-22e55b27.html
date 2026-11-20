@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load i8~</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load i8~</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load i8~ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 17 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">srem-seteq-illegal-types.305e008bf7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span> @test_srem_pow2_setne via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i6
+
+; Function Attrs: nounwind
+define i1 @test_srem_pow2_setne(i6 %X) #0 {
+  %LGV = load i6, ptr @G, align 1
+  %srem = srem i6 %X, 4
+  %B2 = xor i6 %X, %srem
+  %cmp = icmp ne i6 %srem, 0
+  %B = lshr i6 %X, %LGV
+  store i6 %B, ptr poison, align 1
+  store i6 %B2, ptr poison, align 1
+  ret i1 %cmp
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zdinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zdinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %LGV = load i6, ptr @G, align 1&#x27; (in function: test_srem_pow2_setne)
+warning: Instruction selection used fallback path for test_srem_pow2_setne</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmul.469e7b218f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i4</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O2 -code-model=medium</code></td></tr><tr><td class="l">clmulr.5a9a4644b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i4</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbs,+zcb,+zfinx -O3</code></td></tr><tr><td class="l">srem-seteq-illegal-types.305e008bf7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_pow2_setne</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">uadd_sat.2a7e21f3a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/uadd_sat.ll">uadd_sat.ll</a><span class="dim">)</span></td><td class="l">func3</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zhinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">usub_sat_plus.29fc16fb4f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/usub_sat_plus.ll">usub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func4</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zfinx -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

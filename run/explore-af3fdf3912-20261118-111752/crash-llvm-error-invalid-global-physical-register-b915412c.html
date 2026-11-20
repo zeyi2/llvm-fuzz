@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Invalid global physical register</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Invalid global physical register</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Invalid global physical register <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-x27-crash.09facc602c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/fixed-x27-crash.ll">fixed-x27-crash.ll</a><span class="dim">)</span> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-unknown-fuchsia -verify-machineinstrs -mattr=+reserve-x27,+zba,+zvkb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/ebveeccfo">https://godbolt.org/z/ebveeccfo</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/ebveeccfo">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+@G.1 = external global i1
+@G.2 = external global i1
+@G.3 = external global i1
+@G.4 = external global i64
+
+define i64 @foo() {
+entry:
+  %A6 = alloca i1, align 1
+  store i1 false, ptr %A6, align 1
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %local = alloca i64, align 8
+  br label %end
+
+end:                                              ; preds = %entry
+  %C = icmp slt i32 0, -1
+  %LGV = load i32, ptr @G, align 4
+  store i64 0, ptr %local, align 8
+  store i1 %C, ptr @G.3, align 1
+  switch i32 %LGV, label %SW_D [
+    i32 -1162227498, label %SW_C
+    i32 367005100, label %SW_C1
+    i32 -1597278057, label %SW_C2
+    i32 1658429161, label %SW_C3
+    i32 426252355, label %SW_C4
+  ]
+
+BB:                                               ; preds = %SW_C4, %SW_C3, %SW_C2, %SW_C, %SW_D
+  %0 = tail call i64 @llvm.read_register.i64(metadata !0)
+  store i64 %0, ptr @G.4, align 4
+  ret i64 %0
+
+SW_D:                                             ; preds = %SW_D, %end
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %SW_C, %end
+  %LGV5 = load i1, ptr @G.1, align 1
+  store i1 %LGV5, ptr poison, align 1
+  br i1 %LGV5, label %SW_C, label %BB
+
+SW_C1:                                            ; preds = %end
+  ret i64 9223372036854775807
+
+SW_C2:                                            ; preds = %end
+  br label %BB
+
+SW_C3:                                            ; preds = %SW_C3, %end
+  %L7 = load i1, ptr %A6, align 1
+  br i1 %L7, label %BB, label %SW_C3
+
+SW_C4:                                            ; preds = %SW_C4, %end
+  %LGV8 = load i1, ptr @G.2, align 1
+  br i1 %LGV8, label %SW_C4, label %BB
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare i64 @llvm.read_register.i64(metadata) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+
+!0 = !{!&quot;s11&quot;}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64-unknown-fuchsia -verify-machineinstrs -mattr=+reserve-x27,+zba,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">The register $x27 needs to be live in to %bb.10, but is missing from the live-in list.<br>LLVM ERROR: Invalid global physical register<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64-unknown-fuchsia -verify-machineinstrs -mattr=+reserve-x27,+zba,+zvkb -O1 -global-isel=0</code></td><td>0</td><td>49</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-unknown-fuchsia -verify-machineinstrs -mattr=+reserve-x27,+zba,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-unknown-fuchsia -verify-machineinstrs -mattr=+reserve-x27,+zba,+zvkb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">The register $x27 needs to be live in to %bb.10, but is missing from the live-in list.
+LLVM ERROR: Invalid global physical register
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64-unknown-fuchsia -verify-machineinstrs -mattr=+reserve-x27,+zba,+zvkb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Machine Instruction Scheduler&#x27; on function &#x27;@foo&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000557b0a27fe3b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000557b0a27cce1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000557b0a2808bb
+3  libc.so.6 0x00007fdba6445330
+4  libc.so.6 0x00007fdba649ec0c pthread_kill + 284
+5  libc.so.6 0x00007fdba644527e gsignal + 30
+6  libc.so.6 0x00007fdba64288ff abort + 223
+7  llc       0x0000557b0a1c170d llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x0000557b0a1c1556
+9  llc       0x0000557b0a952279 llvm::LiveRangeCalc::findReachingDefs(llvm::LiveRange&amp;, llvm::MachineBasicBlock&amp;, llvm::SlotIndex, llvm::Register, llvm::ArrayRef&lt;llvm::SlotIndex&gt;) + 3529
+10 llc       0x0000557b0a951393 llvm::LiveRangeCalc::extend(llvm::LiveRange&amp;, llvm::SlotIndex, llvm::Register, llvm::ArrayRef&lt;llvm::SlotIndex&gt;) + 211
+11 llc       0x0000557b0a9a8831 llvm::LiveIntervalCalc::extendToUses(llvm::LiveRange&amp;, llvm::Register, llvm::LaneBitmask, llvm::LiveInterval*) + 609
+12 llc       0x0000557b0a894823 llvm::LiveIntervals::computeRegUnitRange(llvm::LiveRange&amp;, llvm::MCRegUnit) + 979
+13 llc       0x0000557b0a893460
+14 llc       0x0000557b0a898ee4
+15 llc       0x0000557b0a898bf2 llvm::LiveIntervals::handleMove(llvm::MachineInstr&amp;, bool) + 306
+16 llc       0x0000557b0ad9bd2e llvm::ScheduleDAGMI::moveInstruction(llvm::MachineInstr*, llvm::MachineInstrBundleIterator&lt;llvm::MachineInstr, false&gt;) + 158
+17 llc       0x0000557b0ada278c llvm::ScheduleDAGMILive::scheduleMI(llvm::SUnit*, bool) + 108
+18 llc       0x0000557b0ada208b llvm::ScheduleDAGMILive::schedule() + 747
+19 llc       0x0000557b0ad9949c llvm::impl_detail::MachineSchedulerBase::scheduleRegions(llvm::ScheduleDAGInstrs&amp;, bool) + 1356
+20 llc       0x0000557b0ad98ea9 llvm::impl_detail::MachineSchedulerImpl::run(llvm::MachineFunction&amp;, llvm::TargetMachine const&amp;, llvm::impl_detail::MachineSchedulerImpl::RequiredAnalyses const&amp;) + 313
+21 llc       0x0000557b0adb07e8
+22 llc       0x0000557b0a857c81 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+23 llc       0x0000557b0a5dd467 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+24 llc       0x0000557b0a5e5982 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+25 llc       0x0000557b0a5de210 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+26 llc       0x0000557b0a2879d9
+27 llc       0x0000557b0a284c01 llcMain + 1665
+28 llc       0x0000557b0a1c116f main + 63
+29 libc.so.6 0x00007fdba642a1ca
+30 libc.so.6 0x00007fdba642a28b __libc_start_main + 139
+31 llc       0x0000557b0a1c1065 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-x27-crash.09facc602c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/fixed-x27-crash.ll">fixed-x27-crash.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64-unknown-fuchsia -verify-machineinstrs -mattr=+reserve-x27,+zba,+zvkb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

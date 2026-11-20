@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">elf-preemption.cb302c854f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/elf-preemption.ll">elf-preemption.ll</a><span class="dim">)</span> @get_dsolocal_var via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -relocation-model=static -mattr=+zfinx -O2 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@dsolocal_var = external dso_local global i32
+
+; Function Attrs: nounwind
+define ptr @get_dsolocal_var() #0 {
+  %B = mul i1 true, true
+  store i1 %B, ptr poison, align 1
+  ret ptr @dsolocal_var
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -relocation-model=static -mattr=+zfinx -O2 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -relocation-model=static -mattr=+zfinx -O2 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %B = mul i1 true, true&#x27; (in function: get_dsolocal_var)
+warning: Instruction selection used fallback path for get_dsolocal_var</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">ctz_zero_return_test.9d84964e13.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/ctz_zero_return_test.ll">ctz_zero_return_test.ll</a><span class="dim">)</span></td><td class="l">ctz3</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zdinx,+a -O0</code></td></tr><tr><td class="l">elf-preemption.cb302c854f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/elf-preemption.ll">elf-preemption.ll</a><span class="dim">)</span></td><td class="l">get_dsolocal_var</td><td class="l"><code>-mtriple=riscv32 -relocation-model=static -mattr=+zfinx -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">uadd_sat_plus.379f682249.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/uadd_sat_plus.ll">uadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func4</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zhinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

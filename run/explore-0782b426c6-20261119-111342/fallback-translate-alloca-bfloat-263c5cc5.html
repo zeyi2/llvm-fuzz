@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca bfloat</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca bfloat</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca bfloat <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 8 test files, 120 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-imm.5049c475f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-imm.ll">half-imm.ll</a><span class="dim">)</span> @half_imm via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define half @half_imm() #0 {
+  %A = alloca bfloat, align 2
+  store bfloat poison, ptr %A, align 2
+  %B = fmul bfloat +inf, 0.000000e+00
+  store bfloat %B, ptr %A, align 2
+  ret half 3.000000e+00
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca bfloat, align 2&#x27; (in function: half_imm)
+warning: Instruction selection used fallback path for half_imm</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.69c1a7bb7c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i64_unordered</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zalasr,+ztso,+zvbb,+zdinx -O2</code></td></tr><tr><td class="l">double-convert.9814ac53c3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_lu</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zbs -O1 -code-model=small</code></td></tr><tr><td class="l">half-arith-strict.260f39fb18.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fadd_h</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -target-abi ilp32 -mattr=+zhinxmin -O0</code></td></tr><tr><td class="l">half-imm.5049c475f9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-imm.ll">half-imm.ll</a><span class="dim">)</span></td><td class="l">half_imm</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx -O3</code></td></tr><tr><td class="l">half-round-conv-sat.d5fbc3f471.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-round-conv-sat.ll">half-round-conv-sat.ll</a><span class="dim">)</span></td><td class="l">test_ceil_si64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinxmin,+c -O2</code></td></tr><tr><td class="l">inline-asm-mem-constraint.2b67502341.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_A_with_local_2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zvbb -O2</code></td></tr><tr><td class="l">rvp-scalar.5dcaca4bb1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvp-scalar.ll">rvp-scalar.ll</a><span class="dim">)</span></td><td class="l">test_mhaccu_u32</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">smulh.fe99262842.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_v8i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zdinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

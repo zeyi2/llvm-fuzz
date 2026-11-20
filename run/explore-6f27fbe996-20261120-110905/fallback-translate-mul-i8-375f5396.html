@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i8</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i8</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i8 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 14 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">clmul.61a0898c3a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span> @clmul_constfold_i4 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i8
+
+; Function Attrs: nounwind
+define i4 @clmul_constfold_i4() #0 {
+  %B = mul i8 1, -1
+  %res = call i4 @llvm.clmul.i4(i4 1, i4 2)
+  store i8 %B, ptr @G.2, align 1
+  ret i4 %res
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i4 @llvm.clmul.i4(i4, i4) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %B = mul i8 1, -1&#x27; (in function: clmul_constfold_i4)
+warning: Instruction selection used fallback path for clmul_constfold_i4</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.f458763dcd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_subnsw_i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zbkb,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">clmul.61a0898c3a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_constfold_i4</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.902a0177dd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_cttz_i8_zero_poison</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zfinx -O3 -code-model=small</code></td></tr><tr><td class="l">imm.293e669f93.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/imm.ll">imm.ll</a><span class="dim">)</span></td><td class="l">li_rori_2</td><td class="l"><code>-mtriple=riscv64 -riscv-constant-pool-for-large-ints=0 -verify-machineinstrs -mattr=+zfinx,+zdinx -O3</code></td></tr><tr><td class="l">lrint-llrint.3c39066250.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/lrint-llrint.ll">lrint-llrint.ll</a><span class="dim">)</span></td><td class="l">lrint_f128</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">usub_sat_plus.6c469819a7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/usub_sat_plus.ll">usub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zdinx,+a -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">usub_sat_plus.7dd909e29f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/usub_sat_plus.ll">usub_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func8</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zfinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

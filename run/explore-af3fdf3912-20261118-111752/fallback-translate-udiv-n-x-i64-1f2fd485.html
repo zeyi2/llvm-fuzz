@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: udiv &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: udiv &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: udiv &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomic-load-store.fd7ab8a8b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span> @atomic_load_i64_monotonic via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zhinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;2 x i64&gt;
+
+; Function Attrs: nounwind
+define i64 @atomic_load_i64_monotonic(ptr %a) #0 {
+  %B = udiv &lt;2 x i64&gt; splat (i64 -9223372036854775808), splat (i64 -9223372036854775808)
+  %1 = load atomic i64, ptr %a monotonic, align 8
+  store &lt;2 x i64&gt; %B, ptr @G.1, align 16
+  ret i64 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zhinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: udiv: &#x27;  %B = udiv &lt;2 x i64&gt; splat (i64 -9223372036854775808), splat (i64 -9223372036854775808)&#x27; (in function: atomic_load_i64_monotonic)
+warning: Instruction selection used fallback path for atomic_load_i64_monotonic</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.fd7ab8a8b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i64_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zhinx -O2</code></td></tr><tr><td class="l">eh-dwarf-cfa.4ea1cbda08.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/eh-dwarf-cfa.ll">eh-dwarf-cfa.ll</a><span class="dim">)</span></td><td class="l">dwarf</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">llvm.frexp.fa7f6fde67.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_v4f32_v4i32_only_use_exp</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

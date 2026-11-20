@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,addiw,andi,beqz,bnez,call</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,addiw,andi,beqz,bnez,call</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,addiw,andi,beqz,bnez,call <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">riscv-tail-dup-size.34343282e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/riscv-tail-dup-size.ll">riscv-tail-dup-size.ll</a><span class="dim">)</span> @test via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@a = external global i32
+@b = external global i32
+@c = external global i32
+@G = external global i1
+@G.1 = external global i64
+@G.2 = external global i16
+@G.3 = external global ptr
+
+declare i32 @foo(i32)
+
+define i32 @test(i32 %n) {
+entry:
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %cmp = icmp sgt i32 %n, 0
+  br i1 %cmp, label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  %LGV4 = load i16, ptr @G.2, align 2
+  %B = or i32 %n, 0
+  %va = load i32, ptr @a, align 4
+  %B5 = sub i16 -32768, %LGV4
+  %mul = mul nsw i32 %va, %B
+  store i16 %B5, ptr %A, align 2
+  br label %if.end
+
+if.else:                                          ; preds = %entry
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %LGV1 = load i64, ptr @G.1, align 4
+  %vb = load i32, ptr @b, align 4
+  %C = icmp uge i64 %LGV1, 1
+  %div = sdiv i32 %vb, %n
+  store i1 %C, ptr %A, align 1
+  br label %if.end
+
+if.end:                                           ; preds = %BB, %if.then
+  %phi = phi i32 [ %mul, %if.then ], [ %div, %BB ]
+  %vc = load i32, ptr @c, align 4
+  %add = add nsw i32 %phi, -1
+  %arg = mul i32 %add, %vc
+  %ret = tail call i32 @foo(i32 %arg)
+  ret i32 %ret
+
+T:                                                ; preds = %T, %if.else
+  %LGV = load i1, ptr @G, align 1
+  br i1 %LGV, label %T, label %BB
+
+F:                                                ; preds = %if.else
+  %G = getelementptr i32, ptr %A, i1 true
+  store ptr %G, ptr @G.3, align 8
+  br label %BB
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -mattr=+m -O1 -verify-machineinstrs&#x27; --funcs test snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">27 of 64 inputs differ (first: #1)
+SelectionDAG hash e80159fb23549387, GlobalISel hash 4cc17d80a190888c
+b0: llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -mattr=+m -verify-machineinstrs -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">riscv-tail-dup-size.34343282e1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/riscv-tail-dup-size.ll">riscv-tail-dup-size.ll</a><span class="dim">)</span></td><td class="l">test</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

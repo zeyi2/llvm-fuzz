@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;), function getMinRVVVectorSizeInBits, file RISCVSubtarget.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;), function getMinRVVVectorSizeInBits, file RISCVSubtarget.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;), function getMinRVVVectorSizeInBits, file RISCVSubtarget.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vsetvli-intrinsics.5bd0ba92ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vsetvli-intrinsics.ll">vsetvli-intrinsics.ll</a><span class="dim">)</span> @test_vsetvli_eqvlmax_e8m8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=128 -verify-machineinstrs -O0 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/WM4jxT6Ec">https://godbolt.org/z/WM4jxT6Ec</a> (llc-assertions-trunk, checked 2026-11-18 14:47 UTC): <a href="https://godbolt.org/z/WM4jxT6Ec">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i32 @test_vsetvli_eqvlmax_e8m8(i32 %avl) #0 {
+  %vl = call i32 @llvm.riscv.vsetvli.i32(i32 128, i32 0, i32 3)
+  %B = udiv i32 %vl, %vl
+  ret i32 %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare i32 @llvm.riscv.vsetvli.i32(i32, i32 immarg, i32 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=128 -verify-machineinstrs -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/RISCVSubtarget.cpp:212: unsigned int llvm::RISCVSubtarget::getMinRVVVectorSizeInBits() const: Assertion `hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=128 -verify-machineinstrs -O0 -code-model=medium -global-isel=0</code></td><td>0</td><td>2</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -riscv-v-vector-bits-max=128 -verify-machineinstrs -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -riscv-v-vector-bits-max=128 -verify-machineinstrs -O0 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVSubtarget.cpp:213: unsigned int llvm::RISCVSubtarget::getMinRVVVectorSizeInBits() const: Assertion `hasVInstructions() &amp;&amp; &quot;Tried to get vector length without Zve or V extension support!&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -riscv-v-vector-bits-max=128 -verify-machineinstrs -O0 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;InstructionSelect&#x27; on function &#x27;@test_vsetvli_eqvlmax_e8m8&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055bfe66c7e3b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055bfe66c4ce1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055bfe66c88bb
+3  libc.so.6 0x00007fe4d7e45330
+4  libc.so.6 0x00007fe4d7e9ec0c pthread_kill + 284
+5  libc.so.6 0x00007fe4d7e4527e gsignal + 30
+6  libc.so.6 0x00007fe4d7e288ff abort + 223
+7  libc.so.6 0x00007fe4d7e2881b
+8  libc.so.6 0x00007fe4d7e3b517
+9  llc       0x000055bfe74adefa
+10 llc       0x000055bfe7927557
+11 llc       0x000055bfe791a4ed
+12 llc       0x000055bfe88481d7 llvm::InstructionSelectImpl::selectMachineFunction(llvm::MachineFunction&amp;) + 1255
+13 llc       0x000055bfe8849971 llvm::InstructionSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 417
+14 llc       0x000055bfe6c9fc81 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+15 llc       0x000055bfe6a25467 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x000055bfe6a2d982 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x000055bfe6a26210 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x000055bfe66cf9d9
+19 llc       0x000055bfe66ccc01 llcMain + 1665
+20 llc       0x000055bfe660916f main + 63
+21 libc.so.6 0x00007fe4d7e2a1ca
+22 libc.so.6 0x00007fe4d7e2a28b __libc_start_main + 139
+23 llc       0x000055bfe6609065 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vsetvli-intrinsics.5bd0ba92ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/vsetvli-intrinsics.ll">vsetvli-intrinsics.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=128 -verify-machineinstrs -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

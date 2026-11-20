@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x i32&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 4 test files, 61 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-masked-load-int.0f78d7f6b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-int.ll">fixed-vectors-masked-load-int.ll</a><span class="dim">)</span> @masked_load_v2i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i16
+@G.1 = external global i16
+
+define &lt;2 x i32&gt; @masked_load_v2i32(ptr %a, &lt;2 x i1&gt; %mask) {
+  %LGV = load i16, ptr @G, align 2
+  %load = call &lt;2 x i32&gt; @llvm.masked.load.v2i32.p0(ptr align 8 %a, &lt;2 x i1&gt; %mask, &lt;2 x i32&gt; poison)
+  %B = srem i16 %LGV, 0
+  store i16 %B, ptr @G.1, align 2
+  ret &lt;2 x i32&gt; %load
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;2 x i32&gt; @llvm.masked.load.v2i32.p0(ptr captures(none), &lt;2 x i1&gt;, &lt;2 x i32&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %25:_(&lt;2 x i32&gt;) = G_PHI %23:_(&lt;2 x i32&gt;), %bb.4, %16:_(&lt;2 x i32&gt;), %bb.3 (in function: masked_load_v2i32)
+warning: Instruction selection used fallback path for masked_load_v2i32</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">bitreverse-zbkb.9aa08a6279.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/bitreverse-zbkb.ll">bitreverse-zbkb.ll</a><span class="dim">)</span></td><td class="l">bitreverse_i8_zext_arg</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb -O0</code></td></tr><tr><td class="l">double-convert.544c39ab.6c9f86a4.52678a89.d34ca542.673fd908.a326b48b.6c072502.d53d76f3.23b15f6e.5a35be63.c3032067f3.ll <span class="dim">(mutant of</span> double-convert.544c39ab.6c9f86a4.52678a89.d34ca542.673fd908.a326b48b.6c072502.d53d76f3.23b15f6e.5a35be63.ll<span class="dim">)</span></td><td class="l">fcvt_wu_d_sat_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+d,+zbb,+zbkb,+zve32x,+m,+zfh -O0</code></td></tr><tr><td class="l">double-convert.544c39ab.6c9f86a4.52678a89.d34ca542.673fd908.a326b48b.6c072502.da6b185c.2ad85528.183e8a0a.5fa50dd77e.ll <span class="dim">(mutant of</span> double-convert.544c39ab.6c9f86a4.52678a89.d34ca542.673fd908.a326b48b.6c072502.da6b185c.2ad85528.183e8a0a.ll<span class="dim">)</span></td><td class="l">fcvt_wu_d_sat_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+d,+zbkb,+zfhmin,+zvbb,+zicond -O0 -code-model=medium</code></td></tr><tr><td class="l">double-convert.544c39ab.6c9f86a4.52678a89.d34ca542.673fd908.a326b48b.6c072502.da6b185c.2ad85528.183e8a0a.ddeff4ddbd.ll <span class="dim">(mutant of</span> double-convert.544c39ab.6c9f86a4.52678a89.d34ca542.673fd908.a326b48b.6c072502.da6b185c.2ad85528.183e8a0a.ll<span class="dim">)</span></td><td class="l">fcvt_wu_d_sat_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+d,+zfhmin,+zicsr -O0</code></td></tr><tr><td class="l">fixed-vectors-masked-load-int.0f78d7f6b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-int.ll">fixed-vectors-masked-load-int.ll</a><span class="dim">)</span></td><td class="l">masked_load_v2i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">fixed-vectors-masked-load-int.0f78d7f6b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-int.ll">fixed-vectors-masked-load-int.ll</a><span class="dim">)</span></td><td class="l">masked_load_v4i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

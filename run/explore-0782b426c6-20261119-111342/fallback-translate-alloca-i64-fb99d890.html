@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">54 in 51 configs, 47 test files, 854 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-bitmanip-dagcombines.00a7ab08b6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-bitmanip-dagcombines.ll">half-bitmanip-dagcombines.ll</a><span class="dim">)</span> @fneg via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64 -verify-machineinstrs -mattr=+zhinx,+zbkb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/q5h6KxsvT">https://godbolt.org/z/q5h6KxsvT</a> (llc-assertions-trunk, checked 2026-11-19 14:52 UTC): <a href="https://godbolt.org/z/q5h6KxsvT">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i64
+
+; Function Attrs: nounwind
+define half @fneg(half %a) #0 {
+  %A = alloca i64, align 8
+  store i64 poison, ptr %A, align 4
+  %LGV = load i64, ptr @G.2, align 4
+  %1 = fneg half %a
+  %B = xor i64 %LGV, 1
+  store i64 %B, ptr @G.2, align 4
+  store i64 %LGV, ptr %A, align 4
+  ret half %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64 -verify-machineinstrs -mattr=+zhinx,+zbkb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>11</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca i64, align 8&#x27; (in function: fneg)<br>warning: Instruction selection used fallback path for fneg</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64 -verify-machineinstrs -mattr=+zhinx,+zbkb -O0 -global-isel=0</code></td><td>0</td><td>11</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi lp64 -verify-machineinstrs -mattr=+zhinx,+zbkb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi lp64 -verify-machineinstrs -mattr=+zhinx,+zbkb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca i64, align 8&#x27; (in function: fneg)
+warning: Instruction selection used fallback path for fneg</pre>
+<h4>Occurrences (54) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.e5106002af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i16_undef</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx,+zbb -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">add-before-shl.49a4717f55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/add-before-shl.ll">add-before-shl.ll</a><span class="dim">)</span></td><td class="l">add_large_const</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -M no-aliases -mattr=+c,+zfinx,+zvkb -O2</code></td></tr><tr><td class="l">atomic-cmpxchg.64b85d6984.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i64_acquire_monotonic</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+ztso,+zhinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">atomic-cmpxchg.64b85d6984.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i64_acq_rel_monotonic</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+ztso,+zhinx -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">atomic-cmpxchg.9668dae0ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i64_monotonic_monotonic</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+ztso,+zabha,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">atomic-rmw.68ed37ed78.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/atomic-rmw.ll">atomic-rmw.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_umax_i64_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zalrsc,+zdinx -O3 -code-model=medium</code></td></tr><tr><td class="l">calling-conv-lp64-lp64f-lp64d-common.0d897117ef.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/calling-conv-lp64-lp64f-lp64d-common.ll">calling-conv-lp64-lp64f-lp64d-common.ll</a><span class="dim">)</span></td><td class="l">caller_mixed_scalar_libcalls</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">calling-conv-p-ext-vector.a80669c8c0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/calling-conv-p-ext-vector.ll">calling-conv-p-ext-vector.ll</a><span class="dim">)</span></td><td class="l">test_exhaust_2xlen_rv32_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zfinx -O3</code></td></tr><tr><td class="l">calls-cf-branch.2ae2e11162.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/calls-cf-branch.ll">calls-cf-branch.ll</a><span class="dim">)</span></td><td class="l">test_call_external</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+c -O2</code></td></tr><tr><td class="l">clmul.c100817b02.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">mul_use_commutative_clmul_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbc,+zhinx -O0</code></td></tr><tr><td class="l">clmulr-rv64.bf83fa9fe4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/clmulr-rv64.ll">clmulr-rv64.ll</a><span class="dim">)</span></td><td class="l">clmulr_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbc,+zhinx -O0</code></td></tr><tr><td class="l">combine-clmul.44759c9c20.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/combine-clmul.ll">combine-clmul.ll</a><span class="dim">)</span></td><td class="l">combine_i64_cmul_larger</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbc,+c,+zfinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">combine-neg-abs.89701a283d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/combine-neg-abs.ll">combine-neg-abs.ll</a><span class="dim">)</span></td><td class="l">expanded_neg_abs64_unsigned</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.6e30a3af9e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_cttz_i64_zero_poison</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+zhinx -O1</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.9973f931df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_cttz_i64_zero_poison</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

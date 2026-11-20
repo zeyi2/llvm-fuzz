@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;vscale x N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;vscale x N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-0782b426c6-20261119-103640.html">main-0782b426c6-20261119-103640</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT &lt;vscale x N x i32&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">197 in 17 configs, 13 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/splats-with-mixed-vl.ll">splats-with-mixed-vl.ll</a> @splat_scalable via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-O3 -mtriple=riscv64 -mattr=+v</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @splat_scalable(ptr %p, i32 %v) {
+  %elt.head = insertelement &lt;vscale x 1 x i32&gt; poison, i32 %v, i32 0
+  %splat = shufflevector &lt;vscale x 1 x i32&gt; %elt.head, &lt;vscale x 1 x i32&gt; poison, &lt;vscale x 1 x i32&gt; zeroinitializer
+  store &lt;vscale x 1 x i32&gt; %splat, ptr %p, align 4
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -O3 -mtriple=riscv64 -mattr=+v -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -O3 -mtriple=riscv64 -mattr=+v -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %7:_(i32) = G_EXTRACT_VECTOR_ELT %3:_(&lt;vscale x 1 x i32&gt;), %6:_(i64) (in function: splat_scalable)
+warning: Instruction selection used fallback path for splat_scalable</pre>
+<h4>Occurrences (197) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv1i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv2i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv4i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv8i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv16i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv1i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv2i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv4i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv8i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/binop-splats.ll">binop-splats.ll</a></td><td class="l">nxv16i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zfh,+zvfh -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/dont-sink-splat-operands.ll">dont-sink-splat-operands.ll</a></td><td class="l">sink_splat_add_scalable</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f -target-abi=lp64f -mattr=+no-sink-splat-operands -riscv-v-vector-bits-min=128</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/dont-sink-splat-operands.ll">dont-sink-splat-operands.ll</a></td><td class="l">sink_splat_add_scalable</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f -target-abi=lp64f -mattr=-no-sink-splat-operands -riscv-v-vector-bits-min=128</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/dont-sink-splat-operands.ll">dont-sink-splat-operands.ll</a></td><td class="l">sink_splat_add_scalable</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f -target-abi=lp64f -riscv-v-vector-bits-min=128</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/sink-splat-operands.ll">sink-splat-operands.ll</a></td><td class="l">sink_splat_add_scalable</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f -target-abi=lp64f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/sink-splat-operands.ll">sink-splat-operands.ll</a></td><td class="l">sink_splat_sub_scalable</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f -target-abi=lp64f</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

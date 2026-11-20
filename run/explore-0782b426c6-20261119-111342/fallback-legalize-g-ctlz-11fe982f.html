@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_CTLZ</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_CTLZ</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_CTLZ <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 75 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv32zbb-zbkb.595d8f7a17.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span> @inverted_masked_merge_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+m -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+define i64 @inverted_masked_merge_i64(i64 %x, i64 %y, i64 %z) #0 {
+  %A = alloca i128, align 8
+  store i128 poison, ptr %A, align 4
+  %LGV = load i128, ptr @G, align 4
+  %a = and i64 %x, %y
+  %notx = xor i64 %x, -1
+  %b = and i64 %notx, %z
+  %B = udiv i128 1, %LGV
+  %or = or i64 %a, %b
+  %not = xor i64 %or, -1
+  store i128 %B, ptr %A, align 4
+  ret i64 %not
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+m -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+m -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %1060:_(i32) = G_CTLZ %17:_(i128) (in function: inverted_masked_merge_i64)
+warning: Instruction selection used fallback path for inverted_masked_merge_i64</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">ctlz-cttz-ctpop.96b42ca687.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_ctpop_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zbkb,+xtheadba -O1</code></td></tr><tr><td class="l">rv32xtheadbb.c9bc59be43.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32xtheadbb.ll">rv32xtheadbb.ll</a><span class="dim">)</span></td><td class="l">cttz_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+b -O2</code></td></tr><tr><td class="l">rv32zbb-zbkb.595d8f7a17.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">inverted_masked_merge_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+m -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_ROUNDEVEN &lt;N x f32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_ROUNDEVEN &lt;N x f32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_ROUNDEVEN &lt;N x f32&gt; <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 1 configs, 1 test files, 8 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-roundeven-vp.7b5107c51c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-roundeven-vp.ll">fixed-vectors-roundeven-vp.ll</a><span class="dim">)</span> @vp_roundeven_v4f32_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvkb -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+@G.1 = external global i1
+
+define &lt;4 x float&gt; @vp_roundeven_v4f32_unmasked(&lt;4 x float&gt; %va, i32 zeroext %evl) {
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %LGV = load i64, ptr @G, align 4
+  switch i64 %LGV, label %SW_D [
+    i64 2215335669694671177, label %SW_C
+    i64 -6502640452460624719, label %SW_C1
+    i64 -6579304437244129240, label %SW_C2
+    i64 -5094988769306473780, label %SW_C3
+    i64 -1825749020496456787, label %SW_C4
+    i64 -2708484321438868389, label %SW_C5
+    i64 -5022762076558266057, label %SW_C6
+  ]
+
+BB:                                               ; preds = %SW_C6, %SW_C5, %SW_C4, %SW_C3, %SW_C2, %SW_C1, %SW_C, %SW_D
+  %v = call &lt;4 x float&gt; @llvm.roundeven.v4f32(&lt;4 x float&gt; %va)
+  ret &lt;4 x float&gt; %v
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %0
+  br label %BB
+
+SW_C1:                                            ; preds = %0
+  br label %BB
+
+SW_C2:                                            ; preds = %0
+  br label %BB
+
+SW_C3:                                            ; preds = %0
+  br label %BB
+
+SW_C4:                                            ; preds = %0
+  br label %BB
+
+SW_C5:                                            ; preds = %SW_C5, %0
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %SW_C5, label %BB
+
+SW_C6:                                            ; preds = %SW_C6, %0
+  %LGV7 = load i1, ptr @G.1, align 1
+  br i1 %LGV7, label %SW_C6, label %BB
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x float&gt; @llvm.roundeven.v4f32(&lt;4 x float&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvkb -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvkb -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %20:_(&lt;4 x f32&gt;) = G_INTRINSIC_ROUNDEVEN %0:_ (in function: vp_roundeven_v4f32_unmasked)
+warning: Instruction selection used fallback path for vp_roundeven_v4f32_unmasked</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-roundeven-vp.7b5107c51c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-roundeven-vp.ll">fixed-vectors-roundeven-vp.ll</a><span class="dim">)</span></td><td class="l">vp_roundeven_v4f32_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvkb -O3</code></td></tr><tr><td class="l">fixed-vectors-roundeven-vp.7b5107c51c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-roundeven-vp.ll">fixed-vectors-roundeven-vp.ll</a><span class="dim">)</span></td><td class="l">vp_roundeven_v8f32_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvkb -O3</code></td></tr><tr><td class="l">fixed-vectors-roundeven-vp.7b5107c51c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-roundeven-vp.ll">fixed-vectors-roundeven-vp.ll</a><span class="dim">)</span></td><td class="l">vp_roundeven_v16f32_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+zvkb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

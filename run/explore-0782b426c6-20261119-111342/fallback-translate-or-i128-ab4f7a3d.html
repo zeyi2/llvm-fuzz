@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-scalar-rv64.6654a7b037.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvp-scalar-rv64.ll">rvp-scalar-rv64.ll</a><span class="dim">)</span> @sra_large_i128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zfinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+define i128 @sra_large_i128(i128 %x, i128 %y) {
+  %a = or i128 %y, 64
+  %B = sub i1 true, true
+  %b = ashr i128 %x, %a
+  store i1 %B, ptr @G, align 1
+  ret i128 %b
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+experimental-p,+m,+zfinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+experimental-p,+m,+zfinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %a = or i128 %y, 64&#x27; (in function: sra_large_i128)
+warning: Instruction selection used fallback path for sra_large_i128</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">and-negpow2-cmp.8b8a5f83df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/and-negpow2-cmp.ll">and-negpow2-cmp.ll</a><span class="dim">)</span></td><td class="l">PR221593</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx,+m -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">codemodel-lowering.e797248dd8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a><span class="dim">)</span></td><td class="l">lower_global</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zhinx,+zicond -O3</code></td></tr><tr><td class="l">half-round-conv.8739a1749a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-round-conv.ll">half-round-conv.ll</a><span class="dim">)</span></td><td class="l">test_ceil_half</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinxmin,+zcb -O3</code></td></tr><tr><td class="l">rvp-scalar-rv64.6654a7b037.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvp-scalar-rv64.ll">rvp-scalar-rv64.ll</a><span class="dim">)</span></td><td class="l">sra_large_i128</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zfinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

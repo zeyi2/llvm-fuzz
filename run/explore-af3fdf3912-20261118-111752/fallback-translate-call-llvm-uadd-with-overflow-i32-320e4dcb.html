@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.uadd.with.overflow.i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.uadd.with.overflow.i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.uadd.with.overflow.i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 6 configs, 4 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">overflow-intrinsics.4b4eb70091.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/overflow-intrinsics.ll">overflow-intrinsics.ll</a><span class="dim">)</span> @uaddo_i32_increment_noncanonical_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+m -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr
+
+define i1 @uaddo_i32_increment_noncanonical_2(i32 %x, ptr %p) {
+  %a = add i32 %x, 1
+  %G = getelementptr i32, ptr %p, i1 false
+  %ov = icmp eq i32 0, %a
+  store i32 %a, ptr %p, align 4
+  store ptr %G, ptr @G.1, align 8
+  ret i1 %ov
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+m -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+m -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.uadd.with.overflow.i32: &#x27;  %1 = call { i32, i1 } @llvm.uadd.with.overflow.i32(i32 %x, i32 1)&#x27; (in function: uaddo_i32_increment_noncanonical_2)
+warning: Instruction selection used fallback path for uaddo_i32_increment_noncanonical_2</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">add_sext_shl_constant.8d7b343e1c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/add_sext_shl_constant.ll">add_sext_shl_constant.ll</a><span class="dim">)</span></td><td class="l">add_sext_shl_moreOneUse_sext</td><td class="l"><code>-mtriple=riscv64 -mattr=+xandesperf,+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">branch-on-zero.db15f3e138.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/branch-on-zero.ll">branch-on-zero.ll</a><span class="dim">)</span></td><td class="l">optbranch_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zihintpause,+zhinx -O2</code></td></tr><tr><td class="l">overflow-intrinsics.4b4eb70091.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/overflow-intrinsics.ll">overflow-intrinsics.ll</a><span class="dim">)</span></td><td class="l">uaddo_i32_increment_noncanonical_2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+m -O1</code></td></tr><tr><td class="l">xaluo.909cba8dfc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">uaddo.i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O2</code></td></tr><tr><td class="l">xaluo.909cba8dfc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">uaddo.select.i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zfinx -O2</code></td></tr><tr><td class="l">xaluo.ddf958b8a1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">uaddo.i32.constant_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zba,+zdinx -O1</code></td></tr><tr><td class="l">xaluo.fba816293a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">uaddo.i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zdinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

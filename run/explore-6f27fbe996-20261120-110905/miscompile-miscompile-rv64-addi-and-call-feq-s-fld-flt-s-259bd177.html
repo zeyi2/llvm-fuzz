@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,and,call,feq.s,fld,flt.s</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,and,call,feq.s,fld,flt.s</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,and,call,feq.s,fld,flt.s <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr139075.78206a85.426c057351.ll <span class="dim">(mutant of</span> pr139075.78206a85.ll<span class="dim">)</span> @a via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr
+@G.2 = external global float
+@G.3 = external global i1
+
+define void @a(ptr %0, ptr %1) {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load float, ptr @G.2, align 4
+  %G = getelementptr &lt;4 x i32&gt;, ptr %1, i32 42
+  %L = load float, ptr %G, align 4
+  call void @llvm.memcpy.p0.p0.i64(ptr align 1 %0, ptr align 4 %1, i64 2048, i1 false)
+  %C = fcmp uno float %L, %LGV
+  store ptr %G, ptr @G.1, align 8
+  store i1 %C, ptr @G.3, align 1
+  %C1 = fcmp one float %L, %L
+  store i1 %C1, ptr %A, align 1
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b -O2&#x27; --funcs a snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash 62d8234100daf4f9, GlobalISel hash a55f10c52aec5e13
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr139075.78206a85.426c057351.ll <span class="dim">(mutant of</span> pr139075.78206a85.ll<span class="dim">)</span></td><td class="l">a</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

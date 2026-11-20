@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fcmp fp128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fcmp fp128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fcmp fp128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 8 configs, 4 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">musttail-indirect-args.ae603f2a97.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span> @caller_musttail_indirect via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicsr,+zdinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.5 = external global i1
+
+declare i32 @callee_musttail_indirect(fp128)
+
+; Function Attrs: nounwind
+define i32 @caller_musttail_indirect(fp128 %a) #0 {
+  %C = fcmp ole fp128 %a, 4.200000e+01
+  store i1 %C, ptr @G.5, align 1
+  %call = musttail call i32 @callee_musttail_indirect(fp128 %a)
+  ret i32 %call
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zicsr,+zdinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zicsr,+zdinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fcmp: &#x27;  %C = fcmp ole fp128 %a, 4.200000e+01&#x27; (in function: caller_musttail_indirect)
+warning: Instruction selection used fallback path for caller_musttail_indirect</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp128.cf9954b21b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fcmp</td><td class="l"><code>-mtriple=riscv64 -mattr=+zihintpause,+zhinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">half-convert-strict.992f4f8fee.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_q</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zhinxmin,+zicsr -O3</code></td></tr><tr><td class="l">llvm.frexp.e36833bc4e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_f128_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O0</code></td></tr><tr><td class="l">musttail-indirect-args.199489fd55.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_mixed_swap_indirect</td><td class="l"><code>-mtriple=riscv32 -mattr=+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.3ba561151b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_nine_indirect</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.91a58a0217.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_forwarded_and_computed</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.ae603f2a97.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_indirect</td><td class="l"><code>-mtriple=riscv32 -mattr=+zicsr,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.b981aaae06.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_nine_indirect</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zba -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.b981aaae06.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_computed</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zba -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

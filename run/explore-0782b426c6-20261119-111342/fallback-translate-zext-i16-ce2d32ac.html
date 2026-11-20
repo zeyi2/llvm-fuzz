@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 4 test files, 52 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">signed-truncation-check.07809d4d3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span> @add_ugecmp_i16_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global bfloat
+@G.1 = external global i1
+
+; Function Attrs: nounwind
+define i1 @add_ugecmp_i16_i8(i16 %x) #0 {
+  %LGV = load bfloat, ptr @G, align 2
+  %tmp0 = add i16 %x, -128
+  %C = fcmp olt bfloat %LGV, 9.183550e-41
+  %tmp1 = icmp uge i16 %tmp0, -256
+  store i1 %C, ptr @G.1, align 1
+  ret i1 %tmp1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %1 = zext i16 %x to i64&#x27; (in function: add_ugecmp_i16_i8)
+warning: Instruction selection used fallback path for add_ugecmp_i16_i8</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.85a3b4be1b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i16_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">abdu-neg.c62ff6e690.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">clmulh.6fe2c22778.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbs,+zhinx,+zdinx -O2</code></td></tr><tr><td class="l">clmulh.aaf2245cfb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbc,+zvkb,+zdinx -O3</code></td></tr><tr><td class="l">clmulr.76ced3ebe3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx,+c -O1</code></td></tr><tr><td class="l">clmulr.fff08fe9a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">signed-truncation-check.07809d4d3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/signed-truncation-check.ll">signed-truncation-check.ll</a><span class="dim">)</span></td><td class="l">add_ugecmp_i16_i8</td><td class="l"><code>-mtriple=riscv64-unknown-linux-gnu -mattr=+zbb,+zhinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

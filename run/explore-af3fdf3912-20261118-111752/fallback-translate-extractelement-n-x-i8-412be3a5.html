@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: extractelement &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: extractelement &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: extractelement &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">hoist-global-addr-base.12a18838f1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span> @big_offset_neg_lui_tail via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zba,+xqcili,+xqcilia,+zbs,+zhinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@bar = external global [0 x i8], align 1
+
+define ptr @big_offset_neg_lui_tail() {
+  %E = extractelement &lt;8 x i8&gt; splat (i8 1), i128 0
+  store i8 %E, ptr poison, align 1
+  ret ptr getelementptr inbounds ([0 x i8], ptr @bar, i32 0, i32 -8192)
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zba,+xqcili,+xqcilia,+zbs,+zhinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zba,+xqcili,+xqcilia,+zbs,+zhinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: extractelement: &#x27;  %E = extractelement &lt;8 x i8&gt; splat (i8 1), i128 0&#x27; (in function: big_offset_neg_lui_tail)
+warning: Instruction selection used fallback path for big_offset_neg_lui_tail</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.cb33a6bf21.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+ztso,+zhinx -O2</code></td></tr><tr><td class="l">half-convert-strict.0499691e18.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_si_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -disable-strictnode-mutation -mattr=+zhinxmin -O3</code></td></tr><tr><td class="l">hoist-global-addr-base.12a18838f1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/hoist-global-addr-base.ll">hoist-global-addr-base.ll</a><span class="dim">)</span></td><td class="l">big_offset_neg_lui_tail</td><td class="l"><code>-mtriple=riscv32 -mattr=+zba,+xqcili,+xqcilia,+zbs,+zhinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

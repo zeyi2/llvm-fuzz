@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca fp128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca fp128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca fp128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 2 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rv64-large-stack.8bb07e3b3c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rv64-large-stack.ll">rv64-large-stack.ll</a><span class="dim">)</span> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zdinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+@G.2 = external global ptr
+
+; Function Attrs: nounwind
+define void @foo() #0 {
+entry:
+  %w = alloca [100000000 x { fp128, fp128 }], align 16
+  %B = srem i128 42, 170141183460469231731687303715884105727
+  %arraydecay = getelementptr inbounds [100000000 x { fp128, fp128 }], ptr %w, i64 0, i64 0
+  store i128 %B, ptr @G.1, align 4
+  call void @baz(ptr nonnull %arraydecay)
+  %LGV1 = load i128, ptr @G.1, align 4
+  %G = getelementptr &lt;4 x float&gt;, ptr %arraydecay, i128 %LGV1
+  store ptr %G, ptr @G.2, align 8
+  ret void
+}
+
+declare void @baz(ptr)
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zdinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zdinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %w = alloca [100000000 x { fp128, fp128 }], align 16&#x27; (in function: foo)
+warning: Instruction selection used fallback path for foo</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">llvm.frexp.71614812a6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_f128_i32_only_use_fract</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O3</code></td></tr><tr><td class="l">llvm.frexp.a63be99a35.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_f128_i32_only_use_fract</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1</code></td></tr><tr><td class="l">llvm.frexp.e75b179ecb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_f128_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+zvkb -O3</code></td></tr><tr><td class="l">rv64-large-stack.8bb07e3b3c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rv64-large-stack.ll">rv64-large-stack.ll</a><span class="dim">)</span></td><td class="l">foo</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx,+zdinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: ashr i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: ashr i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: ashr i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 56 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">select.c4f717c1ed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/select.ll">select.ll</a><span class="dim">)</span> @select_ashr_3 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zicond,+zhinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+define i32 @select_ashr_3(i1 zeroext %cond, i32 %a) {
+entry:
+  %c = ashr i32 %a, 42
+  %res = select i1 %cond, i32 %a, i32 %c
+  %C = icmp uge i32 %a, %c
+  store i1 %C, ptr @G.3, align 1
+  ret i32 %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zicond,+zhinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zicond,+zhinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: ashr: &#x27;  %c = ashr i32 %a, 42&#x27; (in function: select_ashr_3)
+warning: Instruction selection used fallback path for select_ashr_3</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-lp64-lp64f-lp64d-common.6a64e9aac6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/calling-conv-lp64-lp64f-lp64d-common.ll">calling-conv-lp64-lp64f-lp64d-common.ll</a><span class="dim">)</span></td><td class="l">caller_small_coerced_struct</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -code-model=small</code></td></tr><tr><td class="l">clmul.f25954d0a2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/clmul.ll">clmul.ll</a><span class="dim">)</span></td><td class="l">clmul_i64_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbc,+zfinx -O2</code></td></tr><tr><td class="l">half-arith.385c0e42ca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-arith.ll">half-arith.ll</a><span class="dim">)</span></td><td class="l">fsgnjn_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx,+zba,+zfinx -O0</code></td></tr><tr><td class="l">i32-icmp.4a70031023.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/i32-icmp.ll">i32-icmp.ll</a><span class="dim">)</span></td><td class="l">icmp_ugt_constant_4095</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilia,+zvkb,+zdinx -O0</code></td></tr><tr><td class="l">i32-icmp.82ec470198.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/i32-icmp.ll">i32-icmp.ll</a><span class="dim">)</span></td><td class="l">icmp_sge_constant_2048</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr><tr><td class="l">inline-asm-mem-constraint.8138ccdb4b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/inline-asm-mem-constraint.ll">inline-asm-mem-constraint.ll</a><span class="dim">)</span></td><td class="l">constraint_A_with_multi_callbr_asm</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -no-integrated-as -mattr=+zdinx -O1</code></td></tr><tr><td class="l">select.c4f717c1ed.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/select.ll">select.ll</a><span class="dim">)</span></td><td class="l">select_ashr_3</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zicond,+zhinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

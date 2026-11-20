@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">12 in 11 configs, 9 test files, 126 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-half.7f09c89396.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/calling-conv-half.ll">calling-conv-half.ll</a><span class="dim">)</span> @callee_half_on_stack via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x float&gt;
+@G.1 = external global &lt;4 x float&gt;
+
+; Function Attrs: nounwind
+define i32 @callee_half_on_stack(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %g, i32 %h, half %i) #0 {
+  %A = alloca &lt;4 x float&gt;, align 16
+  store &lt;4 x float&gt; poison, ptr %A, align 16
+  %LGV1 = load &lt;4 x float&gt;, ptr @G.1, align 16
+  %LGV = load &lt;4 x float&gt;, ptr @G, align 16
+  %B = fdiv &lt;4 x float&gt; %LGV, %LGV1
+  %1 = fptosi half %i to i32
+  %2 = add i32 %h, %1
+  store &lt;4 x float&gt; %B, ptr %A, align 16
+  ret i32 %2
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca &lt;4 x float&gt;, align 16&#x27; (in function: callee_half_on_stack)
+warning: Instruction selection used fallback path for callee_half_on_stack</pre>
+<h4>Occurrences (12):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-half.7f09c89396.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/calling-conv-half.ll">calling-conv-half.ll</a><span class="dim">)</span></td><td class="l">callee_half_on_stack</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0</code></td></tr><tr><td class="l">exception-pointer-register.ef2eaa0f19.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/exception-pointer-register.ll">exception-pointer-register.ll</a><span class="dim">)</span></td><td class="l">callee</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx,+zicond -O1</code></td></tr><tr><td class="l">fastcc-without-f-reg.8ed32e6cc8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">callee_float_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx,+xtheadba -O2</code></td></tr><tr><td class="l">fastcc-without-f-reg.fb34652626.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fastcc-without-f-reg.ll">fastcc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">caller_float_32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O3 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-select-addsub.7a65798bca.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-select-addsub.ll">fixed-vectors-select-addsub.ll</a><span class="dim">)</span></td><td class="l">select_addsub_v4i32_select_swapped</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">fp-fcanonicalize.1f20cd8c17.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v2f32_nnan</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0 -code-model=small</code></td></tr><tr><td class="l">fp-fcanonicalize.9340a5ceb2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/fp-fcanonicalize.ll">fp-fcanonicalize.ll</a><span class="dim">)</span></td><td class="l">fcanonicalize_v4f16_nnan</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+c -O3</code></td></tr><tr><td class="l">half-intrinsics.330fbbbdbc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/half-intrinsics.ll">half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">roundeven_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+xtheadba,+zvbb -O1</code></td></tr><tr><td class="l">llvm.frexp.dcaf7ca24d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_f16_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+zihintpause -O3 -code-model=medium</code></td></tr><tr><td class="l">llvm.frexp.dcaf7ca24d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_v4f32_v4i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+zihintpause -O3 -code-model=medium</code></td></tr><tr><td class="l">memmove.0ae6278092.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/memmove.ll">memmove.ll</a><span class="dim">)</span></td><td class="l">memmove_i64_var</td><td class="l"><code>-mtriple=riscv32 -mattr=+unaligned-scalar-mem,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">xaluo.397ac0a56c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/xaluo.ll">xaluo.ll</a><span class="dim">)</span></td><td class="l">usubo.i32.constant.lhs</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zdinx -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_LOAD &lt;N x i16~&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_LOAD &lt;N x i16~&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_LOAD &lt;N x i16~&gt;,p0 <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 2 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fp2i.5e24fa8e.9d95354895.ll <span class="dim">(mutant of</span> fixed-vectors-fp2i.5e24fa8e.ll<span class="dim">)</span> @fp2ui_v2f32_v2i15 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+f,+zicond -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.5 = external global i64
+@G.6 = external global i1
+@G.7 = external global i1
+@G.8 = external global &lt;2 x i15&gt;
+
+define &lt;2 x i15&gt; @fp2ui_v2f32_v2i15(&lt;2 x float&gt; %x) {
+  %LGV2 = load i1, ptr @G.7, align 1
+  %LGV = load i64, ptr @G.5, align 4
+  %A = alloca i1, align 1
+  %C1 = icmp uge i64 -1, %LGV
+  store i1 poison, ptr %A, align 1
+  %C = icmp eq i16 0, -32768
+  switch i1 %LGV2, label %SW_D [
+    i1 false, label %SW_C
+  ]
+
+BB:                                               ; preds = %SW_D
+  %z = fptoui &lt;2 x float&gt; %x to &lt;2 x i15&gt;
+  store i1 %C, ptr %A, align 1
+  store i1 %C1, ptr @G.6, align 1
+  ret &lt;2 x i15&gt; %z
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %0
+  %LGV3 = load &lt;2 x i15&gt;, ptr @G.8, align 4
+  ret &lt;2 x i15&gt; %LGV3
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+f,+zicond -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+f,+zicond -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %23:_(&lt;2 x i15&gt;) = G_LOAD %24:_(p0) :: (dereferenceable load (&lt;2 x i15&gt;) from @G.8) (in function: fp2ui_v2f32_v2i15)
+warning: Instruction selection used fallback path for fp2ui_v2f32_v2i15</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fp2i.5e24fa8e.9d95354895.ll <span class="dim">(mutant of</span> fixed-vectors-fp2i.5e24fa8e.ll<span class="dim">)</span></td><td class="l">fp2ui_v2f32_v2i15</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+f,+zicond -O3</code></td></tr><tr><td class="l">fixed-vectors-fp2i.97c87ff4.57017d802c.ll <span class="dim">(mutant of</span> fixed-vectors-fp2i.97c87ff4.ll<span class="dim">)</span></td><td class="l">fp2si_v2f32_v2i15</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f,+d -O2</code></td></tr><tr><td class="l">fixed-vectors-fp2i.97c87ff4.60b5a8a489.ll <span class="dim">(mutant of</span> fixed-vectors-fp2i.97c87ff4.ll<span class="dim">)</span></td><td class="l">fp2si_v2f32_v2i15</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f,+d,+zihintpause -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

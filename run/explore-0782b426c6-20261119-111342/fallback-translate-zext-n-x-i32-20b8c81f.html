@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 2 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vaaddu.6dd09f4575.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaaddu.ll">fixed-vectors-vaaddu.ll</a><span class="dim">)</span> @vaaddu_vx_v8i32_ceil via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;8 x i32&gt; @vaaddu_vx_v8i32_ceil(&lt;8 x i32&gt; %x, i32 %y) {
+  %xzv = zext &lt;8 x i32&gt; %x to &lt;8 x i64&gt;
+  %yhead = insertelement &lt;8 x i32&gt; poison, i32 %y, i32 0
+  %ysplat = shufflevector &lt;8 x i32&gt; %yhead, &lt;8 x i32&gt; poison, &lt;8 x i32&gt; zeroinitializer
+  %B = mul &lt;8 x i32&gt; %yhead, %x
+  %yzv = zext &lt;8 x i32&gt; %ysplat to &lt;8 x i64&gt;
+  %add = add nuw nsw &lt;8 x i64&gt; %xzv, %yzv
+  %add1 = add nuw nsw &lt;8 x i64&gt; %add, splat (i64 1)
+  %div = lshr &lt;8 x i64&gt; %add1, splat (i64 1)
+  %ret = trunc &lt;8 x i64&gt; %div to &lt;8 x i32&gt;
+  store &lt;8 x i32&gt; %B, ptr poison, align 32
+  ret &lt;8 x i32&gt; %ret
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %xzv = zext &lt;8 x i32&gt; %x to &lt;8 x i64&gt;&#x27; (in function: vaaddu_vx_v8i32_ceil)
+warning: Instruction selection used fallback path for vaaddu_vx_v8i32_ceil</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-clmulh.d4ef05ddec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-clmulh.ll">fixed-vectors-clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_v4i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">fixed-vectors-clmulh.d4ef05ddec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-clmulh.ll">fixed-vectors-clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_v16i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vaaddu.6dd09f4575.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vaaddu.ll">fixed-vectors-vaaddu.ll</a><span class="dim">)</span></td><td class="l">vaaddu_vx_v8i32_ceil</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

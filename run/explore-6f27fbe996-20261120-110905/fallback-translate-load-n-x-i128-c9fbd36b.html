@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: load &lt;N x i128&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: load &lt;N x i128&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: load &lt;N x i128&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-shuffle-exact-vlen.ead1c21d.cd8677487c.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.ead1c21d.ll<span class="dim">)</span> @shuffle_i128_ldst via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global &lt;4 x i128&gt;
+@G.4 = external global ptr
+
+; Function Attrs: vscale_range(2,2)
+define void @shuffle_i128_ldst(ptr %p) #0 {
+  %a = load &lt;4 x i128&gt;, ptr %p, align 64
+  %S = shufflevector &lt;4 x i128&gt; %a, &lt;4 x i128&gt; %a, &lt;4 x i32&gt; poison
+  %res = shufflevector &lt;4 x i128&gt; %a, &lt;4 x i128&gt; poison, &lt;4 x i32&gt; &lt;i32 0, i32 0, i32 3, i32 2&gt;
+  store &lt;4 x i128&gt; %res, ptr %p, align 64
+  store &lt;4 x i128&gt; %S, ptr @G.3, align 64
+  %G = getelementptr ptr, ptr %p, i32 1
+  store ptr %G, ptr @G.4, align 8
+  ret void
+}
+
+attributes #0 = { vscale_range(2,2) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: load: &#x27;  %a = load &lt;4 x i128&gt;, ptr %p, align 64&#x27; (in function: shuffle_i128_ldst)
+warning: Instruction selection used fallback path for shuffle_i128_ldst</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmulh.ebdcdfeb5b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_v2i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zvbc,+zfinx -O3</code></td></tr><tr><td class="l">clmulr.8dd298e65e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulr_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbs,+zhinx -O1</code></td></tr><tr><td class="l">fixed-vectors-shuffle-exact-vlen.ead1c21d.cd8677487c.ll <span class="dim">(mutant of</span> fixed-vectors-shuffle-exact-vlen.ead1c21d.ll<span class="dim">)</span></td><td class="l">shuffle_i128_ldst</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

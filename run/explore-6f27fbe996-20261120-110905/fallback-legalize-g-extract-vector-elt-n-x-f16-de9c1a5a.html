@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x f16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x f16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT &lt;N x f16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 79 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-extract.9e7ed4078f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract.ll">fixed-vectors-extract.ll</a><span class="dim">)</span> @extractelt_v8f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d,+m,+zicsr,+c -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.6 = external global &lt;4 x float&gt;
+
+; Function Attrs: nounwind
+define half @extractelt_v8f16(&lt;8 x half&gt; %a) #0 {
+  %B = fmul &lt;4 x float&gt; splat (float 4.200000e+01), splat (float 4.200000e+01)
+  %b = extractelement &lt;8 x half&gt; %a, i32 7
+  store &lt;4 x float&gt; %B, ptr @G.6, align 16
+  ret half %b
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d,+m,+zicsr,+c -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d,+m,+zicsr,+c -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(f16) = G_EXTRACT_VECTOR_ELT %0:_(&lt;8 x f16&gt;), %6:_(i64) (in function: extractelt_v8f16)
+warning: Instruction selection used fallback path for extractelt_v8f16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-extract.295af1db03.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract.ll">fixed-vectors-extract.ll</a><span class="dim">)</span></td><td class="l">extractelt_v16f16_idx</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin,+f,+d,+m -O0</code></td></tr><tr><td class="l">fixed-vectors-extract.9e7ed4078f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-extract.ll">fixed-vectors-extract.ll</a><span class="dim">)</span></td><td class="l">extractelt_v8f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+zfbfmin,+zvfbfmin,+f,+d,+m,+zicsr,+c -O3</code></td></tr><tr><td class="l">fixed-vectors-masked-scatter.57d977f611.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-scatter.ll">fixed-vectors-masked-scatter.ll</a><span class="dim">)</span></td><td class="l">mscatter_baseidx_sext_v8i8_v8f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

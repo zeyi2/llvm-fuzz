@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: andi,beqz,bnez,lb,lbu,xori</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: andi,beqz,bnez,lb,lbu,xori</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: andi,beqz,bnez,lb,lbu,xori <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">attributes.ba4d5ede49.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span> @atomic_load_i8_seq_cst via llvm-extract + llvm-reduce</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+rva23p1s64,+zfh -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i8 @atomic_load_i8_seq_cst(ptr %a) {
+  %L = load i1, ptr %a, align 1
+  br i1 %L, label %T, label %common.ret
+
+common.ret:                                       ; preds = %0
+  %common.ret.op = phi i8 [ 0, %0 ]
+  ret i8 %common.ret.op
+
+T:                                                ; preds = %0
+  %1 = load i8, ptr %a, align 1
+  ret i8 %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -mattr=+rva23p1s64,+zfh -O2 -verify-machineinstrs&#x27; --funcs atomic_load_i8_seq_cst snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">62 of 64 inputs differ (first: #1)
+SelectionDAG hash c1b711f489039770, GlobalISel hash e80159fb23549387
+b0: llc -mtriple=riscv64 -mattr=+rva23p1s64,+zfh -verify-machineinstrs -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -mattr=+rva23p1s64,+zfh -verify-machineinstrs -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -mattr=+rva23p1s64,+zfh -verify-machineinstrs -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.ba4d5ede49.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv64 -mattr=+rva23p1s64,+zfh -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

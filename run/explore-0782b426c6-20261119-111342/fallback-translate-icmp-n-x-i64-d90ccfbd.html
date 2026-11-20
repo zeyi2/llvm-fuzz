@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;N x i64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;N x i64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;N x i64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 121 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zfhmin-imm.def135eff8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/zfhmin-imm.ll">zfhmin-imm.ll</a><span class="dim">)</span> @f16_positive_zero via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64 -mattr=+zhinxmin,+zdinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define half @f16_positive_zero(ptr %pf) #0 {
+  %C = icmp ugt &lt;2 x i64&gt; splat (i64 1), zeroinitializer
+  store &lt;2 x i1&gt; %C, ptr poison, align 1
+  ret half 0.000000e+00
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi lp64 -mattr=+zhinxmin,+zdinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi lp64 -mattr=+zhinxmin,+zdinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp ugt &lt;2 x i64&gt; splat (i64 1), zeroinitializer&#x27; (in function: f16_positive_zero)
+warning: Instruction selection used fallback path for f16_positive_zero</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">codemodel-lowering.c5d304b911.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a><span class="dim">)</span></td><td class="l">lower_constantpool</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+zfinx,+zhinx -O3</code></td></tr><tr><td class="l">double-arith-strict.3a5ac309b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/double-arith-strict.ll">double-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fsqrt_d</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64 -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vssub-vp.e50c32dd.62020ba9dc.ll <span class="dim">(mutant of</span> fixed-vectors-vssub-vp.e50c32dd.ll<span class="dim">)</span></td><td class="l">vssub_vi_v8i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">half-round-conv-sat.bedb098144.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/half-round-conv-sat.ll">half-round-conv-sat.ll</a><span class="dim">)</span></td><td class="l">test_rint_ui64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zhinxmin,+m -O0</code></td></tr><tr><td class="l">rv64xtheadbb.439a911a8a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/rv64xtheadbb.ll">rv64xtheadbb.ll</a><span class="dim">)</span></td><td class="l">ctlz_zero_poison_i64</td><td class="l"><code>-mtriple=riscv64 -mattr=+xtheadbb,+zhinx,+zba -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">smulh.b4d9324679.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_v2i48</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbs,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">zfhmin-imm.def135eff8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/zfhmin-imm.ll">zfhmin-imm.ll</a><span class="dim">)</span></td><td class="l">f16_positive_zero</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64 -mattr=+zhinxmin,+zdinx -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

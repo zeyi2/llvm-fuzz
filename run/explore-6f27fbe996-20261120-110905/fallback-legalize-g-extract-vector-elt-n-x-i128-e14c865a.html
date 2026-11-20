@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x i128&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x i128&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT &lt;N x i128&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">smulh.4d4db0df26.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span> @smulh_v2i128 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+xtheadba -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+
+; Function Attrs: nounwind
+define &lt;2 x i128&gt; @smulh_v2i128(&lt;2 x i128&gt; %x, &lt;2 x i128&gt; %y) #0 {
+  %r = call &lt;2 x i128&gt; @llvm.smulh.v2i128(&lt;2 x i128&gt; %x, &lt;2 x i128&gt; %y)
+  %E = extractelement &lt;2 x i128&gt; %x, i1 true
+  store i128 %E, ptr @G, align 4
+  ret &lt;2 x i128&gt; %r
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i128&gt; @llvm.smulh.v2i128(&lt;2 x i128&gt;, &lt;2 x i128&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+m,+xtheadba -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+m,+xtheadba -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(i128) = G_EXTRACT_VECTOR_ELT %0:_(&lt;2 x i128&gt;), %7:_(i64) (in function: smulh_v2i128)
+warning: Instruction selection used fallback path for smulh_v2i128</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">clmulh.957fedb7bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">commutative_clmulh_v2i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+a -O2</code></td></tr><tr><td class="l">fixed-vectors-clmulh.7cce4e7831.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-clmulh.ll">fixed-vectors-clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_v8i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O1</code></td></tr><tr><td class="l">smulh.4d4db0df26.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/smulh.ll">smulh.ll</a><span class="dim">)</span></td><td class="l">smulh_v2i128</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+xtheadba -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

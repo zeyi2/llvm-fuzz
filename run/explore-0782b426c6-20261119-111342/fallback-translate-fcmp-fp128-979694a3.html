@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fcmp fp128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fcmp fp128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fcmp fp128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 14 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fp128.fa8a123f26.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span> @fptosi_fp128_to_i96 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+; Function Attrs: nounwind
+define i96 @fptosi_fp128_to_i96(fp128 %a) #0 {
+  %C = fcmp one fp128 %a, +inf
+  %result = fptosi fp128 %a to i96
+  store i1 %C, ptr @G.3, align 1
+  ret i96 %result
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fcmp: &#x27;  %C = fcmp one fp128 %a, +inf&#x27; (in function: fptosi_fp128_to_i96)
+warning: Instruction selection used fallback path for fptosi_fp128_to_i96</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fp128.a5b82a677e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">roundeven</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">fp128.fa8a123f26.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">fptosi_fp128_to_i96</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba,+zhinx -O0</code></td></tr><tr><td class="l">llvm.frexp.ee75aa257b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_f128_i32_only_use_fract</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx,+zve32x -O0 -code-model=medium</code></td></tr><tr><td class="l">lrint-conv.a2042dee91.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/lrint-conv.ll">lrint-conv.ll</a><span class="dim">)</span></td><td class="l">test_llrint_ixx_f128</td><td class="l"><code>-mtriple=riscv64 -mattr=+zcb,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">lrint-llrint.4c74c1439a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/GlobalISel/lrint-llrint.ll">lrint-llrint.ll</a><span class="dim">)</span></td><td class="l">llrint_f128</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.710e279309.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_cross_bb</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zvbb -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">musttail-indirect-args.dd052ed064.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/musttail-indirect-args.ll">musttail-indirect-args.ll</a><span class="dim">)</span></td><td class="l">caller_musttail_nine_indirect_swap_first_last</td><td class="l"><code>-mtriple=riscv32 -mattr=+zcb,+zhinx -O2 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

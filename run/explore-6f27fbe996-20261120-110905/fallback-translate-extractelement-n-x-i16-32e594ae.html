@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: extractelement &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: extractelement &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: extractelement &lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">srem-vector-lkk.f6eee80164.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/srem-vector-lkk.ll">srem-vector-lkk.ll</a><span class="dim">)</span> @fold_srem_vec_1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;4 x i16&gt; @fold_srem_vec_1(&lt;4 x i16&gt; %x) #0 {
+  %E = extractelement &lt;4 x i16&gt; %x, i32 1
+  %1 = srem &lt;4 x i16&gt; %x, &lt;i16 95, i16 -124, i16 98, i16 -1003&gt;
+  store i16 %E, ptr poison, align 2
+  ret &lt;4 x i16&gt; %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: extractelement: &#x27;  %E = extractelement &lt;4 x i16&gt; %x, i32 1&#x27; (in function: fold_srem_vec_1)
+warning: Instruction selection used fallback path for fold_srem_vec_1</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-int-buildvec.f75d343d04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-buildvec.ll">fixed-vectors-int-buildvec.ll</a><span class="dim">)</span></td><td class="l">splat_c4_v8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+zvl128b,+zhinx -O2</code></td></tr><tr><td class="l">rvp-simd-32.aea86119.b667de9fb6.ll <span class="dim">(mutant of</span> rvp-simd-32.aea86119.ll<span class="dim">)</span></td><td class="l">test_psrai_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zihintpause,+zfinx -O1</code></td></tr><tr><td class="l">srem-vector-lkk.f6eee80164.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/srem-vector-lkk.ll">srem-vector-lkk.ll</a><span class="dim">)</span></td><td class="l">fold_srem_vec_1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O0 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

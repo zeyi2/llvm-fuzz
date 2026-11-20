@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast ptr <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 94 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zfhmin-imm.a3b35ece01.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/zfhmin-imm.ll">zfhmin-imm.ll</a><span class="dim">)</span> @f16_negative_zero via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32 -mattr=+zhinxmin,+zvbb -O3 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define half @f16_negative_zero(ptr %pf) #0 {
+  %G = getelementptr half, ptr %pf, i8 0
+  store ptr %G, ptr poison, align 8
+  ret half -0.000000e+00
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32 -mattr=+zhinxmin,+zvbb -O3 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32 -mattr=+zhinxmin,+zvbb -O3 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %G1 = bitcast ptr %pf to ptr&#x27; (in function: f16_negative_zero)
+warning: Instruction selection used fallback path for f16_negative_zero</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.966deafb1b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_store_i8_unordered</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+no-trailing-seq-cst-fence,+zfinx,+zvbb -O2 -code-model=medium</code></td></tr><tr><td class="l">attributes.aea24ad40d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+svinval,+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">short-forward-branch-opt-load.bb56865b4d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/short-forward-branch-opt-load.ll">short-forward-branch-opt-load.ll</a><span class="dim">)</span></td><td class="l">test_i8_s_store_2</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+a,+zfinx -O2</code></td></tr><tr><td class="l">xqcisls-merge-base-offset-shladd.33da297c0a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/xqcisls-merge-base-offset-shladd.ll">xqcisls-merge-base-offset-shladd.ll</a><span class="dim">)</span></td><td class="l">no_store_scaled_i8_multiuse_scaled_reg</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcili,+xqcisls,+zba,+xqciac,+zhinx,+xtheadba -O3</code></td></tr><tr><td class="l">zfhmin-imm.a3b35ece01.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/zfhmin-imm.ll">zfhmin-imm.ll</a><span class="dim">)</span></td><td class="l">f16_negative_zero</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32 -mattr=+zhinxmin,+zvbb -O3 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

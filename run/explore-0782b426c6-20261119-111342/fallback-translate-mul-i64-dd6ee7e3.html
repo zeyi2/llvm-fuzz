@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 6 test files, 62 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">addimm-mulimm.0ae8a5a8bb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/addimm-mulimm.ll">addimm-mulimm.ll</a><span class="dim">)</span> @mulneg3000_add8990_c via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zfinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.8 = external global i64
+
+define i64 @mulneg3000_add8990_c(i64 %x) {
+  %tmp0 = mul i64 %x, -3000
+  %B = ashr i64 %tmp0, %tmp0
+  %tmp1 = add i64 %tmp0, 8990
+  store i64 %B, ptr @G.8, align 4
+  ret i64 %tmp1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zfinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zfinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %tmp0 = mul i64 %x, -3000&#x27; (in function: mulneg3000_add8990_c)
+warning: Instruction selection used fallback path for mulneg3000_add8990_c</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">addimm-mulimm.0ae8a5a8bb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/addimm-mulimm.ll">addimm-mulimm.ll</a><span class="dim">)</span></td><td class="l">mulneg3000_add8990_c</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zfinx -O2</code></td></tr><tr><td class="l">div-by-constant.db5d054874.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/div-by-constant.ll">div-by-constant.ll</a><span class="dim">)</span></td><td class="l">sdiv64_constant_no_srai</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zbb,+zfinx -O3 -code-model=small</code></td></tr><tr><td class="l">rv32zbb-zbkb.6552a9970d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv32zbb-zbkb.ll">rv32zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">or_hoisted_not_i64_swapped</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zhinx -O2 -code-model=small</code></td></tr><tr><td class="l">rv64xtheadba.56bdf18970.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv64xtheadba.ll">rv64xtheadba.ll</a><span class="dim">)</span></td><td class="l">mul_neg5</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O1</code></td></tr><tr><td class="l">rv64zba.9829c23751.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span></td><td class="l">mul41</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zba,+zbb,+zbs,+zfinx -O1 -code-model=small</code></td></tr><tr><td class="l">rv64zba.daa6984b49.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rv64zba.ll">rv64zba.ll</a><span class="dim">)</span></td><td class="l">mul119</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zdinx -O1</code></td></tr><tr><td class="l">scmp.161e6ef4e4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.8.64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbs,+zfinx -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

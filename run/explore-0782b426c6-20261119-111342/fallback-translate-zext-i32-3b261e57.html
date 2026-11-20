@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 4 test files, 71 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zilx.4ee3146cf6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/zilx.ll">zilx.ll</a><span class="dim">)</span> @lxsuwd via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zilx,+zfinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+define i64 @lxsuwd(ptr %a, i32 %b) {
+  %1 = zext i32 %b to i64
+  %C = icmp sge i64 %1, 4294967296
+  %2 = getelementptr i64, ptr %a, i64 %1
+  %3 = load i64, ptr %2, align 8
+  store i1 %C, ptr @G.2, align 1
+  ret i64 %3
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zilx,+zfinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zilx,+zfinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %1 = zext i32 %b to i64&#x27; (in function: lxsuwd)
+warning: Instruction selection used fallback path for lxsuwd</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu.3958e7ecf7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/abdu.ll">abdu.ll</a><span class="dim">)</span></td><td class="l">abd_ext_i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx,+zvkb -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">clmulr.5a9a4644b2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbs,+zcb,+zfinx -O3</code></td></tr><tr><td class="l">clmulr.fff08fe9a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/clmulr.ll">clmulr.ll</a><span class="dim">)</span></td><td class="l">clmulr_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">shifts.436643233b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/shifts.ll">shifts.ll</a><span class="dim">)</span></td><td class="l">shl128_shamt32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zfinx -O1</code></td></tr><tr><td class="l">zilx.06be91028b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/zilx.ll">zilx.ll</a><span class="dim">)</span></td><td class="l">lxsuwb</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zba,+experimental-zilx,+zfinx -O0 -code-model=medium</code></td></tr><tr><td class="l">zilx.07b399da3e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/zilx.ll">zilx.ll</a><span class="dim">)</span></td><td class="l">lxsuwb</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx,+zve32x -O1</code></td></tr><tr><td class="l">zilx.4ee3146cf6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/zilx.ll">zilx.ll</a><span class="dim">)</span></td><td class="l">lxsuwd</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zilx,+zfinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

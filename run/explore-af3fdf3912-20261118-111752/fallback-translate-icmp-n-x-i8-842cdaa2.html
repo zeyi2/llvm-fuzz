@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: icmp &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: icmp &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-af3fdf3912-20261118-111752.html">explore-af3fdf3912-20261118-111752</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: icmp &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 9 test files, 63 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">scmp.3794fdeb6a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span> @scmp.8.64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbs,+zdinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at af3fdf3912</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define i8 @scmp.8.64(i64 %x, i64 %y) #0 {
+  %C = icmp sle &lt;8 x i8&gt; splat (i8 127), zeroinitializer
+  %1 = call i8 @llvm.scmp.i8.i64(i64 %x, i64 %y)
+  store &lt;8 x i1&gt; %C, ptr poison, align 1
+  ret i8 %1
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare range(i8 -1, 2) i8 @llvm.scmp.i8.i64(i64, i64) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -mattr=+zbs,+zdinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -mattr=+zbs,+zdinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: icmp: &#x27;  %C = icmp sle &lt;8 x i8&gt; splat (i8 127), zeroinitializer&#x27; (in function: scmp.8.64)
+warning: Instruction selection used fallback path for scmp.8.64</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">attributes.045c1ef330.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-cttz-vp.4cd7819ae3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-cttz-vp.ll">fixed-vectors-cttz-vp.ll</a><span class="dim">)</span></td><td class="l">vp_cttz_zero_undef_v2i16_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+zhinx -O2</code></td></tr><tr><td class="l">fixed-vectors-vssub.598898ffbb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vssub.ll">fixed-vectors-vssub.ll</a><span class="dim">)</span></td><td class="l">ssub_v8i8_vi</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O2 -code-model=small</code></td></tr><tr><td class="l">float-maximum-minimum.7e9cd24039.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/float-maximum-minimum.ll">float-maximum-minimum.ll</a><span class="dim">)</span></td><td class="l">fminimum_nnan_attr_f32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zfinx,+zdinx -O2</code></td></tr><tr><td class="l">half-arith-strict.1830019669.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/half-arith-strict.ll">half-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fmul_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi lp64 -mattr=+zhinx,+m,+zba -O2</code></td></tr><tr><td class="l">memcpy.bd6aaa5758.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/memcpy.ll">memcpy.ll</a><span class="dim">)</span></td><td class="l">memcpy_i32_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+unaligned-scalar-mem,+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-insert-subvector.5ac9df7c36.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/rvp-insert-subvector.ll">rvp-insert-subvector.ll</a><span class="dim">)</span></td><td class="l">insert_hi_v4i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zbkb,+zhinx -O3</code></td></tr><tr><td class="l">sadd_sat.4ace992243.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/sadd_sat.ll">sadd_sat.ll</a><span class="dim">)</span></td><td class="l">func2</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zdinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">scmp.3794fdeb6a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/af3fdf39125a6f119bfcc97f1dd00572185f6e07/llvm/test/CodeGen/RISCV/scmp.ll">scmp.ll</a><span class="dim">)</span></td><td class="l">scmp.8.64</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbs,+zdinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: bitcast ptr</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: bitcast ptr</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: bitcast ptr <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 10 configs, 8 test files, 103 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">unaligned-load-store.7e38305168.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/unaligned-load-store.ll">unaligned-load-store.ll</a><span class="dim">)</span> @store_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global ptr
+
+define void @store_i64(ptr %p, i64 %v) {
+  %G = getelementptr ptr, ptr %p, i1 false
+  store i64 %v, ptr %p, align 1
+  store ptr %G, ptr @G.2, align 8
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: bitcast: &#x27;  %G1 = bitcast ptr %p to ptr&#x27; (in function: store_i64)
+warning: Instruction selection used fallback path for store_i64</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-load-store.3b6d6b7d54.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_unordered</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+no-trailing-seq-cst-fence,+zve32x,+zhinx -O2 -code-model=medium</code></td></tr><tr><td class="l">atomic-load-store.5b79fbd1df.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/atomic-load-store.ll">atomic-load-store.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i32_unordered</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+a,+zhinx -O1</code></td></tr><tr><td class="l">atomicrmw-xchg.c8252f7879.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/atomicrmw-xchg.ll">atomicrmw-xchg.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_xchg_i16_acquire</td><td class="l"><code>-mtriple=riscv32 -mattr=+a,+zabha,+zdinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">attributes.af384fd67d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/attributes.ll">attributes.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i8_seq_cst</td><td class="l"><code>-mtriple=riscv64 -mattr=+zknh,+zfinx -O2 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">constantpool.79911abcdb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/GlobalISel/constantpool.ll">constantpool.ll</a><span class="dim">)</span></td><td class="l">constpool_f64_1234_5</td><td class="l"><code>-mtriple=riscv64 -relocation-model=pic -verify-machineinstrs -mattr=+zdinx -O2</code></td></tr><tr><td class="l">fixed-vectors-int-buildvec.f75d343d04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-int-buildvec.ll">fixed-vectors-int-buildvec.ll</a><span class="dim">)</span></td><td class="l">buildvec_seq_v4i16_v2i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+zvl128b,+zhinx -O2</code></td></tr><tr><td class="l">srem-seteq-illegal-types.e1754b91c4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/srem-seteq-illegal-types.ll">srem-seteq-illegal-types.ll</a><span class="dim">)</span></td><td class="l">test_srem_vec</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zdinx,+xtheadba -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">unaligned-load-store.2e0183308b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/unaligned-load-store.ll">unaligned-load-store.ll</a><span class="dim">)</span></td><td class="l">merge_stores_i16_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkb,+zhinx,+zba -O3</code></td></tr><tr><td class="l">unaligned-load-store.745335c36e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/unaligned-load-store.ll">unaligned-load-store.ll</a><span class="dim">)</span></td><td class="l">load_i24</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfinx -O1</code></td></tr><tr><td class="l">unaligned-load-store.7e38305168.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/unaligned-load-store.ll">unaligned-load-store.ll</a><span class="dim">)</span></td><td class="l">store_i64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

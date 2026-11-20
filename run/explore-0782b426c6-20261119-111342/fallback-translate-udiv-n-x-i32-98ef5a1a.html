@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: udiv &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: udiv &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: udiv &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 16 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-bitextract.93e09d8ea5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span> @test_bitextract_v4i8_var via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;4 x i32&gt;
+
+define &lt;4 x i8&gt; @test_bitextract_v4i8_var(&lt;4 x b32&gt; %src, &lt;4 x i32&gt; %off) {
+  %B = udiv &lt;4 x i32&gt; %off, %off
+  %result = bitextract &lt;4 x i8&gt;, &lt;4 x b32&gt; %src, &lt;4 x i32&gt; %off
+  store &lt;4 x i32&gt; %B, ptr @G, align 16
+  ret &lt;4 x i8&gt; %result
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zfinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zfinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: udiv: &#x27;  %B = udiv &lt;4 x i32&gt; %off, %off&#x27; (in function: test_bitextract_v4i8_var)
+warning: Instruction selection used fallback path for test_bitextract_v4i8_var</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">cttz-elts-scalarize.c2a69c1ffe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/cttz-elts-scalarize.ll">cttz-elts-scalarize.ll</a><span class="dim">)</span></td><td class="l">v4i32_zero_is_poison</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">double-intrinsics.6ebc63121e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">asin_f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx -O2</code></td></tr><tr><td class="l">fixed-vectors-bitextract.93e09d8ea5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v4i8_var</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">xandesvdot-vd4dotsu.8cc94fc96f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/xandesvdot-vd4dotsu.ll">xandesvdot-vd4dotsu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vd4dotsu_vv_nxv1i32_nxv4i8_nxv4i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zve64x,+xandesvdot,+a,+zhinx -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

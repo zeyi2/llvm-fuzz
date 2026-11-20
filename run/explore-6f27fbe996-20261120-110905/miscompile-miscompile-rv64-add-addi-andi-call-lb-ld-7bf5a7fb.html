@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,call,lb,ld</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,call,lb,ld</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,call,lb,ld <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr139075.78206a85.7aa93e42.82d163e611.ll <span class="dim">(mutant of</span> pr139075.78206a85.7aa93e42.ll<span class="dim">)</span> @a via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+zvbb,+zbkb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr
+@G.2 = external global i16
+@G.3 = external global i8
+
+define void @a(ptr %0, ptr %1) {
+  %LGV10 = load i8, ptr @G.3, align 1
+  %A = alloca ptr, align 8
+  store ptr poison, ptr %A, align 8
+  %LGV = load i16, ptr @G.2, align 2
+  %C = icmp uge i16 -1, 32767
+  %G6 = getelementptr i16, ptr %1, i128 170141183460469231731687303715884105727
+  %G3 = getelementptr i1, ptr %0, i1 %C
+  %G2 = getelementptr double, ptr %1, i1 %C
+  %G = getelementptr &lt;4 x i32&gt;, ptr %G2, i32 42
+  %L7 = load i16, ptr %G, align 2
+  %G1 = getelementptr ptr, ptr %G3, i1 %C
+  call void @llvm.memcpy.p0.p0.i64(ptr align 1 %G1, ptr align 4 %1, i64 2048, i1 false)
+  %G5 = getelementptr ptr, ptr %G3, i1 %C
+  %G4 = getelementptr i8, ptr %G5, i16 %LGV
+  store ptr %G, ptr @G.1, align 8
+  %G8 = getelementptr i8, ptr %G6, i16 %L7
+  store i1 %C, ptr %G4, align 1
+  store ptr %G6, ptr @G.1, align 8
+  store ptr %G8, ptr %A, align 8
+  %G11 = getelementptr i16, ptr %0, i8 %LGV10
+  store ptr %G11, ptr @G.1, align 8
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+zvbb,+zbkb -O0&#x27; --funcs a snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash 53ac4748b75f6608, GlobalISel hash 0c7d9e5969d35b56
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+zvbb,+zbkb -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+zvbb,+zbkb -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+zvbb,+zbkb -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr139075.78206a85.7aa93e42.82d163e611.ll <span class="dim">(mutant of</span> pr139075.78206a85.7aa93e42.ll<span class="dim">)</span></td><td class="l">a</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+zvbb,+zbkb -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

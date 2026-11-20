@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTOSI &lt;N x i8&gt;,&lt;N x f64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTOSI &lt;N x i8&gt;,&lt;N x f64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTOSI &lt;N x i8&gt;,&lt;N x f64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files, 33 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fp2i.8378a89c87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span> @fp2si_v8f64_v8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d,+zba -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @fp2si_v8f64_v8i8(ptr %x, ptr %y) {
+  %A = alloca i64, align 8
+  store i64 poison, ptr %A, align 4
+  %E = extractelement &lt;2 x i64&gt; zeroinitializer, i1 true
+  %a = load &lt;8 x double&gt;, ptr %x, align 64
+  %d = fptosi &lt;8 x double&gt; %a to &lt;8 x i8&gt;
+  store &lt;8 x i8&gt; %d, ptr %y, align 8
+  store i64 %E, ptr %A, align 4
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d,+zba -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d,+zba -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(&lt;8 x i8&gt;) = G_FPTOSI %8:_(&lt;8 x f64&gt;) (in function: fp2si_v8f64_v8i8)
+warning: Instruction selection used fallback path for fp2si_v8f64_v8i8</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fp2i.1a4dbcde1e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2si_v8f64_v8i8</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d,+zbs -O3</code></td></tr><tr><td class="l">fixed-vectors-fp2i.48d8ae1762.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2si_v8f64_v8i8</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f,+d,+zbb -O1</code></td></tr><tr><td class="l">fixed-vectors-fp2i.8378a89c87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2si_v8f64_v8i8</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d,+zba -O3</code></td></tr><tr><td class="l">fixed-vectors-fp2i.8c3fdca3c3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp2i.ll">fixed-vectors-fp2i.ll</a><span class="dim">)</span></td><td class="l">fp2si_v8f64_v8i8</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfhmin,+zvfbfmin,+f,+d -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

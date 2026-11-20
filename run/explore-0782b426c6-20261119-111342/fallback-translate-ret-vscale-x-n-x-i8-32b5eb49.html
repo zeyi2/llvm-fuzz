@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: ret &lt;vscale x N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: ret &lt;vscale x N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-0782b426c6-20261119-111342.html">explore-0782b426c6-20261119-111342</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: ret &lt;vscale x N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-tuple-zeroinitializer.6610c2be8d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/vector-tuple-zeroinitializer.ll">vector-tuple-zeroinitializer.ll</a><span class="dim">)</span> @test_tuple_zero_non_power_of_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 0782b426c6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.1 = external global i1
+@G.2 = external global i8
+
+define target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 3) @test_tuple_zero_non_power_of_2() {
+entry:
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %LGV3 = load i8, ptr @G.2, align 1
+  %LGV = load i1, ptr @G, align 1
+  switch i8 %LGV3, label %SW_D [
+    i8 -115, label %SW_C
+    i8 18, label %SW_C4
+    i8 -124, label %SW_C5
+    i8 107, label %SW_C6
+    i8 120, label %SW_C7
+  ]
+
+BB2:                                              ; preds = %SW_C7, %SW_C5, %SW_C4, %SW_C, %SW_D
+  br i1 %LGV, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  ret target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 3) zeroinitializer
+
+T:                                                ; preds = %BB2
+  br label %BB
+
+F:                                                ; preds = %F, %BB2
+  %LGV1 = load i1, ptr @G.1, align 1
+  br i1 %LGV1, label %F, label %BB
+
+SW_D:                                             ; preds = %entry
+  br label %BB2
+
+SW_C:                                             ; preds = %entry
+  br label %BB2
+
+SW_C4:                                            ; preds = %SW_C4, %entry
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %SW_C4, label %BB2
+
+SW_C5:                                            ; preds = %entry
+  br label %BB2
+
+SW_C6:                                            ; preds = %entry
+  ret target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 3) poison
+
+SW_C7:                                            ; preds = %entry
+  br label %BB2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: ret: &#x27;  ret target(&quot;riscv.vector.tuple&quot;, &lt;vscale x 16 x i8&gt;, 3) poison&#x27; (in function: test_tuple_zero_non_power_of_2)
+warning: Instruction selection used fallback path for test_tuple_zero_non_power_of_2</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vector-tuple-zeroinitializer.57c267949d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/vector-tuple-zeroinitializer.ll">vector-tuple-zeroinitializer.ll</a><span class="dim">)</span></td><td class="l">test_tuple_zero_non_power_of_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64d -O0</code></td></tr><tr><td class="l">vector-tuple-zeroinitializer.6610c2be8d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/vector-tuple-zeroinitializer.ll">vector-tuple-zeroinitializer.ll</a><span class="dim">)</span></td><td class="l">test_tuple_zero_non_power_of_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O3 -code-model=medium</code></td></tr><tr><td class="l">vlseg-rv64.235532f44d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/vlseg-rv64.ll">vlseg-rv64.ll</a><span class="dim">)</span></td><td class="l">test_vlseg4_nxv4i8_triscv.vector.tuple_nxv4i8_4t</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64d,+d,+zvfh,+zvfbfmin -O3</code></td></tr><tr><td class="l">vlseg-rv64.84c4475d77.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/0782b426c676c774d60a7825095768f682e9fd6d/llvm/test/CodeGen/RISCV/rvv/vlseg-rv64.ll">vlseg-rv64.ll</a><span class="dim">)</span></td><td class="l">test_vlseg2_nxv4bf16_triscv.vector.tuple_nxv8i8_2t</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfbfmin,+zfa -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

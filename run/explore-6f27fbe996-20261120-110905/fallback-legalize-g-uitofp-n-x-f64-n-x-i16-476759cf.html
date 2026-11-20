@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_UITOFP &lt;N x f64&gt;,&lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_UITOFP &lt;N x f64&gt;,&lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_UITOFP &lt;N x f64&gt;,&lt;N x i16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files, 21 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-i2fp.d12be9176e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span> @ui2fp_v8i16_v8f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f,+d,+c -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i128
+
+define void @ui2fp_v8i16_v8f64(ptr %x, ptr %y) {
+  %LGV1 = load i128, ptr @G.2, align 4
+  %a = load &lt;8 x i16&gt;, ptr %x, align 16
+  %G = getelementptr &lt;4 x float&gt;, ptr %x, i128 %LGV1
+  %d = uitofp &lt;8 x i16&gt; %a to &lt;8 x double&gt;
+  store &lt;8 x double&gt; %d, ptr %G, align 64
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f,+d,+c -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f,+d,+c -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %9:_(&lt;8 x f64&gt;) = G_UITOFP %4:_(&lt;8 x i16&gt;) (in function: ui2fp_v8i16_v8f64)
+warning: Instruction selection used fallback path for ui2fp_v8i16_v8f64</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-i2fp.57f71b5205.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">ui2fp_v2i16_v2f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d,+zvkb -O0</code></td></tr><tr><td class="l">fixed-vectors-i2fp.876cce22c9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">ui2fp_v8i16_v8f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zvfhmin,+zvfbfmin,+f,+d -O1</code></td></tr><tr><td class="l">fixed-vectors-i2fp.d12be9176e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">ui2fp_v8i16_v8f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+f,+d,+c -O3</code></td></tr><tr><td class="l">fixed-vectors-i2fp.eb0445b376.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-i2fp.ll">fixed-vectors-i2fp.ll</a><span class="dim">)</span></td><td class="l">ui2fp_v2i16_v2f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zvfh,+zvfbfmin,+f,+d,+a -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

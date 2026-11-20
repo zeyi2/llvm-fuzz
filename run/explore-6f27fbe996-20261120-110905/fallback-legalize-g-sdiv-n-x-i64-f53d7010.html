@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_SDIV &lt;N x i64~&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_SDIV &lt;N x i64~&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_SDIV &lt;N x i64~&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 1 test files, 2 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">smulh.bc258e48.c61846af9e.ll <span class="dim">(mutant of</span> smulh.bc258e48.ll<span class="dim">)</span> @smulh_v2i48 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;2 x i48&gt;
+@G.5 = external global i1
+
+; Function Attrs: nounwind
+define &lt;2 x i48&gt; @smulh_v2i48(&lt;2 x i48&gt; %x, &lt;2 x i48&gt; %y) #0 {
+  %LGV = load i1, ptr @G.5, align 1
+  %r = call &lt;2 x i48&gt; @llvm.smulh.v2i48(&lt;2 x i48&gt; %x, &lt;2 x i48&gt; %y)
+  %B = sdiv &lt;2 x i48&gt; %r, splat (i48 16777216)
+  store &lt;2 x i48&gt; %B, ptr @G.2, align 16
+  %C = icmp ule i1 true, %LGV
+  store i1 %C, ptr poison, align 1
+  ret &lt;2 x i48&gt; %r
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2 x i48&gt; @llvm.smulh.v2i48(&lt;2 x i48&gt;, &lt;2 x i48&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %13:_(&lt;2 x i48&gt;) = G_SDIV %10:_, %11:_ (in function: smulh_v2i48)
+warning: Instruction selection used fallback path for smulh_v2i48</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">smulh.bc258e48.2fb2c55da5.ll <span class="dim">(mutant of</span> smulh.bc258e48.ll<span class="dim">)</span></td><td class="l">smulh_v2i48</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O0</code></td></tr><tr><td class="l">smulh.bc258e48.81159d234b.ll <span class="dim">(mutant of</span> smulh.bc258e48.ll<span class="dim">)</span></td><td class="l">smulh_v2i48</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zicond -O0</code></td></tr><tr><td class="l">smulh.bc258e48.c61846af9e.ll <span class="dim">(mutant of</span> smulh.bc258e48.ll<span class="dim">)</span></td><td class="l">smulh_v2i48</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>

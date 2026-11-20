@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_LOAD &lt;N x i1&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_LOAD &lt;N x i1&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-6f27fbe996-20261120-110905.html">explore-6f27fbe996-20261120-110905</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_LOAD &lt;N x i1&gt;,p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 28 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-marith-vp.e7cbafe2.3feaafec1f.ll <span class="dim">(mutant of</span> fixed-vectors-marith-vp.e7cbafe2.ll<span class="dim">)</span> @or_v2i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb,+zvfh -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 6f27fbe996</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global &lt;2 x i64&gt;
+@G.3 = external global &lt;2 x i64&gt;
+@G.5 = external global &lt;2 x i1&gt;
+
+define &lt;2 x i1&gt; @or_v2i1(&lt;2 x i1&gt; %b, &lt;2 x i1&gt; %c, &lt;2 x i1&gt; %a, i32 zeroext %evl) {
+  %A = alloca &lt;2 x i64&gt;, align 16
+  %L = load i64, ptr %A, align 4
+  store &lt;2 x i64&gt; poison, ptr %A, align 16
+  %LGV1 = load &lt;2 x i64&gt;, ptr @G.3, align 16
+  %LGV = load &lt;2 x i64&gt;, ptr @G.2, align 16
+  %B = udiv &lt;2 x i64&gt; %LGV, %LGV1
+  switch i64 %L, label %SW_D [
+    i64 5053766931856363142, label %SW_C
+    i64 5590085526398830458, label %SW_C1
+    i64 -2980665610032653508, label %SW_C2
+  ]
+
+BB:                                               ; preds = %SW_C2, %SW_D
+  %v = or &lt;2 x i1&gt; %b, %c
+  store &lt;2 x i64&gt; %B, ptr %A, align 16
+  ret &lt;2 x i1&gt; %v
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %0
+  %LGV3 = load &lt;2 x i1&gt;, ptr @G.5, align 1
+  ret &lt;2 x i1&gt; %LGV3
+
+SW_C1:                                            ; preds = %0
+  %LGV4 = load &lt;2 x i1&gt;, ptr @G.5, align 1
+  ret &lt;2 x i1&gt; %b
+
+SW_C2:                                            ; preds = %0
+  br label %BB
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb,+zvfh -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb,+zvfh -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %31:_(&lt;2 x i1&gt;) = G_LOAD %26:_(p0) :: (dereferenceable load (&lt;2 x i1&gt;) from @G.5) (in function: or_v2i1)
+warning: Instruction selection used fallback path for or_v2i1</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-insert-i1.aa7e408d66.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/6f27fbe996797b4232b8d68b72cf0b2d1ab69478/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-insert-i1.ll">fixed-vectors-insert-i1.ll</a><span class="dim">)</span></td><td class="l">insertelt_idx_v2i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xtheadba -O1</code></td></tr><tr><td class="l">fixed-vectors-marith-vp.e7cbafe2.3feaafec1f.ll <span class="dim">(mutant of</span> fixed-vectors-marith-vp.e7cbafe2.ll<span class="dim">)</span></td><td class="l">or_v2i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvkb,+zvfh -O2</code></td></tr><tr><td class="l">fixed-vectors-vfcmp-constrained-sdnode.3839676b.d8f19a1189.ll <span class="dim">(mutant of</span> fixed-vectors-vfcmp-constrained-sdnode.3839676b.ll<span class="dim">)</span></td><td class="l">fcmp_olt_fv_v2f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh -O3 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-vfcmps-constrained-sdnode.f5957d58.dfc85cd672.ll <span class="dim">(mutant of</span> fixed-vectors-vfcmps-constrained-sdnode.f5957d58.ll<span class="dim">)</span></td><td class="l">fcmps_uge_fv_v2f32</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zba,+zvkb -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-20 14:38 UTC.</p>
