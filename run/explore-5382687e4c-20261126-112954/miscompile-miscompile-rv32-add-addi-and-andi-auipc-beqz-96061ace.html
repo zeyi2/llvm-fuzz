@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: add,addi,and,andi,auipc,beqz</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: add,addi,and,andi,auipc,beqz</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: add,addi,and,andi,auipc,beqz <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">mem.8f2b3cb5.3a22d576.7358db14bd.ll <span class="dim">(mutant of</span> mem.8f2b3cb5.3a22d576.ll<span class="dim">)</span> @load_sext_zext_anyext_i1_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zicond -O3 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+@G.3 = external global ptr
+@G.4 = external global i1
+@G.5 = external global i8
+@G.6 = external global ptr
+@G.7 = external global i1
+
+; Function Attrs: nounwind
+define dso_local i16 @load_sext_zext_anyext_i1_i16(ptr %a) #0 {
+  %LGV16 = load i1, ptr @G.7, align 1
+  %LGV = load i8, ptr @G.5, align 1
+  %1 = getelementptr i1, ptr %a, i32 1
+  %L12 = load i8, ptr %1, align 1
+  %2 = load i1, ptr %1, align 1
+  %3 = sext i1 %2 to i16
+  %4 = getelementptr i1, ptr %a, i32 2
+  %5 = load i1, ptr %4, align 1
+  %C17 = icmp uge i1 %2, %LGV16
+  %B = ashr i16 %3, %3
+  %6 = zext i1 %5 to i16
+  %G11 = getelementptr ptr, ptr %a, i128 18446744073709551616
+  %L15 = load i1, ptr %G11, align 1
+  br i1 %L15, label %T, label %F
+
+BB:                                               ; preds = %F
+  %7 = add i16 %B, %6
+  %8 = load volatile i1, ptr %a, align 1
+  %C = icmp sgt i1 %C17, %8
+  %C8 = icmp sgt i8 127, %LGV
+  store i1 %C, ptr @G.2, align 1
+  %G13 = getelementptr ptr, ptr %a, i8 %L12
+  store ptr %G13, ptr @G.3, align 8
+  store i1 %C8, ptr @G.4, align 1
+  store ptr %G11, ptr @G.6, align 8
+  ret i16 %7
+
+T:                                                ; preds = %0
+  ret i16 %6
+
+F:                                                ; preds = %0
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -mattr=+zicond -O3 -code-model=medium&#x27; --funcs load_sext_zext_anyext_i1_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash 779a2b4ee6d533cf, GlobalISel hash 8baf844483cfab66
+b0: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zicond -code-model=medium -O3 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zicond -code-model=medium -O0 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zicond -code-model=medium -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">mem.8f2b3cb5.3a22d576.7358db14bd.ll <span class="dim">(mutant of</span> mem.8f2b3cb5.3a22d576.ll<span class="dim">)</span></td><td class="l">load_sext_zext_anyext_i1_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zicond -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

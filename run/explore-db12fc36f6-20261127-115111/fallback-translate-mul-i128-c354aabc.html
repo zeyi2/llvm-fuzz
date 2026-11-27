@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 13 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">ucmp.76842a73a8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span> @ucmp.32.32_zext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i128
+
+; Function Attrs: nounwind
+define i32 @ucmp.32.32_zext(i32 zeroext %x, i32 zeroext %y) #0 {
+  %B = mul i128 170141183460469231731687303715884105727, -1
+  %1 = call i32 @llvm.ucmp.i32.i32(i32 %x, i32 %y)
+  store i128 %B, ptr @G.3, align 4
+  ret i32 %1
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare range(i32 -1, 2) i32 @llvm.ucmp.i32.i32(i32, i32) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zhinx -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zhinx -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %B = mul i128 170141183460469231731687303715884105727, -1&#x27; (in function: ucmp.32.32_zext)
+warning: Instruction selection used fallback path for ucmp.32.32_zext</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abdu-neg.6f92d51979.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/abdu-neg.ll">abdu-neg.ll</a><span class="dim">)</span></td><td class="l">abd_minmax_i128</td><td class="l"><code>-mtriple=riscv64 -mattr=+c,+zdinx -O1 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">float-arith-strict.f55d2f871f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/float-arith-strict.ll">float-arith-strict.ll</a><span class="dim">)</span></td><td class="l">fdiv_s</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -disable-strictnode-mutation -target-abi=lp64 -mattr=+zfinx,+zdinx,+c -O0</code></td></tr><tr><td class="l">half-convert-strict.7c1caee485.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/half-convert-strict.ll">half-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_w_demanded_bits</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi ilp32 -disable-strictnode-mutation -mattr=+zhinx,+zcb -O3 -code-model=medium</code></td></tr><tr><td class="l">ucmp.76842a73a8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.32.32_zext</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: zext &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: zext &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: zext &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 3 configs, 2 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vwsll.f80515d1f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwsll.ll">fixed-vectors-vwsll.ll</a><span class="dim">)</span> @vwsll_vi_v16i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;16 x i16&gt; @vwsll_vi_v16i16(&lt;16 x i8&gt; %a) {
+  %x = zext &lt;16 x i8&gt; %a to &lt;16 x i16&gt;
+  %z = shl &lt;16 x i16&gt; %x, splat (i16 2)
+  %C = icmp ugt &lt;16 x i8&gt; %a, %a
+  store &lt;16 x i1&gt; %C, ptr poison, align 2
+  ret &lt;16 x i16&gt; %z
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: zext: &#x27;  %x = zext &lt;16 x i8&gt; %a to &lt;16 x i16&gt;&#x27; (in function: vwsll_vi_v16i16)
+warning: Instruction selection used fallback path for vwsll_vi_v16i16</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vwsll.a06eedf8d3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwsll.ll">fixed-vectors-vwsll.ll</a><span class="dim">)</span></td><td class="l">vwsll_vx_i32_v4i64_v4i8_zext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vwsll.f80515d1f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwsll.ll">fixed-vectors-vwsll.ll</a><span class="dim">)</span></td><td class="l">vwsll_vi_v16i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vwsll.f80515d1f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwsll.ll">fixed-vectors-vwsll.ll</a><span class="dim">)</span></td><td class="l">vwsll_vi_v4i64_v4i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">fixed-vectors-zvdot4a8i.906fd624f3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-zvdot4a8i.ll">fixed-vectors-zvdot4a8i.ll</a><span class="dim">)</span></td><td class="l">vdot4au_vv_scalar_add_chain2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zhinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

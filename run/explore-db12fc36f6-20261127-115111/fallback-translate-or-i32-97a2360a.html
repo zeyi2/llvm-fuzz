@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: or i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: or i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: or i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 96 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">select-constant-xor.c2b7de214e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/select-constant-xor.ll">select-constant-xor.ll</a><span class="dim">)</span> @selecti32i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zdinx -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @selecti32i32(i32 %a) {
+  %B = or i32 %a, -2147483648
+  %c = icmp sgt i32 %a, -1
+  %s = select i1 %c, i32 %B, i32 -85
+  ret i32 %s
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xtheadba,+zdinx -O1 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xtheadba,+zdinx -O1 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: or: &#x27;  %B = or i32 %a, -2147483648&#x27; (in function: selecti32i32)
+warning: Instruction selection used fallback path for selecti32i32</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-signext.3f4096d910.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/atomic-signext.ll">atomic-signext.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_xor_i32_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zacas,+c,+zhinx -O1</code></td></tr><tr><td class="l">clmulh.d03104a958.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/clmulh.ll">clmulh.ll</a><span class="dim">)</span></td><td class="l">clmulh_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zvbc,+zhinx,+zfinx -O2</code></td></tr><tr><td class="l">double-intrinsics.166a9c335c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/double-intrinsics.ll">double-intrinsics.ll</a><span class="dim">)</span></td><td class="l">log_f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx -O0 -code-model=medium</code></td></tr><tr><td class="l">half-convert.da76b346f4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/half-convert.ll">half-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_h_w</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zdinx,+zhinxmin -O2</code></td></tr><tr><td class="l">select-constant-xor.c2b7de214e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/select-constant-xor.ll">select-constant-xor.ll</a><span class="dim">)</span></td><td class="l">selecti32i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+xtheadba,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcilia.89abb8af87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/xqcilia.ll">xqcilia.ll</a><span class="dim">)</span></td><td class="l">or</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqcilia,+zdinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

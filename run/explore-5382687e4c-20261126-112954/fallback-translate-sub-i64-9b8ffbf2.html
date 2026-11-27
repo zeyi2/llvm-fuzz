@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sub i64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sub i64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sub i64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 101 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">shift-amount-mod.f044275bf1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/shift-amount-mod.ll">shift-amount-mod.ll</a><span class="dim">)</span> @shl_by_masked_complemented_64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i64 @shl_by_masked_complemented_64(i64 %x) {
+  %a = sub i64 63, %x
+  %b = and i64 %a, 63
+  %C = icmp sgt i64 %a, %a
+  %c = shl i64 %x, %b
+  store i1 %C, ptr poison, align 1
+  ret i64 %c
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sub: &#x27;  %a = sub i64 63, %x&#x27; (in function: shl_by_masked_complemented_64)
+warning: Instruction selection used fallback path for shl_by_masked_complemented_64</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">abds-neg.4cd1ef81bf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/abds-neg.ll">abds-neg.ll</a><span class="dim">)</span></td><td class="l">abd_subnsw_i64</td><td class="l"><code>-mtriple=riscv32 -mattr=+zbb,+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">atomic-rmw-sub.1f5dcae1fd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/atomic-rmw-sub.ll">atomic-rmw-sub.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_sub_i64_neg</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+-a,+zaamo,+zalrsc,+zfinx -O0</code></td></tr><tr><td class="l">ctlz-cttz-ctpop.503c761413.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/ctlz-cttz-ctpop.ll">ctlz-cttz-ctpop.ll</a><span class="dim">)</span></td><td class="l">test_ctpop_i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+zhinx -O3</code></td></tr><tr><td class="l">double-convert-strict.22c2cca092.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/double-convert-strict.ll">double-convert-strict.ll</a><span class="dim">)</span></td><td class="l">fcvt_d_lu</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -disable-strictnode-mutation -mattr=+zdinx -O0</code></td></tr><tr><td class="l">neg-abs.ce502531c8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/neg-abs.ll">neg-abs.ll</a><span class="dim">)</span></td><td class="l">expanded_neg_abs64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zdinx -O1</code></td></tr><tr><td class="l">rotl-rotr.c22cf47596.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rotl-rotr.ll">rotl-rotr.ll</a><span class="dim">)</span></td><td class="l">rotl_64_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+xtheadba,+zdinx -O1</code></td></tr><tr><td class="l">shift-amount-mod.f044275bf1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/shift-amount-mod.ll">shift-amount-mod.ll</a><span class="dim">)</span></td><td class="l">shl_by_masked_complemented_64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zdinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

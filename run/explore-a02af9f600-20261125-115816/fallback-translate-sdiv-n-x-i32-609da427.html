@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv &lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv &lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv &lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 15 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zilsd.9a9624feb9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/zilsd.ll">zilsd.ll</a><span class="dim">)</span> @store_g via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem,+zhinx -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@g = external dso_local global i64, align 8
+@G.1 = external global &lt;4 x i32&gt;
+
+; Function Attrs: nounwind
+define void @store_g() #0 {
+entyr:
+  %B = sdiv &lt;4 x i32&gt; splat (i32 1), splat (i32 42)
+  store i64 0, ptr @g, align 4
+  store &lt;4 x i32&gt; %B, ptr @G.1, align 16
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem,+zhinx -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem,+zhinx -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv &lt;4 x i32&gt; splat (i32 1), splat (i32 42)&#x27; (in function: store_g)
+warning: Instruction selection used fallback path for store_g</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomic-cmpxchg.99ef93d2c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i32_seq_cst_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zacas,+zhinx -O1</code></td></tr><tr><td class="l">prefetch.2f9f2d8a88.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/prefetch.ll">prefetch.ll</a><span class="dim">)</span></td><td class="l">test_prefetch_frameindex_4</td><td class="l"><code>-mtriple=riscv64 -mattr=+zicbop,+zihintntl,+zhinx,+zbkb -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32zbb.3b912cc7ae.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a><span class="dim">)</span></td><td class="l">ctpop_v2i32_ugt_one</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">zfh-half-intrinsics.afd18420b7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/zfh-half-intrinsics.ll">zfh-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">lround_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinx,+zdinx,+zicond -O2 -code-model=small</code></td></tr><tr><td class="l">zilsd.9a9624feb9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l">store_g</td><td class="l"><code>-mtriple=riscv32 -mattr=+zilsd,+unaligned-scalar-mem,+zhinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

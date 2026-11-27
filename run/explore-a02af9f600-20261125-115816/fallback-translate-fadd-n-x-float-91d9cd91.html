@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: fadd &lt;N x float&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: fadd &lt;N x float&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: fadd &lt;N x float&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">tagged-globals.d01b555b3a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span> @global_int_addr via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 --relocation-model=pic -mattr=+zdinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@global_int = external hidden global i32
+@G.1 = external global double
+@G.4 = external global &lt;4 x float&gt;
+
+define ptr @global_int_addr() #0 {
+  %B2 = fadd &lt;4 x float&gt; splat (float 1.401300e-45), splat (float 4.200000e+01)
+  %LGV = load double, ptr @G.1, align 8
+  %B = fdiv double 0.000000e+00, %LGV
+  store double %B, ptr poison, align 8
+  store &lt;4 x float&gt; %B2, ptr @G.4, align 16
+  ret ptr @global_int
+}
+
+attributes #0 = { &quot;target-features&quot;=&quot;+tagged-globals&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 --relocation-model=pic -mattr=+zdinx -O3 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 --relocation-model=pic -mattr=+zdinx -O3 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: fadd: &#x27;  %B2 = fadd &lt;4 x float&gt; splat (float 1.401300e-45), splat (float 4.200000e+01)&#x27; (in function: global_int_addr)
+warning: Instruction selection used fallback path for global_int_addr</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-arith.2a11b847b0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/float-arith.ll">float-arith.ll</a><span class="dim">)</span></td><td class="l">fnmadd_s_3</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">tagged-globals.d01b555b3a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span></td><td class="l">global_int_addr</td><td class="l"><code>-mtriple=riscv64 --relocation-model=pic -mattr=+zdinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">zfhmin-half-intrinsics.73534677ad.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/zfhmin-half-intrinsics.ll">zfhmin-half-intrinsics.ll</a><span class="dim">)</span></td><td class="l">lrint_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinxmin -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

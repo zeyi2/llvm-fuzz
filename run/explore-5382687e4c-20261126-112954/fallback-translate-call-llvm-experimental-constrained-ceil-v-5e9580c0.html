@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.ceil.v2f64</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.ceil.v2f64</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.ceil.v2f64 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 1 test files, 12 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fceil-constrained-sdnode.7cfb79dbc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span> @ceil_v2f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+; Function Attrs: strictfp
+define &lt;2 x double&gt; @ceil_v2f64(&lt;2 x double&gt; %x) #0 {
+  %C = fcmp false float +inf, 1.401300e-45
+  %a = call &lt;2 x double&gt; @llvm.experimental.constrained.ceil.v2f64(&lt;2 x double&gt; %x, metadata !&quot;fpexcept.strict&quot;)
+  store i1 %C, ptr @G.2, align 1
+  ret &lt;2 x double&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;2 x double&gt; @llvm.experimental.constrained.ceil.v2f64(&lt;2 x double&gt;, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.ceil.v2f64: &#x27;  %a = call &lt;2 x double&gt; @llvm.experimental.constrained.ceil.v2f64(&lt;2 x double&gt; %x, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: ceil_v2f64)
+warning: Instruction selection used fallback path for ceil_v2f64</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.1bd70c3aab.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v2f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v -O1 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.2e441dd45a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v2f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O2 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.6364716c48.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v2f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbb -O2</code></td></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.782ebef246.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v2f64</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zvfh,+zicsr -O0</code></td></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.7c71f39c3b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v2f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbs,+c -O1</code></td></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.7cfb79dbc2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v2f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v -O3</code></td></tr><tr><td class="l">fixed-vectors-fceil-constrained-sdnode.9fd0c5042d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fceil-constrained-sdnode.ll">fixed-vectors-fceil-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">ceil_v2f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zvbb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

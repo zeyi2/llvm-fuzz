@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,auipc,beqz,j</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,auipc,beqz,j</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,auipc,beqz,j <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">tagged-globals.8e9b5568a4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span> @global_addr via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 --relocation-model=pic -mattr=+zba -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@global_ext = external global i32
+@global_int = internal global i32 0
+@G = global i16 1
+@G.1 = global i8 0
+@G.2 = global i8 42
+@G.3 = global i1 true
+
+declare void @func()
+
+define ptr @global_addr() #0 {
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  ret ptr @global_ext
+
+T:                                                ; preds = %0
+  br label %BB
+
+F:                                                ; preds = %0
+  %G = getelementptr i128, ptr %A, i1 %L
+  store ptr %G, ptr %A, align 8
+  br label %BB
+}
+
+declare i32 @global_load() #0
+
+define void @global_store() #0 {
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  store i32 0, ptr @global_ext, align 4
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %G = getelementptr i1, ptr %A, i8 42
+  store ptr %G, ptr %A, align 8
+  ret void
+
+T:                                                ; preds = %0
+  %LGV2 = load i1, ptr @G.3, align 1
+  %C = icmp ugt i1 %L, %LGV2
+  store i1 %C, ptr %A, align 1
+  br label %BB
+
+F:                                                ; preds = %0
+  br label %BB
+}
+
+declare ptr @global_int_addr() #0
+
+define i32 @global_int_load() #0 {
+  %LGV1 = load i8, ptr @G.2, align 1
+  %LGV = load i8, ptr @G.1, align 1
+  %B = or i8 %LGV, %LGV1
+  %load = load i32, ptr @global_int, align 4
+  store i8 %B, ptr poison, align 1
+  ret i32 %load
+}
+
+define void @global_int_store() #0 {
+  %A = alloca i16, align 2
+  store i16 poison, ptr %A, align 2
+  %LGV1 = load i16, ptr @G, align 2
+  %B = mul i16 1, %LGV1
+  store i32 0, ptr @global_int, align 4
+  store i16 %B, ptr @G, align 2
+  %B2 = shl i16 %LGV1, %LGV1
+  store i16 %B2, ptr %A, align 2
+  ret void
+}
+
+declare ptr @func_addr() #0
+
+attributes #0 = { &quot;target-features&quot;=&quot;+tagged-globals&quot; }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 --relocation-model=pic -mattr=+zba -O3 -verify-machineinstrs&#x27; --funcs global_addr snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash 7a5baaed05df015d, GlobalISel hash 53ede2e2af8805aa
+b0: llc -mtriple=riscv64 --relocation-model=pic -mattr=+zba -verify-machineinstrs -O3 -global-isel=0
+b1: llc -mtriple=riscv64 --relocation-model=pic -mattr=+zba -verify-machineinstrs -O0 -global-isel=0
+b2: llc -mtriple=riscv64 --relocation-model=pic -mattr=+zba -verify-machineinstrs -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">tagged-globals.8e9b5568a4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/tagged-globals.ll">tagged-globals.ll</a><span class="dim">)</span></td><td class="l">global_addr</td><td class="l"><code>-mtriple=riscv64 --relocation-model=pic -mattr=+zba -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Frame offsets outside of the signed 32-bit range not supported on RV32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Frame offsets outside of the signed 32-bit range not supported on RV32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Frame offsets outside of the signed 32-bit range not supported on RV32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr88365.235c695764.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/pr88365.ll">pr88365.ll</a><span class="dim">)</span> @foo via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+@G.2 = external global i1
+@G.3 = external global i16
+@G.4 = external global ptr
+
+define void @foo() {
+  %LGV = load i16, ptr @G.3, align 2
+  %A = alloca ptr, align 8
+  %L2 = load i16, ptr %A, align 2
+  %L = load i16, ptr %A, align 2
+  store ptr poison, ptr %A, align 8
+  %C = icmp uge i16 %L, %L2
+  %LGV1 = load i128, ptr @G.1, align 4
+  %1 = alloca [1073741818 x i32], align 4
+  %G5 = getelementptr ptr, ptr %1, i16 %LGV
+  call void @use(ptr %1)
+  %G = getelementptr bfloat, ptr %1, i128 %LGV1
+  %G4 = getelementptr i128, ptr %1, i128 1
+  store ptr %G, ptr %G4, align 8
+  store i1 %C, ptr @G.2, align 1
+  store ptr %G5, ptr @G.4, align 8
+  ret void
+}
+
+declare void @use(ptr)
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">LLVM ERROR: Frame offsets outside of the signed 32-bit range not supported on RV32</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr88365.235c695764.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/pr88365.ll">pr88365.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

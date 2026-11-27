@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shl &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shl &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shl &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 122 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">named-vector-shuffle-reverse.1517e98d87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span> @reverse_nxv64i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfhmin,+zvbb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 64 x i8&gt; @reverse_nxv64i8(&lt;vscale x 64 x i8&gt; %a) {
+  %B = shl &lt;vscale x 4 x i1&gt; zeroinitializer, zeroinitializer
+  %res = call &lt;vscale x 64 x i8&gt; @llvm.vector.reverse.nxv64i8(&lt;vscale x 64 x i8&gt; %a)
+  store &lt;vscale x 4 x i1&gt; %B, ptr poison, align 1
+  ret &lt;vscale x 64 x i8&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 64 x i8&gt; @llvm.vector.reverse.nxv64i8(&lt;vscale x 64 x i8&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfhmin,+zvbb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfhmin,+zvbb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shl: &#x27;  %B = shl &lt;vscale x 4 x i1&gt; zeroinitializer, zeroinitializer&#x27; (in function: reverse_nxv64i8)
+warning: Instruction selection used fallback path for reverse_nxv64i8</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">named-vector-shuffle-reverse.1517e98d87.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/named-vector-shuffle-reverse.ll">named-vector-shuffle-reverse.ll</a><span class="dim">)</span></td><td class="l">reverse_nxv64i8</td><td class="l"><code>-mtriple=riscv64 -riscv-v-vector-bits-max=256 -verify-machineinstrs -mattr=+m,+v,+f,+d,+zvfhmin,+zvbb -O0</code></td></tr><tr><td class="l">vitofp-constrained-sdnode.f06eacab83.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vitofp-constrained-sdnode.ll">vitofp-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vuitofp_nxv1i1_nxv1f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+experimental-zvfbfa,+v -O3</code></td></tr><tr><td class="l">vluxseg-rv64.ef05ee83b3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vluxseg-rv64.ll">vluxseg-rv64.ll</a><span class="dim">)</span></td><td class="l">test_vluxseg6_mask_nxv2f16_triscv.vector.tuple_nxv4i8_6t_nxv2i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64d,+f,+d,+zvfh,+zvfbfmin -O1</code></td></tr><tr><td class="l">vpmerge-sdnode.b6f5dfd975.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vpmerge-sdnode.ll">vpmerge-sdnode.ll</a><span class="dim">)</span></td><td class="l">vpmerge_vf_nxv1f16</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+m -O3 -code-model=small</code></td></tr><tr><td class="l">vrsub.b9c40b9d51.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vrsub.ll">vrsub.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vrsub_mask_vi_nxv1i8_nxv1i8_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

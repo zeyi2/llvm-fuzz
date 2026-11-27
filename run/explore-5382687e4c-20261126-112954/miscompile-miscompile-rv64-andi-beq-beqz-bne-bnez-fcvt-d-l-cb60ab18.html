@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: andi,beq,beqz,bne,bnez,fcvt.d.l</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: andi,beq,beqz,bne,bnez,fcvt.d.l</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: andi,beq,beqz,bne,bnez,fcvt.d.l <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-round-conv.d52f0179.b85dcad809.ll <span class="dim">(mutant of</span> double-round-conv.d52f0179.ll<span class="dim">)</span> @test_round_ui16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zicsr -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+define zeroext i16 @test_round_ui16(double %x) {
+  %A1 = alloca i1, align 1
+  store i1 poison, ptr %A1, align 1
+  %A5 = alloca i1, align 1
+  store i1 true, ptr %A5, align 1
+  %A = alloca i8, align 1
+  store i8 127, ptr %A, align 1
+  %a = call double @llvm.round.f64(double %x)
+  %L = load i8, ptr %A, align 1
+  switch i8 %L, label %SW_D [
+    i8 34, label %SW_C
+    i8 -69, label %SW_C1
+    i8 -55, label %SW_C2
+    i8 64, label %SW_C3
+  ]
+
+BB:                                               ; preds = %SW_C3, %SW_C2, %SW_C1, %SW_C, %SW_D
+  %b = fptoui double %a to i16
+  ret i16 %b
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %SW_C, %0
+  %L6 = load i1, ptr %A5, align 1
+  %B = ashr i1 %L6, true
+  store i1 %B, ptr %A1, align 1
+  br i1 %L6, label %BB, label %SW_C
+
+SW_C1:                                            ; preds = %SW_C1, %0
+  %LGV7 = load i1, ptr @G.3, align 1
+  br i1 %LGV7, label %SW_C1, label %BB
+
+SW_C2:                                            ; preds = %0
+  br label %BB
+
+SW_C3:                                            ; preds = %0
+  br label %BB
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare double @llvm.round.f64(double) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zicsr -O1&#x27; --funcs test_round_ui16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #12)
+SelectionDAG hash 7671f9994d454daf, GlobalISel hash 4a0c640c306e95b7
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zicsr -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zicsr -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zicsr -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-round-conv.d52f0179.b85dcad809.ll <span class="dim">(mutant of</span> double-round-conv.d52f0179.ll<span class="dim">)</span></td><td class="l">test_round_ui16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zicsr -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

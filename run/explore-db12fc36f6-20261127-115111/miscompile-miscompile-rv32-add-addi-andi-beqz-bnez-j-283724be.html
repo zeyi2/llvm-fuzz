@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: add,addi,andi,beqz,bnez,j</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: add,addi,andi,beqz,bnez,j</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: add,addi,andi,beqz,bnez,j <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">mem.8f2b3cb5.3a22d576.53f0836d.a3281bad97.ll <span class="dim">(mutant of</span> mem.8f2b3cb5.3a22d576.53f0836d.ll<span class="dim">)</span> @load_sext_zext_anyext_i1_i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfh -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+@G.3 = external global i64
+@G.5 = external global &lt;4 x i32&gt;
+
+; Function Attrs: nounwind
+define dso_local i16 @load_sext_zext_anyext_i1_i16(ptr %a) #0 {
+  %A10 = alloca i1, align 1
+  store i1 true, ptr %A10, align 1
+  %A6 = alloca i128, align 8
+  %L14 = load i1, ptr %A6, align 1
+  %B16 = ashr i1 %L14, true
+  store i128 1, ptr %A6, align 4
+  %A = alloca ptr, align 8
+  store ptr poison, ptr %A, align 8
+  %LGV = load i64, ptr @G.3, align 4
+  %G = getelementptr i32, ptr %a, i8 -128
+  %L7 = load i128, ptr %A6, align 4
+  switch i128 %L7, label %SW_D [
+    i128 10466952576801051740, label %SW_C
+    i128 17430449723140378266, label %SW_C8
+  ]
+
+BB:                                               ; preds = %SW_C8, %SW_C, %SW_D
+  %B17 = ashr &lt;4 x i32&gt; splat (i32 2147483647), zeroinitializer
+  %1 = getelementptr i1, ptr %a, i32 1
+  %L = load i1, ptr %1, align 1
+  %2 = load i1, ptr %1, align 1
+  %3 = sext i1 %2 to i16
+  %4 = getelementptr i1, ptr %a, i32 2
+  %5 = load i1, ptr %4, align 1
+  %B = ashr i16 %3, %3
+  %B2 = srem i64 %LGV, -1
+  %6 = zext i1 %5 to i16
+  %7 = add i16 %B, %6
+  %8 = load volatile i1, ptr %a, align 1
+  %C = icmp sgt i1 %L, %8
+  store i1 %C, ptr @G.2, align 1
+  %B4 = or i1 %L, %C
+  store i64 %B2, ptr %G, align 4
+  store i1 %B4, ptr @G.2, align 1
+  %G4 = getelementptr &lt;4 x float&gt;, ptr %a, i8 0
+  store ptr %G4, ptr %A, align 8
+  store &lt;4 x i32&gt; %B17, ptr @G.5, align 16
+  ret i16 %7
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %SW_C, %0
+  %L11 = load i1, ptr %A10, align 1
+  %C13 = icmp ule i1 %B16, false
+  store i1 %C13, ptr %A10, align 1
+  br i1 %L11, label %BB, label %SW_C
+
+SW_C8:                                            ; preds = %0
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -mattr=+zfh -O2&#x27; --funcs load_sext_zext_anyext_i1_i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash 4af5ce0bf0dd7bf0, GlobalISel hash fbe36ec142ca419b
+b0: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfh -O2 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfh -O0 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zfh -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">mem.8f2b3cb5.3a22d576.53f0836d.a3281bad97.ll <span class="dim">(mutant of</span> mem.8f2b3cb5.3a22d576.53f0836d.ll<span class="dim">)</span></td><td class="l">load_sext_zext_anyext_i1_i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfh -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

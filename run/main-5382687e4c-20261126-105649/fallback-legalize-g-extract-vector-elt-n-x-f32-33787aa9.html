@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x f32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_EXTRACT_VECTOR_ELT &lt;N x f32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-5382687e4c-20261126-105649.html">main-5382687e4c-20261126-105649</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_EXTRACT_VECTOR_ELT &lt;N x f32&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">40 in 14 configs, 5 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a> @reduce_fadd_16xf32_prefix2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define float @reduce_fadd_16xf32_prefix2(ptr %p) {
+  %v = load &lt;16 x float&gt;, ptr %p, align 256
+  %e0 = extractelement &lt;16 x float&gt; %v, i32 0
+  %e1 = extractelement &lt;16 x float&gt; %v, i32 1
+  %fadd0 = fadd fast float %e0, %e1
+  ret float %fadd0
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %4:_(f32) = G_EXTRACT_VECTOR_ELT %1:_(&lt;16 x f32&gt;), %5:_(i32) (in function: reduce_fadd_16xf32_prefix2)
+warning: Instruction selection used fallback path for reduce_fadd_16xf32_prefix2</pre>
+<h4>Occurrences (40) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">extract_bitcast_sign_set_not_pos</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">extract_bitcast_unknown_sign_ispos</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">extract_bitcast_not_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">extract_bitcast_maybe_nan</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">extract_bitcast_unknown_idx_not_pos</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/combine-is_fpclass.ll">combine-is_fpclass.ll</a></td><td class="l">extract_fabs_unknown_idx_isneg</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+f,+d</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a></td><td class="l">fmul_f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=ilp32d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/double_reduct.ll">double_reduct.ll</a></td><td class="l">fmul_f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+d,+zfh,+zvfh,+v,+m -target-abi=lp64d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_fadd_16xf32_prefix2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_fadd_16xi32_prefix5</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_fadd_2xf32_non_associative</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_fadd_2xf32_reassoc_only</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_fadd_2xf32_ninf_only</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_fadd_4xi32_non_associative</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-formation.ll">fixed-vectors-reduction-formation.ll</a></td><td class="l">reduce_fadd_4xi32_non_associative2</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+m -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

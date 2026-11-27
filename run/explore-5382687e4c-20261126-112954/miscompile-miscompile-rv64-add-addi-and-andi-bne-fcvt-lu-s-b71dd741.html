@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,and,andi,bne,fcvt.lu.s</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,and,andi,bne,fcvt.lu.s</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,and,andi,bne,fcvt.lu.s <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.d76d2bed.d4c06745.35100a60.c32ba07db2.ll <span class="dim">(mutant of</span> float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.d76d2bed.d4c06745.35100a60.ll<span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+zfh,+c,+zbs,+zfa,+a -O2 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global float
+@G.1 = external global i1
+@G.6 = external global float
+@G.7 = external global ptr
+@G.8 = external global i1
+@G.9 = external global float
+@G.10 = external global float
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(float %a) #0 {
+  %LGV6 = load float, ptr @G.10, align 4
+  %LGV1 = load float, ptr @G.9, align 4
+  %LGV4 = load float, ptr @G.6, align 4
+  %C7 = fcmp oge float %a, %LGV6
+  %C5 = fcmp une float %a, %LGV4
+  %A2 = alloca ptr, align 8
+  %L1 = load i128, ptr %A2, align 4
+  %L = load i128, ptr %A2, align 4
+  store ptr poison, ptr %A2, align 8
+  %A = alloca i8, align 1
+  store i8 poison, ptr %A, align 1
+  %LGV = load float, ptr @G, align 4
+  %C3 = icmp ult i128 %L, %L1
+  %C1 = fcmp une float %a, %LGV4
+  %C = fcmp uge float 4.200000e+01, %LGV
+  %C6 = fcmp ole float %LGV, %LGV1
+  %B10 = and i1 %C, %C6
+  %C2 = fcmp une float %a, %a
+  %C4 = fcmp ugt float %a, %LGV
+  %1 = fptoui float %a to i8
+  %B = ashr i8 0, %1
+  store i1 %C, ptr @G.1, align 1
+  store i1 %C2, ptr @G.1, align 1
+  %G5 = getelementptr float, ptr %A2, i1 %C4
+  %G = getelementptr i8, ptr %A, i1 %C
+  store i8 %B, ptr %A, align 1
+  store ptr %G, ptr %A2, align 8
+  store i1 %C4, ptr %G, align 1
+  %B3 = fadd float %a, %LGV4
+  store ptr %G5, ptr %G, align 8
+  store i1 %B10, ptr @G.1, align 1
+  store i1 %C5, ptr @G.1, align 1
+  store i1 %C7, ptr %G, align 1
+  store ptr %A2, ptr @G.7, align 8
+  store i1 %C3, ptr @G.8, align 1
+  store i1 %C1, ptr %G5, align 1
+  store float %B3, ptr @G, align 4
+  ret i8 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+zfh,+c,+zbs,+zfa,+a -O2 -code-model=small&#x27; --funcs fcvt_wu_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">9 of 64 inputs differ (first: #12)
+SelectionDAG hash 7671f9994d454daf, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+zfh,+c,+zbs,+zfa,+a -code-model=small -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+zfh,+c,+zbs,+zfa,+a -code-model=small -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+zfh,+c,+zbs,+zfa,+a -code-model=small -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.d76d2bed.d4c06745.35100a60.c32ba07db2.ll <span class="dim">(mutant of</span> float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.d76d2bed.d4c06745.35100a60.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+zfh,+c,+zbs,+zfa,+a -O2 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

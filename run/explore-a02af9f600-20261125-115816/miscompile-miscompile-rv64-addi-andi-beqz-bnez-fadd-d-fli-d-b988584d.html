@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,beqz,bnez,fadd.d,fli.d</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,beqz,bnez,fadd.d,fli.d</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,beqz,bnez,fadd.d,fli.d <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fma-combine.c6ab806b.eb2956955c.ll <span class="dim">(mutant of</span> fma-combine.c6ab806b.ll<span class="dim">)</span> @fnmadd_non_trivial via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@G = global i128 18446744073709551616
+@G.1 = global ptr poison
+@G.2 = global i1 true
+
+define double @fnmadd_non_trivial(ptr %p0, ptr %p1, ptr %dst, double %mul425) {
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  store double f0x3FEE666666666666, ptr %dst, align 8
+  %mul413 = fmul double %mul425, -3.000000e+00
+  store double %mul413, ptr %p0, align 8
+  %mul428 = fmul contract double %mul425, 4.500000e+00
+  %G = getelementptr i128, ptr %p1, i128 -1
+  %L = load i128, ptr %G, align 4
+  %L1 = load i32, ptr %G, align 4
+  switch i128 %L, label %SW_D [
+    i128 17718781031997712654, label %SW_C
+    i128 13340632267396066624, label %SW_C3
+    i128 2122491656732002575, label %SW_C4
+    i128 8196654670016616010, label %SW_C5
+  ]
+
+BB:                                               ; preds = %SW_C5, %SW_C3, %SW_D
+  %add429 = fadd nsz contract double %mul428, 3.000000e+00
+  %mul430 = fmul contract double %add429, 0.000000e+00
+  %sub432 = fadd nsz contract double %mul430, 1.000000e+00
+  %mul433 = fmul contract double %sub432, 0.000000e+00
+  %1 = fsub nsz contract double %mul433, %mul425
+  %G2 = getelementptr float, ptr %dst, i32 %L1
+  store double %1, ptr %G, align 8
+  %mul441 = fmul double %mul425, 0.000000e+00
+  %add443 = fsub double 0.000000e+00, %mul425
+  %mul446 = fmul contract double %add443, 4.500000e+00
+  %add447 = fadd nsz contract double %mul446, 3.000000e+00
+  %mul448 = fmul contract double %add447, 0.000000e+00
+  %sub450 = fadd nsz contract double %mul448, 1.000000e+00
+  %2 = fsub nsz contract double %sub450, %mul441
+  store ptr %G2, ptr @G.1, align 8
+  ret double %2
+
+SW_D:                                             ; preds = %SW_D, %0
+  %LGV = load i1, ptr @G.2, align 1
+  br i1 %LGV, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %0
+  ret double %mul425
+
+SW_C3:                                            ; preds = %SW_C3, %0
+  %L6 = load i1, ptr %A, align 1
+  br i1 %L6, label %SW_C3, label %BB
+
+SW_C4:                                            ; preds = %0
+  ret double %mul413
+
+SW_C5:                                            ; preds = %0
+  br label %BB
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c -O3&#x27; --funcs fnmadd_non_trivial snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">3 of 64 inputs differ (first: #47)
+SelectionDAG hash a92b9556c3959497, GlobalISel hash 8cd0c24bd1c6f8b5
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fma-combine.c6ab806b.eb2956955c.ll <span class="dim">(mutant of</span> fma-combine.c6ab806b.ll<span class="dim">)</span></td><td class="l">fnmadd_non_trivial</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

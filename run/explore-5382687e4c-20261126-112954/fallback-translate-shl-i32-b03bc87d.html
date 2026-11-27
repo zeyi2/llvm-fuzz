@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shl i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shl i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shl i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">13 in 13 configs, 13 test files, 217 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zdinx-boundary-check.8e45efa69c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a><span class="dim">)</span> @foo12 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+unaligned-scalar-mem -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define void @foo12(ptr captures(none) %p, double %d) #0 {
+entry:
+  %B = shl i32 -2147483648, -1
+  %add.ptr = getelementptr inbounds i8, ptr %p, i64 10239
+  store double %d, ptr %add.ptr, align 8
+  store i32 %B, ptr %add.ptr, align 4
+  ret void
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+unaligned-scalar-mem -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+unaligned-scalar-mem -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shl: &#x27;  %B = shl i32 -2147483648, -1&#x27; (in function: foo12)
+warning: Instruction selection used fallback path for foo12</pre>
+<h4>Occurrences (13):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">andn-zext-lowmask.d0cbd31b72.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/andn-zext-lowmask.ll">andn-zext-lowmask.ll</a><span class="dim">)</span></td><td class="l">andn_zext_lowmask_i64_i32_multiuse</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+c,+zhinx -O1</code></td></tr><tr><td class="l">atomic-cmpxchg.1830a9cac4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/atomic-cmpxchg.ll">atomic-cmpxchg.ll</a><span class="dim">)</span></td><td class="l">cmpxchg_i16_acq_rel_monotonic</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+zacas,+zhinx,+zicond -O0</code></td></tr><tr><td class="l">memmove.5aa73dc694.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/memmove.ll">memmove.ll</a><span class="dim">)</span></td><td class="l">unaligned_memmove3</td><td class="l"><code>-mtriple=riscv64 -mattr=+zhinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">reassoc-shl-addi-add.fa1299487c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/reassoc-shl-addi-add.ll">reassoc-shl-addi-add.ll</a><span class="dim">)</span></td><td class="l">t2</td><td class="l"><code>-mtriple=riscv32-unknown-elf -mattr=+zfinx -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">rv32xtheadbb.cf59c55a6e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rv32xtheadbb.ll">rv32xtheadbb.ll</a><span class="dim">)</span></td><td class="l">sexth_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xtheadbb,+zfinx -O3</code></td></tr><tr><td class="l">rv32zbb.0e4cda39d6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rv32zbb.ll">rv32zbb.ll</a><span class="dim">)</span></td><td class="l">sexth_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">rv64xandesperf.24cd6ef0d6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rv64xandesperf.ll">rv64xandesperf.ll</a><span class="dim">)</span></td><td class="l">bfos_from_ashr_shl_with_msb_zero_insert_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+xandesperf,+zcb,+zhinx -O2</code></td></tr><tr><td class="l">rv64zbb-zbkb.f6acc39ee2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rv64zbb-zbkb.ll">rv64zbb-zbkb.ll</a><span class="dim">)</span></td><td class="l">not_rori_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zdinx,+zvbb -O3</code></td></tr><tr><td class="l">rv64zbs.0717bf3e1d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rv64zbs.ll">rv64zbs.ll</a><span class="dim">)</span></td><td class="l">bclr_i32_no_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbb,+zhinx -O2</code></td></tr><tr><td class="l">rvp-simd-32.0532efcb.96424b0bea.ll <span class="dim">(mutant of</span> rvp-simd-32.0532efcb.ll<span class="dim">)</span></td><td class="l">test_pm2addasu_v2i16_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zfinx,+zbs,+zhinx -O3 -code-model=small</code></td></tr><tr><td class="l">rvp-simd-32.2414abdd9f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_maccsu_h11_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zdinx -O3</code></td></tr><tr><td class="l">sifive_sf_vsettnt.8fa71435bd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/sifive_sf_vsettnt.ll">sifive_sf_vsettnt.ll</a><span class="dim">)</span></td><td class="l">test_sf_vsettnt_e8w2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xsfmmbase,+zhinx,+zbs -O2</code></td></tr><tr><td class="l">zdinx-boundary-check.8e45efa69c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/zdinx-boundary-check.ll">zdinx-boundary-check.ll</a><span class="dim">)</span></td><td class="l">foo12</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32 -mattr=+zdinx,+unaligned-scalar-mem -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

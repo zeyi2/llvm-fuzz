@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_PHI &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_PHI &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_PHI &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 3 configs, 3 test files, 140 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-expandload-int.4828cccc61.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-expandload-int.ll">fixed-vectors-expandload-int.ll</a><span class="dim">)</span> @expandload_v2i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+m,+zve32x -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr
+
+define &lt;2 x i8&gt; @expandload_v2i8(ptr %base, &lt;2 x i8&gt; %src0, &lt;2 x i1&gt; %mask) {
+  %G = getelementptr ptr, ptr %base, i8 16
+  %res = call &lt;2 x i8&gt; @llvm.masked.expandload.v2i8.p0(ptr %base, &lt;2 x i1&gt; %mask, &lt;2 x i8&gt; %src0)
+  store ptr %G, ptr @G.1, align 8
+  ret &lt;2 x i8&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare &lt;2 x i8&gt; @llvm.masked.expandload.v2i8.p0(ptr captures(none), &lt;2 x i1&gt;, &lt;2 x i8&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv32 -mattr=+m,+zve32x -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv32 -mattr=+m,+zve32x -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %29:_(&lt;2 x i8&gt;) = G_PHI %27:_(&lt;2 x i8&gt;), %bb.4, %21:_(&lt;2 x i8&gt;), %bb.3 (in function: expandload_v2i8)
+warning: Instruction selection used fallback path for expandload_v2i8</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-expandload-int.4828cccc61.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-expandload-int.ll">fixed-vectors-expandload-int.ll</a><span class="dim">)</span></td><td class="l">expandload_v2i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+m,+zve32x -O3</code></td></tr><tr><td class="l">fixed-vectors-expandload-int.4828cccc61.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-expandload-int.ll">fixed-vectors-expandload-int.ll</a><span class="dim">)</span></td><td class="l">expandload_v7i8</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+m,+zve32x -O3</code></td></tr><tr><td class="l">fixed-vectors-masked-gather.6920ea6aff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-gather.ll">fixed-vectors-masked-gather.ll</a><span class="dim">)</span></td><td class="l">mgather_baseidx_v8i8</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+d,+zfhmin,+zvfhmin,+zfbfmin,+zvfbfmin -O0</code></td></tr><tr><td class="l">fixed-vectors-masked-load-int.8765de19dd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-int.ll">fixed-vectors-masked-load-int.ll</a><span class="dim">)</span></td><td class="l">masked_load_v16i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (BestRC &amp;&amp; &quot;Couldn&#x27;t find the register class&quot;), function getCommonMinimalPhysRegClass, file TargetRegisterInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (BestRC &amp;&amp; &quot;Couldn&#x27;t find the register class&quot;), function getCommonMinimalPhysRegClass, file TargetRegisterInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (BestRC &amp;&amp; &quot;Couldn&#x27;t find the register class&quot;), function getCommonMinimalPhysRegClass, file TargetRegisterInfo.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zilsd.7dd77799d6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/zilsd.ll">zilsd.ll</a><span class="dim">)</span> @select_i64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O1 -code-model=medium -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/n9G4eW9Ma">https://godbolt.org/z/n9G4eW9Ma</a> (llc-assertions-trunk, checked 2026-11-25 15:47 UTC): <a href="https://godbolt.org/z/n9G4eW9Ma">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+
+; Function Attrs: nounwind
+define i64 @select_i64(i1 %c, i64 %a, i64 %b) #0 {
+  %C = icmp slt i64 4294967296, %b
+  %r = select i1 %c, i64 %a, i64 %b
+  store i1 %C, ptr @G.1, align 1
+  ret i64 %r
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O1 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/CodeGen/TargetRegisterInfo.cpp:216: const TargetRegisterClass* getCommonMinimalPhysRegClass(const llvm::TargetRegisterInfo*, llvm::MCRegister, llvm::MCRegister): Assertion `BestRC &amp;&amp; &quot;Couldn&#x27;t find the register class&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O1 -code-model=medium -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>17</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O1 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O1 -code-model=medium -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/TargetRegisterInfo.cpp:216: const TargetRegisterClass *getCommonMinimalPhysRegClass(const TargetRegisterInfo *, MCRegister, MCRegister): Assertion `BestRC &amp;&amp; &quot;Couldn&#x27;t find the register class&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O1 -code-model=medium -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Post-RA pseudo instruction expansion pass&#x27; on function &#x27;@select_i64&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x00005653f7440ecb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x00005653f743dea1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x00005653f744194b
+3  libc.so.6 0x00007f6e67c45330
+4  libc.so.6 0x00007f6e67c9ebec pthread_kill + 284
+5  libc.so.6 0x00007f6e67c4527e gsignal + 30
+6  libc.so.6 0x00007f6e67c288ff abort + 223
+7  libc.so.6 0x00007f6e67c2881b
+8  libc.so.6 0x00007f6e67c3b517
+9  llc       0x00005653f640d428 llvm::TargetRegisterInfo::getCommonMinimalPhysRegClass(llvm::MCRegister, llvm::MCRegister) const + 248
+10 llc       0x00005653f58d959c
+11 llc       0x00005653f63e8807 llvm::TargetInstrInfo::lowerCopy(llvm::MachineInstr*) const + 359
+12 llc       0x00005653f5f569bb
+13 llc       0x00005653f5f57113
+14 llc       0x00005653f60acb31 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+15 llc       0x00005653f6647417 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+16 llc       0x00005653f664f932 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+17 llc       0x00005653f66481c0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+18 llc       0x00005653f58a07c9
+19 llc       0x00005653f589d953 main + 1747
+20 libc.so.6 0x00007f6e67c2a1ca
+21 libc.so.6 0x00007f6e67c2a28b __libc_start_main + 139
+22 llc       0x00005653f589ca65 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">zilsd.0d055e9ddf.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">zilsd.7dd77799d6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd -O1 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">zilsd.ebc2b2f3a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/zilsd.ll">zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -mattr=+d,+zilsd,+zve32x -O1 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

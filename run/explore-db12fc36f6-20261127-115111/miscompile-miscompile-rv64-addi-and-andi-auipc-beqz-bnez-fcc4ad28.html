@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,and,andi,auipc,beqz,bnez</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,and,andi,auipc,beqz,bnez</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,and,andi,auipc,beqz,bnez <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vror.32cb11e9.8648ae65.e51546935a.ll <span class="dim">(mutant of</span> fixed-vectors-vror.32cb11e9.8648ae65.ll<span class="dim">)</span> @vror_vx_v1i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.9 = external global i1
+@G.11 = external global &lt;1 x i16&gt;
+
+define &lt;1 x i16&gt; @vror_vx_v1i16(&lt;1 x i16&gt; %a, i16 %b) {
+  %A14 = alloca &lt;1 x i16&gt;, align 2
+  store &lt;1 x i16&gt; poison, ptr %A14, align 2
+  %A9 = alloca i1, align 1
+  store i1 false, ptr %A9, align 1
+  %A2 = alloca i128, align 8
+  store i128 -1, ptr %A2, align 4
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %b.head = insertelement &lt;1 x i16&gt; poison, i16 %b, i32 0
+  %b.splat = shufflevector &lt;1 x i16&gt; %b.head, &lt;1 x i16&gt; poison, &lt;1 x i32&gt; zeroinitializer
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F
+  %x = call &lt;1 x i16&gt; @llvm.fshr.v1i16(&lt;1 x i16&gt; %a, &lt;1 x i16&gt; %a, &lt;1 x i16&gt; %b.splat)
+  %B = lshr &lt;1 x i16&gt; %b.head, %a
+  store &lt;1 x i16&gt; %B, ptr %A, align 2
+  ret &lt;1 x i16&gt; %x
+
+T:                                                ; preds = %0
+  %L3 = load i128, ptr %A2, align 4
+  switch i128 %L3, label %SW_D [
+    i128 13035411163055094150, label %SW_C
+    i128 11583156609624202325, label %SW_C4
+    i128 17369001618566797135, label %SW_C5
+    i128 12643201384136325973, label %SW_C6
+    i128 4057885607987709912, label %SW_C7
+    i128 4178179598826040366, label %SW_C8
+  ]
+
+BB1:                                              ; preds = %SW_C8, %SW_C7, %SW_C6, %SW_C5, %SW_C4, %SW_C, %SW_D
+  ret &lt;1 x i16&gt; %b.splat
+
+F:                                                ; preds = %0
+  br label %BB
+
+SW_D:                                             ; preds = %SW_D, %T
+  %L10 = load i1, ptr %A9, align 1
+  br i1 %L10, label %BB1, label %SW_D
+
+SW_C:                                             ; preds = %T
+  br label %BB1
+
+SW_C4:                                            ; preds = %T
+  br label %BB1
+
+SW_C5:                                            ; preds = %SW_C5, %T
+  br i1 %L, label %SW_C5, label %BB1
+
+SW_C6:                                            ; preds = %T
+  br label %BB1
+
+SW_C7:                                            ; preds = %T
+  %LGV12 = load &lt;1 x i16&gt;, ptr @G.11, align 2
+  %B13 = xor &lt;1 x i16&gt; %b.splat, %LGV12
+  store &lt;1 x i16&gt; %B13, ptr %A14, align 2
+  br label %BB1
+
+SW_C8:                                            ; preds = %SW_C8, %T
+  %LGV11 = load i1, ptr @G.9, align 1
+  br i1 %LGV11, label %BB1, label %SW_C8
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;1 x i16&gt; @llvm.fshr.v1i16(&lt;1 x i16&gt;, &lt;1 x i16&gt;, &lt;1 x i16&gt;) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium&#x27; --funcs vror_vx_v1i16 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">29 of 64 inputs differ (first: #1)
+SelectionDAG hash e80159fb23549387, GlobalISel hash a3c4be9285a215bc
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -code-model=medium -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -code-model=medium -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -code-model=medium -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vror.32cb11e9.8648ae65.e51546935a.ll <span class="dim">(mutant of</span> fixed-vectors-vror.32cb11e9.8648ae65.ll<span class="dim">)</span></td><td class="l">vror_vx_v1i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfhmin -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

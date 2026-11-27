@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">select: G_INSERT_VECTOR_ELT &lt;vscale x N x bf16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 32 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vfmerge-bf.98914c1dfe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vfmerge-bf.ll">vfmerge-bf.ll</a><span class="dim">)</span> @intrinsic_vfmerge_vzm_nxv2bf16_nxv2bf16_bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa,+c -O1 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global bfloat
+@G.5 = external global i16
+
+; Function Attrs: nounwind
+define &lt;vscale x 2 x bfloat&gt; @intrinsic_vfmerge_vzm_nxv2bf16_nxv2bf16_bf16(&lt;vscale x 2 x bfloat&gt; %0, &lt;vscale x 2 x i1&gt; %1, i32 %2) #0 {
+entry:
+  %LGV1 = load i16, ptr @G.5, align 2
+  %LGV = load bfloat, ptr @G.4, align 2
+  %I = insertelement &lt;vscale x 2 x bfloat&gt; %0, bfloat %LGV, i16 %LGV1
+  ret &lt;vscale x 2 x bfloat&gt; %I
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa,+c -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa,+c -O1 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: cannot select: %7:vrb(&lt;vscale x 2 x bf16&gt;) = G_INSERT_VECTOR_ELT %0:vrb, %5:gprb(bf16), %8:gprb(i32) (in function: intrinsic_vfmerge_vzm_nxv2bf16_nxv2bf16_bf16)
+warning: Instruction selection used fallback path for intrinsic_vfmerge_vzm_nxv2bf16_nxv2bf16_bf16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vfmerge-bf.98914c1dfe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vfmerge-bf.ll">vfmerge-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfmerge_vzm_nxv2bf16_nxv2bf16_bf16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+experimental-zvfbfa,+c -O1 -code-model=medium</code></td></tr><tr><td class="l">vfwmsac-bf.ddec3ec5f5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vfwmsac-bf.ll">vfwmsac-bf.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfwmsac_vv_nxv4f32_nxv4bf16_nxv4bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa -O2</code></td></tr><tr><td class="l">vloxei.6b2be8190e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vloxei.ll">vloxei.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vloxei_mask_v_nxv16bf16_nxv16bf16_nxv16i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfbfmin,+a -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

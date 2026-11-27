@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,call,feq.s,flt.s</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,call,feq.s,flt.s</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,call,feq.s,flt.s <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">pr139075.6465d626.1a71daf8.7e16587b.2dc1455842.ll <span class="dim">(mutant of</span> pr139075.6465d626.1a71daf8.7e16587b.ll<span class="dim">)</span> @a via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+f -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr
+@G.3 = external global i1
+@G.4 = external global float
+@G.5 = external global i1
+@G.6 = external global ptr
+@G.7 = external global i128
+@G.8 = external global ptr
+@G.9 = external global ptr
+@G.10 = external global i8
+@G.11 = external global i64
+@G.12 = external global i1
+
+define void @a(ptr %0, ptr %1) {
+  %A9 = alloca i128, align 8
+  store i128 poison, ptr %A9, align 4
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV = load i8, ptr @G.10, align 1
+  %LGV5 = load i128, ptr @G.7, align 4
+  %C8 = fcmp oeq float +inf, 1.000000e+00
+  %G4 = getelementptr inbounds ptr, ptr %1, i1 false
+  %L = load i128, ptr %G4, align 4
+  %LGV1 = load float, ptr @G.4, align 4
+  %C2 = fcmp ueq float 1.401300e-45, %LGV1
+  %G3 = getelementptr ptr, ptr %1, i1 %C2
+  %G10 = getelementptr i128, ptr %0, i32 0
+  %L10 = load float, ptr %G10, align 4
+  %C6 = icmp sle i128 %L, %LGV5
+  call void @llvm.memcpy.p0.p0.i64(ptr align 1 %0, ptr align 4 %1, i64 2048, i1 false)
+  %G = getelementptr half, ptr %0, i1 true
+  store ptr %G, ptr @G.1, align 8
+  store i1 %C8, ptr @G.3, align 1
+  store i1 %C6, ptr @G.3, align 1
+  store i1 %C2, ptr @G.5, align 1
+  %G2 = getelementptr float, ptr %1, i1 %C6
+  store ptr %G4, ptr @G.6, align 8
+  store ptr %G10, ptr @G.8, align 8
+  store ptr %G2, ptr @G.9, align 8
+  switch i8 %LGV, label %SW_D [
+    i8 -10, label %SW_C
+    i8 -93, label %SW_C4
+    i8 17, label %SW_C5
+  ]
+
+BB:                                               ; preds = %SW_C5, %SW_C4, %SW_C, %SW_D
+  store ptr %G3, ptr %G2, align 8
+  %B8 = shl i128 %L, 18446744073709551616
+  store i128 %B8, ptr %A9, align 4
+  ret void
+
+SW_D:                                             ; preds = %SW_D, %2
+  br i1 %C6, label %SW_D, label %BB
+
+SW_C:                                             ; preds = %2
+  %G8 = getelementptr i1, ptr %1, i1 true
+  store ptr %G8, ptr @G.9, align 8
+  br label %BB
+
+SW_C4:                                            ; preds = %SW_C4, %2
+  %3 = phi float [ %3, %SW_C4 ], [ %L10, %2 ]
+  %LGV6 = load i1, ptr @G.12, align 1
+  %C = icmp sle i1 %C2, %LGV6
+  store float %3, ptr %G4, align 4
+  store i1 %C, ptr %A, align 1
+  br i1 %C2, label %BB, label %SW_C4
+
+SW_C5:                                            ; preds = %2
+  %B = udiv i64 0, 9223372036854775807
+  store i64 %B, ptr @G.11, align 4
+  %G5 = getelementptr i64, ptr %0, i64 %B
+  store ptr %G5, ptr %G4, align 8
+  br label %BB
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+f -O0&#x27; --funcs a snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash c674986bdf971efb, GlobalISel hash b422c8b2d4029262
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+f -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+f -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+f -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">pr139075.6465d626.1a71daf8.7e16587b.2dc1455842.ll <span class="dim">(mutant of</span> pr139075.6465d626.1a71daf8.7e16587b.ll<span class="dim">)</span></td><td class="l">a</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvl16384b,+f -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

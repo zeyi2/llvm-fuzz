@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (MI-&gt;getOpcode() == RISCV::QC_C_MILEAVERET &amp;&amp; &quot;Unexpected QCI Interrupt Return Instruction&quot;), function restoreCalleeSavedRegisters, file RISCVFrameLowering.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (MI-&gt;getOpcode() == RISCV::QC_C_MILEAVERET &amp;&amp; &quot;Unexpected QCI Interrupt Return Instruction&quot;), function restoreCalleeSavedRegisters, file RISCVFrameLowering.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-db12fc36f6-20261127-110859.html">main-db12fc36f6-20261127-110859</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (MI-&gt;getOpcode() == RISCV::QC_C_MILEAVERET &amp;&amp; &quot;Unexpected QCI Interrupt Return Instruction&quot;), function restoreCalleeSavedRegisters, file RISCVFrameLowering.cpp <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">qci-interrupt-zilsd.c64e08e3aa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span> @test_nest_empty via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/vzrbcrYx6">https://godbolt.org/z/vzrbcrYx6</a> (llc-assertions-trunk, checked 2026-11-27 11:50 UTC): <a href="https://godbolt.org/z/vzrbcrYx6">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global float
+
+define void @test_nest_empty() #0 {
+  %LGV = load float, ptr @G, align 4
+  %C = fcmp ogt float %LGV, 1.000000e+00
+  store i1 %C, ptr poison, align 1
+  ret void
+}
+
+attributes #0 = { &quot;interrupt&quot;=&quot;qci-nest&quot; }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/RISCVFrameLowering.cpp:2753: virtual bool llvm::RISCVFrameLowering::restoreCalleeSavedRegisters(llvm::MachineBasicBlock&amp;, llvm::MachineBasicBlock::iterator, llvm::MutableArrayRef&lt;llvm::CalleeSavedInfo&gt;, const llvm::TargetRegisterInfo*) const: Assertion `MI-&gt;getOpcode() == RISCV::QC_C_MILEAVERET &amp;&amp; &quot;Unexpected QCI Interrupt Return Instruction&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>24</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVFrameLowering.cpp:2929: virtual bool llvm::RISCVFrameLowering::restoreCalleeSavedRegisters(MachineBasicBlock &amp;, MachineBasicBlock::iterator, MutableArrayRef&lt;CalleeSavedInfo&gt;, const TargetRegisterInfo *) const: Assertion `MI-&gt;getOpcode() == RISCV::QC_C_MILEAVERET &amp;&amp; &quot;Unexpected QCI Interrupt Return Instruction&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Prologue/Epilogue Insertion &amp; Frame Finalization&#x27; on function &#x27;@test_nest_empty&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000563ee6855c1b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000563ee6852bf1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000563ee685669b
+3  libc.so.6 0x00007f7de9a45330
+4  libc.so.6 0x00007f7de9a9ebec pthread_kill + 284
+5  libc.so.6 0x00007f7de9a4527e gsignal + 30
+6  libc.so.6 0x00007f7de9a288ff abort + 223
+7  libc.so.6 0x00007f7de9a2881b
+8  libc.so.6 0x00007f7de9a3b517
+9  llc       0x0000563ee4d328ed
+10 llc       0x0000563ee56c7764
+11 llc       0x0000563ee56cc647
+12 llc       0x0000563ee54ce761 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+13 llc       0x0000563ee5a6aa77 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x0000563ee5a72f92 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x0000563ee5a6b820 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x0000563ee4cc5689
+17 llc       0x0000563ee4cc2813 main + 1747
+18 libc.so.6 0x00007f7de9a2a1ca
+19 libc.so.6 0x00007f7de9a2a28b __libc_start_main + 139
+20 llc       0x0000563ee4cc1925 _start + 37</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">qci-interrupt-zilsd.7c9874e49b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd -verify-machineinstrs</code></td></tr><tr><td class="l">qci-interrupt-zilsd.7d0d8485d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd -verify-machineinstrs</code></td></tr><tr><td class="l">qci-interrupt-zilsd.c64e08e3aa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs</code></td></tr><tr><td class="l">qci-interrupt-zilsd.cb0cb7be4d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd -verify-machineinstrs</code></td></tr><tr><td class="l">qci-interrupt-zilsd.d9b582e3f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs</code></td></tr><tr><td class="l">qci-interrupt-zilsd.db1ba585af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs</code></td></tr><tr><td class="l">qci-interrupt-zilsd.db68108735.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd -verify-machineinstrs</code></td></tr><tr><td class="l">qci-interrupt-zilsd.e97e97a17f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/qci-interrupt-zilsd.ll">qci-interrupt-zilsd.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+xqciint,+zilsd,+zclsd,+c -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

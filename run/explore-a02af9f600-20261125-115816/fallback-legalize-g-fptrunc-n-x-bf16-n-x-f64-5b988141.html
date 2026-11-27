@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTRUNC &lt;N x bf16&gt;,&lt;N x f64&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTRUNC &lt;N x bf16&gt;,&lt;N x f64&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTRUNC &lt;N x bf16&gt;,&lt;N x f64&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 1 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fptrunc-vp.802c0c5abd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptrunc-vp.ll">fixed-vectors-fptrunc-vp.ll</a><span class="dim">)</span> @vfptrunc_v2bf16_v2f64_unmasked via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;2 x bfloat&gt; @vfptrunc_v2bf16_v2f64_unmasked(&lt;2 x double&gt; %a, i32 zeroext %vl) {
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %C = fcmp ogt double +qnan, f0x7FEFFFFFFFFFFFFF
+  %v = fptrunc &lt;2 x double&gt; %a to &lt;2 x bfloat&gt;
+  store i1 %C, ptr %A, align 1
+  ret &lt;2 x bfloat&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %11:_(&lt;2 x bf16&gt;) = G_FPTRUNC %0:_(&lt;2 x f64&gt;) (in function: vfptrunc_v2bf16_v2f64_unmasked)
+warning: Instruction selection used fallback path for vfptrunc_v2bf16_v2f64_unmasked</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fptrunc-vp.802c0c5abd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptrunc-vp.ll">fixed-vectors-fptrunc-vp.ll</a><span class="dim">)</span></td><td class="l">vfptrunc_v2bf16_v2f64_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin -O1</code></td></tr><tr><td class="l">fixed-vectors-fptrunc-vp.a9520a19ac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptrunc-vp.ll">fixed-vectors-fptrunc-vp.ll</a><span class="dim">)</span></td><td class="l">vfptrunc_v2bf16_v2f64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+zicsr -O2</code></td></tr><tr><td class="l">fixed-vectors-fptrunc-vp.adb0c0e089.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptrunc-vp.ll">fixed-vectors-fptrunc-vp.ll</a><span class="dim">)</span></td><td class="l">vfptrunc_v2bf16_v2f64_unmasked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin -O1</code></td></tr><tr><td class="l">fixed-vectors-fptrunc-vp.d07f58a2d4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptrunc-vp.ll">fixed-vectors-fptrunc-vp.ll</a><span class="dim">)</span></td><td class="l">vfptrunc_v2bf16_v2f64</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

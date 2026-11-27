@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE N:_(&lt;4 x i1&gt;), N:_(p0) :: (store (&lt;4 x i1&gt;) into %ir.A2)</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE N:_(&lt;4 x i1&gt;), N:_(p0) :: (store (&lt;4 x i1&gt;) into %ir.A2)</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE N:_(&lt;4 x i1&gt;), N:_(p0) :: (store (&lt;4 x i1&gt;) into %ir.A2) </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 28 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.d4bb7e1406.ll <span class="dim">(mutant of</span> double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.ll<span class="dim">)</span> via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfa -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/44ofaMYe8">https://godbolt.org/z/44ofaMYe8</a> (llc-assertions-trunk, checked 2026-11-26 15:24 UTC): <a href="https://godbolt.org/z/44ofaMYe8">G</a> <span class="fp">crashes differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@G = global i1 false
+@G.1 = global &lt;4 x i1&gt; splat (i1 true)
+@G.2 = global &lt;4 x i32&gt; splat (i32 -1)
+@G.3 = global i32 42
+@G.4 = global double 0.000000e+00
+@G.5 = global i1 false
+@G.6 = global i1 false
+@G.7 = global i32 -2147483648
+@G.8 = global double +inf
+@G.9 = global &lt;8 x i8&gt; splat (i8 -128)
+@G.10 = global i64 1
+@G.11 = global i16 1
+@G.12 = global i1 false
+@G.13 = global i128 -170141183460469231731687303715884105728
+@G.14 = global &lt;4 x i32&gt; splat (i32 65536)
+@G.15 = global i1 true
+@G.16 = global i1 false
+
+; Function Attrs: nounwind
+declare float @fcvt_s_d(double) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_s(float) #0
+
+; Function Attrs: nounwind
+declare i32 @fcvt_w_d(double) #0
+
+; Function Attrs: nounwind
+declare i32 @fcvt_w_d_sat(double) #0
+
+; Function Attrs: nounwind
+declare i32 @fcvt_wu_d(double) #0
+
+; Function Attrs: nounwind
+declare i32 @fcvt_wu_d_multiple_use(double, ptr) #0
+
+; Function Attrs: nounwind
+define i32 @fcvt_wu_d_sat(double %a) #0 {
+start:
+  %A11 = alloca i1, align 1
+  store i1 poison, ptr %A11, align 1
+  %A7 = alloca i1, align 1
+  store i1 false, ptr %A7, align 1
+  %A15 = alloca i1, align 1
+  store i1 poison, ptr %A15, align 1
+  %A10 = alloca i1, align 1
+  store i1 false, ptr %A10, align 1
+  %A2 = alloca &lt;4 x i1&gt;, align 1
+  store &lt;4 x i1&gt; poison, ptr %A2, align 1
+  %A6 = alloca i16, align 2
+  store i16 256, ptr %A6, align 2
+  %A1 = alloca i32, align 4
+  store i32 poison, ptr %A1, align 4
+  %LGV2 = load double, ptr @G.4, align 8
+  %A = alloca &lt;4 x i32&gt;, align 16
+  %L = load i8, ptr %A, align 1
+  %C = fcmp une double %a, %LGV2
+  store &lt;4 x i32&gt; poison, ptr %A, align 16
+  %LGV1 = load i32, ptr @G.3, align 4
+  %LGV = load &lt;4 x i32&gt;, ptr @G.2, align 16
+  %0 = tail call i32 @llvm.fptoui.sat.i32.f64(double %a)
+  %I = insertelement &lt;4 x i32&gt; %LGV, i32 %LGV1, i1 false
+  store &lt;4 x i32&gt; %I, ptr %A, align 16
+  store i1 %C, ptr @G.5, align 1
+  switch i8 %L, label %SW_D [
+    i8 -73, label %SW_C
+    i8 50, label %SW_C3
+    i8 71, label %SW_C4
+    i8 118, label %SW_C5
+    i8 -69, label %SW_C6
+    i8 29, label %SW_C7
+    i8 55, label %SW_C8
+    i8 30, label %SW_C9
+  ]
+
+BB:                                               ; preds = %SW_C6, %SW_C5, %SW_C4, %SW_C3, %BB5, %SW_D
+  ret i32 %0
+
+SW_D:                                             ; preds = %start
+  br label %BB
+
+SW_C:                                             ; preds = %start
+  %L7 = load i16, ptr %A6, align 2
+  switch i16 %L7, label %SW_D8 [
+    i16 10452, label %SW_C10
+  ]
+
+BB5:                                              ; preds = %BB3
+  br label %BB
+
+SW_C3:                                            ; preds = %SW_C3, %start
+  %LGV10 = load i1, ptr @G.6, align 1
+  %B = shl i32 %LGV1, 42
+  store i32 %B, ptr %A1, align 4
+  br i1 %LGV10, label %SW_C3, label %BB
+
+SW_C4:                                            ; preds = %start
+  br label %BB
+
+SW_C5:                                            ; preds = %start
+  br label %BB
+
+SW_C6:                                            ; preds = %SW_C6, %start
+  br i1 %C, label %BB, label %SW_C6
+
+SW_C7:                                            ; preds = %start
+  %LGV3 = load i16, ptr @G.11, align 2
+  %C4 = icmp slt i16 1, %LGV3
+  store i1 %C4, ptr %A1, align 1
+  ret i32 %0
+
+SW_C8:                                            ; preds = %start
+  %LGV12 = load i32, ptr @G.7, align 4
+  %C11 = icmp ult i32 %LGV12, %0
+  store i1 %C11, ptr %A6, align 1
+  ret i32 %LGV12
+
+SW_C9:                                            ; preds = %start
+  ret i32 %0
+
+SW_D8:                                            ; preds = %SW_C
+  %LGV9 = load i1, ptr @G.6, align 1
+  %L11 = load i1, ptr %A10, align 1
+  br i1 %L11, label %T7, label %F8
+
+BB6:                                              ; preds = %F8, %T7
+  %C5 = icmp ugt i16 %L7, -1
+  %LGV22 = load &lt;4 x i32&gt;, ptr @G.14, align 16
+  %B23 = mul &lt;4 x i32&gt; %LGV22, %LGV
+  store &lt;4 x i32&gt; %B23, ptr @G.14, align 16
+  store i1 %C5, ptr %A2, align 1
+  switch i32 %LGV1, label %SW_D2 [
+    i32 -1511306095, label %SW_C11
+    i32 1535392864, label %SW_C12
+    i32 -808852141, label %SW_C13
+    i32 430897025, label %SW_C14
+    i32 1292181252, label %SW_C15
+    i32 1602174823, label %SW_C16
+    i32 -1816059589, label %SW_C17
+  ]
+
+BB1:                                              ; preds = %SW_C17, %SW_C16, %SW_C14, %SW_C13, %SW_C12, %BB18
+  %L8 = load i1, ptr %A7, align 1
+  %C9 = icmp sle i1 %L11, false
+  store i1 %C9, ptr %A11, align 1
+  br i1 %L8, label %T4, label %F5
+
+BB3:                                              ; preds = %F5, %T4
+  br label %BB5
+
+SW_C10:                                           ; preds = %SW_C
+  %C19 = fcmp olt double %a, %a
+  store i1 %C19, ptr @G.12, align 1
+  ret i32 %LGV1
+
+SW_D2:                                            ; preds = %BB18, %BB6
+  %B14 = udiv i1 %C5, %LGV9
+  store i1 %B14, ptr %A15, align 1
+  br i1 %C, label %T, label %F
+
+BB18:                                             ; preds = %T
+  %LGV20 = load i128, ptr @G.13, align 4
+  %C21 = icmp sge i128 42, %LGV20
+  store i1 %C21, ptr %A6, align 1
+  br i1 %C, label %SW_D2, label %BB1
+
+SW_C11:                                           ; preds = %BB6
+  ret i32 42
+
+SW_C12:                                           ; preds = %BB6
+  br label %BB1
+
+SW_C13:                                           ; preds = %BB6
+  br label %BB1
+
+SW_C14:                                           ; preds = %BB6
+  %C1 = fcmp ugt &lt;4 x float&gt; splat (float +qnan), splat (float +qnan)
+  store &lt;4 x i1&gt; %C1, ptr %A2, align 1
+  br label %BB1
+
+SW_C15:                                           ; preds = %BB6
+  ret i32 42
+
+SW_C16:                                           ; preds = %BB6
+  br label %BB1
+
+SW_C17:                                           ; preds = %BB6
+  %C2 = icmp eq i8 %L, %L
+  store i1 %C2, ptr @G.16, align 1
+  br label %BB1
+
+T:                                                ; preds = %SW_D2
+  br label %BB18
+
+F:                                                ; preds = %SW_D2
+  ret i32 42
+
+T7:                                               ; preds = %SW_D8
+  br label %BB6
+
+F8:                                               ; preds = %SW_D8
+  br label %BB6
+
+T4:                                               ; preds = %BB1
+  br label %BB3
+
+F5:                                               ; preds = %F5, %BB1
+  br i1 %C5, label %F5, label %BB3
+}
+
+; Function Attrs: nounwind
+declare double @fcvt_d_w(i32) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_w_load(ptr) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_wu(i32) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_wu_load(ptr) #0
+
+; Function Attrs: nounwind
+declare i64 @fcvt_l_d(double) #0
+
+; Function Attrs: nounwind
+declare i64 @fcvt_l_d_sat(double) #0
+
+; Function Attrs: nounwind
+declare i64 @fcvt_lu_d(double) #0
+
+; Function Attrs: nounwind
+declare i64 @fcvt_lu_d_sat(double) #0
+
+; Function Attrs: nounwind
+declare i64 @fmv_x_d(double, double) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_l(i64) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_lu(i64) #0
+
+; Function Attrs: nounwind
+declare double @fmv_d_x(i64, i64) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_w_i8(i8 signext) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_wu_i8(i8 zeroext) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_w_i16(i16 signext) #0
+
+; Function Attrs: nounwind
+declare double @fcvt_d_wu_i16(i16 zeroext) #0
+
+; Function Attrs: nounwind
+declare signext i32 @fcvt_d_w_demanded_bits(i32 signext, ptr) #0
+
+; Function Attrs: nounwind
+declare signext i32 @fcvt_d_wu_demanded_bits(i32 signext, ptr) #0
+
+; Function Attrs: nounwind
+declare signext i16 @fcvt_w_s_i16(double) #0
+
+; Function Attrs: nounwind
+declare signext i16 @fcvt_w_s_sat_i16(double) #0
+
+; Function Attrs: nounwind
+declare zeroext i16 @fcvt_wu_s_i16(double) #0
+
+; Function Attrs: nounwind
+declare zeroext i16 @fcvt_wu_s_sat_i16(double) #0
+
+; Function Attrs: nounwind
+declare signext i8 @fcvt_w_s_i8(double) #0
+
+; Function Attrs: nounwind
+declare signext i8 @fcvt_w_s_sat_i8(double) #0
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(double %a) #0 {
+  %A11 = alloca i16, align 2
+  store i16 poison, ptr %A11, align 2
+  %A8 = alloca i1, align 1
+  store i1 true, ptr %A8, align 1
+  %A3 = alloca i1, align 1
+  %L1 = load double, ptr %A3, align 8
+  store i1 poison, ptr %A3, align 1
+  %B4 = fadd double %a, %L1
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %C = fcmp true double %B4, 4.940660e-324
+  br i1 %C, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %C2 = fcmp oeq float f0x7F7FFFFF, 4.200000e+01
+  %B10 = add i16 0, -1
+  %L9 = load i1, ptr %A8, align 1
+  store i16 %B10, ptr %A11, align 2
+  br i1 %L9, label %T6, label %F7
+
+BB5:                                              ; preds = %F7, %T6
+  %1 = fptoui double %a to i8
+  %B = fdiv double %a, %a
+  store i1 %C, ptr @G, align 1
+  store double %B, ptr @G.8, align 8
+  store i1 %C2, ptr %A3, align 1
+  ret i8 %1
+
+T:                                                ; preds = %T, %0
+  %L = load i1, ptr %A, align 1
+  %B1 = or i1 %L, %C
+  br i1 %B1, label %T, label %BB
+
+F:                                                ; preds = %0
+  %LGV = load i1, ptr @G.15, align 1
+  %B2 = srem &lt;4 x i32&gt; zeroinitializer, splat (i32 42)
+  %B3 = udiv i1 %LGV, true
+  store &lt;4 x i32&gt; %B2, ptr poison, align 16
+  store i1 %B3, ptr @G, align 1
+  br label %BB
+
+T6:                                               ; preds = %BB
+  br label %BB5
+
+F7:                                               ; preds = %BB
+  br label %BB5
+}
+
+; Function Attrs: nounwind
+declare zeroext i8 @fcvt_wu_s_sat_i8(double) #0
+
+; Function Attrs: nounwind
+declare zeroext i32 @fcvt_wu_d_sat_zext(double) #0
+
+; Function Attrs: nounwind
+declare signext i32 @fcvt_w_d_sat_sext(double) #0
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i16 @llvm.fptosi.sat.i16.f64(double) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.fptosi.sat.i32.f64(double) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.fptosi.sat.i64.f64(double) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i8 @llvm.fptosi.sat.i8.f64(double) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i16 @llvm.fptoui.sat.i16.f64(double) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i32 @llvm.fptoui.sat.i32.f64(double) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i64 @llvm.fptoui.sat.i64.f64(double) #1
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare i8 @llvm.fptoui.sat.i8.f64(double) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfa -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %89:_(&lt;4 x i1&gt;), %7:_(p0) :: (store (&lt;4 x i1&gt;) into %ir.A2) (in function: fcvt_wu_d_sat)<br>warning: Instruction selection used fallback path for fcvt_wu_d_sat<br>Unhandled predicate</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfa -O1 -global-isel=0</code></td><td>0</td><td>198</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfa -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfa -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %89:_(&lt;4 x i1&gt;), %7:_(p0) :: (store (&lt;4 x i1&gt;) into %ir.A2) (in function: fcvt_wu_d_sat)
+warning: Instruction selection used fallback path for fcvt_wu_d_sat
+Unhandled predicate
+UNREACHABLE executed at /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVInstructionSelector.cpp:2295!
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfa -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;InstructionSelect&#x27; on function &#x27;@fcvt_wu_s_i8&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000557f7fd1c3fb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000557f7fd193d1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000557f7fd1ce7b
+3  libc.so.6 0x00007ff39cc45330
+4  libc.so.6 0x00007ff39cc9ebec pthread_kill + 284
+5  libc.so.6 0x00007ff39cc4527e gsignal + 30
+6  libc.so.6 0x00007ff39cc288ff abort + 223
+7  llc       0x0000557f7fc74d4f
+8  llc       0x0000557f7e38551e
+9  llc       0x0000557f7e379923
+10 llc       0x0000557f80615317 llvm::InstructionSelectImpl::selectMachineFunction(llvm::MachineFunction&amp;) + 1255
+11 llc       0x0000557f80616ab1 llvm::InstructionSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 417
+12 llc       0x0000557f7e987861 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+13 llc       0x0000557f7ef23c77 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x0000557f7ef2c192 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x0000557f7ef24a20 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x0000557f7e17ce49
+17 llc       0x0000557f7e179fd3 main + 1747
+18 libc.so.6 0x00007ff39cc2a1ca
+19 libc.so.6 0x00007ff39cc2a28b __libc_start_main + 139
+20 llc       0x0000557f7e1790e5 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.d15d27c6a5.ll <span class="dim">(mutant of</span> double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zihintpause -O1</code></td></tr><tr><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.d4bb7e1406.ll <span class="dim">(mutant of</span> double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfa -O1</code></td></tr><tr><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.ll</td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

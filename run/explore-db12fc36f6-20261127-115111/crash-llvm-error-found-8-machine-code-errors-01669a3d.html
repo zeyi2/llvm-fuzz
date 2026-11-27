@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 8 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 8 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 8 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-fp-bf16.85f5859ac0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp-bf16.ll">fixed-vectors-reduction-fp-bf16.ll</a><span class="dim">)</span> @vreduce_fmax_v128bf16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfbfmin,+zvfbfmin -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define bfloat @vreduce_fmax_v128bf16(ptr %x) {
+  %G = getelementptr ptr, ptr %x, i32 -1
+  %v = load &lt;128 x bfloat&gt;, ptr %x, align 256
+  %red = call bfloat %G(&lt;128 x bfloat&gt; %v)
+  ret bfloat %red
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfbfmin,+zvfbfmin -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfbfmin,+zvfbfmin -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After IRTranslator
+# Machine code for function vreduce_fmax_v128bf16: IsSSA, TracksLiveness
+Function Live Ins: $x10
+bb.1 (%ir-block.0):
+  liveins: $x10
+  %0:_(p0) = COPY $x10
+  %1:_(i32) = G_CONSTANT i32 -4
+  %2:gprjalrnonx7(p0) = G_PTR_ADD %0:_, %1:_(i32)
+  %3:_(&lt;128 x bf16&gt;) = G_LOAD %0:_(p0) :: (load (&lt;128 x bf16&gt;) from %ir.x)
+  ADJCALLSTACKDOWN 448, 0, implicit-def $x2, implicit $x2
+  %5:_(bf16), %6:_(bf16), %7:_(bf16), %8:_(bf16), %9:_(bf16), %10:_(bf16), %11:_(bf16), %12:_(bf16), %13:_(bf16), %14:_(bf16), %15:_(bf16), %16:_(bf16), %17:_(bf16), %18:_(bf16), %19:_(bf16), %20:_(bf16), %21:_(bf16), %22:_(bf16), %23:_(bf16), %24:_(bf16), %25:_(bf16), %26:_(bf16), %27:_(bf16), %28:_(bf16), %29:_(bf16), %30:_(bf16), %31:_(bf16), %32:_(bf16), %33:_(bf16), %34:_(bf16), %35:_(bf16), %36:_(bf16), %37:_(bf16), %38:_(bf16), %39:_(bf16), %40:_(bf16), %41:_(bf16), %42:_(bf16), %43:_(bf16), %44:_(bf16), %45:_(bf16), %46:_(bf16), %47:_(bf16), %48:_(bf16), %49:_(bf16), %50:_(bf16), %51:_(bf16), %52:_(bf16), %53:_(bf16), %54:_(bf16), %55:_(bf16), %56:_(bf16), %57:_(bf16), %58:_(bf16), %59:_(bf16), %60:_(bf16), %61:_(bf16), %62:_(bf16), %63:_(bf16), %64:_(bf16), %65:_(bf16), %66:_(bf16), %67:_(bf16), %68:_(bf16), %69:_(bf16), %70:_(bf16), %71:_(bf16), %72:_(bf16), %73:_(bf16), %74:_(bf16), %75:_(bf16), %76:_(bf16), %77:_(bf16), %78:_(bf16), %79:_(bf16), %80:_(bf16), %81:_(bf16), %82:_(bf16), %83:_(bf16), %84:_(bf16), %85:_(bf16), %86:_(bf16), %87:_(bf16), %88:_(bf16), %89:_(bf16), %90:_(bf16), %91:_(bf16), %92:_(bf16), %93:_(bf16), %94:_(bf16), %95:_(bf16), %96:_(bf16), %97:_(bf16), %98:_(bf16), %99:_(bf16), %100:_(bf16), %101:_(bf16), %102:_(bf16), %103:_(bf16), %104:_(bf16), %105:_(bf16), %106:_(bf16), %107:_(bf16), %108:_(bf16), %109:_(bf16), %110:_(bf16), %111:_(bf16), %112:_(bf16), %113:_(bf16), %114:_(bf16), %115:_(bf16), %116:_(bf16), %117:_(bf16), %118:_(bf16), %119:_(bf16), %120:_(bf16), %121:_(bf16), %122:_(bf16), %123:_(bf16), %124:_(bf16), %125:_(bf16), %126:_(bf16), %127:_(bf16), %128:_(bf16), %129:_(bf16), %130:_(bf16), %131:_(bf16), %132:_(bf16) = G_UNMERGE_VALUES %3:_(&lt;128 x bf16&gt;)
+  %133:_(p0) = COPY $x2
+  %134:_(i32) = G_CONSTANT i32 0
+  %135:_(p0) = G_PTR_ADD %133:_, %134:_(i32)
+  G_STORE %21:_(bf16), %135:_(p0) :: (store (bf16) into stack, align 16)
+  %136:_(i32) = G_CONSTANT i32 4
+  %137:_(p0) = G_PTR_ADD %133:_, %136:_(i32)
+  G_STORE %22:_(bf16), %137:_(p0) :: (store (bf16) into stack + 4, align 4)
+  %138:_(i32) = G_CONSTANT i32 8
+  %139:_(p0) = G_PTR_ADD %133:_, %138:_(i32)
+  G_STORE %23:_(bf16), %139:_(p0) :: (store (bf16) into stack + 8, align 8)
+  %140:_(i32) = G_CONSTANT i32 12
+  %141:_(p0) = G_PTR_ADD %133:_, %140:_(i32)
+  G_STORE %24:_(bf16), %141:_(p0) :: (store (bf16) into stack + 12, align 4)
+  %142:_(i32) = G_CONSTANT i32 16
+  %143:_(p0) = G_PTR_ADD %133:_, %142:_(i32)
+  G_STORE %25:_(bf16), %143:_(p0) :: (store (bf16) into stack + 16, align 16)
+  %144:_(i32) = G_CONSTANT i32 20
+  %145:_(p0) = G_PTR_ADD %133:_, %144:_(i32)
+  G_STORE %26:_(bf16), %145:_(p0) :: (store (bf16) into stack + 20, align 4)
+  %146:_(i32) = G_CONSTANT i32 24
+  %147:_(p0) = G_PTR_ADD %133:_, %146:_(i32)
+  G_STORE %27:_(bf16), %147:_(p0) :: (store (bf16) into stack + 24, align 8)
+  %148:_(i32) = G_CONSTANT i32 28
+  %149:_(p0) = G_PTR_ADD %133:_, %148:_(i32)
+  G_STORE %28:_(bf16), %149:_(p0) :: (store (bf16) into stack + 28, align 4)
+  %150:_(i32) = G_CONSTANT i32 32
+  %151:_(p0) = G_PTR_ADD %133:_, %150:_(i32)
+  G_STORE %29:_(bf16), %151:_(p0) :: (store (bf16) into stack + 32, align 16)
+  %152:_(i32) = G_CONSTANT i32 36
+  %153:_(p0) = G_PTR_ADD %133:_, %152:_(i32)
+  G_STORE %30:_(bf16), %153:_(p0) :: (store (bf16) into stack + 36, align 4)
+  %154:_(i32) = G_CONSTANT i32 40
+  %155:_(p0) = G_PTR_ADD %133:_, %154:_(i32)
+  G_STORE %31:_(bf16), %155:_(p0) :: (store (bf16) into stack + 40, align 8)
+  %156:_(i32) = G_CONSTANT i32 44
+  %157:_(p0) = G_PTR_ADD %133:_, %156:_(i32)
+  G_STORE %32:_(bf16), %157:_(p0) :: (store (bf16) into stack + 4</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-fp-bf16.85f5859ac0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp-bf16.ll">fixed-vectors-reduction-fp-bf16.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfbfmin,+zvfbfmin -O2</code></td></tr><tr><td class="l">fixed-vectors-reduction-fp-bf16.b58ecd583d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp-bf16.ll">fixed-vectors-reduction-fp-bf16.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfbfmin,+zvfbfmin,+a -O3 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-reduction-fp.56ffa2b1ef.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfh,+zvfhmin,+d -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

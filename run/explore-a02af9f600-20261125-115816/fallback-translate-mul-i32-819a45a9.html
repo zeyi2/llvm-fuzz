@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: mul i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: mul i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: mul i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 9 test files, 212 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">aext-to-sext.ea6cda8ee4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/aext-to-sext.ll">aext-to-sext.ll</a><span class="dim">)</span> @square via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define signext i32 @square(i32 signext %num) {
+  %mul = mul nsw i32 %num, %num
+  %B1 = lshr i32 %mul, 0
+  %B = mul i32 %mul, %mul
+  store i32 %B1, ptr poison, align 4
+  ret i32 %B
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: mul: &#x27;  %mul = mul nsw i32 %num, %num&#x27; (in function: square)
+warning: Instruction selection used fallback path for square</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">aext-to-sext.ea6cda8ee4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/aext-to-sext.ll">aext-to-sext.ll</a><span class="dim">)</span></td><td class="l">square</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+zhinx -O1</code></td></tr><tr><td class="l">double-convert.0cd9b8532a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/double-convert.ll">double-convert.ll</a><span class="dim">)</span></td><td class="l">fcvt_wu_d_sat_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbs -O0</code></td></tr><tr><td class="l">llvm.frexp.f55f1687e7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/llvm.frexp.ll">llvm.frexp.ll</a><span class="dim">)</span></td><td class="l">test_frexp_f32_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zdinx -O1</code></td></tr><tr><td class="l">rv64zbc-zbkc-intrinsic.feaae15ce0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rv64zbc-zbkc-intrinsic.ll">rv64zbc-zbkc-intrinsic.ll</a><span class="dim">)</span></td><td class="l">clmul32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zbkc,+zfinx -O2</code></td></tr><tr><td class="l">rv64zfhmin-half-convert.587b2d2f27.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rv64zfhmin-half-convert.ll">rv64zfhmin-half-convert.ll</a><span class="dim">)</span></td><td class="l">uitofp_zext_i32_to_f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64 -mattr=+zhinxmin -O1</code></td></tr><tr><td class="l">sadd_sat_plus.cca96ab6fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/sadd_sat_plus.ll">sadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zhinx -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">tls-models.0e90d894d9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/tls-models.ll">tls-models.ll</a><span class="dim">)</span></td><td class="l">f3</td><td class="l"><code>-mtriple=riscv64 -mattr=+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">uadd_sat_plus.ee363401ce.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/uadd_sat_plus.ll">uadd_sat_plus.ll</a><span class="dim">)</span></td><td class="l">func32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zbb,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">xqcia.eb71dda5c4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/xqcia.ll">xqcia.ll</a><span class="dim">)</span></td><td class="l">addsat</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zbkb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: urem i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: urem i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: urem i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">8 in 8 configs, 8 test files, 107 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">atomicrmw-cond-sub-clamp.1a60bdfb31.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/atomicrmw-cond-sub-clamp.ll">atomicrmw-cond-sub-clamp.ll</a><span class="dim">)</span> @atomicrmw_usub_sat_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zcb,+zhinx -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @atomicrmw_usub_sat_i32(ptr %ptr, i32 %val) {
+  %B = urem i32 %val, 0
+  %result = atomicrmw usub_sat ptr %ptr, i32 %val seq_cst, align 4
+  ret i32 %B
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zcb,+zhinx -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zcb,+zhinx -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: urem: &#x27;  %B = urem i32 %val, 0&#x27; (in function: atomicrmw_usub_sat_i32)
+warning: Instruction selection used fallback path for atomicrmw_usub_sat_i32</pre>
+<h4>Occurrences (8):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">atomicrmw-cond-sub-clamp.1a60bdfb31.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/atomicrmw-cond-sub-clamp.ll">atomicrmw-cond-sub-clamp.ll</a><span class="dim">)</span></td><td class="l">atomicrmw_usub_sat_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+zcb,+zhinx -O2</code></td></tr><tr><td class="l">bswap-shift.32b504ae2c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/bswap-shift.ll">bswap-shift.ll</a><span class="dim">)</span></td><td class="l">test_bswap_shli_8_bswap_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbb,+zhinx,+zicsr -O0</code></td></tr><tr><td class="l">pr95284.5254fc3882.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/pr95284.ll">pr95284.ll</a><span class="dim">)</span></td><td class="l">PR95284</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zfinx,+zvbb -O3 -code-model=medium</code></td></tr><tr><td class="l">rv64-float-convert.badbf40de4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rv64-float-convert.ll">rv64-float-convert.ll</a><span class="dim">)</span></td><td class="l">fptoui_f32_to_i128</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx -O2 -code-model=medium</code></td></tr><tr><td class="l">rv64zbb.33b458a94f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/rv64zbb.ll">rv64zbb.ll</a><span class="dim">)</span></td><td class="l">cttz_zero_poison_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">short-forward-branch-opt-min-max.b72ec9410b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/short-forward-branch-opt-min-max.ll">short-forward-branch-opt-min-max.ll</a><span class="dim">)</span></td><td class="l">select_example_umin</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbb,+short-forward-branch-iminmax,+zdinx -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">sifive_sf_vsettnt.554545fa66.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/sifive_sf_vsettnt.ll">sifive_sf_vsettnt.ll</a><span class="dim">)</span></td><td class="l">test_sf_vsettnt_e16w2</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xsfmmbase,+zvkb,+zdinx -O0</code></td></tr><tr><td class="l">umulh.d165b96c2a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_i32</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zihintpause,+zhinx -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,andi,beq,beqz,bltu,bltz</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,andi,beq,beqz,bltu,bltz</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,andi,beq,beqz,bltu,bltz <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">readcyclecounter.501e8a8eba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/GlobalISel/readcyclecounter.ll">readcyclecounter.ll</a><span class="dim">)</span> @test_builtin_readcyclecounter via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -O1 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i64
+@G.1 = external global i1
+@G.2 = external global i1
+
+; Function Attrs: nounwind
+define i64 @test_builtin_readcyclecounter() #0 {
+  %A15 = alloca i1, align 1
+  store i1 false, ptr %A15, align 1
+  %A12 = alloca i1, align 1
+  store i1 false, ptr %A12, align 1
+  %A8 = alloca i1, align 1
+  store i1 false, ptr %A8, align 1
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %LGV = load i64, ptr @G, align 4
+  switch i64 %LGV, label %SW_D [
+    i64 4303199021846014237, label %SW_C
+    i64 2825014246696475366, label %SW_C1
+    i64 -1124663481073590762, label %SW_C2
+    i64 -126088060032052412, label %SW_C3
+    i64 5381856492718128585, label %SW_C4
+    i64 -1449714065303366033, label %SW_C5
+    i64 -3830871222338784181, label %SW_C6
+    i64 8167191317104177415, label %SW_C7
+  ]
+
+BB:                                               ; preds = %SW_C6, %SW_C5, %SW_C4, %SW_C2, %SW_C1, %SW_C, %SW_D
+  %1 = tail call i64 @llvm.readcyclecounter()
+  %B = ashr i64 %1, %1
+  ret i64 %B
+
+SW_D:                                             ; preds = %SW_D, %0
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %SW_C, %0
+  %L9 = load i1, ptr %A8, align 1
+  br i1 %L9, label %SW_C, label %BB
+
+SW_C1:                                            ; preds = %0
+  br label %BB
+
+SW_C2:                                            ; preds = %SW_C2, %0
+  %LGV10 = load i1, ptr @G.1, align 1
+  br i1 %LGV10, label %BB, label %SW_C2
+
+SW_C3:                                            ; preds = %0
+  ret i64 0
+
+SW_C4:                                            ; preds = %SW_C4, %0
+  %LGV11 = load i1, ptr @G.2, align 1
+  br i1 %LGV11, label %BB, label %SW_C4
+
+SW_C5:                                            ; preds = %SW_C5, %0
+  %L13 = load i1, ptr %A12, align 1
+  br i1 %L13, label %SW_C5, label %BB
+
+SW_C6:                                            ; preds = %SW_C6, %0
+  %LGV14 = load i1, ptr @G.1, align 1
+  %L16 = load i1, ptr %A15, align 1
+  br i1 %L16, label %BB, label %SW_C6
+
+SW_C7:                                            ; preds = %0
+  ret i64 %LGV
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn
+declare i64 @llvm.readcyclecounter() #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -mattr=+f -O1 -verify-machineinstrs&#x27; --funcs test_builtin_readcyclecounter snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">7 of 64 inputs differ (first: #2)
+SelectionDAG hash 517c0678befd4ca5, GlobalISel hash e0a40268ba9ea120
+b0: llc -mtriple=riscv32 -mattr=+f -verify-machineinstrs -O1 -global-isel=0
+b1: llc -mtriple=riscv32 -mattr=+f -verify-machineinstrs -O0 -global-isel=0
+b2: llc -mtriple=riscv32 -mattr=+f -verify-machineinstrs -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">readcyclecounter.501e8a8eba.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/GlobalISel/readcyclecounter.ll">readcyclecounter.ll</a><span class="dim">)</span></td><td class="l">test_builtin_readcyclecounter</td><td class="l"><code>-mtriple=riscv32 -mattr=+f -O1 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

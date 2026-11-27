@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shl &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shl &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shl &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">5 in 5 configs, 5 test files, 85 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vpload.522916281d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span> @unaligned_vpload_nxv1i64_allones_mask via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zcb,+c -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 1 x i64&gt; @unaligned_vpload_nxv1i64_allones_mask(ptr %ptr, i32 zeroext %evl) {
+  %a = insertelement &lt;vscale x 1 x i1&gt; poison, i1 true, i32 0
+  %B = shl &lt;vscale x 1 x i1&gt; %a, %a
+  %b = shufflevector &lt;vscale x 1 x i1&gt; %a, &lt;vscale x 1 x i1&gt; %B, &lt;vscale x 1 x i32&gt; zeroinitializer
+  %load = call &lt;vscale x 1 x i64&gt; @llvm.vp.load.nxv1i64.p0(ptr align 1 %ptr, &lt;vscale x 1 x i1&gt; %b, i32 %evl)
+  ret &lt;vscale x 1 x i64&gt; %load
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: read)
+declare &lt;vscale x 1 x i64&gt; @llvm.vp.load.nxv1i64.p0(ptr captures(none), &lt;vscale x 1 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zcb,+c -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zcb,+c -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shl: &#x27;  %B = shl &lt;vscale x 1 x i1&gt; %a, %a&#x27; (in function: unaligned_vpload_nxv1i64_allones_mask)
+warning: Instruction selection used fallback path for unaligned_vpload_nxv1i64_allones_mask</pre>
+<h4>Occurrences (5):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-fp-splat-bf16.46e04cabe0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp-splat-bf16.ll">fixed-vectors-fp-splat-bf16.ll</a><span class="dim">)</span></td><td class="l">splat_zero_v8bf16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zfbfmin,+zvfbfmin,+zbkb -O0</code></td></tr><tr><td class="l">rvv-vmerge-to-vmv.824b95f956.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/rvv-vmerge-to-vmv.ll">rvv-vmerge-to-vmv.ll</a><span class="dim">)</span></td><td class="l">preserve_false</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v -O0</code></td></tr><tr><td class="l">vfcvt-xu-f.e9e3307c52.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vfcvt-xu-f.ll">vfcvt-xu-f.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfcvt_mask_xu.f.v_nxv32i16_nxv32f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh,+zfa -O0</code></td></tr><tr><td class="l">vmsbc.borrow.in.053aef6f4f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vmsbc.borrow.in.ll">vmsbc.borrow.in.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vmsbc.borrow.in_vxm_nxv32i1_nxv32i16_i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zbkb -O2 -code-model=small</code></td></tr><tr><td class="l">vpload.522916281d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">unaligned_vpload_nxv1i64_allones_mask</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfh,+zvfbfmin,+v,+zcb,+c -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

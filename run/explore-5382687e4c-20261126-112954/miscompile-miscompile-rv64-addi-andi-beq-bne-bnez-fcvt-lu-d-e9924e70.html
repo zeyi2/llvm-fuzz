@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,beq,bne,bnez,fcvt.lu.d</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,beq,bne,bnez,fcvt.lu.d</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,beq,bne,bnez,fcvt.lu.d <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-convert.6a9e415f.b4b991a3.234cbd22.03a49e3e.e0f954558e.ll <span class="dim">(mutant of</span> double-convert.6a9e415f.b4b991a3.234cbd22.03a49e3e.ll<span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+a,+zicond -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+@G.7 = external global i8
+@G.8 = external global i1
+@G.9 = external global double
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(double %a) #0 {
+  %LGV3 = load double, ptr @G.9, align 8
+  %C4 = fcmp true double %a, %LGV3
+  %A = alloca i8, align 1
+  store i8 1, ptr %A, align 1
+  %L = load i8, ptr %A, align 1
+  store i1 %C4, ptr %A, align 1
+  switch i8 %L, label %SW_D [
+    i8 62, label %SW_C
+    i8 -28, label %SW_C1
+  ]
+
+BB:                                               ; preds = %BB1, %SW_D
+  %1 = fptoui double %a to i8
+  %C = icmp ugt i8 %1, %1
+  store i1 %C, ptr @G.2, align 1
+  ret i8 %1
+
+SW_D:                                             ; preds = %0
+  br label %BB
+
+SW_C:                                             ; preds = %0
+  %LGV2 = load i1, ptr @G.8, align 1
+  %G = getelementptr &lt;4 x i32&gt;, ptr %A, i8 %L
+  store ptr %G, ptr %A, align 8
+  br i1 %LGV2, label %T, label %F
+
+BB1:                                              ; preds = %T
+  br label %BB
+
+SW_C1:                                            ; preds = %0
+  %LGV = load i8, ptr @G.7, align 1
+  %G1 = getelementptr double, ptr %A, i8 %L
+  %C3 = icmp ne i8 %LGV, %LGV
+  store i1 %C3, ptr poison, align 1
+  store ptr %G1, ptr %A, align 8
+  ret i8 %LGV
+
+T:                                                ; preds = %SW_C
+  br label %BB1
+
+F:                                                ; preds = %SW_C
+  ret i8 0
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+a,+zicond -O1&#x27; --funcs fcvt_wu_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">9 of 64 inputs differ (first: #12)
+SelectionDAG hash 7671f9994d454daf, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+a,+zicond -O1 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+a,+zicond -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+a,+zicond -O1 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert.6a9e415f.b4b991a3.234cbd22.03a49e3e.e0f954558e.ll <span class="dim">(mutant of</span> double-convert.6a9e415f.b4b991a3.234cbd22.03a49e3e.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+a,+zicond -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">7 in 7 configs, 7 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vdot4a.e2f123fad5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vdot4a.ll">vdot4a.ll</a><span class="dim">)</span> @intrinsic_vdot4a_vx_nxv1i32_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zfinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define &lt;vscale x 1 x i32&gt; @intrinsic_vdot4a_vx_nxv1i32_i32(&lt;vscale x 1 x i32&gt; %0, &lt;vscale x 1 x i32&gt; %1, i32 %2, i64 %3) #0 {
+entry:
+  %A = alloca &lt;vscale x 1 x i1&gt;, align 1
+  store &lt;vscale x 1 x i1&gt; poison, ptr %A, align 1
+  %a = call &lt;vscale x 1 x i32&gt; @llvm.riscv.vdot4a.nxv1i32.i32.i64(&lt;vscale x 1 x i32&gt; %0, &lt;vscale x 1 x i32&gt; %1, i32 %2, i64 %3, i64 0)
+  %C = icmp uge &lt;vscale x 1 x i32&gt; %a, zeroinitializer
+  store &lt;vscale x 1 x i1&gt; %C, ptr %A, align 1
+  ret &lt;vscale x 1 x i32&gt; %a
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 1 x i32&gt; @llvm.riscv.vdot4a.nxv1i32.i32.i64(&lt;vscale x 1 x i32&gt;, &lt;vscale x 1 x i32&gt;, i32, i64, i64 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zfinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zfinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca &lt;vscale x 1 x i1&gt;, align 1&#x27; (in function: intrinsic_vdot4a_vx_nxv1i32_i32)
+warning: Instruction selection used fallback path for intrinsic_vdot4a_vx_nxv1i32_i32</pre>
+<h4>Occurrences (7):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vdot4a.e2f123fad5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vdot4a.ll">vdot4a.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vdot4a_vx_nxv1i32_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zfinx -O3</code></td></tr><tr><td class="l">vdot4asu.7f21186376.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vdot4asu.ll">vdot4asu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vdot4asu_mask_vx_nxv1i32_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zhinx -O3</code></td></tr><tr><td class="l">vdot4au.bdf29e7f.582054aea4.ll <span class="dim">(mutant of</span> vdot4au.bdf29e7f.ll<span class="dim">)</span></td><td class="l">intrinsic_vdot4au_vx_nxv16i32_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zdinx,+zbkb -O2</code></td></tr><tr><td class="l">vdot4aus.8cf81eea07.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vdot4aus.ll">vdot4aus.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vdot4aus_vx_nxv16i32_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zdinx -O2</code></td></tr><tr><td class="l">vsha2ch.f5562922.418ed54562.ll <span class="dim">(mutant of</span> vsha2ch.f5562922.ll<span class="dim">)</span></td><td class="l">intrinsic_vsha2ch_vv_nxv4i64_nxv4i64</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zvknhb,+zfinx -O1</code></td></tr><tr><td class="l">vslide1up-constant-vl-rv32.4c55832b6f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/vslide1up-constant-vl-rv32.ll">vslide1up-constant-vl-rv32.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vslide1up_vx_nxv1i64_nxv1i64_i64_vl1</td><td class="l"><code>-mtriple=riscv32 -riscv-v-vector-bits-max=64 -verify-machineinstrs -mattr=+zve64x,+zvl64b,+a,+zfinx -O3</code></td></tr><tr><td class="l">xandesvdot-vd4dotu.028363c265.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/xandesvdot-vd4dotu.ll">xandesvdot-vd4dotu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vd4dotu_mask_vv_nxv2i64_nxv8i16_nxv8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64 -mattr=+zve64x,+xandesvdot,+zdinx -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

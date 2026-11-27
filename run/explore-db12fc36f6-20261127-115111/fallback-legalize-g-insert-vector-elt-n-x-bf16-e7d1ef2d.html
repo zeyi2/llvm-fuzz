@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x bf16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INSERT_VECTOR_ELT &lt;N x bf16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INSERT_VECTOR_ELT &lt;N x bf16&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-scalarized.12d9ad7d83.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-scalarized.ll">fixed-vectors-scalarized.ll</a><span class="dim">)</span> @fpext_v8f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+f -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global bfloat
+@G.1 = external global &lt;8 x bfloat&gt;
+@G.2 = external global i64
+
+define &lt;8 x float&gt; @fpext_v8f16(&lt;8 x bfloat&gt; %x) {
+  %B = lshr i64 -1, -1
+  %LGV = load bfloat, ptr @G, align 2
+  %y = fpext &lt;8 x bfloat&gt; %x to &lt;8 x float&gt;
+  %I = insertelement &lt;8 x bfloat&gt; %x, bfloat %LGV, i128 0
+  store &lt;8 x bfloat&gt; %I, ptr @G.1, align 16
+  store i64 %B, ptr @G.2, align 4
+  ret &lt;8 x float&gt; %y
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+f -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %16:_(&lt;8 x bf16&gt;) = G_INSERT_VECTOR_ELT %0:_, %13:_(bf16), %17:_(i64) (in function: fpext_v8f16)
+warning: Instruction selection used fallback path for fpext_v8f16</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-interleave-store.4b57f35cad.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_v16bf16_v8bf16</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin,+zbs -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-interleave-store.a7da320ede.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_v8bf16_v4bf16</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-scalarized.12d9ad7d83.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-scalarized.ll">fixed-vectors-scalarized.ll</a><span class="dim">)</span></td><td class="l">fpext_v8f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+f -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

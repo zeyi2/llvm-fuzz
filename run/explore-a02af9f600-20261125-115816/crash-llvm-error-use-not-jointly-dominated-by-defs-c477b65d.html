@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Use not jointly dominated by defs.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Use not jointly dominated by defs.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Use not jointly dominated by defs. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 3 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">get-register-reserve.7083c54335.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/get-register-reserve.ll">get-register-reserve.ll</a><span class="dim">)</span> @get_reg_a1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+zfa -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/bYzf8f6jv">https://godbolt.org/z/bYzf8f6jv</a> (llc-assertions-trunk, checked 2026-11-25 15:47 UTC): <a href="https://godbolt.org/z/bYzf8f6jv">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i32
+
+; Function Attrs: nounwind
+define i32 @get_reg_a1() #0 {
+entry:
+  %a1 = call i32 @llvm.read_register.i32(metadata !0)
+  %B = urem i32 %a1, %a1
+  store i32 %B, ptr @G, align 4
+  ret i32 %a1
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare i32 @llvm.read_register.i32(metadata) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(read) }
+
+!0 = !{!&quot;a1\00&quot;}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+zfa -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">Use of $x11 does not have a corresponding definition on every path:<br>80r PseudoCALL target-flags(riscv-call) &amp;__umodsi3, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f $f22_f $f23_f $f24_f $f25_f $f26_f $f27_f $f8_h $f9_h $f18_h $f19_h $f20_h $f21_h and 41 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit-def $x10<br>LLVM ERROR: Use not jointly dominated by defs.</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+zfa -O2 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>4</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+zfa -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+zfa -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">Use of $x11 does not have a corresponding definition on every path:
+80r PseudoCALL target-flags(riscv-call) &amp;__umodsi3, &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f $f22_f $f23_f $f24_f $f25_f $f26_f $f27_f $f8_h $f9_h $f18_h $f19_h $f20_h $f21_h and 41 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit-def $x10
+LLVM ERROR: Use not jointly dominated by defs.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+zfa -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Machine Instruction Scheduler&#x27; on function &#x27;@get_reg_a1&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000556541e10ecb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000556541e0dea1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000556541e1194b
+3  libc.so.6 0x00007fde2ec45330
+4  libc.so.6 0x00007fde2ec9ebec pthread_kill + 284
+5  libc.so.6 0x00007fde2ec4527e gsignal + 30
+6  libc.so.6 0x00007fde2ec288ff abort + 223
+7  llc       0x0000556541d693bd llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x0000556541d69206
+9  llc       0x00005565409e0a80 llvm::LiveRangeCalc::findReachingDefs(llvm::LiveRange&amp;, llvm::MachineBasicBlock&amp;, llvm::SlotIndex, llvm::Register, llvm::ArrayRef&lt;llvm::SlotIndex&gt;) + 4144
+10 llc       0x00005565409df933 llvm::LiveRangeCalc::extend(llvm::LiveRange&amp;, llvm::SlotIndex, llvm::Register, llvm::ArrayRef&lt;llvm::SlotIndex&gt;) + 211
+11 llc       0x00005565409e3836 llvm::LiveIntervalCalc::extendToUses(llvm::LiveRange&amp;, llvm::Register, llvm::LaneBitmask, llvm::LiveInterval*) + 486
+12 llc       0x00005565409cac93 llvm::LiveIntervals::computeRegUnitRange(llvm::LiveRange&amp;, llvm::MCRegUnit) + 979
+13 llc       0x00005565409c9500
+14 llc       0x00005565409cf194
+15 llc       0x00005565409ceea2 llvm::LiveIntervals::handleMove(llvm::MachineInstr&amp;, bool) + 306
+16 llc       0x0000556540b58a3e llvm::ScheduleDAGMI::moveInstruction(llvm::MachineInstr*, llvm::MachineInstrBundleIterator&lt;llvm::MachineInstr, false&gt;) + 158
+17 llc       0x0000556540b5f69c llvm::ScheduleDAGMILive::scheduleMI(llvm::SUnit*, bool) + 108
+18 llc       0x0000556540b5ef9b llvm::ScheduleDAGMILive::schedule() + 747
+19 llc       0x0000556540b560ef llvm::impl_detail::MachineSchedulerBase::scheduleRegions(llvm::ScheduleDAGInstrs&amp;, bool) + 1407
+20 llc       0x0000556540b55ac4 llvm::impl_detail::MachineSchedulerImpl::run(llvm::MachineFunction&amp;, llvm::TargetMachine const&amp;, llvm::impl_detail::MachineSchedulerImpl::RequiredAnalyses const&amp;) + 324
+21 llc       0x0000556540b6d07b
+22 llc       0x0000556540a7cb31 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+23 llc       0x0000556541017417 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+24 llc       0x000055654101f932 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+25 llc       0x00005565410181c0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+26 llc       0x00005565402707c9
+27 llc       0x000055654026d953 main + 1747
+28 libc.so.6 0x00007fde2ec2a1ca
+29 libc.so.6 0x00007fde2ec2a28b __libc_start_main + 139
+30 llc       0x000055654026ca65 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">get-register-reserve.1370525252.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/get-register-reserve.ll">get-register-reserve.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">get-register-reserve.7083c54335.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/get-register-reserve.ll">get-register-reserve.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+zfa -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">get-register-reserve.b66f5ec8af.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/get-register-reserve.ll">get-register-reserve.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+m -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

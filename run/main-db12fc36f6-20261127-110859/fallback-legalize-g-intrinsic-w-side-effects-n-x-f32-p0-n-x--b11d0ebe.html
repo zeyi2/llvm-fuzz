@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x f32&gt;,p0,&lt;N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x f32&gt;,p0,&lt;N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-db12fc36f6-20261127-110859.html">main-db12fc36f6-20261127-110859</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC_W_SIDE_EFFECTS &lt;N x f32&gt;,p0,&lt;N x i1&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">22 in 11 configs, 4 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a> @vector_interleave_store_v4f32_v2f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @vector_interleave_store_v4f32_v2f32(&lt;2 x float&gt; %a, &lt;2 x float&gt; %b, ptr %p) {
+  %res = call &lt;4 x float&gt; @llvm.vector.interleave2.v4f32(&lt;2 x float&gt; %a, &lt;2 x float&gt; %b)
+  store &lt;4 x float&gt; %res, ptr %p, align 16
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;4 x float&gt; @llvm.vector.interleave2.v4f32(&lt;2 x float&gt;, &lt;2 x float&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_INTRINSIC_W_SIDE_EFFECTS intrinsic(@llvm.riscv.seg2.store.mask), %0:_(&lt;2 x f32&gt;), %1:_(&lt;2 x f32&gt;), %2:_(p0), %5:_(&lt;2 x i1&gt;), %7:_(i32) :: (store unknown-size into %ir.p, align 4) (in function: vector_interleave_store_v4f32_v2f32)
+warning: Instruction selection used fallback path for vector_interleave_store_v4f32_v2f32</pre>
+<h4>Occurrences (22) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v4f32_v2f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v4f32_v2f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v4f32_v2f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v4f32_v2f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfhmin,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfhmin,+zvfbfmin</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/sink-splat-operands.ll">sink-splat-operands.ll</a></td><td class="l">sink_splat_fcmp</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f -target-abi=lp64f</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/sink-splat-operands.ll">sink-splat-operands.ll</a></td><td class="l">sink_splat_vp_fcmp</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+v,+f -target-abi=lp64f</code></td></tr><tr><td class="l">fixed-vectors-interleave-store.27f5a11e00.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfhmin,+zvfbfmin</code></td></tr><tr><td class="l">fixed-vectors-interleave-store.6728c2a30d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfh,+zvfbfmin</code></td></tr><tr><td class="l">fixed-vectors-interleave-store.7f38b170c6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv32 -mattr=+v,+zvfh,+zvfbfmin</code></td></tr><tr><td class="l">fixed-vectors-interleave-store.a81e9f800f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-interleave-store.ll">fixed-vectors-interleave-store.ll</a><span class="dim">)</span></td><td class="l">vector_interleave_store_v8f32_v4f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+v,+zvfhmin,+zvfbfmin</code></td></tr><tr><td class="l">fixed-vectors-strided-vpstore.4232cc6a28.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-strided-vpstore.ll">fixed-vectors-strided-vpstore.ll</a><span class="dim">)</span></td><td class="l">strided_vpstore_v2f32</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+d,+v,+zvfhmin,+zvfbfmin -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

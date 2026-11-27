@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 8 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 8 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 8 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-fp.95228df0a9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span> @vreduce_fmax_v32f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d -O1 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/cP64bjzG8">https://godbolt.org/z/cP64bjzG8</a> (llc-assertions-trunk, checked 2026-11-25 15:48 UTC): <a href="https://godbolt.org/z/cP64bjzG8">G</a> <span class="fp">crashes differently</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define double @vreduce_fmax_v32f64(ptr %x) {
+  %G = getelementptr ptr, ptr %x, i8 0
+  %v = load &lt;32 x double&gt;, ptr %x, align 256
+  %red = call double %G(&lt;32 x double&gt; %v)
+  ret double %red
+}
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err"><br># After IRTranslator<br># Machine code for function vreduce_fmax_v32f64: IsSSA, TracksLiveness</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d -O1 -code-model=medium -global-isel=0</code></td><td>0</td><td>95</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d -O1 -code-model=medium -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d -O1 -code-model=medium -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After IRTranslator
+# Machine code for function vreduce_fmax_v32f64: IsSSA, TracksLiveness
+Function Live Ins: $x10
+bb.1 (%ir-block.0):
+  liveins: $x10
+  %0:gprjalrnonx7(p0) = COPY $x10
+  %1:_(&lt;32 x f64&gt;) = G_LOAD %0:gprjalrnonx7(p0) :: (load (&lt;32 x f64&gt;) from %ir.x)
+  ADJCALLSTACKDOWN 160, 0, implicit-def $x2, implicit $x2
+  %3:_(f64), %4:_(f64), %5:_(f64), %6:_(f64), %7:_(f64), %8:_(f64), %9:_(f64), %10:_(f64), %11:_(f64), %12:_(f64), %13:_(f64), %14:_(f64), %15:_(f64), %16:_(f64), %17:_(f64), %18:_(f64), %19:_(f64), %20:_(f64), %21:_(f64), %22:_(f64), %23:_(f64), %24:_(f64), %25:_(f64), %26:_(f64), %27:_(f64), %28:_(f64), %29:_(f64), %30:_(f64), %31:_(f64), %32:_(f64), %33:_(f64), %34:_(f64) = G_UNMERGE_VALUES %1:_(&lt;32 x f64&gt;)
+  %35:_(p0) = COPY $x2
+  %36:_(i32) = G_CONSTANT i32 0
+  %37:_(p0) = G_PTR_ADD %35:_, %36:_(i32)
+  G_STORE %19:_(f64), %37:_(p0) :: (store (f64) into stack, align 16)
+  %38:_(i32) = G_CONSTANT i32 8
+  %39:_(p0) = G_PTR_ADD %35:_, %38:_(i32)
+  G_STORE %20:_(f64), %39:_(p0) :: (store (f64) into stack + 8)
+  %40:_(i32) = G_CONSTANT i32 16
+  %41:_(p0) = G_PTR_ADD %35:_, %40:_(i32)
+  G_STORE %21:_(f64), %41:_(p0) :: (store (f64) into stack + 16, align 16)
+  %42:_(i32) = G_CONSTANT i32 24
+  %43:_(p0) = G_PTR_ADD %35:_, %42:_(i32)
+  G_STORE %22:_(f64), %43:_(p0) :: (store (f64) into stack + 24)
+  %44:_(i32) = G_CONSTANT i32 32
+  %45:_(p0) = G_PTR_ADD %35:_, %44:_(i32)
+  G_STORE %23:_(f64), %45:_(p0) :: (store (f64) into stack + 32, align 16)
+  %46:_(i32) = G_CONSTANT i32 40
+  %47:_(p0) = G_PTR_ADD %35:_, %46:_(i32)
+  G_STORE %24:_(f64), %47:_(p0) :: (store (f64) into stack + 40)
+  %48:_(i32) = G_CONSTANT i32 48
+  %49:_(p0) = G_PTR_ADD %35:_, %48:_(i32)
+  G_STORE %25:_(f64), %49:_(p0) :: (store (f64) into stack + 48, align 16)
+  %50:_(i32) = G_CONSTANT i32 56
+  %51:_(p0) = G_PTR_ADD %35:_, %50:_(i32)
+  G_STORE %26:_(f64), %51:_(p0) :: (store (f64) into stack + 56)
+  %52:_(i32) = G_CONSTANT i32 64
+  %53:_(p0) = G_PTR_ADD %35:_, %52:_(i32)
+  G_STORE %27:_(f64), %53:_(p0) :: (store (f64) into stack + 64, align 16)
+  %54:_(i32) = G_CONSTANT i32 72
+  %55:_(p0) = G_PTR_ADD %35:_, %54:_(i32)
+  G_STORE %28:_(f64), %55:_(p0) :: (store (f64) into stack + 72)
+  %56:_(i32) = G_CONSTANT i32 80
+  %57:_(p0) = G_PTR_ADD %35:_, %56:_(i32)
+  G_STORE %29:_(f64), %57:_(p0) :: (store (f64) into stack + 80, align 16)
+  %58:_(i32) = G_CONSTANT i32 88
+  %59:_(p0) = G_PTR_ADD %35:_, %58:_(i32)
+  G_STORE %30:_(f64), %59:_(p0) :: (store (f64) into stack + 88)
+  %60:_(i32) = G_CONSTANT i32 96
+  %61:_(p0) = G_PTR_ADD %35:_, %60:_(i32)
+  G_STORE %31:_(f64), %61:_(p0) :: (store (f64) into stack + 96, align 16)
+  %62:_(i32) = G_CONSTANT i32 104
+  %63:_(p0) = G_PTR_ADD %35:_, %62:_(i32)
+  G_STORE %32:_(f64), %63:_(p0) :: (store (f64) into stack + 104)
+  %64:_(i32) = G_CONSTANT i32 112
+  %65:_(p0) = G_PTR_ADD %35:_, %64:_(i32)
+  G_STORE %33:_(f64), %65:_(p0) :: (store (f64) into stack + 112, align 16)
+  %66:_(i32) = G_CONSTANT i32 120
+  %67:_(p0) = G_PTR_ADD %35:_, %66:_(i32)
+  G_STORE %34:_(f64), %67:_(p0) :: (store (f64) into stack + 120)
+  $f10_d = COPY %3:_(f64)
+  $f11_d = COPY %4:_(f64)
+  $f12_d = COPY %5:_(f64)
+  $f13_d = COPY %6:_(f64)
+  $f14_d = COPY %7:_(f64)
+  $f15_d = COPY %8:_(f64)
+  $f16_d = COPY %9:_(f64)
+  $f17_d = COPY %10:_(f64)
+  $x10 = COPY %11:_(f64)
+  $x11 = COPY %12:_(f64)
+  $x12 = COPY %13:_(f64)
+  $x13 = COPY %14:_(f64)
+  $x14 = COPY %15:_(f64)
+  $x15 = COPY %16:_(f64)
+  $x16 = COPY %17:_(f64)
+  $x17 = COPY %18:_(f64)
+  PseudoCALLIndirect %0:gprjalrnonx7(p0), &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_d $f9_d $f18_d $f19_d $f20_d $f21_d $f22_d $f23_d $f24_d $f25_d $f26_d $f27_d $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f and 53 more...&gt;, implicit-def dead $x1, implicit $f10_d, implicit $f11_d, implicit $f12_d, implicit $f13_d, implicit $f14_d, implicit $f15_d, implicit $f16_d, implicit $f17_d, implicit $x10, implicit $x11, implicit $x12, implicit $x13, implicit $x14, implicit $x15</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-fp.272189bf04.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d,+zfhmin -O0</code></td></tr><tr><td class="l">fixed-vectors-reduction-fp.95228df0a9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d -O1 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-reduction-fp.b254777d2e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-fp.ll">fixed-vectors-reduction-fp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+zfh,+zvfh,+f,+d,+zicond -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

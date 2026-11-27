@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_VECREDUCE_UMAX &lt;N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_VECREDUCE_UMAX &lt;N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_VECREDUCE_UMAX &lt;N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 7 configs, 2 test files, 40 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-reduction-mask-vp.aa459da1e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span> @vpreduce_umax_v64i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define zeroext i1 @vpreduce_umax_v64i1(i1 zeroext %s, &lt;64 x i1&gt; %v, &lt;64 x i1&gt; %m, i32 zeroext %evl) {
+  %r = call i1 @llvm.vp.reduce.umax.v64i1(i1 %s, &lt;64 x i1&gt; %v, &lt;64 x i1&gt; %m, i32 %evl)
+  %B = shl i1 %s, %r
+  ret i1 %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare i1 @llvm.vp.reduce.umax.v64i1(i1, &lt;64 x i1&gt;, &lt;64 x i1&gt;, i32) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %81:_(i1) = G_VECREDUCE_UMAX %80:_(&lt;64 x i1&gt;) (in function: vpreduce_umax_v64i1)
+warning: Instruction selection used fallback path for vpreduce_umax_v64i1</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.340b1598a0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umax_v4i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -O2</code></td></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.4d29bea406.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umax_v16i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O2</code></td></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.aa459da1e0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umax_v64i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O3</code></td></tr><tr><td class="l">fixed-vectors-reduction-mask-vp.b6ccc168b8.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-mask-vp.ll">fixed-vectors-reduction-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_umax_v4i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.28e924a201.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_umax_v8i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m -O0</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.36f198e6fe.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_umax_v256i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zbb -O2</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.6a43f02dc6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_umax_v32i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -O0</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.ea58607636.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_umax_v64i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v -O0</code></td></tr><tr><td class="l">fixed-vectors-vreductions-mask.ea58607636.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vreductions-mask.ll">fixed-vectors-vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_umax_v256i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

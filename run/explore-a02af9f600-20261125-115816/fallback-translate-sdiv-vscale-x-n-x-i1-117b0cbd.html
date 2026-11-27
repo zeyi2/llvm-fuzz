@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: sdiv &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: sdiv &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: sdiv &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 111 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-compress.b3fd9fb9b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vector-compress.ll">vector-compress.ll</a><span class="dim">)</span> @vector_compress_nxv32f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin,+zfhmin,+zfa -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 32 x half&gt; @vector_compress_nxv32f16(&lt;vscale x 32 x half&gt; %data, &lt;vscale x 32 x i1&gt; %mask) {
+  %B = sdiv &lt;vscale x 32 x i1&gt; %mask, splat (i1 true)
+  %ret = call &lt;vscale x 32 x half&gt; @llvm.experimental.vector.compress.nxv32f16(&lt;vscale x 32 x half&gt; %data, &lt;vscale x 32 x i1&gt; %B, &lt;vscale x 32 x half&gt; poison)
+  ret &lt;vscale x 32 x half&gt; %ret
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 32 x half&gt; @llvm.experimental.vector.compress.nxv32f16(&lt;vscale x 32 x half&gt;, &lt;vscale x 32 x i1&gt;, &lt;vscale x 32 x half&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv64 -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin,+zfhmin,+zfa -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv64 -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin,+zfhmin,+zfa -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: sdiv: &#x27;  %B = sdiv &lt;vscale x 32 x i1&gt; %mask, splat (i1 true)&#x27; (in function: vector_compress_nxv32f16)
+warning: Instruction selection used fallback path for vector_compress_nxv32f16</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">commutable.f3262523ac.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/commutable.ll">commutable.ll</a><span class="dim">)</span></td><td class="l">commutable_vmax_vv_masked</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v -O2</code></td></tr><tr><td class="l">masked-tamu.7984ce3e5a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/masked-tamu.ll">masked-tamu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfmacc_mask_vv_nxv1f16_nxv1f16_nxv1f16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+zvfh -O1 -code-model=small</code></td></tr><tr><td class="l">vector-compress.b3fd9fb9b1.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vector-compress.ll">vector-compress.ll</a><span class="dim">)</span></td><td class="l">vector_compress_nxv32f16</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv64 -mattr=+m,+v,+f,+d,+zvfh,+zvfbfmin,+zfhmin,+zfa -O0</code></td></tr><tr><td class="l">vrol.a26074ca5e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vrol.ll">vrol.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vrol_mask_vx_nxv32i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zvkb -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

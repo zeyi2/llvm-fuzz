@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: alloca &lt;vscale x N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: alloca &lt;vscale x N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: alloca &lt;vscale x N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 4 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">zvdot4a8i-sdnode.31816b89fa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a><span class="dim">)</span> @partial_of_sext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zhinx -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 4 x i32&gt; @partial_of_sext(&lt;vscale x 16 x i8&gt; %a) {
+entry:
+  %A = alloca &lt;vscale x 16 x i32&gt;, align 64
+  store &lt;vscale x 16 x i32&gt; poison, ptr %A, align 64
+  %a.ext = sext &lt;vscale x 16 x i8&gt; %a to &lt;vscale x 16 x i32&gt;
+  %res = call &lt;vscale x 4 x i32&gt; @llvm.vector.partial.reduce.add.nxv4i32.nxv16i32(&lt;vscale x 4 x i32&gt; zeroinitializer, &lt;vscale x 16 x i32&gt; %a.ext)
+  %B = ashr &lt;vscale x 16 x i32&gt; %a.ext, %a.ext
+  store &lt;vscale x 16 x i32&gt; %B, ptr %A, align 64
+  ret &lt;vscale x 4 x i32&gt; %res
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;vscale x 4 x i32&gt; @llvm.vector.partial.reduce.add.nxv4i32.nxv16i32(&lt;vscale x 4 x i32&gt;, &lt;vscale x 16 x i32&gt;) #0
+
+attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zhinx -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zhinx -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: alloca: &#x27;  %A = alloca &lt;vscale x 16 x i32&gt;, align 64&#x27; (in function: partial_of_sext)
+warning: Instruction selection used fallback path for partial_of_sext</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">frame-info.dad33d95c0.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/frame-info.ll">frame-info.ll</a><span class="dim">)</span></td><td class="l">branch_and_tail_call</td><td class="l"><code>-mtriple=riscv64 --enable-shrink-wrap=false -mattr=+zdinx,+zve32x -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vdot4asu.3fb0d636eb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vdot4asu.ll">vdot4asu.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vdot4asu_vv_nxv1i32_nxv1i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zfinx -O3</code></td></tr><tr><td class="l">vdot4au.6871aaff57.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vdot4au.ll">vdot4au.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vdot4au_vx_nxv8i32_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve64x,+experimental-zvdot4a8i,+zfinx,+zhinx -O0</code></td></tr><tr><td class="l">zvdot4a8i-sdnode.31816b89fa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/zvdot4a8i-sdnode.ll">zvdot4a8i-sdnode.ll</a><span class="dim">)</span></td><td class="l">partial_of_sext</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-zvdot4a8i,+zhinx -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

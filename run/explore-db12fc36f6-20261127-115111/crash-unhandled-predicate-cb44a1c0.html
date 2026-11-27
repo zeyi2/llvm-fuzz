@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Unhandled predicate</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Unhandled predicate</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Unhandled predicate <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 31 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.81bbaa0b.70356aba99.ll <span class="dim">(mutant of</span> double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.81bbaa0b.ll<span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfh,+zfhmin,+zbb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/T3T16cfeE">https://godbolt.org/z/T3T16cfeE</a> (llc-assertions-trunk, checked 2026-11-27 15:30 UTC): <a href="https://godbolt.org/z/T3T16cfeE">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.8 = external global double
+@G.15 = external global i1
+@G.17 = external global double
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(double %a) #0 {
+  %A5 = alloca i1, align 1
+  store i1 poison, ptr %A5, align 1
+  %A3 = alloca i1, align 1
+  %L1 = load double, ptr %A3, align 8
+  store i1 poison, ptr %A3, align 1
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %C = fcmp true double %a, 4.940660e-324
+  %G = getelementptr double, ptr %A, i128 -1
+  %C3 = fcmp ole double %a, %L1
+  store i1 %C3, ptr poison, align 1
+  store ptr %G, ptr poison, align 8
+  br i1 %C, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %B = fdiv double %a, %a
+  store i1 %C, ptr @G, align 1
+  store double %B, ptr @G.8, align 8
+  %C2 = fcmp oeq float f0x7F7FFFFF, 4.200000e+01
+  %1 = fptoui double %a to i8
+  store i1 %C2, ptr %A3, align 1
+  ret i8 %1
+
+T:                                                ; preds = %T, %0
+  %L = load i1, ptr %A, align 1
+  %B4 = shl i1 %L, %L
+  %B5 = frem double %L1, +qnan
+  %B1 = or i1 %L, %C
+  store i1 %B4, ptr %A5, align 1
+  %C10 = fcmp uge double 1.000000e+00, %B5
+  store double %B5, ptr @G.17, align 8
+  store i1 %C10, ptr poison, align 1
+  br i1 %B1, label %T, label %BB
+
+F:                                                ; preds = %0
+  %LGV = load i1, ptr @G.15, align 1
+  %B2 = srem &lt;4 x i32&gt; zeroinitializer, splat (i32 42)
+  %B3 = udiv i1 %LGV, true
+  store &lt;4 x i32&gt; %B2, ptr poison, align 16
+  store i1 %B3, ptr @G, align 1
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfh,+zfhmin,+zbb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">Unhandled predicate<br>UNREACHABLE executed at /root/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVInstructionSelector.cpp:2295!<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfh,+zfhmin,+zbb -O1 -global-isel=0</code></td><td>0</td><td>52</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfh,+zfhmin,+zbb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfh,+zfhmin,+zbb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">Unhandled predicate
+UNREACHABLE executed at /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/GISel/RISCVInstructionSelector.cpp:2295!
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfh,+zfhmin,+zbb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;InstructionSelect&#x27; on function &#x27;@fcvt_wu_s_i8&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000557c3f0e8c1b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000557c3f0e5bf1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000557c3f0e969b
+3  libc.so.6 0x00007fb85c045330
+4  libc.so.6 0x00007fb85c09ebec pthread_kill + 284
+5  libc.so.6 0x00007fb85c04527e gsignal + 30
+6  libc.so.6 0x00007fb85c0288ff abort + 223
+7  llc       0x0000557c3f04156f
+8  llc       0x0000557c3d761bce
+9  llc       0x0000557c3d755fd3
+10 llc       0x0000557c3f9e1b17 llvm::InstructionSelectImpl::selectMachineFunction(llvm::MachineFunction&amp;) + 1255
+11 llc       0x0000557c3f9e32b1 llvm::InstructionSelectLegacy::runOnMachineFunction(llvm::MachineFunction&amp;) + 417
+12 llc       0x0000557c3dd61761 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+13 llc       0x0000557c3e2fda77 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x0000557c3e305f92 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x0000557c3e2fe820 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x0000557c3d558689
+17 llc       0x0000557c3d555813 main + 1747
+18 libc.so.6 0x00007fb85c02a1ca
+19 libc.so.6 0x00007fb85c02a28b __libc_start_main + 139
+20 llc       0x0000557c3d554925 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.60bbbcae.83ddf06c21.ll <span class="dim">(mutant of</span> double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.60bbbcae.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zicond,+zvbb,+zicsr -O3</code></td></tr><tr><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.81bbaa0b.70356aba99.ll <span class="dim">(mutant of</span> double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.84a31932.81bbaa0b.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zfh,+zfhmin,+zbb -O1</code></td></tr><tr><td class="l">double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.b6fe42c2.eb536c71.23e0106c2e.ll <span class="dim">(mutant of</span> double-convert.9733cb1e.ef308d9b.a54c1633.3407dbf1.a5226c28.b6fe42c2.eb536c71.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+f,+zicond,+zvbb,+zcb -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

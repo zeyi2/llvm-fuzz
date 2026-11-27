@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,and,andi,beqz,bnez</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,and,andi,beqz,bnez</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,and,andi,beqz,bnez <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-convert.8268b6ca.21218c28.6abe3e79.18c02bef66.ll <span class="dim">(mutant of</span> half-convert.8268b6ca.21218c28.6abe3e79.ll<span class="dim">)</span> @fcvt_ui_h via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfhmin,+zicond,+zve32x -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i128
+@G.2 = external global i1
+@G.7 = external global half
+@G.8 = external global ptr
+
+; Function Attrs: nounwind
+define i16 @fcvt_ui_h(half %a) #0 {
+  %A4 = alloca i1, align 1
+  store i1 poison, ptr %A4, align 1
+  %LGV4 = load half, ptr @G.7, align 2
+  %C1 = fcmp ord half %a, 5.960460e-08
+  %C = fcmp oge half %a, %LGV4
+  %A3 = alloca ptr, align 8
+  %L2 = load i1, ptr %A3, align 1
+  store ptr poison, ptr %A3, align 8
+  %A = alloca i128, align 8
+  %L = load i1, ptr %A, align 1
+  %C8 = fcmp ugt float 0.000000e+00, +qnan
+  store i128 poison, ptr %A, align 4
+  %LGV = load i128, ptr @G.1, align 4
+  %1 = fptoui half %a to i16
+  %B = or i128 %LGV, %LGV
+  store i1 %C1, ptr @G.2, align 1
+  store i128 %B, ptr %A, align 4
+  %G = getelementptr i128, ptr %A, i8 0
+  %B3 = shl i1 %C, %L2
+  store ptr %G, ptr %A3, align 8
+  store i1 %C, ptr @G.2, align 1
+  store i1 %B3, ptr %A4, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  ret i16 %1
+
+T:                                                ; preds = %T, %0
+  br i1 %C8, label %T, label %BB
+
+F:                                                ; preds = %0
+  %2 = phi i1 [ %C1, %0 ]
+  %G5 = getelementptr half, ptr %A, i16 %1
+  store ptr %G5, ptr @G.8, align 8
+  store i1 %2, ptr %A4, align 1
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfhmin,+zicond,+zve32x -O3&#x27; --funcs fcvt_ui_h snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">21 of 64 inputs differ (first: #1)
+SelectionDAG hash 591594ef7dd87b7c, GlobalISel hash e80159fb23549387
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfhmin,+zicond,+zve32x -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfhmin,+zicond,+zve32x -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfhmin,+zicond,+zve32x -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-convert.8268b6ca.21218c28.6abe3e79.18c02bef66.ll <span class="dim">(mutant of</span> half-convert.8268b6ca.21218c28.6abe3e79.ll<span class="dim">)</span></td><td class="l">fcvt_ui_h</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi lp64f -mattr=+zfhmin,+zicond,+zve32x -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

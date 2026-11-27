@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,lh,li,lui</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,lh,li,lui</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,lh,li,lui <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memset-inline.a738fe63.8d983472.b68a88faba.ll <span class="dim">(mutant of</span> memset-inline.a738fe63.8d983472.ll<span class="dim">)</span> @aligned_memset_zero_2 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+unaligned-scalar-mem,+c,+zvkb,+zfhmin -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.4 = external global i1
+@G.7 = external global &lt;4 x i32&gt;
+@G.8 = external global i16
+
+; Function Attrs: nounwind
+define void @aligned_memset_zero_2(ptr %a) #0 {
+  %LGV3 = load i16, ptr @G.8, align 2
+  %G = getelementptr double, ptr %a, i16 %LGV3
+  %LGV = load &lt;4 x i32&gt;, ptr @G.7, align 16
+  %E = extractelement &lt;8 x i8&gt; splat (i8 -1), i8 -1
+  %E2 = extractelement &lt;4 x i32&gt; %LGV, i8 %E
+  tail call void @llvm.memset.inline.p0.i64(ptr align 2 %a, i8 %E, i64 2, i1 false)
+  %C = icmp ule i8 %E, 0
+  %C1 = icmp uge i1 %C, true
+  store i1 %C1, ptr @G.4, align 1
+  store i32 %E2, ptr %G, align 4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: write)
+declare void @llvm.memset.inline.p0.i64(ptr writeonly captures(none), i8, i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+unaligned-scalar-mem,+c,+zvkb,+zfhmin -O3&#x27; --funcs aligned_memset_zero_2 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash cb02b1a8778bd05f, GlobalISel hash bcf50269d903820f
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+unaligned-scalar-mem,+c,+zvkb,+zfhmin -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+unaligned-scalar-mem,+c,+zvkb,+zfhmin -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+unaligned-scalar-mem,+c,+zvkb,+zfhmin -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memset-inline.a738fe63.8d983472.b68a88faba.ll <span class="dim">(mutant of</span> memset-inline.a738fe63.8d983472.ll<span class="dim">)</span></td><td class="l">aligned_memset_zero_2</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v,+unaligned-scalar-mem,+c,+zvkb,+zfhmin -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

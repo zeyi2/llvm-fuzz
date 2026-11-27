@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_BITCAST &lt;N x i16&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_BITCAST &lt;N x i16&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-db12fc36f6-20261127-110859.html">main-db12fc36f6-20261127-110859</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_BITCAST &lt;N x i16&gt; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">61 in 11 configs, 11 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-const-fold.ll">rvp-bitcast-const-fold.ll</a> @pnot_v2i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @pnot_v2i16(i32 %a) {
+  %bc = bitcast i32 %a to &lt;2 x i16&gt;
+  %not = xor &lt;2 x i16&gt; %bc, splat (i16 -1)
+  %res = bitcast &lt;2 x i16&gt; %not to i32
+  ret i32 %res
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %5:_(i32) = G_BITCAST %4:_(&lt;2 x i16&gt;) (in function: pnot_v2i16)
+warning: Instruction selection used fallback path for pnot_v2i16</pre>
+<h4>Occurrences (61) (first 15):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-const-fold.ll">rvp-bitcast-const-fold.ll</a></td><td class="l">pnot_v2i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-const-fold.ll">rvp-bitcast-const-fold.ll</a></td><td class="l">pnot_v4i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-const-fold.ll">rvp-bitcast-const-fold.ll</a></td><td class="l">pnot_v2i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-const-fold.ll">rvp-bitcast-const-fold.ll</a></td><td class="l">pnot_v4i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-paired.ll">rvp-bitcast-paired.ll</a></td><td class="l">add_v4i16_via_bitcast</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-paired.ll">rvp-bitcast-paired.ll</a></td><td class="l">add_v4i16_via_bitcast</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb,+d -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-bitcast-paired.ll">rvp-bitcast-paired.ll</a></td><td class="l">add_v4i16_via_bitcast</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-mul-parts-acc-fold.ll">rvp-mul-parts-acc-fold.ll</a></td><td class="l">pmul_b00_add_i16x2</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-mul-parts-acc-fold.ll">rvp-mul-parts-acc-fold.ll</a></td><td class="l">pmul_b00_add_i16x4</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-mul-parts-acc-fold.ll">rvp-mul-parts-acc-fold.ll</a></td><td class="l">pmulu_b01_add_i16x2</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-mul-parts-acc-fold.ll">rvp-mul-parts-acc-fold.ll</a></td><td class="l">pmulsu_b11_add_i16x4</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-narrowing-shift-trunc.ll">rvp-narrowing-shift-trunc.ll</a></td><td class="l">trunc_lshr_v2i32_to_v2i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-narrowing-shift-trunc.ll">rvp-narrowing-shift-trunc.ll</a></td><td class="l">trunc_ashr_v2i32_to_v2i16</td><td class="l"><code>-mtriple=riscv32 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-narrowing-shift-trunc.ll">rvp-narrowing-shift-trunc.ll</a></td><td class="l">trunc_lshr_v2i32_to_v2i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/rvp-narrowing-shift-trunc.ll">rvp-narrowing-shift-trunc.ll</a></td><td class="l">trunc_ashr_v2i32_to_v2i16</td><td class="l"><code>-mtriple=riscv64 -mattr=+experimental-p,+m,+zbb -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

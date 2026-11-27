@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Found 5 machine code errors.</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Found 5 machine code errors.</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Found 5 machine code errors. <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-masked-load-fp.6075a5ea8e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-fp.ll">fixed-vectors-masked-load-fp.ll</a><span class="dim">)</span> @masked_load_v16f32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+zba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.7 = external global i32
+
+define &lt;16 x float&gt; @masked_load_v16f32(ptr %a, &lt;16 x i1&gt; %mask) {
+  %LGV1 = load i32, ptr @G.7, align 4
+  %G = getelementptr &lt;16 x i1&gt;, ptr %a, i32 %LGV1
+  %load = call &lt;16 x float&gt; %G(ptr align 8 %a, &lt;16 x i1&gt; %mask, &lt;16 x float&gt; poison)
+  ret &lt;16 x float&gt; %load
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+zba -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+zba -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code"># After IRTranslator
+# Machine code for function masked_load_v16f32: IsSSA, TracksLiveness
+Frame Objects:
+  fi#0: size=64, align=64, at location [SP]
+  fi#1: size=1, align=2, at location [SP]
+save/restore points:
+save points are empty
+restore points are empty
+Function Live Ins: $x10, $x11, $x12
+bb.1 (%ir-block.0):
+  liveins: $x10, $x11, $x12
+  %2:_(p0) = COPY $x10
+  %0:_(p0) = COPY $x11
+  %3:_(p0) = COPY $x12
+  %1:_(&lt;16 x i1&gt;) = G_LOAD %3:_(p0) :: (load (&lt;16 x i1&gt;))
+  %5:_(p0) = G_GLOBAL_VALUE @G.7
+  %11:_(&lt;16 x f32&gt;) = G_IMPLICIT_DEF
+  %4:_(i32) = G_LOAD %5:_(p0) :: (load (i32) from @G.7)
+  %6:_(i64) = G_SEXT %4:_(i32)
+  %7:_(i64) = G_CONSTANT i64 2
+  %8:_(i64) = G_MUL %6:_, %7:_
+  %9:gprjalrnonx7(p0) = G_PTR_ADD %0:_, %8:_(i64)
+  %12:_(p0) = G_FRAME_INDEX %stack.0
+  ADJCALLSTACKDOWN 24, 0, implicit-def $x2, implicit $x2
+  %13:_(p0) = G_FRAME_INDEX %stack.1
+  G_STORE %1:_(&lt;16 x i1&gt;), %13:_(p0) :: (store (&lt;16 x i1&gt;) into %stack.1)
+  %14:_(f32), %15:_(f32), %16:_(f32), %17:_(f32), %18:_(f32), %19:_(f32), %20:_(f32), %21:_(f32), %22:_(f32), %23:_(f32), %24:_(f32), %25:_(f32), %26:_(f32), %27:_(f32), %28:_(f32), %29:_(f32) = G_UNMERGE_VALUES %11:_(&lt;16 x f32&gt;)
+  %30:_(p0) = COPY $x2
+  %31:_(i64) = G_CONSTANT i64 0
+  %32:_(p0) = G_PTR_ADD %30:_, %31:_(i64)
+  G_STORE %27:_(f32), %32:_(p0) :: (store (f32) into stack, align 16)
+  %33:_(i64) = G_CONSTANT i64 8
+  %34:_(p0) = G_PTR_ADD %30:_, %33:_(i64)
+  G_STORE %28:_(f32), %34:_(p0) :: (store (f32) into stack + 8, align 8)
+  %35:_(i64) = G_CONSTANT i64 16
+  %36:_(p0) = G_PTR_ADD %30:_, %35:_(i64)
+  G_STORE %29:_(f32), %36:_(p0) :: (store (f32) into stack + 16, align 16)
+  $x10 = COPY %12:_(p0)
+  $x11 = COPY %0:_(p0)
+  $x12 = COPY %13:_(p0)
+  $f10_f = COPY %14:_(f32)
+  $f11_f = COPY %15:_(f32)
+  $f12_f = COPY %16:_(f32)
+  $f13_f = COPY %17:_(f32)
+  $f14_f = COPY %18:_(f32)
+  $f15_f = COPY %19:_(f32)
+  $f16_f = COPY %20:_(f32)
+  $f17_f = COPY %21:_(f32)
+  $x13 = COPY %22:_(f32)
+  $x14 = COPY %23:_(f32)
+  $x15 = COPY %24:_(f32)
+  $x16 = COPY %25:_(f32)
+  $x17 = COPY %26:_(f32)
+  PseudoCALLIndirect %9:gprjalrnonx7(p0), &lt;regmask $vlenb $x0 $x1 $x8 $x9 $x18 $x19 $x20 $x21 $x22 $x23 $x24 $x25 $x26 $x27 $f8_f $f9_f $f18_f $f19_f $f20_f $f21_f $f22_f $f23_f $f24_f $f25_f $f26_f $f27_f $f8_h $f9_h $f18_h $f19_h $f20_h $f21_h and 41 more...&gt;, implicit-def dead $x1, implicit $x10, implicit $x11, implicit $x12, implicit $f10_f, implicit $f11_f, implicit $f12_f, implicit $f13_f, implicit $f14_f, implicit $f15_f, implicit $f16_f, implicit $f17_f, implicit $x13, implicit $x14, implicit $x15, implicit $x16, implicit $x17
+  ADJCALLSTACKUP 24, 0, implicit-def $x2, implicit $x2
+  %10:_(&lt;16 x f32&gt;) = G_LOAD %12:_(p0) :: (load (&lt;16 x f32&gt;) from %stack.0)
+  G_STORE %10:_(&lt;16 x f32&gt;), %2:_(p0) :: (store (&lt;16 x f32&gt;))
+  PseudoRET
+# End machine code for function masked_load_v16f32.
+*** Bad machine code: Copy Instruction is illegal with mismatching sizes ***
+- function:    masked_load_v16f32
+- basic block: %bb.1  (0x55a0a012fc50)
+- instruction: $x13 = COPY %22:_(f32)
+Def Size = 64, Src Size = 32
+*** Bad machine code: Copy Instruction is illegal with mismatching sizes ***
+- function:    masked_load_v16f32
+- basic block: %bb.1  (0x55a0a012fc50)
+- instruction: $x14 = COPY %23:_(f32)
+Def Size = 64, Src Size = 32
+*** Bad machine code: Copy Instruction is illegal with mismatching sizes ***
+- function:    masked_load_v16f32
+- basic block: %bb.1  (0x55a0a012fc50)
+- instruction: $x15 = COPY %24:_(f32)
+Def Size = 64, Src Size = 32
+*** Bad machine code: Copy Instruction is illegal with mismatching sizes ***
+- function:    masked_load_v16f32
+- basic block: %bb.1  (0x55a0a012fc50)
+- instruction: $x16 = COPY %25:_(f32)
+Def Size = 64, Src Size = 32
+*** Bad machine code: Copy Instruction is illegal with mismatching sizes ***
+- function:    masked_load_v16f32
+- basic block: %bb.1  (0x55a0a012fc50)
+- instruction: $x17 = COPY %26:_(f32)
+Def Size = 64, Src Size = 32
+LLVM ERROR: Found 5 machine code errors.
+PLEASE submit a bug repor</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-masked-load-fp.6075a5ea8e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-load-fp.ll">fixed-vectors-masked-load-fp.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+zba -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

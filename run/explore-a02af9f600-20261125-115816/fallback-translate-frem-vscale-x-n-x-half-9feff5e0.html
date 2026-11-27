@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: frem &lt;vscale x N x half&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: frem &lt;vscale x N x half&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: frem &lt;vscale x N x half&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 4 test files, 5 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">setcc-fp.c54b6be8c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/setcc-fp.ll">setcc-fp.ll</a><span class="dim">)</span> @fcmp_ord_fv_nxv8f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+d,+zfh,+zvfh,+zfbfmin,+zvfbfmin,+v -O3 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;vscale x 8 x i1&gt; @fcmp_ord_fv_nxv8f16(&lt;vscale x 8 x half&gt; %va, half %b) {
+  %A = alloca &lt;vscale x 8 x half&gt;, align 16
+  store &lt;vscale x 8 x half&gt; poison, ptr %A, align 16
+  %head = insertelement &lt;vscale x 8 x half&gt; poison, half %b, i32 0
+  %B = frem &lt;vscale x 8 x half&gt; %va, splat (half 1.000000e+00)
+  %splat = shufflevector &lt;vscale x 8 x half&gt; %head, &lt;vscale x 8 x half&gt; poison, &lt;vscale x 8 x i32&gt; zeroinitializer
+  %vc = fcmp ord &lt;vscale x 8 x half&gt; %splat, %va
+  store &lt;vscale x 8 x half&gt; %B, ptr %A, align 16
+  ret &lt;vscale x 8 x i1&gt; %vc
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+d,+zfh,+zvfh,+zfbfmin,+zvfbfmin,+v -O3 -code-model=small -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+d,+zfh,+zvfh,+zfbfmin,+zvfbfmin,+v -O3 -code-model=small -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: frem: &#x27;  %B = frem &lt;vscale x 8 x half&gt; %va, splat (half 1.000000e+00)&#x27; (in function: fcmp_ord_fv_nxv8f16)
+warning: Instruction selection used fallback path for fcmp_ord_fv_nxv8f16</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">setcc-fp.c54b6be8c5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/setcc-fp.ll">setcc-fp.ll</a><span class="dim">)</span></td><td class="l">fcmp_ord_fv_nxv8f16</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+d,+zfh,+zvfh,+zfbfmin,+zvfbfmin,+v -O3 -code-model=small</code></td></tr><tr><td class="l">vcopysign-vp.17aa91ec0b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vcopysign-vp.ll">vcopysign-vp.ll</a><span class="dim">)</span></td><td class="l">vfsgnj_vv_nxv16f16_unmasked</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+zvfh,+zvfbfmin,+v -O2</code></td></tr><tr><td class="l">vfmuladd-vp.b08d8e2cd4.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vfmuladd-vp.ll">vfmuladd-vp.ll</a><span class="dim">)</span></td><td class="l">vfnmsub_vf_nxv2f16_neg_splat_commute</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+m,+a -O1</code></td></tr><tr><td class="l">vfnmsub.da5e8edf19.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vfnmsub.ll">vfnmsub.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfnmsub_vf_nxv8f16_f16_nxv8f16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfh,+zfh -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

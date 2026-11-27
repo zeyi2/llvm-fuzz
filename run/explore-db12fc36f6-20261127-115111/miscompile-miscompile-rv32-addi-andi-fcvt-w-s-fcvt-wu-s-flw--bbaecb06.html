@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,andi,fcvt.w.s,fcvt.wu.s,flw,fsh</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,andi,fcvt.w.s,fcvt.wu.s,flw,fsh</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,andi,fcvt.w.s,fcvt.wu.s,flw,fsh <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">half-round-conv.5a9e531c.5b3f6a39e3.ll <span class="dim">(mutant of</span> half-round-conv.5a9e531c.ll<span class="dim">)</span> @test_round_ui8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfhmin,+zicond -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global half
+@G.1 = external global i1
+
+define zeroext i8 @test_round_ui8(half %x) {
+  %LGV = load half, ptr @G, align 2
+  %a = call half @llvm.round.f16(half %x)
+  %C = fcmp false half %x, %LGV
+  %b = fptoui half %a to i8
+  store i1 %C, ptr @G.1, align 1
+  store half %a, ptr @G, align 2
+  ret i8 %b
+}
+
+; Function Attrs: nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none)
+declare half @llvm.round.f16(half) #0
+
+attributes #0 = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfhmin,+zicond -O0&#x27; --funcs test_round_ui8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">30 of 64 inputs differ (first: #1)
+SelectionDAG hash 56affdb4077e8d74, GlobalISel hash ccbdc0f1543cc07f
+b0: llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfhmin,+zicond -O0 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfhmin,+zicond -O2 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfhmin,+zicond -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">half-round-conv.5a9e531c.5b3f6a39e3.ll <span class="dim">(mutant of</span> half-round-conv.5a9e531c.ll<span class="dim">)</span></td><td class="l">test_round_ui8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+zfhmin,+zicond -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,lbu,ld,li,lui</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,lbu,ld,li,lui</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,lbu,ld,li,lui <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">unaligned-load-store.62ffa59e.452ce65f.e331870c.ad1e399d.04e34c760d.ll <span class="dim">(mutant of</span> unaligned-load-store.62ffa59e.452ce65f.e331870c.ad1e399d.ll<span class="dim">)</span> @merge_stores_i8_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a,+zba -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.5 = external global i8
+@G.6 = external global i32
+
+define void @merge_stores_i8_i32(ptr %p) {
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %LGV = load i1, ptr @G, align 1
+  store i8 0, ptr %p, align 1
+  %p2 = getelementptr i8, ptr %p, i32 1
+  store i8 0, ptr %p2, align 1
+  %p3 = getelementptr i8, ptr %p, i32 2
+  %L = load i1, ptr %p3, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F
+  %1 = phi i8 [ %LGV1, %F ]
+  %B = mul i1 %L, true
+  store i8 0, ptr %p3, align 1
+  %p4 = getelementptr i8, ptr %p, i32 3
+  %L3 = load i32, ptr %p4, align 4
+  store i8 0, ptr %p4, align 1
+  store i1 %B, ptr %p4, align 1
+  switch i32 %L3, label %SW_D [
+    i32 -1644334215, label %SW_C
+    i32 -1706290524, label %SW_C4
+  ]
+
+BB2:                                              ; preds = %SW_C4, %SW_C, %SW_D
+  store i8 %1, ptr %p4, align 1
+  ret void
+
+T:                                                ; preds = %0
+  %L5 = load i1, ptr %A, align 1
+  br i1 %L5, label %T2, label %F3
+
+BB1:                                              ; preds = %F3
+  %G7 = getelementptr ptr, ptr %p, i8 42
+  store ptr %G7, ptr %A, align 8
+  ret void
+
+F:                                                ; preds = %0
+  %LGV1 = load i8, ptr @G.5, align 1
+  %G = getelementptr ptr, ptr %p, i1 %LGV
+  store ptr %G, ptr %A, align 8
+  br label %BB
+
+T2:                                               ; preds = %T
+  ret void
+
+F3:                                               ; preds = %T
+  br label %BB1
+
+SW_D:                                             ; preds = %BB
+  %G6 = getelementptr ptr, ptr %p, i128 0
+  store ptr %G6, ptr %A, align 8
+  br label %BB2
+
+SW_C:                                             ; preds = %BB
+  %LGV2 = load i32, ptr @G.6, align 4
+  %C = icmp ugt i32 42, %LGV2
+  store i1 %C, ptr %G, align 1
+  br label %BB2
+
+SW_C4:                                            ; preds = %SW_C4, %BB
+  %G1 = getelementptr &lt;8 x i8&gt;, ptr %p, i8 0
+  store ptr %G1, ptr %G, align 8
+  br i1 %LGV, label %SW_C4, label %BB2
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a,+zba -O0&#x27; --funcs merge_stores_i8_i32 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash f49f388c7c8010a7, GlobalISel hash bcf50269d903820f
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a,+zba -O0 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a,+zba -O2 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a,+zba -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">unaligned-load-store.62ffa59e.452ce65f.e331870c.ad1e399d.04e34c760d.ll <span class="dim">(mutant of</span> unaligned-load-store.62ffa59e.452ce65f.e331870c.ad1e399d.ll<span class="dim">)</span></td><td class="l">merge_stores_i8_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a,+zba -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

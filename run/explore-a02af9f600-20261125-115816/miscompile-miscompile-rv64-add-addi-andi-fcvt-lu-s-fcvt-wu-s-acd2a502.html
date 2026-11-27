@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,fcvt.lu.s,fcvt.wu.s,fle.s</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,fcvt.lu.s,fcvt.wu.s,fle.s</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,fcvt.lu.s,fcvt.wu.s,fle.s <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.a388361a.6c7bbfcb.97f4e28330.ll <span class="dim">(mutant of</span> float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.a388361a.6c7bbfcb.ll<span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+c,+zbs,+zfa,+v -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global float
+@G.1 = external global i1
+@G.3 = external global i1
+@G.6 = external global ptr
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(float %a) #0 {
+  %A2 = alloca ptr, align 8
+  %L6 = load i1, ptr %A2, align 1
+  store ptr poison, ptr %A2, align 8
+  %A = alloca i8, align 1
+  store i8 poison, ptr %A, align 1
+  %C7 = icmp sge i1 true, %L6
+  %G4 = getelementptr &lt;4 x i32&gt;, ptr %A2, i16 1
+  %C6 = fcmp ult float %a, +inf
+  %LGV = load float, ptr @G, align 4
+  %C = fcmp uge float 4.200000e+01, %LGV
+  %C2 = fcmp uge float %a, %a
+  %C4 = fcmp ugt float %a, %LGV
+  %1 = fptoui float %a to i8
+  %B = ashr i8 0, %1
+  store i1 %C, ptr @G.1, align 1
+  store i1 %C2, ptr @G.1, align 1
+  %G5 = getelementptr float, ptr %A2, i1 %C4
+  %G = getelementptr i8, ptr %A, i1 %C
+  store i8 %B, ptr %A, align 1
+  store ptr %G, ptr %A2, align 8
+  store i1 %C4, ptr %G, align 1
+  %B1 = add i1 %C, false
+  store ptr %G5, ptr %G, align 8
+  store i1 %B1, ptr @G.3, align 1
+  store i1 %C7, ptr @G.1, align 1
+  store ptr %G4, ptr @G.6, align 8
+  store i1 %C6, ptr @G.3, align 1
+  ret i8 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+c,+zbs,+zfa,+v -O3&#x27; --funcs fcvt_wu_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">9 of 64 inputs differ (first: #12)
+SelectionDAG hash 7671f9994d454daf, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+c,+zbs,+zfa,+v -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+c,+zbs,+zfa,+v -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+c,+zbs,+zfa,+v -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.a388361a.6c7bbfcb.97f4e28330.ll <span class="dim">(mutant of</span> float-convert.35787337.04ba4e62.4c225fc8.1acb9e30.a388361a.6c7bbfcb.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64f -mattr=+f,+zicsr,+zbkb,+c,+zbs,+zfa,+v -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: LLVM ERROR: Invalid global physical register</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: LLVM ERROR: Invalid global physical register</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">LLVM ERROR: Invalid global physical register <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">get-register-reserve.0569c64e76.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/get-register-reserve.ll">get-register-reserve.ll</a><span class="dim">)</span> @get_reg_a1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+d,+xtheadba -O3 -code-model=small -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+@G.1 = external global i1
+@G.2 = external global i128
+@G.3 = external global i32
+@G.4 = external global i32
+
+; Function Attrs: nounwind
+define i32 @get_reg_a1() #0 {
+entry:
+  %A11 = alloca i1, align 1
+  store i1 true, ptr %A11, align 1
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %LGV1 = load i128, ptr @G.2, align 4
+  %LGV = load i1, ptr @G, align 1
+  %B = sub i1 %LGV, false
+  switch i128 %LGV1, label %SW_D [
+    i128 8348366680151990803, label %SW_C
+    i128 13832364843385839275, label %SW_C2
+    i128 5764386661700279051, label %SW_C3
+    i128 4505415018729163243, label %SW_C4
+    i128 18231647579771507847, label %SW_C5
+    i128 6859151123541113344, label %SW_C6
+    i128 18158749168261918524, label %SW_C7
+  ]
+
+BB:                                               ; preds = %SW_C7, %SW_C6, %SW_C5, %SW_C4, %SW_C2, %SW_D
+  %a1 = call i32 @llvm.read_register.i32(metadata !0)
+  store i1 %B, ptr @G.1, align 1
+  ret i32 %a1
+
+SW_D:                                             ; preds = %SW_D, %entry
+  %LGV8 = load i1, ptr @G, align 1
+  br i1 %LGV, label %BB, label %SW_D
+
+SW_C:                                             ; preds = %entry
+  %LGV9 = load i32, ptr @G.3, align 4
+  ret i32 %LGV9
+
+SW_C2:                                            ; preds = %SW_C2, %entry
+  br i1 %B, label %BB, label %SW_C2
+
+SW_C3:                                            ; preds = %entry
+  %LGV10 = load i32, ptr @G.4, align 4
+  ret i32 %LGV10
+
+SW_C4:                                            ; preds = %SW_C4, %entry
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %BB, label %SW_C4
+
+SW_C5:                                            ; preds = %entry
+  br label %BB
+
+SW_C6:                                            ; preds = %entry
+  br label %BB
+
+SW_C7:                                            ; preds = %SW_C7, %entry
+  %L12 = load i1, ptr %A11, align 1
+  br i1 %L12, label %BB, label %SW_C7
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(read)
+declare i32 @llvm.read_register.i32(metadata) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(read) }
+
+!0 = !{!&quot;a1\00&quot;}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+d,+xtheadba -O3 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+d,+xtheadba -O3 -code-model=small -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">The register $x11 needs to be live in to %bb.27, but is missing from the live-in list.
+LLVM ERROR: Invalid global physical register
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+d,+xtheadba -O3 -code-model=small -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Machine Instruction Scheduler&#x27; on function &#x27;@get_reg_a1&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x000055cfe45b33fb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x000055cfe45b03d1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x000055cfe45b3e7b
+3  libc.so.6 0x00007fa9e0a45330
+4  libc.so.6 0x00007fa9e0a9ebec pthread_kill + 284
+5  libc.so.6 0x00007fa9e0a4527e gsignal + 30
+6  libc.so.6 0x00007fa9e0a288ff abort + 223
+7  llc       0x000055cfe450b8ed llvm::report_fatal_error(llvm::Twine const&amp;, bool) + 429
+8  llc       0x000055cfe450b736
+9  llc       0x000055cfe3182549 llvm::LiveRangeCalc::findReachingDefs(llvm::LiveRange&amp;, llvm::MachineBasicBlock&amp;, llvm::SlotIndex, llvm::Register, llvm::ArrayRef&lt;llvm::SlotIndex&gt;) + 3529
+10 llc       0x000055cfe3181663 llvm::LiveRangeCalc::extend(llvm::LiveRange&amp;, llvm::SlotIndex, llvm::Register, llvm::ArrayRef&lt;llvm::SlotIndex&gt;) + 211
+11 llc       0x000055cfe3185566 llvm::LiveIntervalCalc::extendToUses(llvm::LiveRange&amp;, llvm::Register, llvm::LaneBitmask, llvm::LiveInterval*) + 486
+12 llc       0x000055cfe316c9c3 llvm::LiveIntervals::computeRegUnitRange(llvm::LiveRange&amp;, llvm::MCRegUnit) + 979
+13 llc       0x000055cfe316b230
+14 llc       0x000055cfe3170ec4
+15 llc       0x000055cfe3170bd2 llvm::LiveIntervals::handleMove(llvm::MachineInstr&amp;, bool) + 306
+16 llc       0x000055cfe32fa76e llvm::ScheduleDAGMI::moveInstruction(llvm::MachineInstr*, llvm::MachineInstrBundleIterator&lt;llvm::MachineInstr, false&gt;) + 158
+17 llc       0x000055cfe33013cc llvm::ScheduleDAGMILive::scheduleMI(llvm::SUnit*, bool) + 108
+18 llc       0x000055cfe3300ccb llvm::ScheduleDAGMILive::schedule() + 747
+19 llc       0x000055cfe32f7e1f llvm::impl_detail::MachineSchedulerBase::scheduleRegions(llvm::ScheduleDAGInstrs&amp;, bool) + 1407
+20 llc       0x000055cfe32f77f4 llvm::impl_detail::MachineSchedulerImpl::run(llvm::MachineFunction&amp;, llvm::TargetMachine const&amp;, llvm::impl_detail::MachineSchedulerImpl::RequiredAnalyses const&amp;) + 324
+21 llc       0x000055cfe330edab
+22 llc       0x000055cfe321e861 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+23 llc       0x000055cfe37bac77 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+24 llc       0x000055cfe37c3192 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+25 llc       0x000055cfe37bba20 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+26 llc       0x000055cfe2a13e49
+27 llc       0x000055cfe2a10fd3 main + 1747
+28 libc.so.6 0x00007fa9e0a2a1ca
+29 libc.so.6 0x00007fa9e0a2a28b __libc_start_main + 139
+30 llc       0x000055cfe2a100e5 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">get-register-reserve.0569c64e76.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/get-register-reserve.ll">get-register-reserve.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr +reserve-x8 -mattr +reserve-x11 -mattr=+d,+xtheadba -O3 -code-model=small -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,andi,auipc,beqz,fadd.d</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,andi,auipc,beqz,fadd.d</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,andi,auipc,beqz,fadd.d <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">double-convert.88e9b925.81b8f55c.b5a41928.eff1a97a.9ee07059.5d05258a80.ll <span class="dim">(mutant of</span> double-convert.88e9b925.81b8f55c.b5a41928.eff1a97a.9ee07059.ll<span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zcb,+zfh,+c -O3 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i1
+@G.6 = external global i32
+@G.7 = external global i1
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(double %a) #0 {
+  %A3 = alloca half, align 2
+  store half poison, ptr %A3, align 2
+  %A2 = alloca ptr, align 8
+  store ptr poison, ptr %A2, align 8
+  %B1 = fadd double %a, %a
+  %LGV = load i32, ptr @G.6, align 4
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %L = load i1, ptr %A, align 1
+  %G = getelementptr i16, ptr %A, i32 %LGV
+  store ptr %G, ptr %A2, align 8
+  store double %B1, ptr %A, align 8
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %T
+  %B = fadd double %a, 4.940660e-324
+  %1 = fptoui double %a to i8
+  store double %B, ptr %A, align 8
+  ret i8 %1
+
+T:                                                ; preds = %0
+  %C = icmp ne i32 1, -2147483648
+  %C5 = icmp ule i1 %C, true
+  %B4 = srem i1 %C, %C
+  store i1 %C, ptr @G.1, align 1
+  store i1 %B4, ptr %A3, align 1
+  store i1 %C5, ptr %A3, align 1
+  br label %BB
+
+F:                                                ; preds = %0
+  %LGV1 = load i1, ptr @G.7, align 1
+  %B2 = frem half 4.200000e+01, 6.550400e+04
+  %C1 = fcmp ord double %B1, %a
+  %B3 = xor i1 %C1, %LGV1
+  store half %B2, ptr %A3, align 2
+  store i1 %B3, ptr %A3, align 1
+  br label %BB
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zcb,+zfh,+c -O3 -code-model=medium&#x27; --funcs fcvt_wu_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">9 of 64 inputs differ (first: #12)
+SelectionDAG hash 7671f9994d454daf, GlobalISel hash 5289e0e02a921a1b
+b0: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zcb,+zfh,+c -code-model=medium -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zcb,+zfh,+c -code-model=medium -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zcb,+zfh,+c -code-model=medium -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">double-convert.88e9b925.81b8f55c.b5a41928.eff1a97a.9ee07059.5d05258a80.ll <span class="dim">(mutant of</span> double-convert.88e9b925.81b8f55c.b5a41928.eff1a97a.9ee07059.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+d,+zcb,+zfh,+c -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

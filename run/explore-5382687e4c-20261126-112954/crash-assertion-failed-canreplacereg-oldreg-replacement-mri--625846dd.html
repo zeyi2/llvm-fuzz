@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (canReplaceReg(OldReg, Replacement, MRI) &amp;&amp; &quot;Cannot replace register?&quot;), function replaceSingleDefInstWithReg, file CombinerHelper.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (canReplaceReg(OldReg, Replacement, MRI) &amp;&amp; &quot;Cannot replace register?&quot;), function replaceSingleDefInstWithReg, file CombinerHelper.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (canReplaceReg(OldReg, Replacement, MRI) &amp;&amp; &quot;Cannot replace register?&quot;), function replaceSingleDefInstWithReg, file CombinerHelper.cpp <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-masked-scatter.1535396166.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-scatter.ll">fixed-vectors-masked-scatter.ll</a><span class="dim">)</span> @mscatter_v2i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define void @mscatter_v2i8(&lt;2 x i8&gt; %val, &lt;2 x ptr&gt; %ptrs, &lt;2 x i1&gt; %m) {
+  %E = extractelement &lt;2 x ptr&gt; %ptrs, i1 false
+  call void %E(&lt;2 x i8&gt; %val, &lt;2 x ptr&gt; align 1 %ptrs, &lt;2 x i1&gt; %m)
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/CombinerHelper.cpp:2858: void llvm::CombinerHelper::replaceSingleDefInstWithReg(MachineInstr &amp;, Register) const: Assertion `canReplaceReg(OldReg, Replacement, MRI) &amp;&amp; &quot;Cannot replace register?&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISCVPreLegalizerCombiner&#x27; on function &#x27;@mscatter_v2i8&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000558cc2d7b3fb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000558cc2d783d1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000558cc2d7be7b
+3  libc.so.6 0x00007f9726845330
+4  libc.so.6 0x00007f972689ebec pthread_kill + 284
+5  libc.so.6 0x00007f972684527e gsignal + 30
+6  libc.so.6 0x00007f97268288ff abort + 223
+7  libc.so.6 0x00007f972682881b
+8  libc.so.6 0x00007f972683b517
+9  llc       0x0000558cc3611248
+10 llc       0x0000558cc3618b51 llvm::CombinerHelper::applyExtractVecEltBuildVec(llvm::MachineInstr&amp;, llvm::Register&amp;) const + 177
+11 llc       0x0000558cc143e037
+12 llc       0x0000558cc144aab3
+13 llc       0x0000558cc143e7ab
+14 llc       0x0000558cc35fbf5d llvm::Combiner::combineMachineInstrs() + 2301
+15 llc       0x0000558cc14337c1
+16 llc       0x0000558cc14339f6
+17 llc       0x0000558cc19e6861 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+18 llc       0x0000558cc1f82c77 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+19 llc       0x0000558cc1f8b192 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+20 llc       0x0000558cc1f83a20 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+21 llc       0x0000558cc11dbe49
+22 llc       0x0000558cc11d8fd3 main + 1747
+23 libc.so.6 0x00007f972682a1ca
+24 libc.so.6 0x00007f972682a28b __libc_start_main + 139
+25 llc       0x0000558cc11d80e5 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-masked-scatter.1535396166.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-masked-scatter.ll">fixed-vectors-masked-scatter.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+m,+d,+zvfh,+zfbfmin,+zvfbfmin,+zve32f,+zvl128b -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

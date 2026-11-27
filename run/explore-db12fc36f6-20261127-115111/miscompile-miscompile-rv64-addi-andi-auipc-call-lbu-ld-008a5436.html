@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: addi,andi,auipc,call,lbu,ld</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: addi,andi,auipc,call,lbu,ld</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: addi,andi,auipc,call,lbu,ld <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-extract-i1.7a96e8ee.6c49832b.89a3d97f1f.ll <span class="dim">(mutant of</span> fixed-vectors-extract-i1.7a96e8ee.6c49832b.ll<span class="dim">)</span> @extractelt_v1i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfa,+zfh -O2 -code-model=medium</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global ptr
+@G.4 = external global i1
+@G.5 = external global i1
+
+; Function Attrs: nounwind
+define i1 @extractelt_v1i1(ptr %x, i64 %idx) #0 {
+  %B = udiv i64 %idx, 0
+  %a = load &lt;1 x i8&gt;, ptr %x, align 1
+  %b = icmp eq &lt;1 x i8&gt; %a, zeroinitializer
+  %C1 = icmp sgt i1 false, false
+  %c = extractelement &lt;1 x i1&gt; %b, i64 %idx
+  %G = getelementptr i16, ptr %x, i1 false
+  store ptr %G, ptr @G.3, align 8
+  store i64 %B, ptr %G, align 4
+  %C = icmp uge i1 %c, true
+  store i1 %C, ptr @G.4, align 1
+  store i1 %C1, ptr @G.5, align 1
+  ret i1 %c
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfa,+zfh -O2 -code-model=medium&#x27; --funcs extractelt_v1i1 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">2 of 64 inputs differ (first: #0)
+SelectionDAG hash a7e61bb1562e86b6, GlobalISel hash 70ef565d486bba23
+b0: llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfa,+zfh -code-model=medium -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfa,+zfh -code-model=medium -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfa,+zfh -code-model=medium -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-extract-i1.7a96e8ee.6c49832b.89a3d97f1f.ll <span class="dim">(mutant of</span> fixed-vectors-extract-i1.7a96e8ee.6c49832b.ll<span class="dim">)</span></td><td class="l">extractelt_v1i1</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfa,+zfh -O2 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

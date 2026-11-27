@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;intrinsic_vmulhu_mask_vv_nxv32i16_nxv32i16_nxv32i16&#x27;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;intrinsic_vmulhu_mask_vv_nxv32i16_nxv32i16_nxv32i16&#x27;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;intrinsic_vmulhu_mask_vv_nxv32i16_nxv32i16_nxv32i16&#x27; </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">2 in 2 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vmulhu.6e449380.c03f4ac037.ll <span class="dim">(mutant of</span> vmulhu.6e449380.ll<span class="dim">)</span> @intrinsic_vmulhu_mask_vv_nxv32i16_nxv32i16_nxv32i16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zihintpause,+zbkb -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.5 = external global i64
+
+; Function Attrs: nounwind
+define &lt;vscale x 32 x i16&gt; @intrinsic_vmulhu_mask_vv_nxv32i16_nxv32i16_nxv32i16(&lt;vscale x 32 x i16&gt; %0, &lt;vscale x 32 x i16&gt; %1, &lt;vscale x 32 x i16&gt; %2, &lt;vscale x 32 x i1&gt; %3, i64 %4) #0 {
+entry:
+  %A = alloca i64, align 8
+  store i64 poison, ptr %A, align 4
+  %LGV = load i64, ptr @G.5, align 4
+  %B1 = udiv i64 0, %LGV
+  %a = call &lt;vscale x 32 x i16&gt; @llvm.riscv.vmulhu.mask.nxv32i16.nxv32i16.i64(&lt;vscale x 32 x i16&gt; %0, &lt;vscale x 32 x i16&gt; %1, &lt;vscale x 32 x i16&gt; %2, &lt;vscale x 32 x i1&gt; %3, i64 %4, i64 1)
+  %B = sub &lt;vscale x 32 x i16&gt; %0, %a
+  store i64 %B1, ptr %A, align 4
+  ret &lt;vscale x 32 x i16&gt; %B
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+declare &lt;vscale x 32 x i16&gt; @llvm.riscv.vmulhu.mask.nxv32i16.nxv32i16.i64(&lt;vscale x 32 x i16&gt;, &lt;vscale x 32 x i16&gt;, &lt;vscale x 32 x i16&gt;, &lt;vscale x 32 x i1&gt;, i64, i64 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zihintpause,+zbkb -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zihintpause,+zbkb -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">error: &lt;unknown&gt;:0:0: ran out of registers during register allocation in function &#x27;intrinsic_vmulhu_mask_vv_nxv32i16_nxv32i16_nxv32i16&#x27;</pre>
+<h4>Occurrences (2):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">vmulhu.6e449380.c03f4ac037.ll <span class="dim">(mutant of</span> vmulhu.6e449380.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zihintpause,+zbkb -O0</code></td></tr><tr><td class="l">vmulhu.6e449380.ll</td><td class="l"></td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+zihintpause -O0 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

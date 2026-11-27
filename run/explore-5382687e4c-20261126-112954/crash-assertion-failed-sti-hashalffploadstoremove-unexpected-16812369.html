@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;), function copyPhysReg, file RISCVInstrInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;), function copyPhysReg, file RISCVInstrInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;), function copyPhysReg, file RISCVInstrInfo.cpp <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xandesbfhcvt.dfe8884926.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/xandesbfhcvt.ll">xandesbfhcvt.ll</a><span class="dim">)</span> @fcvt_bf16_s via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define bfloat @fcvt_bf16_s(float %a) #0 {
+  %B = fmul bfloat 3.389530e+38, 4.200000e+01
+  ret bfloat %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVInstrInfo.cpp:598: virtual void llvm::RISCVInstrInfo::copyPhysReg(MachineBasicBlock &amp;, MachineBasicBlock::iterator, const DebugLoc &amp;, Register, Register, bool, bool, bool) const: Assertion `STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Post-RA pseudo instruction expansion pass&#x27; on function &#x27;@fcvt_bf16_s&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000560b65a733fb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000560b65a703d1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000560b65a73e7b
+3  libc.so.6 0x00007f706d645330
+4  libc.so.6 0x00007f706d69ebec pthread_kill + 284
+5  libc.so.6 0x00007f706d64527e gsignal + 30
+6  libc.so.6 0x00007f706d6288ff abort + 223
+7  libc.so.6 0x00007f706d62881b
+8  libc.so.6 0x00007f706d63b517
+9  llc       0x0000560b63f0ce98
+10 llc       0x0000560b64a1c067 llvm::TargetInstrInfo::lowerCopy(llvm::MachineInstr*) const + 359
+11 llc       0x0000560b6458897b
+12 llc       0x0000560b645890d3
+13 llc       0x0000560b646de861 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+14 llc       0x0000560b64c7ac77 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x0000560b64c83192 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x0000560b64c7ba20 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x0000560b63ed3e49
+18 llc       0x0000560b63ed0fd3 main + 1747
+19 libc.so.6 0x00007f706d62a1ca
+20 libc.so.6 0x00007f706d62a28b __libc_start_main + 139
+21 llc       0x0000560b63ed00e5 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">xandesbfhcvt.dfe8884926.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/xandesbfhcvt.ll">xandesbfhcvt.ll</a><span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,andi,beq,beqz,bne,fcvt.wu.s</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,andi,beq,beqz,bne,fcvt.wu.s</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,andi,beq,beqz,bne,fcvt.wu.s <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">float-convert.2cbe69cd.0fd7cc2b.fd5b2496.7d679a972c.ll <span class="dim">(mutant of</span> float-convert.2cbe69cd.0fd7cc2b.fd5b2496.ll<span class="dim">)</span> @fcvt_wu_s_i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+c -O3 -code-model=small</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i8
+@G.1 = external global i64
+@G.4 = external global float
+@G.5 = external global i1
+
+; Function Attrs: nounwind
+define zeroext i8 @fcvt_wu_s_i8(float %a) #0 {
+  %A6 = alloca i1, align 1
+  store i1 poison, ptr %A6, align 1
+  %A3 = alloca i8, align 1
+  store i8 poison, ptr %A3, align 1
+  %A2 = alloca i8, align 1
+  store i8 127, ptr %A2, align 1
+  %A = alloca i1, align 1
+  store i1 false, ptr %A, align 1
+  %L = load i1, ptr %A, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F, %BB1
+  %1 = phi i64 [ %LGV, %F ], [ 42, %BB1 ]
+  %2 = fptoui float %a to i8
+  store i8 %2, ptr @G, align 1
+  store i64 %1, ptr @G.1, align 4
+  ret i8 %2
+
+T:                                                ; preds = %0
+  %L3 = load i8, ptr %A2, align 1
+  switch i8 %L3, label %SW_D [
+    i8 0, label %SW_C
+    i8 -6, label %SW_C4
+    i8 -92, label %SW_C5
+    i8 -52, label %SW_C6
+  ]
+
+BB1:                                              ; preds = %SW_C5, %SW_C4, %SW_D
+  %LGV5 = load float, ptr @G.4, align 4
+  %C = fcmp oeq float %a, %LGV5
+  store i1 %C, ptr %A6, align 1
+  %C2 = fcmp uge float %a, %LGV5
+  %C3 = fcmp olt float %a, %LGV5
+  store i1 %C2, ptr %A6, align 1
+  store i1 %C3, ptr @G.5, align 1
+  br label %BB
+
+F:                                                ; preds = %0
+  %LGV = load i64, ptr @G.1, align 4
+  br label %BB
+
+SW_D:                                             ; preds = %T
+  br label %BB1
+
+SW_C:                                             ; preds = %T
+  ret i8 1
+
+SW_C4:                                            ; preds = %T
+  br label %BB1
+
+SW_C5:                                            ; preds = %T
+  %B = or i8 %L3, 1
+  store i8 %B, ptr %A3, align 1
+  br label %BB1
+
+SW_C6:                                            ; preds = %T
+  %B7 = fadd float %a, 4.200000e+01
+  store float %B7, ptr @G.4, align 4
+  ret i8 16
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+c -O3 -code-model=small&#x27; --funcs fcvt_wu_s_i8 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">9 of 64 inputs differ (first: #12)
+SelectionDAG hash c7c80994735a01b2, GlobalISel hash 50322c310da047ea
+b0: llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+c -code-model=small -O3 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+c -code-model=small -O0 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+c -code-model=small -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">float-convert.2cbe69cd.0fd7cc2b.fd5b2496.7d679a972c.ll <span class="dim">(mutant of</span> float-convert.2cbe69cd.0fd7cc2b.fd5b2496.ll<span class="dim">)</span></td><td class="l">fcvt_wu_s_i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32f -mattr=+f,+c -O3 -code-model=small</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

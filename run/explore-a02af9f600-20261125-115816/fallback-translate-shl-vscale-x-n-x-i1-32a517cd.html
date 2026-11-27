@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: shl &lt;vscale x N x i1&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: shl &lt;vscale x N x i1&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: shl &lt;vscale x N x i1&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 10 configs, 10 test files, 123 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fp-bitcast.dd71f76a62.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp-bitcast.ll">fixed-vectors-fp-bitcast.ll</a><span class="dim">)</span> @bitcast_i64_v1f64 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbs,+zcb -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define &lt;1 x double&gt; @bitcast_i64_v1f64(i64 %a) {
+  %A = alloca &lt;vscale x 4 x i1&gt;, align 1
+  store &lt;vscale x 4 x i1&gt; poison, ptr %A, align 1
+  %B = shl &lt;vscale x 4 x i1&gt; zeroinitializer, splat (i1 true)
+  %b = bitcast i64 %a to &lt;1 x double&gt;
+  store &lt;vscale x 4 x i1&gt; %B, ptr %A, align 1
+  ret &lt;1 x double&gt; %b
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbs,+zcb -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbs,+zcb -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: shl: &#x27;  %B = shl &lt;vscale x 4 x i1&gt; zeroinitializer, splat (i1 true)&#x27; (in function: bitcast_i64_v1f64)
+warning: Instruction selection used fallback path for bitcast_i64_v1f64</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-extract-i1.7a96e8ee.5c695752.c087632f.b620a4e0.cf0e757ec4.ll <span class="dim">(mutant of</span> fixed-vectors-extract-i1.7a96e8ee.5c695752.c087632f.b620a4e0.ll<span class="dim">)</span></td><td class="l">extractelt_v1i1</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+v,+zfa,+zfh,+zicond,+zvfh -O2</code></td></tr><tr><td class="l">fixed-vectors-extract-i1.be91b851.fcd750bb.84f7bf217d.ll <span class="dim">(mutant of</span> fixed-vectors-extract-i1.be91b851.fcd750bb.ll<span class="dim">)</span></td><td class="l">extractelt_v1i1</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+v,+zbs -O0</code></td></tr><tr><td class="l">fixed-vectors-fp-bitcast.dd71f76a62.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fp-bitcast.ll">fixed-vectors-fp-bitcast.ll</a><span class="dim">)</span></td><td class="l">bitcast_i64_v1f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zvfh,+v,+zbs,+zcb -O1</code></td></tr><tr><td class="l">fixed-vectors-reduction-int.80430e8a73.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-reduction-int.ll">fixed-vectors-reduction-int.ll</a><span class="dim">)</span></td><td class="l">vreduce_umax_v3i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zfhmin -O1</code></td></tr><tr><td class="l">masked-store-int.ab70f4c42c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/masked-store-int.ll">masked-store-int.ll</a><span class="dim">)</span></td><td class="l">masked_store_nxv8i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zve32x,+zvl128b,+c -O1</code></td></tr><tr><td class="l">vpload.9c3758b397.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vpload.ll">vpload.ll</a><span class="dim">)</span></td><td class="l">vpload_nxv2f32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+zvfhmin,+zvfbfmin,+v -O0</code></td></tr><tr><td class="l">vreductions-int-vp.58d665b46e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vreductions-int-vp.ll">vreductions-int-vp.ll</a><span class="dim">)</span></td><td class="l">vwpreduce_uadd_nxv2i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+v,+f,+zbb -O1 -code-model=small</code></td></tr><tr><td class="l">vreductions-mask-vp.452113e821.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vreductions-mask-vp.ll">vreductions-mask-vp.ll</a><span class="dim">)</span></td><td class="l">vpreduce_xor_nxv4i1</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+v,+zicsr,+zbs -O2 -code-model=medium</code></td></tr><tr><td class="l">vreductions-mask.a0627e7b1d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vreductions-mask.ll">vreductions-mask.ll</a><span class="dim">)</span></td><td class="l">vreduce_add_nxv4i1</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+m,+v -O3</code></td></tr><tr><td class="l">vsoxei.5468fd7aa2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/rvv/vsoxei.ll">vsoxei.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vsoxei_mask_v_nxv32f16_nxv32f16_nxv32i16</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -target-abi=ilp32d -mattr=+v,+zvfhmin -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

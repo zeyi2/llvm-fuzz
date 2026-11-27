@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,lb,lbu,lh,lui,sb</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,lb,lbu,lh,lui,sb</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,lb,lbu,lh,lui,sb <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">memcpy-inline.9762ecec.5e0c01d779.ll <span class="dim">(mutant of</span> memcpy-inline.9762ecec.ll<span class="dim">)</span> @unaligned_memcpy7 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbs,+zihintpause,+zba -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global ptr
+@G.3 = external global i8
+@G.4 = external global ptr
+@G.5 = external global i16
+
+; Function Attrs: nounwind
+define void @unaligned_memcpy7(ptr captures(none) %dest, ptr %src) #0 {
+entry:
+  %A = alloca i16, align 2
+  store i16 poison, ptr %A, align 2
+  %LGV = load i16, ptr @G.5, align 2
+  %LGV1 = load i8, ptr @G.3, align 1
+  %G = getelementptr ptr, ptr %dest, i32 2147483647
+  %C = icmp ugt i8 %LGV1, 0
+  %G3 = getelementptr ptr, ptr %G, i8 %LGV1
+  tail call void @llvm.memcpy.inline.p0.p0.i64(ptr %dest, ptr %G, i64 7, i1 false)
+  %G2 = getelementptr i64, ptr %G, i8 %LGV1
+  %L = load i16, ptr %G2, align 2
+  %B = xor i16 %L, %LGV
+  store ptr %G2, ptr @G.1, align 8
+  store i1 %C, ptr %G2, align 1
+  store ptr %G3, ptr @G.4, align 8
+  store i16 %B, ptr %A, align 2
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.memcpy.inline.p0.p0.i64(ptr noalias writeonly captures(none), ptr noalias readonly captures(none), i64, i1 immarg) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -verify-machineinstrs -mattr=+zbs,+zihintpause,+zba -O3&#x27; --funcs unaligned_memcpy7 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash b7642aac8792b6d9, GlobalISel hash 8ef54f5e5fb958a0
+b0: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbs,+zihintpause,+zba -O3 -global-isel=0
+b1: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbs,+zihintpause,+zba -O0 -global-isel=0
+b2: llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zbs,+zihintpause,+zba -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">memcpy-inline.9762ecec.5e0c01d779.ll <span class="dim">(mutant of</span> memcpy-inline.9762ecec.ll<span class="dim">)</span></td><td class="l">unaligned_memcpy7</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zbs,+zihintpause,+zba -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

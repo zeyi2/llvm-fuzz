@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: call llvm.experimental.constrained.fptosi.v8i1.v8f16</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: call llvm.experimental.constrained.fptosi.v8i1.v8f16</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: call llvm.experimental.constrained.fptosi.v8i1.v8f16 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 1 test files, 1 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vfptoi-constrained-sdnode.dc8c280f21.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span> @vfptosi_v8f16_v8i1 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+v -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global &lt;8 x half&gt;
+
+; Function Attrs: strictfp
+define &lt;8 x i1&gt; @vfptosi_v8f16_v8i1(&lt;8 x half&gt; %va) #0 {
+  %B = fmul &lt;8 x half&gt; %va, %va
+  %evec = call &lt;8 x i1&gt; @llvm.experimental.constrained.fptosi.v8i1.v8f16(&lt;8 x half&gt; %va, metadata !&quot;fpexcept.strict&quot;)
+  store &lt;8 x half&gt; %B, ptr @G, align 16
+  ret &lt;8 x i1&gt; %evec
+}
+
+; Function Attrs: nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite)
+declare &lt;8 x i1&gt; @llvm.experimental.constrained.fptosi.v8i1.v8f16(&lt;8 x half&gt;, metadata) #1
+
+attributes #0 = { strictfp }
+attributes #1 = { nocallback nofree nosync nounwind strictfp willreturn memory(inaccessiblemem: readwrite) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+v -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+v -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: call llvm.experimental.constrained.fptosi.v8i1.v8f16: &#x27;  %evec = call &lt;8 x i1&gt; @llvm.experimental.constrained.fptosi.v8i1.v8f16(&lt;8 x half&gt; %va, metadata !&quot;fpexcept.strict&quot;)&#x27; (in function: vfptosi_v8f16_v8i1)
+warning: Instruction selection used fallback path for vfptosi_v8f16_v8i1</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfptoi-constrained-sdnode.3aa30b65fb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v8f16_v8i1</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa,+v,+zihintpause -O0</code></td></tr><tr><td class="l">fixed-vectors-vfptoi-constrained-sdnode.7bfd224753.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v8f16_v8i1</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa,+v,+a,+zihintpause -O2</code></td></tr><tr><td class="l">fixed-vectors-vfptoi-constrained-sdnode.a261c5e17c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v8f16_v8i1</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa,+zicond -O2 -code-model=small</code></td></tr><tr><td class="l">fixed-vectors-vfptoi-constrained-sdnode.d79e774a0c.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v8f16_v8i1</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa,+v,+zba -O3 -code-model=medium</code></td></tr><tr><td class="l">fixed-vectors-vfptoi-constrained-sdnode.dc8c280f21.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v8f16_v8i1</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+v -O3</code></td></tr><tr><td class="l">fixed-vectors-vfptoi-constrained-sdnode.f24616a392.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vfptoi-constrained-sdnode.ll">fixed-vectors-vfptoi-constrained-sdnode.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v8f16_v8i1</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfh,+zvfh,+experimental-zvfbfa -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

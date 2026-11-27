@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_FPTRUNC s32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_FPTRUNC s32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_FPTRUNC s32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 965 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">rvp-fastcc.e985f90e6b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvp-fastcc.ll">rvp-fastcc.ll</a><span class="dim">)</span> @callee_v8i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global bfloat
+
+define fastcc &lt;8 x i8&gt; @callee_v8i8(&lt;8 x i8&gt; %a, &lt;8 x i8&gt; %b) {
+  %A = alloca bfloat, align 2
+  store bfloat poison, ptr %A, align 2
+  %LGV1 = load bfloat, ptr @G.2, align 2
+  %r = add &lt;8 x i8&gt; %a, %b
+  %B = frem bfloat 4.200000e+01, %LGV1
+  store bfloat %B, ptr %A, align 2
+  ret &lt;8 x i8&gt; %r
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+m -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %32:_(bf16) = G_FPTRUNC %65:_(s32) (in function: callee_v8i8)
+warning: Instruction selection used fallback path for callee_v8i8</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vfmul-constrained-sdnode.9b21b0b6.18a3bda9ea.ll <span class="dim">(mutant of</span> fixed-vectors-vfmul-constrained-sdnode.9b21b0b6.ll<span class="dim">)</span></td><td class="l">vfmul_vv_v4f64</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64d -verify-machineinstrs -mattr=+d,+zfhmin,+experimental-zvfbfa -O2</code></td></tr><tr><td class="l">inline-asm-d-constraint-f.7d769bedff.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/inline-asm-d-constraint-f.ll">inline-asm-d-constraint-f.ll</a><span class="dim">)</span></td><td class="l">constraint_f_double_abi_name</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32 -verify-machineinstrs -mattr=+d,+zba,+zbs -O0</code></td></tr><tr><td class="l">rvp-fastcc.e985f90e6b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvp-fastcc.ll">rvp-fastcc.ll</a><span class="dim">)</span></td><td class="l">callee_v8i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m -O0</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

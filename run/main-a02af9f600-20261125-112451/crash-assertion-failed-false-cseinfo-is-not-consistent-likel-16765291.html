@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (false &amp;&amp; &quot;CSEInfo is not consistent. Likely missing calls to &quot; &quot;observer on mutations.&quot;), function combineMachineInstrs, file Combiner.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (false &amp;&amp; &quot;CSEInfo is not consistent. Likely missing calls to &quot; &quot;observer on mutations.&quot;), function combineMachineInstrs, file Combiner.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../main-a02af9f600-20261125-112451.html">main-a02af9f600-20261125-112451</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (false &amp;&amp; &quot;CSEInfo is not consistent. Likely missing calls to &quot; &quot;observer on mutations.&quot;), function combineMachineInstrs, file Combiner.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/float-bit-preserving-dagcombines.ll">float-bit-preserving-dagcombines.ll</a> @bitcast_double_and via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/W6oYKdEjc">https://godbolt.org/z/W6oYKdEjc</a> (llc-assertions-trunk, checked 2026-11-18 11:17 UTC): <a href="https://godbolt.org/z/W6oYKdEjc">G</a> <span class="fp">no crash on trunk</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define double @bitcast_double_and(double %a1, double %a2) #0 {
+  %a3 = fadd double %a1, %a2
+  %bc1 = bitcast double %a3 to i64
+  %and = and i64 %bc1, 9223372036854775807
+  %bc2 = bitcast i64 %and to double
+  %a4 = fadd double %a1, %bc2
+  ret double %a4
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>0</td><td>22</td><td class="msg err"><span class="dim">-</span></td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs -global-isel=0</code></td><td>0</td><td>15</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">CSEMap mismatch, InstrMapping has MIs without corresponding Nodes in CSEMap:
+%22:_(i32), %23:_(s32) = G_UNMERGE_VALUES %6:_(f64)
+llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/CodeGen/GlobalISel/Combiner.cpp:347: bool llvm::Combiner::combineMachineInstrs(): Assertion `false &amp;&amp; &quot;CSEInfo is not consistent. Likely missing calls to &quot; &quot;observer on mutations.&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;RISCVPostLegalizerCombiner&#x27; on function &#x27;@bitcast_double_and&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000563d56268ecb llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000563d56265ea1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000563d5626994b
+3  libc.so.6 0x00007faf15645330
+4  libc.so.6 0x00007faf1569ebec pthread_kill + 284
+5  libc.so.6 0x00007faf1564527e gsignal + 30
+6  libc.so.6 0x00007faf156288ff abort + 223
+7  libc.so.6 0x00007faf1562881b
+8  libc.so.6 0x00007faf1563b517
+9  llc       0x0000563d56ae3d75
+10 llc       0x0000563d548fce97
+11 llc       0x0000563d548fd3e6
+12 llc       0x0000563d54ed4b31 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+13 llc       0x0000563d5546f417 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+14 llc       0x0000563d55477932 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+15 llc       0x0000563d554701c0 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+16 llc       0x0000563d546c87c9
+17 llc       0x0000563d546c5953 main + 1747
+18 libc.so.6 0x00007faf1562a1ca
+19 libc.so.6 0x00007faf1562a28b __libc_start_main + 139
+20 llc       0x0000563d546c4a65 _start + 37</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l"><a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/float-bit-preserving-dagcombines.ll">float-bit-preserving-dagcombines.ll</a></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -mattr=+f,+d -target-abi=ilp32 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

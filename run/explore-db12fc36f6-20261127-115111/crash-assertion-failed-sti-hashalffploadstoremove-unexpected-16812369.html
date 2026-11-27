@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crash: Assertion failed: (STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;), function copyPhysReg, file RISCVInstrInfo.cpp</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>crash: Assertion failed: (STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;), function copyPhysReg, file RISCVInstrInfo.cpp</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">crash</td></tr>
+<tr><td class="l">Category:</td><td class="l">Assertion failed: (STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;), function copyPhysReg, file RISCVInstrInfo.cpp </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 1 test files, 22 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">xandesbfhcvt.65bf773a.ll @fcvt_bf16_s via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><a href="https://godbolt.org/z/e548G3vd4">https://godbolt.org/z/e548G3vd4</a> (llc-assertions-trunk, checked 2026-11-27 15:30 UTC): <a href="https://godbolt.org/z/e548G3vd4">G</a> <span class="tp">reproduces</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; Function Attrs: nounwind
+define bfloat @fcvt_bf16_s(float %a) #0 {
+  %B = fmul bfloat 3.389530e+38, 4.200000e+01
+  ret bfloat %B
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Compiler Explorer panes:</h4>
+<table><tr><th class="l">Pane</th><th class="l">Options</th><th>Exit</th><th>Insts</th><th class="l">stderr</th></tr><tr><td class="l">GlobalISel</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.*</code></td><td>134</td><td>0</td><td class="msg err">llc: /root/llvm-project/llvm/lib/Target/RISCV/RISCVInstrInfo.cpp:598: virtual void llvm::RISCVInstrInfo::copyPhysReg(llvm::MachineBasicBlock&amp;, llvm::MachineBasicBlock::iterator, const llvm::DebugLoc&amp;, llvm::Register, llvm::Register, bool, bool, bool) const: Assertion `STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;&#x27; failed.<br>PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.<br>Stack dump:</td></tr><tr><td class="l">SelectionDAG (control)</td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel=0</code></td><td>0</td><td>6</td><td class="msg err"><span class="dim">-</span></td></tr></table>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">llc: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/llvm/lib/Target/RISCV/RISCVInstrInfo.cpp:598: virtual void llvm::RISCVInstrInfo::copyPhysReg(MachineBasicBlock &amp;, MachineBasicBlock::iterator, const DebugLoc &amp;, Register, Register, bool, bool, bool) const: Assertion `STI.hasHalfFPLoadStoreMove() &amp;&amp; &quot;Unexpected extensions&quot;&#x27; failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /home/runner/work/llvm-fuzz/llvm-fuzz/llvm-project/build/bin/llc -mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* -o -
+1.	Running pass &#x27;Function Pass Manager&#x27; on module &#x27;&lt;stdin&gt;&#x27;.
+2.	Running pass &#x27;Post-RA pseudo instruction expansion pass&#x27; on function &#x27;@fcvt_bf16_s&#x27;
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  llc       0x0000560525f3bc1b llvm::sys::PrintStackTrace(llvm::raw_ostream&amp;, int) + 43
+1  llc       0x0000560525f38bf1 llvm::sys::RunSignalHandlers() + 369
+2  llc       0x0000560525f3c69b
+3  libc.so.6 0x00007f9747645330
+4  libc.so.6 0x00007f974769ebec pthread_kill + 284
+5  libc.so.6 0x00007f974764527e gsignal + 30
+6  libc.so.6 0x00007f97476288ff abort + 223
+7  libc.so.6 0x00007f974762881b
+8  libc.so.6 0x00007f974763b517
+9  llc       0x00005605243e4578
+10 llc       0x0000560524eef847 llvm::TargetInstrInfo::lowerCopy(llvm::MachineInstr*) const + 359
+11 llc       0x0000560524a5ef1b
+12 llc       0x0000560524a5f673
+13 llc       0x0000560524bb4761 llvm::MachineFunctionPass::runOnFunction(llvm::Function&amp;) + 513
+14 llc       0x0000560525150a77 llvm::FPPassManager::runOnFunction(llvm::Function&amp;) + 871
+15 llc       0x0000560525158f92 llvm::FPPassManager::runOnModule(llvm::Module&amp;) + 50
+16 llc       0x0000560525151820 llvm::legacy::PassManagerImpl::run(llvm::Module&amp;) + 2000
+17 llc       0x00005605243ab689
+18 llc       0x00005605243a8813 main + 1747
+19 libc.so.6 0x00007f974762a1ca
+20 libc.so.6 0x00007f974762a28b __libc_start_main + 139
+21 llc       0x00005605243a7925 _start + 37</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">xandesbfhcvt.65bf773a.23bf4acf9b.ll <span class="dim">(mutant of</span> xandesbfhcvt.65bf773a.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt,+zfa -O3 -code-model=small</code></td></tr><tr><td class="l">xandesbfhcvt.65bf773a.80f2fffbd7.ll <span class="dim">(mutant of</span> xandesbfhcvt.65bf773a.ll<span class="dim">)</span></td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt,+zvkb -O0 -code-model=medium</code></td></tr><tr><td class="l">xandesbfhcvt.65bf773a.ll</td><td class="l"></td><td class="l"><code>-mtriple=riscv32 -target-abi ilp32f -verify-machineinstrs -mattr=+xandesbfhcvt -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

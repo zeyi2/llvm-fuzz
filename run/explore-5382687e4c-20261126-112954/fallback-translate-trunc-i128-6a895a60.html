@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: trunc i128</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: trunc i128</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: trunc i128 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 2 configs, 2 test files, 7 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">calling-conv-lp64e.082fd0b868.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/calling-conv-lp64e.ll">calling-conv-lp64e.ll</a><span class="dim">)</span> @callee_i128_in_regs via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64e -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i64
+
+; Function Attrs: nounwind
+define i64 @callee_i128_in_regs(i32 %a, i128 %b) #0 {
+  %b_trunc = trunc i128 %b to i64
+  %a_ext = zext i32 %a to i64
+  %B = ashr i64 %b_trunc, %b_trunc
+  %1 = add i64 %a_ext, %b_trunc
+  store i64 %B, ptr @G.3, align 4
+  ret i64 %1
+}
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -target-abi lp64e -verify-machineinstrs -mattr=+zdinx -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -target-abi lp64e -verify-machineinstrs -mattr=+zdinx -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: trunc: &#x27;  %b_trunc = trunc i128 %b to i64&#x27; (in function: callee_i128_in_regs)
+warning: Instruction selection used fallback path for callee_i128_in_regs</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">calling-conv-lp64.4b826aae17.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/calling-conv-lp64.ll">calling-conv-lp64.ll</a><span class="dim">)</span></td><td class="l">callee_float_on_stack</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -frame-pointer=all -mattr=+zhinx -O3</code></td></tr><tr><td class="l">calling-conv-lp64e.082fd0b868.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/calling-conv-lp64e.ll">calling-conv-lp64e.ll</a><span class="dim">)</span></td><td class="l">callee_i128_in_regs</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64e -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr><tr><td class="l">calling-conv-lp64e.082fd0b868.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/calling-conv-lp64e.ll">calling-conv-lp64e.ll</a><span class="dim">)</span></td><td class="l">callee_i128_on_stack</td><td class="l"><code>-mtriple=riscv64 -target-abi lp64e -verify-machineinstrs -mattr=+zdinx -O1</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

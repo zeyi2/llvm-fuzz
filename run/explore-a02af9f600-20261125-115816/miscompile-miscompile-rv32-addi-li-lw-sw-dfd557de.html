@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv32: addi,li,lw,sw</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv32: addi,li,lw,sw</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv32: addi,li,lw,sw <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">elf-preemption.71dae34704.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/elf-preemption.ll">elf-preemption.ll</a><span class="dim">)</span> @dsolocal_func via full input</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -relocation-model=pic -mattr=+zfh,+zfa -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">; ModuleID = &#x27;&lt;stdin&gt;&#x27;
+source_filename = &quot;&lt;stdin&gt;&quot;
+
+@preemptable_var = global i32 42
+@dsolocal_var = dso_local global i32 42
+@weak_dsolocal_var = weak dso_local global i32 42
+@hidden_var = hidden global i32 42
+@protected_var = protected global i32 42
+@G = global &lt;2 x i64&gt; splat (i64 -1)
+
+; Function Attrs: nounwind
+declare ptr @get_preemptable_var() #0
+
+; Function Attrs: nounwind
+declare ptr @get_dsolocal_var() #0
+
+; Function Attrs: nounwind
+declare ptr @get_weak_dsolocal_var() #0
+
+; Function Attrs: nounwind
+declare ptr @get_hidden_var() #0
+
+; Function Attrs: nounwind
+define ptr @get_protected_var() #0 {
+  %C = fcmp one half 1.000000e+00, 4.200000e+01
+  store i1 %C, ptr poison, align 1
+  ret ptr @protected_var
+}
+
+; Function Attrs: nounwind
+declare ptr @preemptable_func() #0
+
+; Function Attrs: nounwind
+define dso_local ptr @dsolocal_func() #0 {
+  %B = xor &lt;2 x i64&gt; splat (i64 4294967296), splat (i64 1)
+  store &lt;2 x i64&gt; %B, ptr @G, align 16
+  ret ptr @dsolocal_func
+}
+
+; Function Attrs: nounwind
+declare dso_local ptr @weak_dsolocal_func() #0
+
+; Function Attrs: nounwind
+declare dso_local void @call_dsolocal_func() #0
+
+attributes #0 = { nounwind }
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv32 -relocation-model=pic -mattr=+zfh,+zfa -O0 -verify-machineinstrs&#x27; --funcs dsolocal_func snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash f9c4cb13a6b1ca47, GlobalISel hash 263d7df8259652bb
+b0: llc -mtriple=riscv32 -relocation-model=pic -mattr=+zfh,+zfa -verify-machineinstrs -O0 -global-isel=0
+b1: llc -mtriple=riscv32 -relocation-model=pic -mattr=+zfh,+zfa -verify-machineinstrs -O2 -global-isel=0
+b2: llc -mtriple=riscv32 -relocation-model=pic -mattr=+zfh,+zfa -verify-machineinstrs -O0 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">elf-preemption.71dae34704.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/elf-preemption.ll">elf-preemption.ll</a><span class="dim">)</span></td><td class="l">dsolocal_func</td><td class="l"><code>-mtriple=riscv32 -relocation-model=pic -mattr=+zfh,+zfa -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

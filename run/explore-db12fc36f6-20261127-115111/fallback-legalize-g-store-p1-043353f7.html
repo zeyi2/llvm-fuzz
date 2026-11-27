@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE p1</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE p1</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE p1 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 2 test files, 10 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">addrspacecast.d237120795.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span> @cast0 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+f -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i128
+@G.1 = external global half
+@G.2 = external global i1
+
+define void @cast0(ptr addrspace(1) %ptr) {
+  %LGV3 = load half, ptr @G.1, align 2
+  %G2 = getelementptr ptr addrspace(1), ptr addrspace(1) %ptr, i32 42
+  %C4 = fcmp oeq half %LGV3, 0.000000e+00
+  %C = fcmp uno float +qnan, 0.000000e+00
+  %LGV = load i128, ptr @G, align 4
+  %ptr0 = addrspacecast ptr addrspace(1) %ptr to ptr
+  store i32 0, ptr %ptr0, align 4
+  %G = getelementptr ptr, ptr addrspace(1) %ptr, i128 %LGV
+  store ptr addrspace(1) %G, ptr poison, align 8
+  store i1 %C, ptr addrspace(1) %G, align 1
+  store ptr addrspace(1) %G2, ptr addrspace(1) %G, align 8
+  store i1 %C4, ptr @G.2, align 1
+  ret void
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+f -O2 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+a,+f -O2 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %4:_(p1), %17:_(p1) :: (store (p1) into %ir.G, align 8, addrspace 1) (in function: cast0)
+warning: Instruction selection used fallback path for cast0</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">addrspacecast.0843499e.c5314c51.4f617ffb29.ll <span class="dim">(mutant of</span> addrspacecast.0843499e.c5314c51.ll<span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zfh,+zicond,+zcb -O1</code></td></tr><tr><td class="l">addrspacecast.090c1e65ec.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zcb -O2</code></td></tr><tr><td class="l">addrspacecast.d237120795.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/db12fc36f6cba426179bc6a723228fad898dcdc1/llvm/test/CodeGen/RISCV/addrspacecast.ll">addrspacecast.ll</a><span class="dim">)</span></td><td class="l">cast0</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+f -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

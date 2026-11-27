@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTRINSIC &lt;N x i8&gt;,&lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTRINSIC &lt;N x i8&gt;,&lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTRINSIC &lt;N x i8&gt;,&lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 5 configs, 3 test files, 33 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">vector-interleave-fixed.c055a44cc6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span> @vector_interleave4_v512i8_v2048i8 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfh,+zvfbfmin,+xtheadba -O0 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global half
+
+; Function Attrs: nounwind
+define &lt;2048 x i8&gt; @vector_interleave4_v512i8_v2048i8(&lt;512 x i8&gt; %v0, &lt;512 x i8&gt; %v1, &lt;512 x i8&gt; %v2, &lt;512 x i8&gt; %v3) #0 {
+  %LGV = load half, ptr @G.1, align 2
+  %C = fcmp une half +qnan, %LGV
+  %v = call &lt;2048 x i8&gt; @llvm.vector.interleave4.v2048i8(&lt;512 x i8&gt; %v0, &lt;512 x i8&gt; %v1, &lt;512 x i8&gt; %v2, &lt;512 x i8&gt; %v3)
+  store i1 %C, ptr poison, align 1
+  ret &lt;2048 x i8&gt; %v
+}
+
+; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare &lt;2048 x i8&gt; @llvm.vector.interleave4.v2048i8(&lt;512 x i8&gt;, &lt;512 x i8&gt;, &lt;512 x i8&gt;, &lt;512 x i8&gt;) #1
+
+attributes #0 = { nounwind }
+attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+zvfh,+zvfbfmin,+xtheadba -O0 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+zvfh,+zvfbfmin,+xtheadba -O0 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %13:_(&lt;2048 x i8&gt;) = G_INTRINSIC intrinsic(@llvm.vector.interleave4), %0:_(&lt;512 x i8&gt;), %1:_(&lt;512 x i8&gt;), %2:_(&lt;512 x i8&gt;), %3:_(&lt;512 x i8&gt;) (in function: vector_interleave4_v512i8_v2048i8)
+warning: Instruction selection used fallback path for vector_interleave4_v512i8_v2048i8</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-deinterleave-load.408c5aa0cd.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-deinterleave-load.ll">fixed-vectors-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_factor4</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfhmin,+zvfbfmin -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-deinterleave-load.63130daafc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-deinterleave-load.ll">fixed-vectors-deinterleave-load.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave_load_factor4</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfhmin,+zvfbfmin,+zvkb -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-deinterleave-fixed.49d156435a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vector-deinterleave-fixed.ll">vector-deinterleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_deinterleave8_v16i8_v2i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh,+zvfbfmin -O0 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-fixed.c055a44cc6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_interleave4_v512i8_v2048i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zvfh,+zvfbfmin,+xtheadba -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-fixed.f48331f35d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_interleave7_v14i8_v2i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh,+zvfbfmin,+zfa -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">vector-interleave-fixed.f48331f35d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/vector-interleave-fixed.ll">vector-interleave-fixed.ll</a><span class="dim">)</span></td><td class="l">vector_interleave8_v16i8_v2i8</td><td class="l"><code>-mtriple=riscv64 -mattr=+zvfh,+zvfbfmin,+zfa -O2 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

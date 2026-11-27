@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: insertelement &lt;N x i8&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: insertelement &lt;N x i8&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: insertelement &lt;N x i8&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">6 in 6 configs, 6 test files, 13 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-vwsll.9b48e393aa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwsll.ll">fixed-vectors-vwsll.ll</a><span class="dim">)</span> @vwsll_vx_i8_v8i32_zext via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global i1
+
+define &lt;8 x i32&gt; @vwsll_vx_i8_v8i32_zext(&lt;8 x i16&gt; %a, i8 %b) {
+  %head = insertelement &lt;8 x i8&gt; poison, i8 %b, i32 0
+  %splat = shufflevector &lt;8 x i8&gt; %head, &lt;8 x i8&gt; poison, &lt;8 x i32&gt; zeroinitializer
+  %x = zext &lt;8 x i16&gt; %a to &lt;8 x i32&gt;
+  %y = zext &lt;8 x i8&gt; %splat to &lt;8 x i32&gt;
+  %C = icmp eq i32 0, -1
+  %z = shl &lt;8 x i32&gt; %x, %y
+  store i1 %C, ptr @G.3, align 1
+  ret &lt;8 x i32&gt; %z
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: insertelement: &#x27;  %head = insertelement &lt;8 x i8&gt; poison, i8 %b, i32 0&#x27; (in function: vwsll_vx_i8_v8i32_zext)
+warning: Instruction selection used fallback path for vwsll_vx_i8_v8i32_zext</pre>
+<h4>Occurrences (6):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-vmacc-vp.d400c501fc.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vmacc-vp.ll">fixed-vectors-vmacc-vp.ll</a><span class="dim">)</span></td><td class="l">vmacc_vx_nxv64i8_unmasked</td><td class="l"><code>-mtriple=riscv32 -target-abi=ilp32d -verify-machineinstrs -mattr=+m,+zfinx -O3</code></td></tr><tr><td class="l">fixed-vectors-vror.a99bc1fb49.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vror.ll">fixed-vectors-vror.ll</a><span class="dim">)</span></td><td class="l">vror_vx_v4i8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zhinx -O1</code></td></tr><tr><td class="l">fixed-vectors-vssub-vp.c636b18d50.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vssub-vp.ll">fixed-vectors-vssub-vp.ll</a><span class="dim">)</span></td><td class="l">vssub_vx_v4i8_unmasked</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+zhinx -O0</code></td></tr><tr><td class="l">fixed-vectors-vwsll.9b48e393aa.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-vwsll.ll">fixed-vectors-vwsll.ll</a><span class="dim">)</span></td><td class="l">vwsll_vx_i8_v8i32_zext</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+zdinx -O3</code></td></tr><tr><td class="l">ghccc-without-f-reg.43b71bbb28.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/ghccc-without-f-reg.ll">ghccc-without-f-reg.ll</a><span class="dim">)</span></td><td class="l">caller_float</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx,+zdinx -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">umulh.3795de3d46.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/umulh.ll">umulh.ll</a><span class="dim">)</span></td><td class="l">umulh_v8i8</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfinx -O2 -code-model=medium -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

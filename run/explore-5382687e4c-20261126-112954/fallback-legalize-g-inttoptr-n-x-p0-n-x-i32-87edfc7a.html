@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_INTTOPTR &lt;N x p0&gt;,&lt;N x i32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_INTTOPTR &lt;N x p0&gt;,&lt;N x i32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_INTTOPTR &lt;N x p0&gt;,&lt;N x i32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">4 in 4 configs, 2 test files, 6 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-inttoptr-ptrtoint.132026082b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-inttoptr-ptrtoint.ll">fixed-vectors-inttoptr-ptrtoint.ll</a><span class="dim">)</span> @inttoptr_v4p0_v4i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -O3 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.3 = external global bfloat
+
+define &lt;4 x ptr&gt; @inttoptr_v4p0_v4i32(&lt;4 x i32&gt; %va, &lt;4 x i1&gt; %m, i32 zeroext %evl) {
+  %A = alloca bfloat, align 2
+  store bfloat poison, ptr %A, align 2
+  %LGV = load bfloat, ptr @G.3, align 2
+  %B = fmul bfloat 0.000000e+00, %LGV
+  %v = inttoptr &lt;4 x i32&gt; %va to &lt;4 x ptr&gt;
+  store bfloat %B, ptr %A, align 2
+  ret &lt;4 x ptr&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv64 -O3 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv64 -O3 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %14:_(&lt;4 x p0&gt;) = G_INTTOPTR %0:_(&lt;4 x i32&gt;) (in function: inttoptr_v4p0_v4i32)
+warning: Instruction selection used fallback path for inttoptr_v4p0_v4i32</pre>
+<h4>Occurrences (4):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bitextract.457fdb24d7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v2ptr</td><td class="l"><code>-mtriple=riscv32 -mattr=+zfh -O2 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-bitextract.607185b21d.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v2ptr</td><td class="l"><code>-mtriple=riscv32 -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-bitextract.974de203f6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v2ptr</td><td class="l"><code>-mtriple=riscv32 -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-inttoptr-ptrtoint.132026082b.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/5382687e4c0ce16c3ccbacf7a9928de4f3a6696a/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-inttoptr-ptrtoint.ll">fixed-vectors-inttoptr-ptrtoint.ll</a><span class="dim">)</span></td><td class="l">inttoptr_v4p0_v4i32</td><td class="l"><code>-mtriple=riscv64 -O3 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

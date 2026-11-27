@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,andi,beqz,bnez,lbu,li</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,andi,beqz,bnez,lbu,li</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-5382687e4c-20261126-112954.html">explore-5382687e4c-20261126-112954</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,andi,beqz,bnez,lbu,li <span class="new" title="never reported by any earlier run">NEW</span> <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">unaligned-load-store.62ffa59e.452ce65f.e331870c.9c1bda085e.ll <span class="dim">(mutant of</span> unaligned-load-store.62ffa59e.452ce65f.e331870c.ll<span class="dim">)</span> @merge_stores_i8_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a -O3</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at 5382687e4c</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G = external global i1
+
+define void @merge_stores_i8_i32(ptr %p) {
+  %A = alloca i1, align 1
+  store i1 true, ptr %A, align 1
+  %LGV = load i1, ptr @G, align 1
+  store i8 0, ptr %p, align 1
+  %p2 = getelementptr i8, ptr %p, i32 1
+  store i8 0, ptr %p2, align 1
+  %p3 = getelementptr i8, ptr %p, i32 2
+  %L = load i1, ptr %p3, align 1
+  br i1 %L, label %T, label %F
+
+BB:                                               ; preds = %F
+  store i8 0, ptr %p3, align 1
+  %p4 = getelementptr i8, ptr %p, i32 3
+  store i8 0, ptr %p4, align 1
+  ret void
+
+T:                                                ; preds = %0
+  %G4 = getelementptr &lt;2 x i64&gt;, ptr %p, i1 %L
+  %L5 = load i1, ptr %A, align 1
+  br i1 %L5, label %T2, label %F3
+
+BB1:                                              ; preds = %F3
+  %B = shl &lt;2 x i64&gt; splat (i64 1), zeroinitializer
+  %G2 = getelementptr ptr, ptr %p3, i8 0
+  store ptr %G2, ptr poison, align 8
+  store &lt;2 x i64&gt; %B, ptr %G4, align 16
+  ret void
+
+F:                                                ; preds = %0
+  %G = getelementptr ptr, ptr %p, i1 %LGV
+  store ptr %G, ptr %A, align 8
+  br label %BB
+
+T2:                                               ; preds = %T
+  ret void
+
+F3:                                               ; preds = %T
+  %C = icmp sgt i1 %L5, true
+  store i1 %C, ptr %G4, align 1
+  br label %BB1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a -O3&#x27; --funcs merge_stores_i8_i32 snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">64 of 64 inputs differ (first: #0)
+SelectionDAG hash f49f388c7c8010a7, GlobalISel hash bcf50269d903820f
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a -O3 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a -O3 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">unaligned-load-store.62ffa59e.452ce65f.e331870c.9c1bda085e.ll <span class="dim">(mutant of</span> unaligned-load-store.62ffa59e.452ce65f.e331870c.ll<span class="dim">)</span></td><td class="l">merge_stores_i8_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+unaligned-scalar-mem,+a -O3</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

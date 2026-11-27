@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_IMPLICIT_DEF &lt;N x f32&gt;</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_IMPLICIT_DEF &lt;N x f32&gt;</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_IMPLICIT_DEF &lt;N x f32&gt; <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">3 in 3 configs, 3 test files, 18 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">short-forward-branch-opt-with-branch-with-immediates_48_eq.02846329b7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/short-forward-branch-opt-with-branch-with-immediates_48_eq.ll">short-forward-branch-opt-with-branch-with-immediates_48_eq.ll</a><span class="dim">)</span> @branch_with_immSFB_addi via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+d -O0</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">define i32 @branch_with_immSFB_addi(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e) {
+entry:
+  %A = alloca &lt;4 x float&gt;, align 16
+  store &lt;4 x float&gt; poison, ptr %A, align 16
+  %x = icmp eq i32 %d, 10011
+  %addi = add i32 %a, 11
+  %sel = select i1 %x, i32 %addi, i32 %c
+  %B = frem &lt;4 x float&gt; splat (float 1.000000e+00), splat (float +qnan)
+  store &lt;4 x float&gt; %B, ptr %A, align 16
+  ret i32 %sel
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -verify-machineinstrs -mtriple=riscv32 -mattr=+d -O0 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -verify-machineinstrs -mtriple=riscv32 -mattr=+d -O0 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: %6:_(&lt;4 x f32&gt;) = G_IMPLICIT_DEF (in function: branch_with_immSFB_addi)
+warning: Instruction selection used fallback path for branch_with_immSFB_addi</pre>
+<h4>Occurrences (3):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">short-forward-branch-opt-with-branch-with-immediates_48_eq.02846329b7.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/short-forward-branch-opt-with-branch-with-immediates_48_eq.ll">short-forward-branch-opt-with-branch-with-immediates_48_eq.ll</a><span class="dim">)</span></td><td class="l">branch_with_immSFB_addi</td><td class="l"><code>-verify-machineinstrs -mtriple=riscv32 -mattr=+d -O0</code></td></tr><tr><td class="l">vfrsqrt7-bf16.067e2cee68.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/vfrsqrt7-bf16.ll">vfrsqrt7-bf16.ll</a><span class="dim">)</span></td><td class="l">intrinsic_vfrsqrt7_mask_v_nxv8bf16_nxv8bf16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -target-abi=lp64d -mattr=+v,+experimental-zvfbfa,+zve32x,+zvkb -O0</code></td></tr><tr><td class="l">xqcilsm-memset.152e7d24a5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/xqcilsm-memset.ll">xqcilsm-memset.ll</a><span class="dim">)</span></td><td class="l">test8</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+xqcilsm,+f -O3 -code-model=medium</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

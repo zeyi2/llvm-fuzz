@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: translate: udiv i32</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: translate: udiv i32</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">translate: udiv i32 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">10 in 10 configs, 10 test files, 79 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">alu-roundtrip.a187951039.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/alu-roundtrip.ll">alu-roundtrip.ll</a><span class="dim">)</span> @udiv_i32 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -riscv-enable-copy-propagation=false -mattr=+m,+zdinx,+zba -O1</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global &lt;4 x i32&gt;
+
+define i32 @udiv_i32(i32 %a, i32 %b) {
+entry:
+  %0 = udiv i32 %a, %b
+  %B = urem &lt;4 x i32&gt; splat (i32 -1), splat (i32 -2147483648)
+  store &lt;4 x i32&gt; %B, ptr @G.1, align 16
+  ret i32 %0
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -verify-machineinstrs -riscv-enable-copy-propagation=false -mattr=+m,+zdinx,+zba -O1 -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -verify-machineinstrs -riscv-enable-copy-propagation=false -mattr=+m,+zdinx,+zba -O1 -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to translate instruction: udiv: &#x27;  %0 = udiv i32 %a, %b&#x27; (in function: udiv_i32)
+warning: Instruction selection used fallback path for udiv_i32</pre>
+<h4>Occurrences (10):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">alu-roundtrip.a187951039.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/alu-roundtrip.ll">alu-roundtrip.ll</a><span class="dim">)</span></td><td class="l">udiv_i32</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -riscv-enable-copy-propagation=false -mattr=+m,+zdinx,+zba -O1</code></td></tr><tr><td class="l">atomic-load-zext.5487386830.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/atomic-load-zext.ll">atomic-load-zext.ll</a><span class="dim">)</span></td><td class="l">atomic_load_i16_seq_cst</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+a,+ztso,+zhinx -O2 -code-model=medium</code></td></tr><tr><td class="l">codemodel-lowering.98de19b495.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/codemodel-lowering.ll">codemodel-lowering.ll</a><span class="dim">)</span></td><td class="l">lower_blockaddress_displ</td><td class="l"><code>-mtriple=riscv64 -target-abi=lp64 -verify-machineinstrs -mattr=+zfinx,+zhinx -O3</code></td></tr><tr><td class="l">div-by-constant.c800343ae5.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/div-by-constant.ll">div-by-constant.ll</a><span class="dim">)</span></td><td class="l">udiv_constant_no_add</td><td class="l"><code>-mtriple=riscv32 -verify-machineinstrs -mattr=+m,+zba,+zbb,+zfinx -O1</code></td></tr><tr><td class="l">fp128.0bfc514deb.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/GlobalISel/fp128.ll">fp128.ll</a><span class="dim">)</span></td><td class="l">sitofp_i32</td><td class="l"><code>-mtriple=riscv64 -mattr=+zfinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">memset.09cd549236.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/memset.ll">memset.ll</a><span class="dim">)</span></td><td class="l">memset_i32_2147483648</td><td class="l"><code>-mtriple=riscv32 -mattr=+zhinx -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">rvp-narrowing-clip.f63973240e.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvp-narrowing-clip.ll">rvp-narrowing-clip.ll</a><span class="dim">)</span></td><td class="l">pnclip_v2i16</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+xtheadba,+zfinx -O1</code></td></tr><tr><td class="l">rvp-simd-32.b75a0c9a76.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvp-simd-32.ll">rvp-simd-32.ll</a><span class="dim">)</span></td><td class="l">test_pm2addasu_v2i16_i32</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+experimental-p,+m,+zbb,+zhinx -O3</code></td></tr><tr><td class="l">shl-cttz.b20767cbb6.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/shl-cttz.ll">shl-cttz.ll</a><span class="dim">)</span></td><td class="l">shl_cttz_i32_zero_is_defined</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zbb,+zcb,+zhinx -O3 -code-model=medium -verify-machineinstrs</code></td></tr><tr><td class="l">ucmp.51d46d754a.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/ucmp.ll">ucmp.ll</a><span class="dim">)</span></td><td class="l">ucmp.8.32</td><td class="l"><code>-mtriple=riscv64 -mattr=+a,+zfinx -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fallback: legalize: G_STORE &lt;N x i8~&gt;,p0</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>fallback: legalize: G_STORE &lt;N x i8~&gt;,p0</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-a02af9f600-20261125-115816.html">explore-a02af9f600-20261125-115816</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">fallback</td></tr>
+<tr><td class="l">Category:</td><td class="l">legalize: G_STORE &lt;N x i8~&gt;,p0 <span class="dim" title="only mutants reach this category">M</span></td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">9 in 9 configs, 4 test files, 68 more counted only</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fixed-vectors-fptosi-vp.a96c4d53f3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptosi-vp.ll">fixed-vectors-fptosi-vp.ll</a><span class="dim">)</span> @vfptosi_v4i7_v4f16 via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh -O2 -verify-machineinstrs</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at a02af9f600</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not uploaded (over --godbolt-limit or disabled)</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.2 = external global i1
+
+define &lt;4 x i7&gt; @vfptosi_v4i7_v4f16(&lt;4 x half&gt; %va, &lt;4 x i1&gt; %m, i32 zeroext %evl) {
+  %LGV = load i1, ptr @G.2, align 1
+  %B = udiv i1 %LGV, false
+  %v = fptosi &lt;4 x half&gt; %va to &lt;4 x i7&gt;
+  store i1 %B, ptr @G.2, align 1
+  ret &lt;4 x i7&gt; %v
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>llc -mtriple=riscv32 -mattr=+m,+zvfh -O2 -verify-machineinstrs -global-isel -global-isel-abort=2 -pass-remarks-missed=gisel.* snippet.ll -o -
+llc -mtriple=riscv32 -mattr=+m,+zvfh -O2 -verify-machineinstrs -global-isel=0 snippet.ll -o -</pre>
+<h4>Local llc output:</h4>
+<pre class="code">remark: &lt;unknown&gt;:0:0: unable to legalize instruction: G_STORE %13:_(&lt;4 x i7&gt;), %3:_(p0) :: (store (&lt;4 x i7&gt;)) (in function: vfptosi_v4i7_v4f16)
+warning: Instruction selection used fallback path for vfptosi_v4i7_v4f16</pre>
+<h4>Occurrences (9):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fixed-vectors-bitextract.77d5767387.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v16i4_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+zba -O1 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-bitextract.d9c9f6a52f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-bitextract.ll">fixed-vectors-bitextract.ll</a><span class="dim">)</span></td><td class="l">test_bitextract_v16i4_var</td><td class="l"><code>-mtriple=riscv64 -mattr=+m -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptosi-vp.a41b4175c2.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptosi-vp.ll">fixed-vectors-fptosi-vp.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfhmin -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptosi-vp.a96c4d53f3.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptosi-vp.ll">fixed-vectors-fptosi-vp.ll</a><span class="dim">)</span></td><td class="l">vfptosi_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh -O2 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.160b8986c9.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfhmin,+f -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.acb37a9b4f.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv64 -mattr=+m,+zvfh,+zbb -O3 -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.f0060ff830.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfh -O2 -code-model=small -verify-machineinstrs</code></td></tr><tr><td class="l">fixed-vectors-fptoui-vp.f4fd8ce882.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fixed-vectors-fptoui-vp.ll">fixed-vectors-fptoui-vp.ll</a><span class="dim">)</span></td><td class="l">vfptoui_v4i7_v4f16</td><td class="l"><code>-mtriple=riscv32 -mattr=+m,+zvfhmin -O0 -verify-machineinstrs</code></td></tr><tr><td class="l">fp4-bitcast.d94426b815.ll <span class="dim">(mutant of</span> <a href="https://github.com/llvm/llvm-project/blob/a02af9f60064e32f8b24cdeb7ea9acdff16c7083/llvm/test/CodeGen/RISCV/rvv/fp4-bitcast.ll">fp4-bitcast.ll</a><span class="dim">)</span></td><td class="l">fp4</td><td class="l"><code>-mtriple=riscv64 -mattr=+zbs -O0 -verify-machineinstrs</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>

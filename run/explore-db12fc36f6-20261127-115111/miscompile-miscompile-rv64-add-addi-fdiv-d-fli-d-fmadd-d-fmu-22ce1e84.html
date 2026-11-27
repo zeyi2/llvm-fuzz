@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>miscompile: miscompile rv64: add,addi,fdiv.d,fli.d,fmadd.d,fmul.d</title>
+<link rel="stylesheet" href="../../style.css" />
+<nav>
+<a href="../../index.html">Index</a> |
+<a href="../../about.html">About</a>
+</nav>
+<hr />
+<h3>miscompile: miscompile rv64: add,addi,fdiv.d,fli.d,fmadd.d,fmul.d</h3>
+<table>
+<tr><td class="l">Run:</td><td class="l"><a href="../explore-db12fc36f6-20261127-115111.html">explore-db12fc36f6-20261127-115111</a></td></tr>
+<tr><td class="l">Kind:</td><td class="l">miscompile</td></tr>
+<tr><td class="l">Category:</td><td class="l">miscompile rv64: add,addi,fdiv.d,fli.d,fmadd.d,fmul.d </td></tr>
+<tr><td class="l">Occurrences:</td><td class="l">1 in 1 configs, 1 test files</td></tr>
+<tr><td class="l">Snippet from:</td><td class="l">fma-combine.c6ab806b.35ba964f.733e6079.ll @fnmadd_non_trivial via llvm-extract</td></tr>
+<tr><td class="l">Config:</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c,+zicond -O2</code></td></tr>
+<tr><td class="l">Local check:</td><td class="l"><span class="tp">reproduces</span> at db12fc36f6</td></tr>
+<tr><td class="l">Compiler Explorer:</td><td class="l"><span class="dim">not applicable: Compiler Explorer compiles RISC-V but cannot run it</span></td></tr>
+</table>
+<h4>Snippet:</h4>
+<pre class="code">@G.1 = external global i16
+@G.2 = external global i8
+
+define double @fnmadd_non_trivial(ptr %p0, ptr %p1, ptr %dst, double %mul425) {
+  %A4 = alloca ptr, align 8
+  store ptr poison, ptr %A4, align 8
+  %A = alloca i1, align 1
+  store i1 poison, ptr %A, align 1
+  %LGV1 = load i8, ptr @G.2, align 1
+  %G9 = getelementptr i8, ptr %dst, i8 %LGV1
+  %LGV = load i16, ptr @G.1, align 2
+  store double f0x3FEE666666666666, ptr %dst, align 8
+  %mul413 = fmul double %mul425, -3.000000e+00
+  store double %mul413, ptr %p0, align 8
+  %G = getelementptr i128, ptr %p1, i128 -1
+  %G7 = getelementptr &lt;8 x i8&gt;, ptr %A, i16 %LGV
+  %L = load i8, ptr %G, align 1
+  %G13 = getelementptr i1, ptr %dst, i32 42
+  %B = fdiv double %mul413, %mul425
+  store double %B, ptr %G, align 8
+  %C = icmp slt i8 %L, %LGV1
+  %mul441 = fmul contract double %mul425, 0.000000e+00
+  %add443 = fsub double 0.000000e+00, %mul425
+  %mul446 = fmul contract double %add443, 4.500000e+00
+  %add447 = fadd nsz contract double %mul446, 3.000000e+00
+  %mul448 = fmul contract double %add447, 0.000000e+00
+  %sub450 = fadd nsz contract double %mul448, 1.000000e+00
+  %1 = fsub nsz contract double %sub450, %mul441
+  store ptr %G13, ptr %G, align 8
+  store i1 %C, ptr %A, align 1
+  store ptr %G7, ptr %A4, align 8
+  store ptr %G9, ptr %G7, align 8
+  ret double %1
+}
+</pre>
+<h4>Reproduce:</h4>
+<pre>./exec_oracle.py --flags &#x27;-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c,+zicond -O2&#x27; --funcs fnmadd_non_trivial snippet.ll</pre>
+<h4>Local execution result:</h4>
+<pre class="code">3 of 64 inputs differ (first: #47)
+SelectionDAG hash 45de18ee7099eaa7, GlobalISel hash 60254ff362ca8685
+b0: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c,+zicond -O2 -global-isel=0
+b1: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c,+zicond -O0 -global-isel=0
+b2: llc -mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c,+zicond -O2 -global-isel -global-isel-abort=2</pre>
+<h4>Occurrences (1):</h4>
+<table><tr><th class="l">Input</th><th class="l">Function</th><th class="l">Config</th></tr><tr><td class="l">fma-combine.c6ab806b.35ba964f.733e6079.ll</td><td class="l">fnmadd_non_trivial</td><td class="l"><code>-mtriple=riscv64 -verify-machineinstrs -mattr=+d,+m,+zfa,+zvbb,+c,+zicond -O2</code></td></tr></table>
+<hr />
+<p class="dim">Generated 2026-11-27 15:31 UTC.</p>
